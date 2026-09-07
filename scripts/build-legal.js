@@ -313,6 +313,11 @@ remove content or terminate accounts.</p>`,
   ),
 );
 
+// The published site lives in its own PUBLIC repo so this app repo can stay
+// private (GitHub Pages is only free on public repos). If that folder is
+// checked out next to this one, keep it in sync automatically.
+const SITE_REPO = process.env.SITE_DIR || path.join(ROOT, '..', 'rust-strength-site');
+
 // Copy the app icon so the site has a favicon and header mark.
 const icon = path.join(ROOT, 'assets', 'icon.png');
 if (fs.existsSync(icon)) fs.copyFileSync(icon, path.join(docs, 'icon.png'));
@@ -320,6 +325,19 @@ if (fs.existsSync(icon)) fs.copyFileSync(icon, path.join(docs, 'icon.png'));
 // GitHub Pages otherwise runs the folder through Jekyll, which drops files
 // beginning with an underscore and slows publishing down for no benefit.
 fs.writeFileSync(path.join(docs, '.nojekyll'), '');
+
+if (fs.existsSync(SITE_REPO)) {
+  for (const f of fs.readdirSync(docs)) {
+    fs.copyFileSync(path.join(docs, f), path.join(SITE_REPO, f));
+  }
+  console.log('Synced the published site at', SITE_REPO);
+} else {
+  console.log(
+    'No site repo at',
+    SITE_REPO,
+    '- skipping publish sync (set SITE_DIR to override).',
+  );
+}
 
 fs.rmSync(OUT, { recursive: true, force: true });
 
