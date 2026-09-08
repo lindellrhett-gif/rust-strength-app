@@ -12,7 +12,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
