@@ -2,7 +2,7 @@
  * Everything in the legal documents that depends on a business decision rather
  * than on the code.
  *
- * ⚠️  THE FOUR VALUES MARKED `TODO` MUST BE FILLED IN BEFORE SUBMITTING TO THE
+ * ⚠️  THE FIVE VALUES BELOW MUST BE FILLED IN BEFORE SUBMITTING TO THE
  *     APP STORE. They are not guesses to be left as-is — Apple requires a
  *     working support contact and a reachable privacy policy URL, and the
  *     documents are not enforceable without a real legal entity and a
@@ -11,20 +11,20 @@
 
 export const LEGAL = {
   /** Trading/legal name of whoever publishes the app. TODO */
-  entity: '[TODO: your legal name or company, e.g. "Rhett Lindell"]',
+  entity: 'Rhett Lindell',
 
   /** Monitored inbox for privacy requests and support. TODO */
-  contactEmail: '[TODO: e.g. support@yourdomain.com]',
+  contactEmail: 'lindellrhett@gmail.com',
 
   /** US state whose law governs the Terms, normally where you live. TODO */
-  governingState: '[TODO: e.g. "Ohio"]',
+  governingState: 'North Dakota',
 
   /**
    * Public URLs. Apple requires a privacy policy reachable from the App Store
    * listing itself, not only inside the app. TODO
    */
-  privacyPolicyUrl: '[TODO: e.g. https://yourdomain.com/privacy]',
-  termsUrl: '[TODO: e.g. https://yourdomain.com/terms]',
+  privacyPolicyUrl: 'https://lindellrhett-gif.github.io/rust-strength/privacy.html',
+  termsUrl: 'https://lindellrhett-gif.github.io/rust-strength/terms.html',
 
   // --- Settled by the decisions already made -------------------------------
 
@@ -52,5 +52,12 @@ export function hasUnresolvedPlaceholders(): boolean {
     LEGAL.governingState,
     LEGAL.privacyPolicyUrl,
     LEGAL.termsUrl,
-  ].some((v) => v.includes('TODO'));
+  ].some(
+    (v) =>
+      v.includes('TODO') ||
+      // Catches values pasted in while leaving the placeholder brackets on,
+      // e.g. '[Rhett Lindell]' — which would print the brackets verbatim.
+      /[[\]]/.test(v) ||
+      v.trim().length === 0,
+  );
 }

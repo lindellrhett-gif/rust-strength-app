@@ -2,7 +2,7 @@
 
 **Last updated: September 7, 2026**
 
-These Terms are an agreement between you and [TODO: your legal name or company, e.g. "Rhett Lindell"] ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
+These Terms are an agreement between you and Rhett Lindell ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 
 ## 1. Not medical or fitness advice
 
@@ -23,7 +23,7 @@ You must be at least 13 years old. By creating an account you confirm that you a
 
 ## 3. Your account
 
-You are responsible for keeping your password secure and for activity under your account. Give us accurate information and keep it current. Tell us at [TODO: e.g. support@yourdomain.com] if you believe your account has been accessed without your permission.
+You are responsible for keeping your password secure and for activity under your account. Give us accurate information and keep it current. Tell us at lindellrhett@gmail.com if you believe your account has been accessed without your permission.
 
 One account per person. Do not share, sell or transfer your account.
 
@@ -51,15 +51,15 @@ You are responsible for your content and confirm you have the right to post it.
 
 ## 6. Reporting and enforcement
 
-If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email [TODO: e.g. support@yourdomain.com]. You can also block any user immediately, which removes any friendship and hides you from each other.
+If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email lindellrhett@gmail.com. You can also block any user immediately, which removes any friendship and hides you from each other.
 
 We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk.
 
-If you think we got it wrong, email [TODO: e.g. support@yourdomain.com] and we will review it.
+If you think we got it wrong, email lindellrhett@gmail.com and we will review it.
 
 ## 7. Copyright
 
-If you believe content in the App infringes your copyright, email [TODO: e.g. support@yourdomain.com] with a description of the work, where it appears, your contact details, a statement that you believe the use is unauthorised, and a statement under penalty of perjury that your notice is accurate and you are authorised to act. We will remove infringing material and may terminate repeat infringers.
+If you believe content in the App infringes your copyright, email lindellrhett@gmail.com with a description of the work, where it appears, your contact details, a statement that you believe the use is unauthorised, and a statement under penalty of perjury that your notice is accurate and you are authorised to act. We will remove infringing material and may terminate repeat infringers.
 
 ## 8. Our content
 
@@ -99,13 +99,13 @@ Some jurisdictions do not allow limiting liability for personal injury or gross 
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless [TODO: your legal name or company, e.g. "Rhett Lindell"] from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
+You agree to indemnify and hold harmless Rhett Lindell from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
 
 ## 15. Governing law and disputes
 
-These Terms are governed by the laws of the State of [TODO: e.g. "Ohio"], without regard to conflict-of-law rules.
+These Terms are governed by the laws of the State of North Dakota, without regard to conflict-of-law rules.
 
-Please contact us at [TODO: e.g. support@yourdomain.com] first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in [TODO: e.g. "Ohio"], and you and we consent to that jurisdiction.
+Please contact us at lindellrhett@gmail.com first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in North Dakota, and you and we consent to that jurisdiction.
 
 Nothing here prevents either of us from bringing a claim in small-claims court.
 
@@ -123,5 +123,5 @@ If any provision is unenforceable, the rest stays in force. Our not enforcing a 
 
 ## 19. Contact
 
-[TODO: your legal name or company, e.g. "Rhett Lindell"]
-[TODO: e.g. support@yourdomain.com]
+Rhett Lindell
+lindellrhett@gmail.com
