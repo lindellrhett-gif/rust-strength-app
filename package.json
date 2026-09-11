@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "legal": "node scripts/build-legal.js",
-    "icons": "node scripts/make-icons.js"
+    "icons": "node scripts/make-icons.js",
+    "screenshots": "node scripts/screenshots.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

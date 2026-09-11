@@ -153,6 +153,10 @@ Create the demo account before submitting and put its credentials in the
 Required: **iPhone 6.9" display**, 1290 × 2796 or 1320 × 2868 px, up to 10.
 Since iPad support is turned off, no iPad screenshots are needed.
 
+The iPhone 16 Pro shoots 1206 × 2622, which is a 6.3" display and is refused at
+upload. `npm run screenshots` resizes them — see `store/screenshots/README.md`
+for the whole routine, including what to check before you shoot.
+
 Suggested order — lead with the thing no other tracker does:
 
 1. **Add-set screen showing the suggestion card.** The whole pitch in one

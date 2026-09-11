@@ -38,3 +38,6 @@ yarn-error.*
 supabase/.branches
 supabase/.temp
 .legal-build/
+
+# screenshots straight off the phone; the resized ones are kept
+store/screenshots/raw/
