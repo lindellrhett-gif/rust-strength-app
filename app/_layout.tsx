@@ -5,11 +5,19 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingView } from '@/components';
+import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import { useProfile } from '@/data/profile';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
+
+/**
+ * Expo Router installs an error boundary from a route file's `ErrorBoundary`
+ * export. Exporting it from the root layout covers every screen beneath it, so
+ * a render that throws shows a way out instead of a dead screen.
+ */
+export { AppErrorBoundary as ErrorBoundary };
 
 /**
  * The rest timer lives above the navigator so it keeps counting while the user
