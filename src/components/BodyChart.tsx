@@ -15,6 +15,17 @@ import { radius, spacing, text } from '@/theme/typography';
  * Front and back figures with each muscle group shaded by how much work it got
  * this week. Drawn rather than illustrated so it matches the trophy icons: same
  * flat shapes, same outline weight, tinted from one small palette.
+ *
+ * The figure is laid out on the standard eight-head canon, which is what stops
+ * it reading as a cartoon. On a 212-unit figure that fixes every landmark:
+ *
+ *   crown 4 · chin 30 (one head = 26) · shoulders 44 · waist 84
+ *   hips 106 (exactly half) · knee 157 · ankle 200
+ *
+ * Widths follow from the same canon — shoulders about two and a half head
+ * widths, waist narrower than the hips. Every muscle shape below is positioned
+ * against those numbers rather than eyeballed, so the pecs sit on the chest and
+ * the calves sit below the knee.
  */
 
 const LEVEL_FILL: Record<CoverageLevel, string> = {
@@ -25,95 +36,100 @@ const LEVEL_FILL: Record<CoverageLevel, string> = {
 };
 
 const OUTLINE = '#39424E';
+const BODY_FILL = '#1A2029';
 
-/** Each group's shapes on a 100x210 figure, per side. */
+/** Each group's shapes, positioned on the landmarks above. */
 const SHAPES: Record<MuscleGroup, React.ReactNode> = {
+  // --- Front ---------------------------------------------------------------
   shoulders: (
     <>
-      <Ellipse cx="27" cy="58" rx="11" ry="9" />
-      <Ellipse cx="73" cy="58" rx="11" ry="9" />
+      <Ellipse cx="29" cy="52" rx="8" ry="8" />
+      <Ellipse cx="71" cy="52" rx="8" ry="8" />
     </>
   ),
   chest: (
     <>
-      <Path d="M36 55 H49 V74 Q42 78 34 72 Q33 62 36 55 Z" />
-      <Path d="M64 55 H51 V74 Q58 78 66 72 Q67 62 64 55 Z" />
+      <Path d="M36 52 Q44 49 49 51 L49 72 Q40 75 35 68 Q34 58 36 52 Z" />
+      <Path d="M64 52 Q56 49 51 51 L51 72 Q60 75 65 68 Q66 58 64 52 Z" />
     </>
   ),
   biceps: (
     <>
-      <Ellipse cx="22" cy="80" rx="8" ry="13" />
-      <Ellipse cx="78" cy="80" rx="8" ry="13" />
+      <Ellipse cx="25" cy="64" rx="4.5" ry="11" />
+      <Ellipse cx="75" cy="64" rx="4.5" ry="11" />
     </>
   ),
-  core: (
-    <>
-      <Rect x="38" y="78" width="24" height="30" rx="6" />
-    </>
-  ),
+  core: <Rect x="41" y="74" width="18" height="28" rx="5" />,
   quads: (
     <>
-      <Path d="M38 116 Q34 140 38 158 L48 158 Q50 136 48 116 Z" />
-      <Path d="M62 116 Q66 140 62 158 L52 158 Q50 136 52 116 Z" />
+      <Path d="M34 110 Q31 130 35 152 L46 152 Q47 130 47 110 Z" />
+      <Path d="M66 110 Q69 130 65 152 L54 152 Q53 130 53 110 Z" />
     </>
   ),
-  back: (
-    <>
-      <Path d="M34 56 H66 L62 84 Q50 90 38 84 Z" />
-    </>
-  ),
+
+  // --- Back ----------------------------------------------------------------
+  back: <Path d="M32 46 Q50 41 68 46 L65 68 L63 86 Q50 91 37 86 L35 68 Z" />,
   triceps: (
     <>
-      <Ellipse cx="22" cy="80" rx="8" ry="13" />
-      <Ellipse cx="78" cy="80" rx="8" ry="13" />
+      <Ellipse cx="25" cy="64" rx="4.5" ry="11" />
+      <Ellipse cx="75" cy="64" rx="4.5" ry="11" />
     </>
   ),
   glutes: (
     <>
-      <Path d="M37 104 Q34 120 42 122 Q50 122 50 106 Z" />
-      <Path d="M63 104 Q66 120 58 122 Q50 122 50 106 Z" />
+      <Ellipse cx="41" cy="107" rx="9" ry="11" />
+      <Ellipse cx="59" cy="107" rx="9" ry="11" />
     </>
   ),
   hamstrings: (
     <>
-      <Path d="M39 124 Q36 144 40 158 L48 158 Q49 138 48 124 Z" />
-      <Path d="M61 124 Q64 144 60 158 L52 158 Q51 138 52 124 Z" />
+      <Path d="M34 116 Q32 134 35 154 L46 154 Q47 134 47 116 Z" />
+      <Path d="M66 116 Q68 134 65 154 L54 154 Q53 134 53 116 Z" />
     </>
   ),
   calves: (
     <>
-      <Ellipse cx="43" cy="176" rx="7" ry="14" />
-      <Ellipse cx="57" cy="176" rx="7" ry="14" />
+      <Ellipse cx="41" cy="174" rx="6.5" ry="14" />
+      <Ellipse cx="59" cy="174" rx="6.5" ry="14" />
     </>
   ),
 };
 
-/** The neutral body outline both figures share. */
+/**
+ * The neutral body both figures share.
+ *
+ * The neck is drawn before the torso so the torso covers its base, and the
+ * arms hang to mid-thigh — a wrist at hip height is the landmark that makes
+ * arms read as the right length.
+ */
 function Silhouette() {
   return (
-    <G stroke={OUTLINE} strokeWidth={1.5} fill="#1A2029">
-      <Ellipse cx="50" cy="20" rx="13" ry="15" />
-      <Path d="M50 35 V44" />
-      <Path d="M30 52 Q50 44 70 52 L68 110 Q50 116 32 110 Z" />
-      <Path d="M30 54 Q18 62 16 96 L26 100 Q30 74 34 62 Z" />
-      <Path d="M70 54 Q82 62 84 96 L74 100 Q70 74 66 62 Z" />
-      <Path d="M34 110 Q32 150 38 196 L48 196 Q50 150 50 112 Z" />
-      <Path d="M66 110 Q68 150 62 196 L52 196 Q50 150 50 112 Z" />
+    <G stroke={OUTLINE} strokeWidth={1.5} fill={BODY_FILL} strokeLinejoin="round">
+      <Ellipse cx="50" cy="17" rx="8.5" ry="12.5" />
+      <Path d="M46 27 L46 44 L54 44 L54 27 Z" />
+
+      {/* Shoulders 46 wide, tapering to a 32-wide waist, out again at the hips. */}
+      <Path d="M27 45 Q50 33 73 45 L69 70 L66 84 L69 106 Q50 112 31 106 L34 84 L31 70 Z" />
+
+      <Path d="M28 47 Q21 53 20 74 L19 104 L27 105 L27 75 Q28 59 33 51 Z" />
+      <Path d="M72 47 Q79 53 80 74 L81 104 L73 105 L73 75 Q72 59 67 51 Z" />
+      <Ellipse cx="22" cy="112" rx="4.5" ry="7" />
+      <Ellipse cx="78" cy="112" rx="4.5" ry="7" />
+
+      {/* Legs are half the figure: hip 106 to ankle 200, knee at 157. */}
+      <Path d="M32 106 Q29 132 34 157 Q36 180 37 200 L46 200 Q47 176 47 157 Q48 132 49 108 Z" />
+      <Path d="M68 106 Q71 132 66 157 Q64 180 63 200 L54 200 Q53 176 53 157 Q52 132 51 108 Z" />
+      <Path d="M36 200 L46 200 L46 207 L33 207 Z" />
+      <Path d="M64 200 L54 200 L54 207 L67 207 Z" />
     </G>
   );
 }
 
-function Figure({
-  regions,
-  side,
-}: {
-  regions: RegionState[];
-  side: 'front' | 'back';
-}) {
+function Figure({ regions, side }: { regions: RegionState[]; side: 'front' | 'back' }) {
   const shown = regions.filter((r) => r.side === side);
   return (
     <View style={styles.figure}>
-      <Svg width={104} height={214} viewBox="0 0 100 210">
+      <Svg width={98} height={208} viewBox="0 0 100 212">
         <Silhouette />
         {shown.map((r) => (
           <G
@@ -121,6 +137,7 @@ function Figure({
             fill={LEVEL_FILL[r.level]}
             stroke={OUTLINE}
             strokeWidth={1}
+            strokeLinejoin="round"
             opacity={r.level === 'none' ? 0.85 : 1}
           >
             {SHAPES[r.group]}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { ModalScreen } from './ModalScreen';
 import { TIER_COLOR } from '@/domain/achievements';
 import type { LevelProgress, XpBreakdown } from '@/domain/xp';
 import { colors } from '@/theme/colors';
@@ -76,8 +76,7 @@ export function LevelCard({ level, breakdown, name }: LevelCardProps) {
         {body}
       </Pressable>
 
-      <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
-        <SafeAreaView style={styles.sheet}>
+      <ModalScreen visible={open} onRequestClose={() => setOpen(false)}>
           <View style={styles.sheetHead}>
             <Text style={text.title}>Where your XP came from</Text>
             <Pressable onPress={() => setOpen(false)} hitSlop={12}>
@@ -115,8 +114,7 @@ export function LevelCard({ level, breakdown, name }: LevelCardProps) {
               </Text>
             ) : null}
           </ScrollView>
-        </SafeAreaView>
-      </Modal>
+      </ModalScreen>
     </>
   );
 }
@@ -171,7 +169,6 @@ const styles = StyleSheet.create({
   },
   fill: { height: 6, borderRadius: radius.pill },
 
-  sheet: { flex: 1, backgroundColor: colors.background },
   sheetHead: {
     flexDirection: 'row',
     alignItems: 'center',

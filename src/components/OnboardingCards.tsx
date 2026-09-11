@@ -1,18 +1,17 @@
 import { useRef, useState } from 'react';
 import {
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
+import { ModalScreen } from './ModalScreen';
 import { TrophyIcon } from './TrophyIcon';
 import {
   ONBOARDING_CARDS,
@@ -35,9 +34,15 @@ interface OnboardingCardsProps {
  * intro someone cannot escape is worse than one they never read.
  */
 export function OnboardingCards({ visible, onDone }: OnboardingCardsProps) {
-  const { width } = useWindowDimensions();
+  // Measured rather than taken from the window: the modal is inset from the
+  // screen edges, so a page is narrower than the device and window width would
+  // leave the pager a few points off on every swipe.
+  const [width, setWidth] = useState(0);
   const [index, setIndex] = useState(0);
   const scroller = useRef<ScrollView>(null);
+
+  const onPagerLayout = (event: LayoutChangeEvent) =>
+    setWidth(event.nativeEvent.layout.width);
 
   const goTo = (next: number) => {
     const target = clampCardIndex(next);
@@ -56,8 +61,7 @@ export function OnboardingCards({ visible, onDone }: OnboardingCardsProps) {
   };
 
   return (
-    <Modal visible={visible} animationType="fade" onRequestClose={finish}>
-      <SafeAreaView style={styles.safe}>
+    <ModalScreen visible={visible} animationType="fade" onRequestClose={finish}>
         <View style={styles.topBar}>
           <Text style={text.label}>WELCOME TO RUST STRENGTH</Text>
           <Pressable onPress={finish} hitSlop={12} accessibilityRole="button">
@@ -71,6 +75,7 @@ export function OnboardingCards({ visible, onDone }: OnboardingCardsProps) {
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={onScrollEnd}
+          onLayout={onPagerLayout}
           style={styles.pager}
         >
           {ONBOARDING_CARDS.map((card) => (
@@ -104,13 +109,11 @@ export function OnboardingCards({ visible, onDone }: OnboardingCardsProps) {
             onPress={() => (isLastCard(index) ? finish() : goTo(index + 1))}
           />
         </View>
-      </SafeAreaView>
-    </Modal>
+    </ModalScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',

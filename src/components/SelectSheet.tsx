@@ -1,15 +1,14 @@
 import { useMemo, useState } from 'react';
 import {
   FlatList,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ModalScreen } from './ModalScreen';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -51,8 +50,7 @@ export function SelectSheet({
   }, [options, query]);
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
+    <ModalScreen visible={visible} onRequestClose={onClose}>
         <View style={styles.header}>
           <Text style={text.heading}>{title}</Text>
           <Pressable onPress={onClose} hitSlop={12}>
@@ -103,13 +101,11 @@ export function SelectSheet({
             ) : null
           }
         />
-      </SafeAreaView>
-    </Modal>
+    </ModalScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
