@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, EmptyState, LoadingView } from '@/components';
+import { RestTimerBar } from '@/components/RestTimerBar';
 import { SaveTemplateModal } from '@/components/SaveTemplateModal';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { useProfile } from '@/data/profile';
@@ -157,6 +158,12 @@ export default function WorkoutScreen() {
           <Text style={text.caption}>{progress.target > 0 ? 'planned sets' : 'working sets'}</Text>
         </View>
       </View>
+
+      {inProgress ? (
+        <View style={styles.restWrap}>
+          <RestTimerBar />
+        </View>
+      ) : null}
 
       {inProgress && upNext ? (
         <Pressable style={styles.upNext} onPress={() => addSetFor(upNext.exerciseId)}>
@@ -371,6 +378,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  restWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   upNext: {
     flexDirection: 'row',
     alignItems: 'center',

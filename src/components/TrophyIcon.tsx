@@ -146,6 +146,60 @@ const GLYPHS: Record<TrophyGlyph, React.ReactNode> = {
       <Path d="M5 16.5 H19 V20 H5 Z" />
     </>
   ),
+  arm: (
+    <>
+      <Path d="M4 18 V12 A4 4 0 0 1 8 8 H12" />
+      <Path d="M12 8 C16 8 18.5 10 19.5 13.5 C20.2 16 19 18 16.5 18 H4" />
+      <Path d="M12 8 V5 H7.5" />
+    </>
+  ),
+  plate: (
+    <>
+      <Circle cx="12" cy="12" r="8.5" />
+      <Circle cx="12" cy="12" r="3" />
+      <Path d="M12 3.5 V6.5 M12 17.5 V20.5 M3.5 12 H6.5 M17.5 12 H20.5" />
+    </>
+  ),
+  clap: (
+    <>
+      <Path d="M9 20 C6 18.5 4.5 16 4.5 13 V8.5 A1.5 1.5 0 0 1 7.5 8.5 V12" />
+      <Path d="M7.5 12 V6 A1.5 1.5 0 0 1 10.5 6 V11.5" />
+      <Path d="M10.5 11.5 V6.5 A1.5 1.5 0 0 1 13.5 6.5 V12" />
+      <Path d="M13.5 12 V8.5 A1.5 1.5 0 0 1 16.5 8.5 V14 C16.5 17.5 14 20 10.5 20 Z" />
+      <Path d="M18 4 L20 2 M19.5 8 H22" />
+    </>
+  ),
+  star: (
+    <>
+      <Path d="M12 3 L14.6 9 L21 9.7 L16.3 14 L17.6 20.3 L12 17.1 L6.4 20.3 L7.7 14 L3 9.7 L9.4 9 Z" />
+    </>
+  ),
+  flask: (
+    <>
+      <Path d="M9.5 3 V9.5 L4.5 18 A2 2 0 0 0 6.3 21 H17.7 A2 2 0 0 0 19.5 18 L14.5 9.5 V3" />
+      <Path d="M8 3 H16" />
+      <Path d="M7 15 H17" />
+      <Circle cx="10.5" cy="17.5" r="1" />
+      <Circle cx="14" cy="18.5" r="0.8" />
+    </>
+  ),
+  crown: (
+    <>
+      <Path d="M3.5 17.5 L5 7 L9.5 11 L12 4.5 L14.5 11 L19 7 L20.5 17.5 Z" />
+      <Path d="M4.5 20.5 H19.5" />
+    </>
+  ),
+  bolt: (
+    <>
+      <Path d="M13.5 2.5 L5.5 13.5 H11 L10 21.5 L18.5 10.5 H13 Z" />
+    </>
+  ),
+  shield: (
+    <>
+      <Path d="M12 2.5 L20 5.5 V12 C20 16.5 16.6 20 12 21.5 C7.4 20 4 16.5 4 12 V5.5 Z" />
+      <Path d="M8.5 12 L11 14.5 L15.5 9.5" />
+    </>
+  ),
 };
 
 interface TrophyIconProps {
@@ -191,6 +245,35 @@ export function TrophyIcon({ glyph, tier, size = 44 }: TrophyIconProps) {
         strokeLinejoin="round"
         fill="none"
         opacity={locked ? 0.55 : 1}
+      >
+        {GLYPHS[glyph]}
+      </G>
+    </Svg>
+  );
+}
+
+/**
+ * The same glyph without the medal around it, for places that need the icon on
+ * its own — reaction buttons, inline labels. Keeps the one drawing vocabulary
+ * so a flame in the feed matches the flame on the streak trophy.
+ */
+export function GlyphIcon({
+  glyph,
+  color,
+  size = 18,
+}: {
+  glyph: TrophyGlyph;
+  color: string;
+  size?: number;
+}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <G
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
       >
         {GLYPHS[glyph]}
       </G>

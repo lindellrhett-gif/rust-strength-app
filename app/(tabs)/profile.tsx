@@ -1,32 +1,25 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button, Card, Field, LoadingView, Screen } from '@/components';
 import { AchievementGrid } from '@/components/AchievementGrid';
+import { BadgeShelf } from '@/components/BadgeShelf';
+import { LevelCard } from '@/components/LevelCard';
 import { NumberStepper } from '@/components/NumberStepper';
-import { useActivityTotals } from '@/data/activities';
+import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
-import { useRestDays } from '@/data/restDays';
+import { useWorkoutDates } from '@/data/stats';
 import { LEGAL } from '@/legal/config';
-import {
-  bestRepsMap,
-  bestWeightMap,
-  useAllTimeTotals,
-  useExercisePRs,
-  useWeeklyCoverage,
-  useWorkoutDates,
-} from '@/data/stats';
 import { useAuth } from '@/providers/AuthProvider';
 import {
-  evaluateAchievements,
   consistency,
   earnedCount,
   totalTiersEarned,
   totalTiersAvailable,
 } from '@/domain/achievements';
 import { repRangeOrDefault } from '@/domain/recommender';
-import { bestStreak, currentStreak, MUSCLE_GROUPS, weekStart } from '@/domain/stats';
+import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
 import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { todayLocal } from '@/lib/dates';
 import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
@@ -38,54 +31,19 @@ export default function ProfileScreen() {
   const profile = useProfile();
   const update = useUpdateProfile();
 
-  const totals = useAllTimeTotals();
   const dates = useWorkoutDates();
   const today = todayLocal();
-  const coverage = useWeeklyCoverage(weekStart(today));
-  const prs = useExercisePRs();
-  const activity = useActivityTotals();
-  const restDays = useRestDays();
   const router = useRouter();
-  const [handle, setHandle] = useState<string | null>(null);
 
+  // XP, level, badges and trophies all come from one place, so this screen can
+  // never disagree with the post-workout screen about what level you are.
+  const { xp, level, badges, achievements } = useMyLevel();
+
+  const [handle, setHandle] = useState<string | null>(null);
+  const [rest, setRest] = useState<number | null>(null);
   const [low, setLow] = useState<number | null>(null);
   const [high, setHigh] = useState<number | null>(null);
   const [bw, setBw] = useState<number | null>(null);
-
-  const restDates = useMemo(
-    () => (restDays.data ?? []).map((r) => r.rest_date),
-    [restDays.data],
-  );
-
-  const achievements = useMemo(() => {
-    const groupsThisWeek = MUSCLE_GROUPS.filter((g) => (coverage.data?.[g] ?? 0) > 0).length;
-    return evaluateAchievements({
-      totalWorkouts: totals.data?.totalWorkouts ?? 0,
-      totalVolume: totals.data?.volume ?? 0,
-      totalReps: totals.data?.totalReps ?? 0,
-      totalSets: totals.data?.totalSets ?? 0,
-      totalSeconds: totals.data?.totalSeconds ?? 0,
-      currentStreak: currentStreak(dates.data ?? [], today, restDates),
-      bestStreak: bestStreak(dates.data ?? [], restDates),
-      groupsThisWeek,
-      groupsTotal: MUSCLE_GROUPS.length,
-      activitySeconds: activity.data?.totalSeconds ?? 0,
-      activityCount: activity.data?.totalActivities ?? 0,
-      activityKinds: activity.data?.distinctKinds ?? 0,
-      bestWeightByExercise: bestWeightMap(prs.data),
-      bestRepsByExercise: bestRepsMap(prs.data),
-      unit: profile.data?.unit ?? 'lb',
-    });
-  }, [
-    totals.data,
-    dates.data,
-    coverage.data,
-    today,
-    prs.data,
-    profile.data?.unit,
-    activity.data,
-    restDates,
-  ]);
 
   if (profile.isLoading || !profile.data) return <LoadingView />;
 
@@ -98,6 +56,8 @@ export default function ProfileScreen() {
   const bwDirty = bw != null && bw !== p.body_weight;
 
   const equipment = p.equipment ?? [];
+  const restSeconds = rest ?? p.rest_seconds;
+  const restDirty = restSeconds !== p.rest_seconds;
   const consistency30 = Math.round(consistency(dates.data ?? [], today, 30) * 100);
 
   const setUnit = (unit: WeightUnit) => update.mutate({ unit });
@@ -138,6 +98,8 @@ export default function ProfileScreen() {
           {earnedCount(achievements)} trophies
         </Text>
       </View>
+
+      <LevelCard level={level} breakdown={xp} />
 
       <Card title="Username">
         <Text style={text.bodyMuted}>
@@ -254,6 +216,82 @@ export default function ProfileScreen() {
         </View>
       </Card>
 
+      <Card title="Badges">
+        <Text style={text.bodyMuted}>
+          Levelling up unlocks these. Influencer and Beta Tester are handed out by us and cannot
+          be earned in the app.
+        </Text>
+        <BadgeShelf badges={badges} />
+      </Card>
+
+      <Card title="Rest timer">
+        <Text style={text.bodyMuted}>
+          How long the timer runs between sets. It starts on its own when you save a working set.
+        </Text>
+        <View style={styles.chips}>
+          {REST_PRESETS.map((seconds) => (
+            <Pressable
+              key={seconds}
+              onPress={() => setRest(seconds)}
+              style={[styles.chip, restSeconds === seconds && styles.chipActive]}
+            >
+              <Text style={[styles.chipText, restSeconds === seconds && styles.chipTextActive]}>
+                {restLabel(seconds)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+        <NumberStepper
+          label="Rest (seconds)"
+          value={restSeconds}
+          onChange={(v) => setRest(clampRest(v))}
+          step={15}
+          min={5}
+          max={3600}
+        />
+        {restDirty ? (
+          <Button
+            label="Save rest time"
+            loading={update.isPending}
+            onPress={() =>
+              update.mutate(
+                { rest_seconds: clampRest(restSeconds) },
+                { onSuccess: () => setRest(null) },
+              )
+            }
+          />
+        ) : null}
+        <View style={styles.activityRow}>
+          <View style={styles.toggleText}>
+            <Text style={text.body}>Start automatically</Text>
+            <Text style={text.caption}>Begin the rest timer as soon as a working set is saved.</Text>
+          </View>
+          <Switch
+            value={p.rest_auto}
+            onValueChange={(on) => update.mutate({ rest_auto: on })}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
+      </Card>
+
+      <Card title="Sharing with friends">
+        <View style={styles.activityRow}>
+          <View style={styles.toggleText}>
+            <Text style={text.body}>Show my sessions in the feed</Text>
+            <Text style={text.caption}>
+              Friends you have accepted see a summary of each workout and activity: its name,
+              time, volume and which exercises you did. Individual sets are never shared. Turn
+              this off and your sessions stop appearing for everyone.
+            </Text>
+          </View>
+          <Switch
+            value={p.share_workouts}
+            onValueChange={(on) => update.mutate({ share_workouts: on })}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
+      </Card>
+
       <Card
         title={`Trophies · ${totalTiersEarned(achievements)} of ${totalTiersAvailable(achievements)} tiers`}
       >
@@ -304,6 +342,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
   },
+  toggleText: { flex: 1, gap: 2 },
   segment: { flexDirection: 'row', gap: spacing.sm },
   segmentBtn: {
     flex: 1,

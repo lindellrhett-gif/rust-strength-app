@@ -80,6 +80,7 @@ export function useLogActivity() {
     onSuccess: () => {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
+      client.invalidateQueries({ queryKey: qk.feed });
     },
   });
 }
@@ -94,6 +95,7 @@ export function useDeleteActivity() {
     onSuccess: () => {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
+      client.invalidateQueries({ queryKey: qk.feed });
     },
   });
 }

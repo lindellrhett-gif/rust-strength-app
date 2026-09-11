@@ -68,7 +68,16 @@ export type TrophyGlyph =
   | 'body'
   | 'stack'
   | 'shoe'
-  | 'heart';
+  | 'heart'
+  // Added for badges and feed reactions; same 24x24 line-art grid as the rest.
+  | 'arm'
+  | 'plate'
+  | 'clap'
+  | 'star'
+  | 'flask'
+  | 'crown'
+  | 'bolt'
+  | 'shield';
 
 export type TrophyFamily = 'lift' | 'calisthenics' | 'milestone' | 'consistency';
 

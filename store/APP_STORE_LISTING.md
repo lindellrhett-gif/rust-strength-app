@@ -38,10 +38,10 @@ Log a set with reps and how hard it felt. Rust Strength estimates your one-rep m
 ## Keywords (100 max, comma-separated, no spaces)
 
 ```
-workout,gym,lifting,tracker,rpe,1rm,barbell,dumbbell,log,progress,routine,split,volume,pr
+workout,gym,lifting,tracker,rpe,1rm,barbell,dumbbell,log,progress,routine,split,volume,pr,rest
 ```
 
-`88 characters`
+`94 characters`
 
 Words already in the Name and Subtitle are indexed automatically, so
 "strength", "weight" and "next" are deliberately left out to avoid wasting
@@ -69,12 +69,14 @@ A live workout timer, plus totals for time, volume, reps and sets.
 Activity tracking for runs, sports and cardio machines, timed live or entered by hand.
 A calendar for planning sessions ahead, logging rest days, and reviewing what you have done.
 A body chart showing which muscle groups you have and have not trained this week.
+A rest timer between sets, set to whatever length you want, that starts on its own when you save a set.
 Tiered trophies across nine ranks, from Wood to Legend, for the main lifts, calisthenics, and lifetime weight moved.
-Friends, so you can see each other's streaks and progress.
+XP and levels earned from the training you log, unlocking badges as you climb.
+A feed of your friends' recent sessions that you can react to, and profiles showing their streaks, levels and progress.
 
 DESIGNED TO ASK FOR LITTLE
 
-No ads. No analytics. No tracking. No third-party advertising SDKs. Rust Strength asks for an email address and a password so your training syncs to your devices, and collects nothing it does not need to run. Your bodyweight is optional. You can export everything you have logged, and delete your account and all its data from inside the app at any time.
+No ads. No analytics. No tracking. No third-party advertising SDKs. Rust Strength asks for an email address and a password so your training syncs to your devices, and collects nothing it does not need to run. Your bodyweight is optional. Friends see a summary of a session, never the individual sets, and you can switch feed sharing off entirely. You can export everything you have logged, and delete your account and all its data from inside the app at any time.
 
 IMPORTANT
 
@@ -102,9 +104,13 @@ Terms of Service: https://lindellrhett-gif.github.io/rust-strength/terms.html
 ## Age rating
 
 Expect **13+**. The questionnaire will ask whether the app has user-generated
-content or social features — answer **yes** to both. Friends can see each
-other's profiles, and usernames, display names, custom exercise names and
-activity names are all free text written by users.
+content or social features — answer **yes** to both. Friends see each other's
+profiles and a feed of each other's sessions, and usernames, display names,
+custom exercise names, preset names and activity names are all free text
+written by users, shown to friends.
+
+There is no free-text commenting. Reactions are a fixed set of four, so the
+only user-written text that reaches another person is the names above.
 
 Do not be tempted to answer "no" to get a 4+ rating. Misrepresenting
 user-generated content is a rejection, and a removal risk after launch.
@@ -124,10 +130,19 @@ Sign-up is email and password only. There is no paid content, no subscription
 and no advertising in this build.
 
 User-generated content: users choose a username and display name, and may name
-their own exercises, machines, presets and activities. Friends can view each
-other's profiles. Reporting and blocking are available from any user's profile
-(Friends tab > open a profile > Report). Account deletion is at
-Profile > Privacy & data > Delete my account.
+their own exercises, machines, presets and activities. Accepted friends can
+view each other's profiles and a feed of each other's finished sessions, and
+can react to a post from a fixed set of four reactions. There is no free-text
+commenting or messaging anywhere in the app.
+
+Reporting and blocking are available from any user's profile (Friends tab >
+Friends > open a profile > Report). A user can stop appearing in the feed at
+Profile > Sharing with friends. Account deletion is at
+Profile > Privacy & legal > Delete my account.
+
+Levels and badges are worked out from the user's own logged training. The
+Influencer and Beta Tester badges are awarded by the developer and cannot be
+obtained in the app; there is nothing to purchase anywhere in this build.
 ```
 
 Create the demo account before submitting and put its credentials in the
@@ -147,8 +162,8 @@ Suggested order — lead with the thing no other tracker does:
 3. **Post-workout summary showing a personal record.** Caption: "See what you
    beat."
 4. **Home screen with the body chart.** Caption: "Never skip a muscle group."
-5. **Trophy shelf.** Caption: "Nine ranks. Wood to Legend."
-6. **Calendar.** Caption: "Plan sessions. Log rest days."
+5. **Trophy shelf and level card.** Caption: "Nine ranks. Wood to Legend."
+6. **Friend feed with reactions.** Caption: "See what your friends are lifting."
 
 Log a few real sessions on the demo account first so nothing shows an empty
 state. Empty screenshots convert badly and look unfinished to a reviewer.

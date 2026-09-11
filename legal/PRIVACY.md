@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: September 7, 2026**
+**Last updated: September 10, 2026**
 
 Rust Strength is operated by Rhett Lindell ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -16,6 +16,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Training data.** Exercises, weights, reps, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
+- **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
 - **Reports you file.** If you report another user, we store who you reported, the reason, and anything you type.
 
 ### Created automatically
@@ -42,7 +43,8 @@ We use it only to run the features you see: showing your history, estimating you
 - To store and show your training history
 - To calculate estimated one-rep max and suggest weights
 - To calculate stats, streaks, trophies and the weekly body chart
-- To run the friends feature you opt into
+- To run the friends feature you opt into, including the feed and reactions
+- To work out your XP, level and badges from the totals above
 - To review reports of abuse
 - To keep the service working and secure
 
@@ -53,8 +55,26 @@ We do not use your information for advertising, profiling, or automated decision
 The social features are **opt-in**. Until you choose a username and add a friend, nobody can see anything.
 
 - **Anyone signed in** can search usernames and display names — but only for accounts that have chosen their own handle. Nothing else is visible.
-- **Accepted friends** can see your username, display name, trophies, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, your per-exercise personal bests, and the dates you worked out.
-- **Nobody** can see your email address, bodyweight, individual workout entries, notes, planned sessions, or rest days.
+- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, how many friends you have, your per-exercise personal bests, and the dates you worked out.
+- **Accepted friends also see a summary of each session in the feed** (see below).
+- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, or the individual sets inside a workout.
+
+### The friend feed
+
+When you finish a workout or log an activity, a summary of it appears in the feed of the friends you have accepted. A summary is:
+
+- the name of the session or activity, and when it happened
+- how long it lasted
+- total weight moved, sets and reps
+- which exercises you did, by name
+- how many personal records you set
+- for an activity, its distance if you recorded one
+
+**The individual sets are never shared** — not the weight, reps or RPE of any single set, and not your notes.
+
+Friends can react to a post. You see how many of each reaction a post received, but **not who left them**.
+
+**You can switch this off.** In Profile, under "Sharing with friends", turn off "Show my sessions in the feed" and your sessions stop appearing for everyone immediately. The rest of the friends features keep working.
 
 You can remove a friend or block someone at any time. Blocking removes any existing friendship and hides you from each other in search.
 
@@ -84,7 +104,7 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, and reports you filed. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 

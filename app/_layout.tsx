@@ -5,9 +5,24 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingView } from '@/components';
+import { useProfile } from '@/data/profile';
 import { queryClient } from '@/lib/queryClient';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
+import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
+
+/**
+ * The rest timer lives above the navigator so it keeps counting while the user
+ * moves between the workout screen and the add-set modal. It reads the user's
+ * preferred duration here rather than inside the provider, which keeps the
+ * provider itself free of data fetching.
+ */
+function RestTimerGate({ children }: { children: React.ReactNode }) {
+  const profile = useProfile();
+  return (
+    <RestTimerProvider defaultSeconds={profile.data?.rest_seconds}>{children}</RestTimerProvider>
+  );
+}
 
 function RootNavigator() {
   const { initializing } = useAuth();
@@ -64,7 +79,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <StatusBar style="light" />
-            <RootNavigator />
+            <RestTimerGate>
+              <RootNavigator />
+            </RestTimerGate>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

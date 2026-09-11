@@ -35,10 +35,10 @@ export const LEGAL = {
   minimumAge: 13,
 
   /** Bump when the documents change materially; re-prompts for acceptance. */
-  version: '1.0.0',
+  version: '1.1.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'September 7, 2026',
+  lastUpdated: 'September 10, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

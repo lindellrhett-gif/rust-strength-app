@@ -134,6 +134,7 @@ export interface FriendStats {
   activitySeconds: number;
   activityCount: number;
   activityKinds: number;
+  friendCount: number;
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -160,6 +161,7 @@ export function useFriendStats(targetUserId: string | undefined) {
         activitySeconds: Number(row.activity_seconds) || 0,
         activityCount: Number(row.activity_count) || 0,
         activityKinds: Number(row.activity_kinds) || 0,
+        friendCount: Number(row.friend_count) || 0,
       };
     },
   });
@@ -171,6 +173,8 @@ export interface FriendPRs {
   bestWeight: Record<string, number>;
   /** Best reps in a single set per exercise, keyed by lowercased name. */
   bestReps: Record<string, number>;
+  /** Best estimated 1RM per exercise — the XP "personal records" source. */
+  bestE1rm: Record<string, number>;
 }
 
 /** A friend's per-exercise bests, so their lift trophies render on their profile. */
@@ -185,13 +189,15 @@ export function useFriendPRs(targetUserId: string | undefined) {
       if (error) throw error;
       const bestWeight: Record<string, number> = {};
       const bestReps: Record<string, number> = {};
+      const bestE1rm: Record<string, number> = {};
       for (const row of data ?? []) {
         const key = (row.exercise_name ?? '').toLowerCase();
         if (!key) continue;
         bestWeight[key] = Math.max(bestWeight[key] ?? 0, Number(row.best_weight) || 0);
         bestReps[key] = Math.max(bestReps[key] ?? 0, Number(row.best_reps) || 0);
+        bestE1rm[key] = Math.max(bestE1rm[key] ?? 0, Number(row.best_e1rm) || 0);
       }
-      return { bestWeight, bestReps };
+      return { bestWeight, bestReps, bestE1rm };
     },
   });
 }

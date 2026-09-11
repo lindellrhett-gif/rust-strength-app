@@ -38,4 +38,6 @@ export const qk = {
   restDays: ['rest-days'] as const,
   blockedUsers: ['blocked-users'] as const,
   workoutSummary: (workoutId: string) => ['workout-summary', workoutId] as const,
+  feed: ['feed'] as const,
+  badges: (userId: string) => ['badges', userId] as const,
 };

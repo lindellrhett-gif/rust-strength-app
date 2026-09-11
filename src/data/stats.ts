@@ -155,3 +155,17 @@ export function bestRepsMap(prs: ExercisePR[] | undefined): Record<string, numbe
   }
   return out;
 }
+
+/**
+ * Best estimated 1RM per exercise — the input to the XP "personal records"
+ * source. Keyed by name and reduced with max, because two exercise rows can
+ * share a name (one from the shared library, one the user made).
+ */
+export function bestE1rmMap(prs: ExercisePR[] | undefined): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const pr of prs ?? []) {
+    const key = pr.exerciseName.toLowerCase();
+    out[key] = Math.max(out[key] ?? 0, pr.bestE1rm);
+  }
+  return out;
+}

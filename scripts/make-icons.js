@@ -49,12 +49,11 @@ function encodePng(w, h, rgba) {
   const raw = Buffer.alloc(h * (w * 4 + 1));
   for (let y = 0; y < h; y += 1) {
     raw[y * (w * 4 + 1)] = 0; // filter: none
-    rgba.copy
-      ? rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4)
-      : Buffer.from(rgba.subarray(y * w * 4, (y + 1) * w * 4)).copy(
-          raw,
-          y * (w * 4 + 1) + 1,
-        );
+    if (rgba.copy) {
+      rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4);
+    } else {
+      Buffer.from(rgba.subarray(y * w * 4, (y + 1) * w * 4)).copy(raw, y * (w * 4 + 1) + 1);
+    }
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(w, 0);

@@ -98,6 +98,8 @@ export function useEndWorkout() {
       client.invalidateQueries({ queryKey: qk.workout(id) });
       client.invalidateQueries({ queryKey: qk.totals });
       client.invalidateQueries({ queryKey: qk.workoutDates });
+      // The finished session is now a post of its own.
+      client.invalidateQueries({ queryKey: qk.feed });
     },
   });
 }
@@ -115,6 +117,7 @@ export function useDeleteWorkout() {
       client.invalidateQueries({ queryKey: qk.totals });
       client.invalidateQueries({ queryKey: qk.workoutDates });
       client.invalidateQueries({ queryKey: qk.prs });
+      client.invalidateQueries({ queryKey: qk.feed });
     },
   });
 }

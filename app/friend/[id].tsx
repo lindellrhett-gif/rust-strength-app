@@ -5,11 +5,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, EmptyState, LoadingView, StatTile } from '@/components';
 import { AchievementStrip } from '@/components/AchievementGrid';
+import { BadgeShelf } from '@/components/BadgeShelf';
+import { LevelCard } from '@/components/LevelCard';
 import { ReportUserModal } from '@/components/ReportUserModal';
+import { useGrantedBadges } from '@/data/badges';
 import { useFriendPRs, useFriendStats } from '@/data/friends';
 import { useProfile } from '@/data/profile';
 import { useBlockUser, useReportUser } from '@/data/privacy';
-import { consistency, earnedCount, evaluateAchievements } from '@/domain/achievements';
+import {
+  consistency,
+  earnedCount,
+  evaluateAchievements,
+  totalTiersEarned,
+} from '@/domain/achievements';
+import { evaluateBadges } from '@/domain/badges';
+import { computeXp, levelProgress, strengthScore } from '@/domain/xp';
 import { formatDurationShort } from '@/domain/duration';
 import { bestStreak, currentStreak, MUSCLE_GROUPS } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
@@ -21,6 +31,7 @@ export default function FriendProfile() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const stats = useFriendStats(id);
   const prs = useFriendPRs(id);
+  const badgeIds = useGrantedBadges(id);
   const me = useProfile();
   const today = todayLocal();
 
@@ -54,6 +65,30 @@ export default function FriendProfile() {
       unit,
     });
   }, [stats.data, today, prs.data, unit]);
+
+  /**
+   * Their level, worked out by the same code that works out yours, from the
+   * aggregates the server returns. One caveat: rest days stay private, so a
+   * streak they bridged with a rest day is not counted here and their level can
+   * read a little low. It never reads high.
+   */
+  const xp = useMemo(() => {
+    if (!stats.data) return null;
+    return computeXp({
+      totalWorkouts: stats.data.totalWorkouts,
+      totalSets: stats.data.totalSets,
+      totalVolume: stats.data.totalVolume,
+      totalActivities: stats.data.activityCount,
+      bestStreak: bestStreak(stats.data.workoutDates),
+      friendCount: stats.data.friendCount,
+      trophyTiers: totalTiersEarned(achievements),
+      strengthScore: strengthScore(prs.data?.bestE1rm ?? {}),
+      unit,
+    });
+  }, [stats.data, achievements, prs.data, unit]);
+
+  const level = xp ? levelProgress(xp.total) : null;
+  const badges = evaluateBadges(level?.level ?? 1, badgeIds.data ?? []);
 
   if (stats.isLoading) return <LoadingView />;
   if (stats.isError) {
@@ -93,8 +128,14 @@ export default function FriendProfile() {
           <StatTile value={compact(s.totalSets)} label="sets" />
         </View>
 
+        {level ? <LevelCard level={level} name={`@${s.username}`} /> : null}
+
         <Card title="Trophies">
           <AchievementStrip achievements={achievements} />
+        </Card>
+
+        <Card title="Badges">
+          <BadgeShelf badges={badges} showLocked={false} />
         </Card>
 
         <Card title="Safety">

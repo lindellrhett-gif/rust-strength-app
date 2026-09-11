@@ -35,6 +35,10 @@ export type Database = {
           terms_version: string | null;
           age_confirmed_at: string | null;
           username_chosen: boolean;
+          share_workouts: boolean;
+          rest_seconds: number;
+          rest_auto: boolean;
+          level_seen: number;
         };
         Insert: {
           user_id: string;
@@ -59,6 +63,10 @@ export type Database = {
           terms_version?: string | null;
           age_confirmed_at?: string | null;
           username_chosen?: boolean;
+          share_workouts?: boolean;
+          rest_seconds?: number;
+          rest_auto?: boolean;
+          level_seen?: number;
         };
         Relationships: [];
       };
@@ -458,6 +466,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      profile_badges: {
+        Row: {
+          user_id: string;
+          badge_id: string;
+          granted_at: string;
+          note: string | null;
+        };
+        // Awarded by the service role only — there is no insert policy for
+        // signed-in users, so the app never writes this table.
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      feed_reactions: {
+        Row: {
+          id: string;
+          subject_type: 'workout' | 'activity';
+          subject_id: string;
+          user_id: string;
+          reaction: 'fire' | 'strong' | 'heavy' | 'respect';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          subject_type: 'workout' | 'activity';
+          subject_id: string;
+          user_id: string;
+          reaction: 'fire' | 'strong' | 'heavy' | 'respect';
+          created_at?: string;
+        };
+        Update: { reaction?: 'fire' | 'strong' | 'heavy' | 'respect' };
+        Relationships: [];
+      };
     };
     Views: {
       v_activity_totals: {
@@ -518,15 +559,47 @@ export type Database = {
           activity_seconds: number;
           activity_count: number;
           activity_kinds: number;
+          friend_count: number;
         }[];
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
+      can_react_to: { Args: { p_type: string; p_id: string }; Returns: boolean };
+      rpc_friend_feed: {
+        Args: { p_limit?: number; p_before?: string | null };
+        Returns: {
+          subject_type: 'workout' | 'activity';
+          subject_id: string;
+          user_id: string;
+          username: string;
+          display_name: string | null;
+          occurred_at: string;
+          name: string | null;
+          duration_seconds: number;
+          volume: number;
+          total_sets: number;
+          total_reps: number;
+          exercise_names: string[];
+          record_count: number;
+          activity_kind: string | null;
+          distance: number | null;
+          distance_unit: string | null;
+          badge_ids: string[];
+          // jsonb object keyed by reaction id, e.g. { fire: 3, strong: 1 }
+          reaction_counts: Record<string, number>;
+          my_reaction: string | null;
+        }[];
+      };
       rpc_block_user: { Args: { target: string }; Returns: undefined };
       rpc_export_my_data: { Args: Record<string, never>; Returns: Json };
       rpc_delete_my_account: { Args: Record<string, never>; Returns: undefined };
       rpc_friend_prs: {
         Args: { target: string };
-        Returns: { exercise_name: string; best_weight: number; best_reps: number }[];
+        Returns: {
+          exercise_name: string;
+          best_weight: number;
+          best_reps: number;
+          best_e1rm: number;
+        }[];
       };
       rpc_save_workout_as_template: {
         Args: { p_workout_id: string; p_name: string };
@@ -625,6 +698,8 @@ export type WorkoutExercise = Database['public']['Tables']['workout_exercises'][
 export type ActivityRow = Database['public']['Tables']['activities']['Row'];
 export type RestDay = Database['public']['Tables']['rest_days']['Row'];
 export type Friendship = Database['public']['Tables']['friendships']['Row'];
+export type ProfileBadge = Database['public']['Tables']['profile_badges']['Row'];
+export type FeedReaction = Database['public']['Tables']['feed_reactions']['Row'];
 
 export type ExercisePrRow = Database['public']['Views']['v_exercise_prs']['Row'];
 export type AllTimeTotalsRow = Database['public']['Views']['v_all_time_totals']['Row'];

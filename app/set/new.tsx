@@ -7,6 +7,7 @@ import { Button, Card } from '@/components';
 import { CreateExerciseModal } from '@/components/CreateExerciseModal';
 import { CreateMachineModal } from '@/components/CreateMachineModal';
 import { NumberStepper } from '@/components/NumberStepper';
+import { RestTimerBar } from '@/components/RestTimerBar';
 import { RpeSelector } from '@/components/RpeSelector';
 import { SelectSheet, type Option } from '@/components/SelectSheet';
 import { useCreateExercise, useExercises } from '@/data/exercises';
@@ -16,6 +17,7 @@ import { useAddSet, useExerciseHistory, useSetsForWorkout } from '@/data/sets';
 import { recommendNextWeight, repRangeOrDefault } from '@/domain/recommender';
 import { roundToIncrement } from '@/domain/rounding';
 import { trimWeight } from '@/lib/format';
+import { useRestTimer } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -33,6 +35,7 @@ export default function NewSet() {
   const createExercise = useCreateExercise();
   const createMachine = useCreateMachine();
   const addSet = useAddSet();
+  const restTimer = useRestTimer();
 
   const [exerciseId, setExerciseId] = useState<string | null>(presetExerciseId ?? null);
   const [machineId, setMachineId] = useState<string | null>(null);
@@ -127,6 +130,12 @@ export default function NewSet() {
       orderIndex: (existingSets.data?.length ?? 0),
     });
 
+    // Rest starts the moment the set is in, not when the user next looks at
+    // the screen. Warmups are excluded — nobody rests two minutes after a bar.
+    if (profile.data?.rest_auto !== false && !isWarmup) {
+      restTimer.start(profile.data?.rest_seconds);
+    }
+
     if (thenAddAnother) {
       setWeightTouched(false);
       setRpe(null);
@@ -190,6 +199,9 @@ export default function NewSet() {
             )}
           </Card>
         ) : null}
+
+        {/* Only on screen once a rest is actually running. */}
+        <RestTimerBar hideWhenIdle />
 
         {/* Inputs */}
         <View>
