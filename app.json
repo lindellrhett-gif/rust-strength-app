@@ -14,7 +14,15 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSExceptionDomains": {
+            "localhost": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
