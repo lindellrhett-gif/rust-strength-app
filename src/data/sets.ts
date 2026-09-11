@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
-import { qk } from '@/lib/queryClient';
+import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { toLocalDateString } from '@/lib/dates';
+import { newId } from '@/lib/ids';
 import type { MuscleGroup, SetRow } from '@/lib/database.types';
 import { e1rmFromSet, type LoggedSet } from '@/domain/recommender';
 import type { ProgressSet } from '@/domain/progress';
+import { insertSetRow } from './mutationDefaults';
 import { useAuth } from '@/providers/AuthProvider';
 
 export interface SetWithRefs extends SetRow {
@@ -105,48 +108,90 @@ export interface AddSetInput {
   orderIndex: number;
 }
 
+/**
+ * Log a set.
+ *
+ * Returns `add`, which is deliberately synchronous. Waiting on the network here
+ * would mean that in a gym with no signal the Save button spins forever: an
+ * offline write is *paused*, not failed, so the promise never settles. Instead
+ * the set is written straight into the cache, the screen moves on, and the row
+ * reaches the server whenever there is a connection — later in the session, or
+ * after the app has been killed and reopened.
+ */
 export function useAddSet() {
   const { userId } = useAuth();
   const client = useQueryClient();
-  return useMutation({
-    mutationFn: async (input: AddSetInput): Promise<SetRow> => {
+
+  const mutation = useMutation({
+    mutationKey: mk.addSet,
+    mutationFn: insertSetRow,
+    onSettled: (_data, _error, row) => {
+      client.invalidateQueries({ queryKey: qk.setsForWorkout(row.workout_id) });
+      client.invalidateQueries({ queryKey: qk.exerciseHistory(row.exercise_id) });
+      client.invalidateQueries({ queryKey: qk.exerciseProgress(row.exercise_id) });
+      client.invalidateQueries({ queryKey: qk.totals });
+      client.invalidateQueries({ queryKey: qk.prs });
+      client.invalidateQueries({ queryKey: ['stats', 'coverage'] });
+    },
+  });
+
+  const add = useCallback(
+    (input: AddSetInput): SetRow => {
       const e1rm = input.isWarmup
         ? 0
         : Math.round(
             e1rmFromSet({ weight: input.weight, reps: input.reps, rpe: input.rpe }) * 10,
           ) / 10;
 
-      const { data, error } = await supabase
-        .from('sets')
-        .insert({
-          user_id: userId!,
-          workout_id: input.workoutId,
-          exercise_id: input.exerciseId,
-          machine_id: input.machineId,
-          weight: input.weight,
-          reps: input.reps,
-          rpe: input.rpe,
-          is_warmup: input.isWarmup,
-          is_bodyweight: input.isBodyweight,
-          target_rep_low: input.targetRepLow,
-          target_rep_high: input.targetRepHigh,
-          e1rm,
-          order_index: input.orderIndex,
-          performed_at: new Date().toISOString(),
-        })
-        .select('*')
-        .single();
-      if (error) throw error;
-      return data;
+      const now = new Date().toISOString();
+      const row: SetRow = {
+        // Generated here so the set can be queued behind a workout that has not
+        // reached the server yet, and so a replay cannot duplicate it.
+        id: newId(),
+        user_id: userId!,
+        workout_id: input.workoutId,
+        exercise_id: input.exerciseId,
+        machine_id: input.machineId,
+        weight: input.weight,
+        reps: input.reps,
+        rpe: input.rpe,
+        is_warmup: input.isWarmup,
+        is_bodyweight: input.isBodyweight,
+        target_rep_low: input.targetRepLow,
+        target_rep_high: input.targetRepHigh,
+        e1rm,
+        order_index: input.orderIndex,
+        performed_at: now,
+        created_at: now,
+      };
+
+      // Show it immediately, with the exercise and machine names the workout
+      // screen renders, looked up from caches the picker already filled.
+      const exercise =
+        client
+          .getQueryData<{ id: string; name: string; muscle_group: MuscleGroup }[]>(qk.exercises)
+          ?.find((e) => e.id === input.exerciseId) ?? null;
+      const machine =
+        client
+          .getQueryData<{ id: string; label: string; increment: number }[]>(qk.machines)
+          ?.find((m) => m.id === input.machineId) ?? null;
+
+      client.setQueryData<SetWithRefs[]>(qk.setsForWorkout(input.workoutId), (current) => [
+        ...(current ?? []),
+        {
+          ...row,
+          exercise: exercise ? { name: exercise.name, muscle_group: exercise.muscle_group } : null,
+          machine: machine ? { label: machine.label, increment: machine.increment } : null,
+        },
+      ]);
+
+      mutation.mutate(row);
+      return row;
     },
-    onSuccess: (_data, input) => {
-      client.invalidateQueries({ queryKey: qk.setsForWorkout(input.workoutId) });
-      client.invalidateQueries({ queryKey: qk.exerciseHistory(input.exerciseId) });
-      client.invalidateQueries({ queryKey: qk.totals });
-      client.invalidateQueries({ queryKey: qk.prs });
-      client.invalidateQueries({ queryKey: ['stats', 'coverage'] });
-    },
-  });
+    [userId, client, mutation],
+  );
+
+  return { add, isPending: mutation.isPending, error: mutation.error };
 }
 
 export function useDeleteSet(workoutId: string) {

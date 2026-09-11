@@ -114,9 +114,12 @@ export default function NewSet() {
 
   const canSave = !!exerciseId && displayWeight > 0 && reps > 0 && (isWarmup || rpe != null);
 
-  const save = async (thenAddAnother: boolean) => {
+  const save = (thenAddAnother: boolean) => {
     if (!canSave || !workoutId || !exerciseId) return;
-    await addSet.mutateAsync({
+    // Synchronous: the set goes into the cache now and reaches the server when
+    // there is a connection. Waiting on the network here would leave the button
+    // spinning in a gym with no signal, which is where this is used most.
+    addSet.add({
       workoutId,
       exerciseId,
       machineId,
@@ -141,7 +144,9 @@ export default function NewSet() {
       setRpe(null);
       setIsWarmup(false);
       setIsBodyweight(false);
-      await Promise.all([history.refetch(), existingSets.refetch()]);
+      // Not awaited: offline these settle as errors and the cache already has
+      // the set, so there is nothing to wait for either way.
+      void history.refetch();
     } else {
       router.back();
     }
@@ -261,14 +266,12 @@ export default function NewSet() {
           variant="secondary"
           onPress={() => save(true)}
           disabled={!canSave}
-          loading={addSet.isPending}
           style={styles.footerBtn}
         />
         <Button
           label="Save set"
           onPress={() => save(false)}
           disabled={!canSave}
-          loading={addSet.isPending}
           style={styles.footerBtn}
         />
       </View>

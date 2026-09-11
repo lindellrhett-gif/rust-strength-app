@@ -112,7 +112,7 @@ export default function GenerateWorkout() {
   const startFromPlan = async () => {
     if (plan.items.length === 0) return;
     // Name it after the focus so the Recent feed reads "Push day", not "Workout".
-    const workout = await startWorkout.mutateAsync({ name: `${FOCUS_LABELS[focus]} day` });
+    const workout = startWorkout.start(`${FOCUS_LABELS[focus]} day`);
     // Write the plan onto the session so every exercise is already there and
     // the user only has to fill in weights.
     await addSlots.mutateAsync({

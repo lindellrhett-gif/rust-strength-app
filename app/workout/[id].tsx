@@ -93,7 +93,7 @@ export default function WorkoutScreen() {
         {
           text: 'Finish',
           onPress: async () => {
-            await endWorkout.mutateAsync(id!);
+            endWorkout.end(id!);
             router.replace({ pathname: '/workout/summary', params: { id } });
           },
         },

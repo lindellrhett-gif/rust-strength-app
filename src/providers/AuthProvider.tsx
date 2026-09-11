@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { queryClient } from '@/lib/queryClient';
+import { persister, queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -49,6 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * refetches at all. Deleting an account already clears the cache; plain
    * signing out has to do the same.
    *
+   * The cache is also written to disk so the app works without a signal, so
+   * the stored copy has to go with it — otherwise one person's training would
+   * sit in storage on a phone somebody else is now signed in to.
+   *
    * Keyed on the user id rather than on the event, so a routine token refresh
    * does not throw away data the user is looking at.
    */
@@ -62,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (lastUserId.current !== id) {
       lastUserId.current = id;
       queryClient.clear();
+      void persister.removeClient();
     }
   }, [session]);
 

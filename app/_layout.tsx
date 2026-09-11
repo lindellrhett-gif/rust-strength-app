@@ -1,4 +1,4 @@
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -6,11 +6,21 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LoadingView } from '@/components';
 import { AppErrorBoundary } from '@/components/AppErrorBoundary';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { registerMutationDefaults } from '@/data/mutationDefaults';
 import { useProfile } from '@/data/profile';
-import { queryClient } from '@/lib/queryClient';
+import { CACHE_MAX_AGE, persister, queryClient } from '@/lib/queryClient';
+import { startNetworkWatcher } from '@/lib/network';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
+
+// Both run at import time, before anything renders. The queue is restored
+// during the first paint, and a restored write has no function attached — so
+// the defaults have to be registered before that happens or the write is
+// dropped on the floor.
+startNetworkWatcher();
+registerMutationDefaults(queryClient);
 
 /**
  * Expo Router installs an error boundary from a route file's `ErrorBoundary`
@@ -85,14 +95,35 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
+        {/*
+          The cache is restored from the phone before anything renders, so the
+          app opens with your training visible even with no signal — and any
+          writes queued in a dead spot are picked back up here and replayed in
+          the order they were made.
+        */}
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister,
+            maxAge: CACHE_MAX_AGE,
+            // Only writes waiting on a connection are worth storing. A write
+            // that already landed, or one that failed outright, is not.
+            dehydrateOptions: {
+              shouldDehydrateMutation: (mutation) => mutation.state.isPaused,
+            },
+          }}
+          onSuccess={() => {
+            void queryClient.resumePausedMutations();
+          }}
+        >
           <AuthProvider>
             <StatusBar style="light" />
+            <OfflineBanner />
             <RestTimerGate>
               <RootNavigator />
             </RestTimerGate>
           </AuthProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

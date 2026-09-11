@@ -45,8 +45,8 @@ export default function Today() {
 
   const todaysPlans = (planned.data ?? []).filter((p) => p.scheduled_for === todayStr);
 
-  const go = async () => {
-    const workout = open.data ?? (await startWorkout.mutateAsync());
+  const go = () => {
+    const workout = open.data ?? startWorkout.start();
     router.push(`/workout/${workout.id}`);
   };
 
