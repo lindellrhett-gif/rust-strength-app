@@ -10,18 +10,18 @@
  */
 
 export const LEGAL = {
-  /** Trading/legal name of whoever publishes the app. TODO */
+  /** Trading/legal name of whoever publishes the app. */
   entity: 'Rhett Lindell',
 
-  /** Monitored inbox for privacy requests and support. TODO */
+  /** Monitored inbox for privacy requests and support. */
   contactEmail: 'lindellrhett@gmail.com',
 
-  /** US state whose law governs the Terms, normally where you live. TODO */
+  /** US state whose law governs the Terms, normally where you live. */
   governingState: 'North Dakota',
 
   /**
    * Public URLs. Apple requires a privacy policy reachable from the App Store
-   * listing itself, not only inside the app. TODO
+   * listing itself, not only inside the app.
    */
   privacyPolicyUrl: 'https://lindellrhett-gif.github.io/rust-strength/privacy.html',
   termsUrl: 'https://lindellrhett-gif.github.io/rust-strength/terms.html',

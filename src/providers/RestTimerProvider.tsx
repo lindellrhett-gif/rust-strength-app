@@ -118,23 +118,29 @@ export function RestTimerProvider({ children, defaultSeconds }: ProviderProps) {
     setFinished(false);
   }, []);
 
+  /**
+   * Nudge the deadline. Everything is computed here rather than inside a state
+   * updater: an updater must be a pure function of the previous state, and
+   * React may call it more than once, so reading the clock and touching a ref
+   * from inside one is a bug waiting to surface.
+   */
   const add = useCallback(
     (delta: number) => {
-      setEndsAt((current) => {
-        if (current == null) return current;
-        // Extending past zero restarts the countdown rather than leaving the
-        // bar stuck in its finished state.
-        const base = Math.max(current, Date.now());
-        const next = base + delta * 1000;
-        if (next > Date.now()) {
-          buzzed.current = false;
-          setFinished(false);
-        }
-        return next;
-      });
+      if (endsAt == null) return;
+
+      const now = Date.now();
+      // Extending past zero restarts the countdown rather than leaving the bar
+      // stuck in its finished state.
+      const next = Math.max(endsAt, now) + delta * 1000;
+      if (next > now) {
+        buzzed.current = false;
+        setFinished(false);
+      }
+
+      setEndsAt(next);
       setTotalSeconds((current) => adjustRest(current, delta));
     },
-    [],
+    [endsAt],
   );
 
   const value = useMemo<RestTimerValue>(

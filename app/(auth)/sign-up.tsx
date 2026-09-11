@@ -36,21 +36,33 @@ export default function SignUp() {
     setBusy(true);
     try {
       await signUp(email.trim(), password);
-      // If email confirmation is off we can sign straight in, and the (auth)
-      // layout redirects into the tabs once the session lands.
-      try {
-        await signIn(email.trim(), password);
-        // Stamp the profile now that we have a session; the trigger has
-        // already created the row.
-        await acceptTerms.mutateAsync();
-      } catch {
-        setNotice('Account created. Check your email to confirm, then sign in.');
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not create account.');
-    } finally {
       setBusy(false);
+      return;
     }
+
+    // If email confirmation is off we can sign straight in, and the (auth)
+    // layout redirects into the tabs once the session lands.
+    try {
+      await signIn(email.trim(), password);
+    } catch {
+      setNotice('Account created. Check your email to confirm, then sign in.');
+      setBusy(false);
+      return;
+    }
+
+    // Stamp the profile now that there is a session; the trigger has already
+    // created the row. Kept in its own block: a failure here means the consent
+    // record did not save, which is not the same thing as needing to confirm an
+    // email, and telling someone to check their inbox when they are already
+    // signed in sends them nowhere.
+    try {
+      await acceptTerms.mutateAsync();
+    } catch {
+      setNotice('Signed in. We could not save your acceptance — please reopen the app.');
+    }
+    setBusy(false);
   };
 
   return (

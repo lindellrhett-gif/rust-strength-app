@@ -4,10 +4,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 
+import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -36,6 +38,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  /**
+   * Throw away every cached query when the signed-in account changes.
+   *
+   * Without this, signing out leaves one person's profile, workouts, personal
+   * records, friends and feed sitting in the React Query cache. The next person
+   * to sign in on the same phone is served that cache while their own data
+   * loads — and with a 30-second stale time, a query mounted soon enough never
+   * refetches at all. Deleting an account already clears the cache; plain
+   * signing out has to do the same.
+   *
+   * Keyed on the user id rather than on the event, so a routine token refresh
+   * does not throw away data the user is looking at.
+   */
+  const lastUserId = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const id = session?.user.id ?? null;
+    if (lastUserId.current === undefined) {
+      lastUserId.current = id;
+      return;
+    }
+    if (lastUserId.current !== id) {
+      lastUserId.current = id;
+      queryClient.clear();
+    }
+  }, [session]);
 
   const value = useMemo<AuthState>(
     () => ({
