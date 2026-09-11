@@ -12,6 +12,7 @@ import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useWorkoutDates } from '@/data/stats';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
+import { useOnboardingControls } from '@/providers/OnboardingProvider';
 import {
   consistency,
   earnedCount,
@@ -34,6 +35,7 @@ export default function ProfileScreen() {
   const dates = useWorkoutDates();
   const today = todayLocal();
   const router = useRouter();
+  const onboarding = useOnboardingControls();
 
   // XP, level, badges and trophies all come from one place, so this screen can
   // never disagree with the post-workout screen about what level you are.
@@ -298,6 +300,21 @@ export default function ProfileScreen() {
         <AchievementGrid achievements={achievements} />
       </Card>
 
+      <Card title="Help">
+        <Pressable
+          style={styles.legalRow}
+          onPress={() => onboarding?.replay()}
+          disabled={!onboarding}
+          accessibilityRole="button"
+        >
+          <View style={styles.helpText}>
+            <Text style={text.body}>How this app works</Text>
+            <Text style={text.caption}>Run through the welcome cards again</Text>
+          </View>
+          <Text style={styles.chev}>›</Text>
+        </Pressable>
+      </Card>
+
       <Card title="Privacy & legal">
         <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>
           <View>
@@ -336,6 +353,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   chev: { color: colors.textFaint, fontSize: 20 },
+  helpText: { flex: 1, gap: 2 },
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',

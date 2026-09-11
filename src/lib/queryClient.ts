@@ -21,6 +21,7 @@ export const qk = {
   workout: (id: string) => ['workouts', id] as const,
   setsForWorkout: (id: string) => ['sets', 'workout', id] as const,
   exerciseHistory: (id: string) => ['sets', 'exercise', id] as const,
+  exerciseProgress: (id: string) => ['sets', 'progress', id] as const,
   totals: ['stats', 'totals'] as const,
   prs: ['stats', 'prs'] as const,
   workoutDates: ['stats', 'workout-dates'] as const,

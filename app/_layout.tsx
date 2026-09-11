@@ -44,6 +44,7 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="workout/[id]" options={{ headerShown: true, title: 'Workout' }} />
       <Stack.Screen name="friend/[id]" options={{ headerShown: true, title: 'Profile' }} />
+      <Stack.Screen name="exercise/[id]" options={{ headerShown: true, title: 'Progress' }} />
       <Stack.Screen name="templates/index" options={{ headerShown: true, title: 'Presets' }} />
       <Stack.Screen name="templates/[id]" options={{ headerShown: true, title: 'Preset' }} />
       <Stack.Screen name="legal/privacy" options={{ headerShown: true, title: 'Privacy Policy' }} />

@@ -305,7 +305,7 @@ export default function CalendarScreen() {
                 onPress={() => setAdding(true)}
               />
               <Button
-                label={selectedRest ? 'Remove rest day' : '😴 Mark as rest day'}
+                label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
                 variant={selectedRest ? 'danger' : 'ghost'}
                 onPress={toggleRestDay}
                 loading={setRestDay.isPending || deleteRestDay.isPending}

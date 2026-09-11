@@ -2,8 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
+import { toLocalDateString } from '@/lib/dates';
 import type { MuscleGroup, SetRow } from '@/lib/database.types';
 import { e1rmFromSet, type LoggedSet } from '@/domain/recommender';
+import type { ProgressSet } from '@/domain/progress';
 import { useAuth } from '@/providers/AuthProvider';
 
 export interface SetWithRefs extends SetRow {
@@ -26,6 +28,40 @@ export function useSetsForWorkout(workoutId: string | undefined) {
         .order('order_index');
       if (error) throw error;
       return (data ?? []) as unknown as SetWithRefs[];
+    },
+  });
+}
+
+/**
+ * Every working set of one exercise, oldest first — feeds the progress chart.
+ *
+ * Separate from `useExerciseHistory`, which is capped at the last 20 sets
+ * because that is all the recommender looks at. A chart wants the whole story,
+ * so this asks for far more and drops warmups, which would drag the line down
+ * without meaning anything.
+ */
+export function useExerciseProgress(exerciseId: string | undefined) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.exerciseProgress(exerciseId ?? 'none'),
+    enabled: !!exerciseId && !!userId,
+    queryFn: async (): Promise<ProgressSet[]> => {
+      const { data, error } = await supabase
+        .from('sets')
+        .select('weight, reps, e1rm, performed_at')
+        .eq('exercise_id', exerciseId!)
+        .eq('is_warmup', false)
+        .order('performed_at', { ascending: true })
+        .limit(2000);
+      if (error) throw error;
+      return (data ?? []).map((s) => ({
+        // Grouped by the user's own calendar day, so a late-night session
+        // counts as the day they trained rather than the UTC day after.
+        date: toLocalDateString(s.performed_at),
+        weight: s.weight,
+        reps: s.reps,
+        e1rm: s.e1rm,
+      }));
     },
   });
 }

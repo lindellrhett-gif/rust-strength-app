@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, LoadingView, StatTile } from '@/components';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { BodyChart } from '@/components/BodyChart';
+import { GlyphIcon } from '@/components/TrophyIcon';
 import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
 import { useProfile } from '@/data/profile';
@@ -72,9 +73,15 @@ export default function Today() {
           <Text style={text.bodyMuted}>
             {profile.data?.display_name ? `Hey ${profile.data.display_name}` : 'Ready to lift?'}
           </Text>
-          <Text style={text.hero}>
-            {streak > 0 ? `🔥 ${streak}-day streak` : 'Start a streak today'}
-          </Text>
+          {streak > 0 ? (
+            <View style={styles.streakRow}>
+              {/* The drawn flame, same one the streak trophy uses. */}
+              <GlyphIcon glyph="flame" color={colors.warning} size={30} />
+              <Text style={text.hero}>{streak}-day streak</Text>
+            </View>
+          ) : (
+            <Text style={text.hero}>Start a streak today</Text>
+          )}
         </View>
 
         <View style={styles.tiles}>
@@ -119,13 +126,13 @@ export default function Today() {
               />
               <View style={styles.secondaryRow}>
                 <Button
-                  label="✨ Generate"
+                  label="Generate"
                   variant="secondary"
                   onPress={() => router.push('/generate')}
                   style={styles.secondaryBtn}
                 />
                 <Button
-                  label="📋 Presets"
+                  label="Presets"
                   variant="secondary"
                   onPress={() => router.push('/templates')}
                   style={styles.secondaryBtn}
@@ -190,6 +197,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.xl },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   secondaryRow: { flexDirection: 'row', gap: spacing.sm },
   secondaryBtn: { flex: 1 },
   presetRow: {

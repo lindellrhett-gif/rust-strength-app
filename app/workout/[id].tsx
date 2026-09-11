@@ -209,7 +209,7 @@ export default function WorkoutScreen() {
       <View style={styles.footer}>
         {inProgress ? (
           <>
-            <Button label="＋ Add exercise or set" size="lg" onPress={() => addSetFor()} />
+            <Button label="+ Add exercise or set" size="lg" onPress={() => addSetFor()} />
             <View style={styles.footerRow}>
               <Button
                 label="Cancel workout"
@@ -359,7 +359,7 @@ function ExerciseBlock({
             ) : null}
             {inProgress ? (
               <Pressable onPress={onAddSet} hitSlop={8}>
-                <Text style={styles.addMore}>＋ set</Text>
+                <Text style={styles.addMore}>+ set</Text>
               </Pressable>
             ) : null}
           </View>

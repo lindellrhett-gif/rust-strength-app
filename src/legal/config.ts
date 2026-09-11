@@ -2,11 +2,11 @@
  * Everything in the legal documents that depends on a business decision rather
  * than on the code.
  *
- * ⚠️  THE FIVE VALUES BELOW MUST BE FILLED IN BEFORE SUBMITTING TO THE
- *     APP STORE. They are not guesses to be left as-is — Apple requires a
- *     working support contact and a reachable privacy policy URL, and the
- *     documents are not enforceable without a real legal entity and a
- *     governing-law choice.
+ * !! THE FIVE VALUES BELOW MUST BE FILLED IN BEFORE SUBMITTING TO THE
+ *    APP STORE. They are not guesses to be left as-is — Apple requires a
+ *    working support contact and a reachable privacy policy URL, and the
+ *    documents are not enforceable without a real legal entity and a
+ *    governing-law choice.
  */
 
 export const LEGAL = {

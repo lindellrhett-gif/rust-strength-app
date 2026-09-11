@@ -1,4 +1,5 @@
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, LoadingView, Pill, StatTile } from '@/components';
@@ -24,6 +25,7 @@ import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
 export default function Stats() {
+  const router = useRouter();
   const profile = useProfile();
   const totals = useAllTimeTotals();
   const prs = useExercisePRs();
@@ -148,8 +150,17 @@ export default function Stats() {
           {!prs.data?.length ? (
             <Text style={text.bodyMuted}>Log some working sets to start setting PRs.</Text>
           ) : (
+            <Text style={text.caption}>Tap an exercise to see how it has moved over time.</Text>
+          )}
+          {!prs.data?.length ? null : (
             prs.data.map((pr) => (
-              <View key={pr.exerciseId} style={styles.prRow}>
+              <Pressable
+                key={pr.exerciseId}
+                accessibilityRole="button"
+                accessibilityLabel={`${pr.exerciseName} progress over time`}
+                onPress={() => router.push(`/exercise/${pr.exerciseId}`)}
+                style={({ pressed }) => [styles.prRow, pressed && styles.prRowPressed]}
+              >
                 <View style={styles.prMain}>
                   <Text style={text.body}>{pr.exerciseName}</Text>
                   <Pill label={pr.muscleGroup} />
@@ -160,7 +171,8 @@ export default function Stats() {
                   </Text>
                   <Text style={text.caption}>e1RM · best set {trimWeight(pr.bestWeight)}</Text>
                 </View>
-              </View>
+                <Text style={styles.prChev}>›</Text>
+              </Pressable>
             ))
           )}
         </Card>
@@ -205,7 +217,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
+  prRowPressed: { backgroundColor: colors.surfaceRaised },
   prMain: { gap: spacing.xs, flexShrink: 1 },
   prNums: { alignItems: 'flex-end', gap: spacing.xs },
   prBig: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  prChev: { color: colors.textFaint, fontSize: 20, fontWeight: '700', marginLeft: spacing.sm },
 });

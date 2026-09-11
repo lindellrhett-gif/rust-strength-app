@@ -196,7 +196,7 @@ export default function TemplateEditor() {
         )}
 
         <Button
-          label="＋ Add exercise"
+          label="+ Add exercise"
           variant="secondary"
           onPress={() => setShowPicker(true)}
         />

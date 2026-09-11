@@ -92,7 +92,7 @@ export default function TemplatesScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button label="＋ New preset" size="lg" onPress={() => router.push('/templates/new')} />
+        <Button label="+ New preset" size="lg" onPress={() => router.push('/templates/new')} />
       </View>
     </SafeAreaView>
   );
