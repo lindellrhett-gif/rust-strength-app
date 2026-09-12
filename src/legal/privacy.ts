@@ -103,11 +103,13 @@ We use **no** analytics, advertising, crash-reporting, or tracking services.
 
 ## 6. Where information is stored
 
-On Supabase's hosted infrastructure. Data is transmitted over encrypted connections (HTTPS/TLS) and access is restricted at the database level so that, by default, you can only read and write your own rows.
+**On our provider's servers.** On Supabase's hosted infrastructure, in the United States. Data is transmitted over encrypted connections (HTTPS/TLS) and access is restricted at the database level so that, by default, you can only read and write your own rows.
+
+**On your own phone.** So the app keeps working in a gym with no signal, a copy of your recent training is stored on your device, along with anything you log while offline that has not reached the server yet. That copy lives in the app's private storage, which the operating system keeps separate from other apps and protects with your device passcode. It is deleted when you sign out, when you delete your account, and when you delete the app.
 
 ## 7. How long we keep it
 
-We keep your data while your account exists. When you delete your account, your data is deleted immediately and permanently — see Section 8. Backups and server logs held by our provider may persist for a short period afterwards under that provider's retention schedule.
+We keep your data while your account exists. When you delete your account, your data is deleted immediately and permanently — see Section 8. The offline copy on your phone is cleared at the same time, and deleting the app removes it too. Backups and server logs held by our provider may persist for a short period afterwards under that provider's retention schedule.
 
 ## 8. Deleting your account and data
 
@@ -133,7 +135,7 @@ ${LEGAL.appName} is not intended for children under ${LEGAL.minimumAge}. You mus
 
 ## 11. Security
 
-Passwords are hashed by our authentication provider and never stored in readable form. All traffic uses HTTPS/TLS. Database access is restricted per-user by row-level security. Your session is stored on your own device.
+Passwords are hashed by our authentication provider and never stored in readable form. All traffic uses HTTPS/TLS. Database access is restricted per-user by row-level security. Your session, and the offline copy of your training described in Section 6, are stored in the app's private storage on your own device and are cleared when you sign out.
 
 No system is perfectly secure, and we cannot guarantee absolute security.
 

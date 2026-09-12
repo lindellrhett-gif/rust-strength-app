@@ -1,276 +1,396 @@
-# Pre-launch legal & privacy audit — Gym App
+# Pre-launch legal & privacy audit — Rust Strength
 
-**Audit date:** 7 September 2026
-**Audited against:** the actual code at `C:\dev\gym-app`, not assumptions about it.
-**Scope decisions confirmed with the owner:** US-only launch, 13+ minimum age, username search retained (with the leak fixed), free with no purchases.
+**Audited: 11 September 2026** against commit `1902db5`, covering every migration
+through `0010_moderation_queue.sql`.
 
-> This is an engineering audit, not legal advice. It identifies risks and implements
-> technical mitigations. It does not make the app lawsuit-proof, and several items
-> below need a qualified attorney.
+This supersedes the audit of 7 September, which predated the friend feed,
+reactions, XP and badges, offline storage, the moderation queue, progress charts
+and the welcome cards.
+
+---
+
+## 0. What this is, and what it is not
+
+I am not a lawyer and this is not legal advice. This is an engineer reading the
+code and the documents and reporting what does not line up.
+
+**This report does not say the app is compliant, and nothing here makes it
+lawsuit-proof.** Several items below genuinely need a lawyer, and I have said so
+rather than guessing.
+
+**What I checked:** the source, the database schema and every row-level security
+policy, the generated legal documents, the live published site, the App Store
+listing copy, the build configuration and the dependency tree.
+
+**What I could not check**, and where the risk therefore sits with you:
+
+- **The Supabase dashboard.** Auth settings, email confirmation, rate limits,
+  backups and plan tier are invisible from the code. Several items below depend
+  on them.
+- **The app at runtime.** I cannot drive your phone, and nearly everything is
+  behind a sign-in I should not be creating.
+- **Anything about the real world** — whether the name is already a trademark,
+  which countries you will publish in, what your insurance covers.
 
 ---
 
 ## 1. What the app actually does
 
-A workout tracker with an opt-in social layer. Users log lifting sessions and other
-activities; the app estimates a one-rep max and suggests the next weight. Friends can
-see each other's aggregate stats and trophies.
+A workout logger. You record sets with weight, reps, RPE and which machine; it
+estimates a one-rep max and suggests the next weight. Around that: presets, a
+calendar, rest days, activities, trophies, XP and levels, progress charts, and a
+friends layer with a feed of each other's sessions.
 
-**No payments. No advertising. No analytics. No tracking SDKs. No device permissions.**
+Free. No purchases, no subscription, no advertising, no analytics.
 
-### Third-party services — complete list
+### Third parties — the complete list
 
-| Service | Role | What it receives | Disclosed |
-|---|---|---|---|
-| **Supabase** | Auth, Postgres database, hosting | Email, hashed password, and all app data | Yes — Privacy Policy §5 |
-| Expo / EAS | Build tooling and OTA delivery | No end-user personal data at runtime | N/A |
+| Party | Role | What it receives |
+|---|---|---|
+| **Supabase** | Database, authentication, hosting | Everything: account, training data, social graph |
+| **Expo / EAS** | Build service | Source at build time. No user data. |
+| **Apple** | Distribution | Whatever App Store Connect collects from purchasers. No data flows from the app to Apple. |
+| **GitHub Pages** | Hosts the legal site | Visitor IPs in its own logs. No app data. |
 
-Every runtime dependency (19 packages) is **MIT licensed** — verified programmatically.
-No copyleft obligations, no attribution requirements beyond retaining licence text.
+**Verified: no analytics, crash reporting, advertising or attribution SDK is
+present.** I searched the dependency tree and the source for every common one. The
+app makes no network call to any host other than your own Supabase project.
+
+Runtime dependencies are the Expo and React Native platform, `@supabase/supabase-js`,
+TanStack Query and its storage persister, AsyncStorage, NetInfo, `expo-crypto`,
+`react-native-svg`, `react-hook-form`, `zod` and Ionicons. All permissively
+licensed. None phones home.
 
 ### Data inventory
 
-| Data | Why | Where | Shared with friends? |
-|---|---|---|---|
-| Email address | Account identity, sign-in | Supabase `auth.users` | **No** |
-| Password | Authentication | Hashed by Supabase; never in our code | No |
-| Username / display name | Friend discovery | `profiles` | Yes (searchable) |
-| Bodyweight *(optional)* | Fills weight for bodyweight exercises | `profiles.body_weight` | **No** |
-| Training data (exercise, weight, reps, RPE, sets) | Core function | `sets`, `workouts` | Aggregates only |
-| Activity data (duration, distance, steps, calories) | Activity tracking | `activities` | Totals only |
-| Gym / machine names | Rounding weights to real increments | `gyms`, `machines` | No |
-| Preferences (unit, rep range, equipment) | App behaviour | `profiles` | No |
-| Reports filed | Abuse review | `user_reports` | No |
-| Timestamps | Durations, streaks, history | throughout | Workout dates only |
-| IP address | Standard server logs | Supabase infrastructure | No |
+**Given by the user:** email address, password (hashed by Supabase, never seen by
+you), username and display name, optional bodyweight, training data (exercises,
+weights, reps, RPE, sets, workouts, presets, planned sessions, rest days, gyms,
+machines), activity data with optional distance, steps and calories,
+preferences, reactions to friends' posts, and reports filed about other users.
 
-**Not collected:** real name, phone, location (any precision), photos, video, contacts,
-microphone, camera, advertising identifiers, biometrics, government ID, payment data.
+**Generated:** timestamps, a random account id, and Supabase's server logs
+including IP addresses.
+
+**Not collected:** real name, phone number, location of any precision, photos,
+video, contacts, microphone, camera, advertising identifiers, biometrics,
+government identifiers, payment details. **The app requests no device
+permissions at all** — verified in the resolved iOS configuration.
 
 ---
 
-## 2. PASS — appears properly handled
+## 2. PASS — checked and properly handled
 
-- **No secrets in client code.** Scanned for JWTs, service-role keys, hardcoded
-  passwords — none found. Only the Supabase URL and `anon` key are shipped, which is
-  their designed use; they are protected by row-level security.
-- **`.env` is gitignored.** Not committed.
-- **Row-level security on every table.** All 15 user tables have RLS enabled with
-  owner-only policies. Friend access goes through `security definer` functions that
-  check the friendship first.
-- **No logging of user data.** Zero `console.*` calls in `app/` or `src/`.
-- **TLS everywhere.** All Supabase traffic is HTTPS.
-- **Password hashing.** Handled by Supabase; the app never sees or stores a password.
-- **No permissions requested.** `android.permissions` is explicitly `[]`; no iOS
-  usage-description strings are needed because no permission-gated API is used.
-- **No tracking.** iOS privacy manifest declares `NSPrivacyTracking: false` with no
-  tracking domains. No App Tracking Transparency prompt is required.
-- **Licences clean.** All 19 runtime dependencies MIT.
-- **Data minimisation.** The age gate stores *"they confirmed 13+"*, not a date of
-  birth. Bodyweight is optional and the app works without it.
+- **Row-level security is enabled on every table**, and the policies are scoped
+  to `auth.uid()`. I read each one.
+- **`profile_badges` has a select policy and nothing else.** With RLS on and no
+  insert policy, a signed-in user cannot award themselves the Influencer badge
+  through the API. Only the service role can write it.
+- **`rpc_admin_user_text` is revoked from `authenticated` and `anon`.** The
+  moderation helper that reads any user's free text is service-role only.
+- **Every `SECURITY DEFINER` function checks friendship before returning another
+  user's data**, or returns aggregates only. `rpc_friend_feed` gates authorship
+  three ways: accepted friendship, the author's sharing preference, and no block
+  in either direction.
+- **The feed returns summaries, never individual sets.** That limit is in the SQL,
+  not the client, so a modified app cannot widen it.
+- **Account deletion works and is reachable in two taps** from Profile. It
+  removes the auth user, which cascades, and explicitly clears reactions left
+  elsewhere. Satisfies App Store Guideline 5.1.1(v).
+- **Data export works** and now includes badges and reactions.
+- **Report and block both exist**, and blocking tears down the friendship in both
+  directions. Guideline 1.2.
+- **Age gate and consent are recorded** at sign-up with a document version.
+- **Usernames are neutral by default** (`lifter_7f3a91`) and an account is not
+  searchable until the user chooses a handle. This was the serious defect found
+  in the first audit and it is properly fixed.
+- **The anon key in the bundle is correct by design** — it is the public key and
+  is useless unless RLS is wrong, which it is not. No service-role key anywhere
+  in the source or git history.
+- **App Transport Security is on** as of today. Expo's default had it disabled.
+- **The iOS privacy manifest is accurate** as of today: four collected data types,
+  none tracking, all for app functionality.
+- **No health or results claims** anywhere in the listing copy or the welcome
+  cards. There is an automated test that fails the build on a list of claim
+  phrases, and another that keeps the "not medical advice" line present.
+- **The published legal site matches the in-app documents**, because both are
+  generated from the same source. Verified live today at version 1.2.0.
 
 ---
 
-## 3. FIXED IN THIS PASS
+## 3. Fixed since the last audit
 
-### 🔴 Email addresses were being published to strangers
-**Was:** `handle_new_user()` derived the username from the email local-part, so
-`john.smith@gmail.com` became the searchable public handle `johnsmith` — and
-`rpc_search_users` exposed it to any signed-in user with a 2-character prefix search.
-This published a derived form of every user's email address without consent.
-
-**Fixed:** new accounts get a neutral random handle (`lifter_7f3a91`). Users are not
-searchable at all until they deliberately choose a username, and the search minimum is
-now 3 characters. Migration `0007`.
-
-> ⚠️ **Existing accounts created before this migration still have email-derived
-> usernames.** They are now hidden from search (`username_chosen` defaults to false),
-> but the value is still in the database. If you have real users already, run:
-> `update profiles set username = 'lifter_' || substr(md5(random()::text), 1, 6), username_chosen = false;`
-
-### 🔴 No account deletion — App Store blocker
-Apple Guideline 5.1.1(v) requires in-app account deletion for any app with account
-creation. **Added:** `rpc_delete_my_account()` and a confirm-by-typing-DELETE flow at
-Profile → Privacy & legal. Deletes the `auth.users` row, which cascades to every table.
-
-### 🔴 No report or block — App Store blocker
-Guideline 1.2 requires apps with user-generated content to provide a way to report
-objectionable content, block abusive users, and publish contact info. **Added:**
-`user_reports` and `user_blocks` tables, a report modal with five reasons, one-tap block
-from a friend's profile, a blocked-user list, and a published contact email.
-
-### 🟠 No consent or age record
-**Added:** signup now requires two explicit confirmations (13+, and acceptance of the
-Terms and Privacy Policy) with links to both documents, recorded on the profile as
-`terms_accepted_at`, `terms_version` and `age_confirmed_at`.
-
-### 🟠 No data export (CCPA right to access)
-**Added:** `rpc_export_my_data()` returns everything held about the caller as JSON,
-surfaced as "Download my data" via the share sheet.
-
-### 🟠 Weak password minimum
-Was 6 characters; raised to 8.
-
-### 🟡 No legal documents
-**Added:** full Privacy Policy and Terms of Service written against the actual schema,
-readable in-app, and exported to `legal/PRIVACY.md` / `legal/TERMS.md` for hosting.
+| Finding | Severity | Status |
+|---|---|---|
+| Sign-out left the previous account's data in the app's cache | High | Fixed — cache and its on-disk copy cleared on account change |
+| Reaction rows were readable by friends, contradicting the policy's "not who left them" | Medium | Fixed in `0009` — direct reads limited to your own rows |
+| Privacy manifest declared the app collects nothing | Medium | Fixed — all four data types declared |
+| App Transport Security disabled by Expo's default | Medium | Fixed — ATS on, HTTPS only |
+| Offline storage put training data on the phone, undisclosed | Medium | Fixed today — policy Sections 6, 7 and 11 now describe it |
+| Reports were written and never read | Medium | Fixed in `0010` — a queue with status, plus `legal/MODERATION.md` |
+| Sign-up told users to check their email when already signed in | Low | Fixed |
+| No error boundary; a render crash showed a dead screen | Low | Fixed |
 
 ---
 
 ## 4. NEEDS FIXING BEFORE LAUNCH
 
-| # | Item | Why it matters |
-|---|---|---|
-| 1 | **Fill the five placeholders in `src/legal/config.ts`** | Legal entity, contact email, governing state, and two public URLs. The documents are unenforceable and Apple will reject a listing without a reachable privacy policy URL. |
-| 2 | **Host the policy publicly** | Apple requires a Privacy Policy URL on the App Store listing itself, not just in-app. `legal/PRIVACY.md` is ready to publish. |
-| 3 | **Set up the support inbox** | Guideline 1.2 requires published contact for UGC apps. It must be monitored — you commit in the Terms to acting on abuse reports within 24 hours. |
-| 4 | **Rename the app** | "Gym App" is generic and almost certainly unregistrable; `com.gymapp.app` is likely already taken on both stores. See §7. |
-| 5 | **Build a way to read reports** | `user_reports` collects them, but there is no admin view. You can read them in the Supabase dashboard for now — but you need a defined process before launch, not just a table. |
-| 6 | **Turn email confirmation back on** | It was disabled for testing. Leaving it off lets anyone register with someone else's address. |
+**Decide your App Store territories, and understand what worldwide means.**
+The last audit recorded a US-only launch. That decision has to be *made* in App
+Store Connect — the default is all territories. If you publish worldwide, the
+GDPR and UK GDPR attach: lawful basis, a data processing agreement with Supabase,
+international transfer terms, and a documented response process for access and
+erasure requests. The documents are written for US law and say so. **Either
+restrict availability to the United States, or get the documents reviewed for the
+EU before you submit.** This is the largest open legal question.
+
+**Move Supabase off the free tier before submission.** Free projects pause after
+roughly a week of inactivity. If yours pauses while a reviewer has the app open,
+everything fails and you are rejected for something that is not a bug. The same
+plan gets you real backups, which matters when you are holding people's entire
+training history.
+
+**Turn on email confirmation.** Still off. Note that turning it on breaks the
+consent recording in the sign-up flow — the app currently signs the user straight
+in and stamps acceptance, and with confirmation on there is no session to stamp.
+Tell me when you flip it and I will fix the flow.
+
+**Create the App Review demo account** with real logged history. A reviewer who
+cannot get past the sign-in screen rejects the build.
+
+**Check the Supabase password policy** in the dashboard. The app enforces eight
+characters client-side; the server should enforce at least that too, or the
+client check is decoration.
+
+**No re-acceptance when the documents change.** The config comment said a version
+bump "re-prompts for acceptance". Nothing in the app does that — the comment is
+corrected as of today. Harmless now, since no users hold an old version, but the
+first post-launch change to the Terms will pass silently unless you build it.
 
 ---
 
 ## 5. NEEDS ATTORNEY REVIEW
 
-1. **Washington My Health My Data Act (and Nevada SB370).**
-   This is the single most significant legal exposure. Training data, bodyweight and
-   calories are arguably "consumer health data" under MHMDA, which is drafted very
-   broadly. It requires a **separate** consumer health data privacy policy (distinct
-   from the general one), affirmative consent before collection, separate consent before
-   any sharing, and a right to deletion. Critically, **it carries a private right of
-   action** under Washington's Consumer Protection Act — meaning individuals can sue.
-   It applies to consumers in Washington regardless of where you are.
-   *Recommendation:* have an attorney determine whether MHMDA applies to you. If it
-   does, you need a separate health-data policy and consent flow. This is not something
-   I should decide for you.
+These are judgement calls I am not qualified to make.
 
-2. **Injury liability and the weight-suggestion feature.**
-   The app tells people how much weight to lift. The Terms disclaim this heavily
-   (§1, §12, §13) and I have avoided any language implying the suggestions are safe or
-   prescriptive. But disclaimers do not always survive, and many states will not enforce
-   a limitation of liability for personal injury. An attorney should review §1 and §13
-   specifically.
+**Washington's My Health My Data Act, and its imitators.** This was the largest
+open question in the first audit and the friend feed has made it larger. The Act
+defines consumer health data broadly enough to cover training and bodyweight
+data, gives individuals a private right of action, and regulates *sharing*, not
+just selling. The app now shares health-adjacent summaries with other users. The
+posture is defensible — the recipients are people the user explicitly accepted,
+the content is a summary, and there is a switch to turn it off — but whether that
+constitutes valid consent under the Act is exactly the kind of question a lawyer
+should answer. Nevada and Connecticut have comparable regimes.
 
-3. **Limitation of liability cap ($100) and the venue clause.**
-   Standard drafting, but enforceability varies by state, and consumer-protection
-   statutes in some states override them.
+**The liability waiver in the Terms.** Lifting injures people. Whether your
+waiver is enforceable depends on state law, how prominently it is presented, and
+whether it attempts to disclaim things that cannot be disclaimed.
 
-4. **No arbitration clause.** I deliberately did not add one. They are effective at
-   limiting class exposure but are heavily regulated, easy to draft unenforceably, and
-   arguably inappropriate for a free app. Your attorney's call.
+**Whether the disclaimers are placed prominently enough.** "Not medical or
+coaching advice" appears in the Terms, the Profile screen, the welcome cards and
+the App Store description. Whether that is sufficient prominence for a product
+that tells people what weight to lift is a legal question, not an engineering one.
 
-5. **Full erasure of abuse reports on account deletion.** Deleting an account currently
-   deletes reports filed against that user, so someone can shed an abuse history by
-   re-registering. Retaining them would need a stated legal basis and a policy change.
-   Flagged rather than done silently.
+**Governing law and dispute resolution.** North Dakota is chosen. Whether you
+want an arbitration clause and a class action waiver, and whether they would
+hold, is a business and legal decision.
+
+**Your insurance and your business structure.** Whether operating as a named
+individual rather than through an entity is the right exposure for a product that
+advises physical exertion. This has legal consequences and it is not a decision I
+can make from the code.
 
 ---
 
 ## 6. APP STORE RISKS
 
-| Risk | Status |
-|---|---|
-| Account deletion (Apple 5.1.1(v)) | ✅ Implemented |
-| UGC: report + block + contact (Apple 1.2) | ✅ Implemented |
-| Privacy Policy URL on listing | ⚠️ Needs hosting |
-| Privacy nutrition labels | ⚠️ Must be completed in App Store Connect. Declare: Contact Info (email, linked to identity), Health & Fitness, User Content, Identifiers (user ID). Mark all as **not used for tracking** and **not used for advertising**. |
-| iOS privacy manifest | ✅ Added to `app.json` |
-| Age rating | Declare 12+ (Apple) / Teen (Google) because of unmoderated user-to-user content. Do **not** declare 4+. |
-| Google Play Data Safety form | ⚠️ Must be completed. Same disclosures; declare data is encrypted in transit and deletable. |
-| Google Play account deletion URL | ⚠️ Play also requires a **web** deletion request URL, not just in-app. You need a page for this. |
-| Health data declaration | Declare Health & Fitness. You do **not** use HealthKit, so the stricter HealthKit rules don't apply. |
-| Generic app name | ⚠️ May be rejected as non-distinctive; see §7. |
+**Requiring an account (Guideline 5.1.1).** Apps may not require registration
+unless it is relevant to core functionality. A reviewer may ask why the app
+cannot be used anonymously. Your answer is that training history syncs across
+devices and the social features need an identity, which is a good answer — but
+put it in the review notes rather than improvising if asked.
+
+**User-generated content (Guideline 1.2).** You have reporting, blocking, a
+moderation queue and a documented daily routine. This is now in reasonable shape.
+What keeps it in shape is that there is **no free-text messaging or commenting** —
+the only user-written text another person sees is a username, a display name, and
+the names someone gives their own exercises. Adding comments or direct messages
+would change the moderation burden completely.
+
+**Age rating.** Expect 13+, and answer yes to user-generated content and social
+features. Do not be tempted to answer no to reach 4+.
+
+**In order:** account deletion, the privacy manifest, no tracking, no purchases,
+and screenshots — the last now producible from an iPhone 16 Pro via
+`npm run screenshots`.
 
 ---
 
-## 7. INTELLECTUAL PROPERTY
+## 7. PRIVACY RISKS
 
-- **Code:** written for this project. No copied code.
-- **Dependencies:** all MIT. Keep the licence texts in the build (standard tooling does).
-- **Icons:** all trophy and body-chart icons are original SVG paths authored here — no
-  third-party icon set is embedded. `@expo/vector-icons` (MIT, Ionicons) is used for tab
-  icons and is redistributable.
-- **Fonts:** system fonts only. No licensing issue.
-- **Exercise names:** generic ("Barbell Bench Press"). Not protectable, no issue.
-- **⚠️ App name and bundle ID.** "Gym App" is descriptive and very unlikely to be
-  registrable as a trademark; `com.gymapp.app` is probably taken. Before launch, pick a
-  distinctive name, run a USPTO TESS search and an App Store search, and update
-  `app.json` (`name`, `slug`, `bundleIdentifier`, `package`, `scheme`) plus
-  `LEGAL.appName`. **Changing a bundle ID after release is not possible** — get this
-  right first.
+**The friend feed is the first real sharing this app does.** Until now a friend
+saw aggregate totals. They now see each session: its name, when it happened, how
+long it lasted, volume, sets, reps, which exercises, and how many records were
+set. Mitigations: accepted friends only, enforced in SQL; summaries only, never
+individual sets; a switch in Profile that stops it immediately; and the policy
+describes exactly what a post contains.
+
+**Reaction identities are not exposed**, as of `0009`. The feed returns counts.
+
+**Training data now sits on the phone** for offline use. It is in the app's
+private storage, protected by the operating system and the device passcode, and
+cleared on sign-out, on account deletion and when the app is deleted. Disclosed
+as of today.
+
+**Username enumeration is possible but limited.** Search needs two characters,
+matches a prefix, returns at most twenty, excludes blocked users in both
+directions, and only ever returns accounts that have chosen a handle. It returns
+a username and display name, never training data. This is the same exposure any
+app with username search has. I would leave it.
+
+**`user_reports` has no retention limit.** Reports — including free text one user
+wrote about another — are kept indefinitely. Consider deleting resolved reports
+after a period. Low risk, but it is personal data about a third party held
+forever with no stated purpose once the case is closed.
+
+**Supabase's logs contain IP addresses.** Disclosed in Section 1 of the policy,
+with retention on their schedule rather than yours, which the policy also says.
 
 ---
 
 ## 8. SECURITY RISKS
 
-| Finding | Severity | Status |
-|---|---|---|
-| Email-derived public usernames | High | ✅ Fixed |
-| Password minimum of 6 | Medium | ✅ Raised to 8 |
-| `decode-uri-component` DoS (GHSA-vcc3-ghjq-m6fr) | Medium | ⚠️ **Open.** Reachable in the shipped bundle via deep-link parsing (`gymapp://`). `npm audit fix` cannot resolve it without breaking the SDK 57 alignment — it comes through Expo's own dependency tree. Impact is a local hang from a malicious link, not data exposure. Recheck when Expo bumps it. |
-| `uuid` bounds check (GHSA-w5hq-g745-h8pq) | Low | Build-tooling only; verified **not** in the shipped bundle. |
-| No rate limiting on username search | Low | `rpc_search_users` allows enumeration at 20 results/query. Mitigated by 3-char minimum and opt-in discoverability. Consider Supabase rate limits. |
-| No server-side content filter on usernames | Low | A user can set an offensive handle; it is reportable but not pre-screened. Apple accepts report-based moderation, but a profanity check on save would be cheap. |
+**The database is the strong part.** Row-level security on every table, scoped
+policies, definer functions that check friendship, and an admin function that
+`authenticated` cannot call. I read all of it.
 
-**Breach exposure if Supabase were compromised:** email addresses, hashed passwords,
-and all training/bodyweight data. No payment data, no government IDs, no location, no
-photos. Under most state breach-notification laws, email + hashed password may trigger
-notification duties — you should have an incident plan before launch (see
-`legal/INCIDENT_RESPONSE.md`).
+**There is no rate limiting beyond Supabase's defaults.** Username search, friend
+requests and report filing are all callable as fast as the API allows. For an app
+with no users this is theoretical; revisit if it grows.
 
----
+**No multi-factor authentication.** Reasonable for a training log.
 
-## 9. MARKETING CLAIMS
+**The offline cache is protected by the operating system, not by you.** iOS file
+protection and the device passcode are the defence. For workout data that is
+proportionate. It would not be for anything more sensitive.
 
-Reviewed all user-facing strings. No unsupported claims about weight loss, health
-outcomes, guaranteed results, or earnings. The one area needing care:
+**No dependency scanning, because there is no CI.** Running `npm audit` by hand
+before each release is the cheap version. Standing warning: **never run
+`npm audit fix --omit=dev` in this project** — it prunes devDependencies and
+breaks the toolchain.
 
-- The recommender says "Based on N recent sets" and gives a rationale — factual, fine.
-- Trophy names ("Legend", "Cross-Trainer") are motivational, not claims.
-- ✅ Added an explicit "logging tool, not medical or fitness advice" line to the profile
-  and Terms §1.
-
-**Do not** add marketing copy claiming the app prevents injury, guarantees strength
-gains, or provides medical/training advice.
+**No secrets in the repository.** Verified across the working tree and the
+history.
 
 ---
 
-## 10. PRIORITISED ACTIONS
+## 9. INTELLECTUAL PROPERTY
 
-### CRITICAL — before submission
-1. Fill the five placeholders in `src/legal/config.ts`.
-2. Host the Privacy Policy at a public URL; add it to both store listings.
-3. Choose a distinctive app name and bundle ID (cannot be changed later).
-4. Set up and monitor the support email.
-5. Re-enable email confirmation in Supabase Auth.
-6. If you already have real users, reset the email-derived usernames (§3).
+**"Rust Strength" has still not been trademark-searched.** This is the one IP item
+that could force a rename after launch, and a bundle identifier cannot be changed
+once published. Search the USPTO TESS database, and check the App Store for
+similar names, before the listing goes live. "Rust" is used in software contexts
+and the risk is not zero.
+
+**Every icon and glyph is drawn in-house** in `TrophyIcon.tsx` and
+`BodyChart.tsx`. No stock art, no licensed illustrations, no emoji.
+
+**Fonts are the system fonts plus Ionicons**, which is MIT.
+
+**Exercise names are generic and descriptive** and not protectable by anyone.
+
+**The real-world weight comparisons are factual** — a US semi is capped at
+80,000 lb by federal law, a 747-400's maximum takeoff weight is 875,000 lb. Facts
+are not protectable and these are accurate.
+
+**No third-party licences screen is shipped.** Most permissive licences require
+attribution. Generating one is cheap and worth doing before launch.
+
+---
+
+## 10. MARKETING CLAIMS
+
+**No claim is made about strength gains, weight loss, injury prevention or any
+health outcome.** The listing copy says the app suggests weights from numbers you
+enter. That is a capability claim about software, and it is substantiated.
+
+**Automated tests enforce this.** The welcome cards are checked against a list of
+claim phrases, and the "not medical or coaching advice" line is asserted present.
+If marketing copy is later written into the app, the test fails.
+
+**Watch this if you ever advertise.** The FTC's Health Products Compliance
+Guidance is the relevant standard and it applies to store copy, social posts and
+anything an influencer says on your behalf. If you give someone the Influencer
+badge and they make a claim you would not make, that is your problem too.
+
+---
+
+## 11. MISSING DOCUMENTS
+
+| Document | Status |
+|---|---|
+| Privacy Policy | Published, v1.2.0 |
+| Terms of Service | Published, v1.2.0 |
+| Support page | Published |
+| Account deletion page | Published — Apple wants a web-reachable route |
+| Incident response plan | `legal/INCIDENT_RESPONSE.md` |
+| Moderation runbook | `legal/MODERATION.md` |
+| EULA | Not needed; Apple's standard EULA applies by default |
+| Cookie policy | Not needed; no web app, no cookies |
+| **Data processing agreement with Supabase** | Missing. Only required if you publish outside the US. Supabase offers one. |
+| **Third-party licences screen** | Missing. Cheap to add. |
+| **Retention schedule for `user_reports`** | Missing. |
+
+---
+
+## 12. PRIORITISED ACTIONS
+
+### CRITICAL — before you submit
+
+1. **Decide and set your App Store territories.** US-only, or get the documents
+   reviewed for the EU.
+2. **Move Supabase to a paid plan** so the project cannot pause during review,
+   and so backups exist.
+3. **Trademark-search "Rust Strength."** The bundle identifier is permanent.
+4. **Create the demo account** with real history and put the credentials in the
+   App Review notes.
 
 ### HIGH — strongly recommended before launch
-7. Attorney review of the injury disclaimer and the Washington MHMDA question.
-8. Complete Apple privacy labels and Google Play Data Safety accurately.
-9. Add the web-based account-deletion URL Google Play requires.
-10. Define how you will review reports and act within the 24 hours the Terms promise.
-11. Write the incident-response plan.
+
+5. **Turn on email confirmation**, and have me fix the consent recording when you
+   do.
+6. **Take Section 5 to a lawyer**, with the Washington My Health My Data question
+   first.
+7. **Test the offline support on a real phone.** It has never run on one. That is
+   a data-loss risk rather than a legal one, but losing somebody's logged session
+   is the fastest route to a one-star review.
+8. **Check the Supabase password policy** matches the client.
 
 ### MEDIUM
-12. Track the `decode-uri-component` advisory; update when Expo does.
-13. Add a profanity filter on username save.
-14. Consider rate-limiting user search.
-15. Decide whether to retain abuse reports past account deletion.
+
+9. Add a third-party licences screen.
+10. Set a retention period for resolved reports.
+11. Build the re-acceptance prompt for document changes, before you need it.
+12. Start the daily moderation check now, so it is a habit before it matters.
 
 ### LOW
-16. Add a "what's changed" prompt when the Terms version bumps.
-17. Consider making friend stats more granular (per-stat visibility toggles).
+
+13. Run `npm audit` before each release. Never with `--omit=dev`.
+14. Revisit rate limiting if the app grows.
 
 ---
 
-## 11. WHAT I COULD NOT DECIDE FOR YOU
+## 13. Decisions only you can make
 
-These need a business or legal decision, not a code change:
+I have not guessed at any of these.
 
-1. **Your legal entity** — sole proprietor under your own name, or an LLC? An LLC gives
-   liability separation that matters for an app giving lifting suggestions.
-2. **Governing-law state** — normally where you live or where the entity is formed.
-3. **Whether MHMDA applies** — needs an attorney.
-4. **Whether to add arbitration** — needs an attorney.
-5. **The app's real name** — a branding decision with trademark consequences.
+1. **Which countries you publish in.** Everything about the GDPR follows from it.
+2. **Whether to operate as an individual or form an entity.** You are currently
+   named personally in documents for a product that advises physical exertion.
+3. **Whether to carry insurance.**
+4. **Whether to keep the name**, after searching for it.
+5. **Whether to accept the Washington My Health My Data risk**, mitigate it
+   further, or exclude that state.
+6. **How fast you commit to answering reports.** The runbook says daily. That is
+   a promise you are making to Apple and to your users.

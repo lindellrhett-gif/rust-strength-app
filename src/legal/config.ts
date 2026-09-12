@@ -34,11 +34,15 @@ export const LEGAL = {
   /** Minimum age. 13+ keeps the app outside COPPA. */
   minimumAge: 13,
 
-  /** Bump when the documents change materially; re-prompts for acceptance. */
-  version: '1.1.0',
+  /**
+   * Bumped whenever the documents change materially. Note that nothing in the
+   * app currently re-prompts an existing user on a bump — see the legal audit.
+   * Harmless before launch, since there are no users holding an old version.
+   */
+  version: '1.2.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'September 10, 2026',
+  lastUpdated: 'September 11, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',
