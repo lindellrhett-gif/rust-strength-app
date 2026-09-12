@@ -98,6 +98,13 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "db98e082-e945-429a-928a-882673e8d53d"
+      }
+    },
+    "owner": "rhettl08"
   }
 }
