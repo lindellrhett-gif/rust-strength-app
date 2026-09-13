@@ -9,7 +9,8 @@
       "distribution": "internal",
       "env": {
         "APP_VARIANT": "development"
-      }
+      },
+      "environment": "development"
     },
 
     "ios-check": {
@@ -19,7 +20,8 @@
       },
       "env": {
         "APP_VARIANT": "preview"
-      }
+      },
+      "environment": "preview"
     },
 
     "android-check": {
@@ -29,7 +31,8 @@
       },
       "env": {
         "APP_VARIANT": "preview"
-      }
+      },
+      "environment": "preview"
     },
 
     "preview": {
@@ -42,7 +45,8 @@
       },
       "env": {
         "APP_VARIANT": "preview"
-      }
+      },
+      "environment": "preview"
     },
     "production": {
       "autoIncrement": true,
@@ -51,7 +55,8 @@
       },
       "env": {
         "APP_VARIANT": "production"
-      }
+      },
+      "environment": "production"
     }
   },
   "submit": {

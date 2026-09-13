@@ -23,6 +23,28 @@ eas init
 `eas init` links this folder to a project on your Expo account. It is free and
 it does not touch Apple.
 
+### Give EAS your Supabase config
+
+`.env` is gitignored, so EAS never receives it. Each build profile reads its
+values from an EAS environment instead (pinned in `eas.json`: `ios-check`,
+`android-check` and `preview` use **preview**; `production` uses
+**production**). Add both values to both environments, copying them from your
+`.env`:
+
+```
+eas env:set --name EXPO_PUBLIC_SUPABASE_URL --environment preview --environment production --visibility plaintext
+eas env:set --name EXPO_PUBLIC_SUPABASE_ANON_KEY --environment preview --environment production --visibility sensitive
+```
+
+Each command prompts for the value. Do not use `--visibility secret`: these
+are baked into the app bundle, which is by design (Row Level Security protects
+the data, not the key), so "secret" would be misleading, and Expo advises
+against it for `EXPO_PUBLIC_` variables.
+Never add the Supabase **service role** key here or anywhere in this project.
+
+`scripts/check-build-env.js` runs on every EAS build and fails it if either
+value is missing — otherwise the build goes green and the app crashes on launch.
+
 ## Check 1 — does it build for iOS?
 
 ```
