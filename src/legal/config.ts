@@ -14,7 +14,7 @@ export const LEGAL = {
   entity: 'Rhett Lindell',
 
   /** Monitored inbox for privacy requests and support. */
-  contactEmail: 'lindellrhett@gmail.com',
+  contactEmail: 'ruststrengthsupport@gmail.com',
 
   /** US state whose law governs the Terms, normally where you live. */
   governingState: 'North Dakota',
@@ -42,7 +42,7 @@ export const LEGAL = {
   version: '1.2.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'September 11, 2026',
+  lastUpdated: 'September 14, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: September 11, 2026**
+**Last updated: September 14, 2026**
 
 Rust Strength is operated by Rhett Lindell ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -110,7 +110,7 @@ This permanently deletes your account, profile, workouts, sets, activities, rest
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 
-If you cannot access the app, email lindellrhett@gmail.com from your account's email address and we will action it.
+If you cannot access the app, email ruststrengthsupport@gmail.com from your account's email address and we will action it.
 
 ## 9. Your privacy rights
 
@@ -118,11 +118,11 @@ Depending on where you live, you may have the right to know what we collect, acc
 
 **We do not sell or share personal information**, so there is nothing to opt out of.
 
-The in-app export and delete tools satisfy access and deletion immediately. For anything else, contact lindellrhett@gmail.com. We will not treat you differently for asking.
+The in-app export and delete tools satisfy access and deletion immediately. For anything else, contact ruststrengthsupport@gmail.com. We will not treat you differently for asking.
 
 ## 10. Children
 
-Rust Strength is not intended for children under 13. You must confirm you are at least 13 to create an account. We do not knowingly collect information from children under 13. If you believe a child under 13 has created an account, email lindellrhett@gmail.com and we will delete it.
+Rust Strength is not intended for children under 13. You must confirm you are at least 13 to create an account. We do not knowingly collect information from children under 13. If you believe a child under 13 has created an account, email ruststrengthsupport@gmail.com and we will delete it.
 
 ## 11. Security
 
@@ -137,4 +137,4 @@ If we change this policy materially we will update the date above and ask you to
 ## 13. Contact
 
 Rhett Lindell
-lindellrhett@gmail.com
+ruststrengthsupport@gmail.com
