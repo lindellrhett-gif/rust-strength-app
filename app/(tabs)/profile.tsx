@@ -7,6 +7,7 @@ import { AchievementGrid } from '@/components/AchievementGrid';
 import { BadgeShelf } from '@/components/BadgeShelf';
 import { LevelCard } from '@/components/LevelCard';
 import { NumberStepper } from '@/components/NumberStepper';
+import { RestAlertToggle } from '@/components/RestAlertToggle';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useWorkoutDates } from '@/data/stats';
@@ -274,6 +275,7 @@ export default function ProfileScreen() {
             trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
+        <RestAlertToggle />
       </Card>
 
       <Card title="Sharing with friends">

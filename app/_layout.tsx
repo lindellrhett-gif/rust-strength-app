@@ -11,6 +11,11 @@ import { registerMutationDefaults } from '@/data/mutationDefaults';
 import { useProfile } from '@/data/profile';
 import { CACHE_MAX_AGE, persister, queryClient } from '@/lib/queryClient';
 import { startNetworkWatcher } from '@/lib/network';
+import {
+  installNotificationHandler,
+  loadRestAlertSetting,
+  useRestAlertEnabled,
+} from '@/lib/restNotifications';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
@@ -21,6 +26,8 @@ import { colors } from '@/theme/colors';
 // dropped on the floor.
 startNetworkWatcher();
 registerMutationDefaults(queryClient);
+installNotificationHandler();
+loadRestAlertSetting();
 
 /**
  * Expo Router installs an error boundary from a route file's `ErrorBoundary`
@@ -37,8 +44,16 @@ export { AppErrorBoundary as ErrorBoundary };
  */
 function RestTimerGate({ children }: { children: React.ReactNode }) {
   const profile = useProfile();
+  const { userId } = useAuth();
+  const alertEnabled = useRestAlertEnabled();
   return (
-    <RestTimerProvider defaultSeconds={profile.data?.rest_seconds}>{children}</RestTimerProvider>
+    <RestTimerProvider
+      defaultSeconds={profile.data?.rest_seconds}
+      alertEnabled={alertEnabled}
+      signedIn={!!userId}
+    >
+      {children}
+    </RestTimerProvider>
   );
 }
 

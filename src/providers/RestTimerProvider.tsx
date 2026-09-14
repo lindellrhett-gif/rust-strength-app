@@ -10,12 +10,14 @@ import {
 } from 'react';
 import { AppState, Vibration } from 'react-native';
 
+import { restAlertContent, restAlertPlan } from '@/domain/restAlert';
 import {
   DEFAULT_REST_SECONDS,
   adjustRest,
   clampRest,
   remainingSeconds,
 } from '@/domain/restTimer';
+import { cancelRestAlert, scheduleRestAlert } from '@/lib/restNotifications';
 
 export interface RestTimerValue {
   /** Counting down right now. */
@@ -47,6 +49,10 @@ interface ProviderProps {
   children: ReactNode;
   /** The user's preferred rest, from their profile. */
   defaultSeconds?: number;
+  /** The user switched on the alert for when rest is over. */
+  alertEnabled?: boolean;
+  /** Someone is signed in. Signing out cancels any pending alert. */
+  signedIn?: boolean;
 }
 
 /**
@@ -58,11 +64,17 @@ interface ProviderProps {
  * lose whatever the system decided not to run. A deadline is either passed or
  * it is not, so the timer is still right when you look back at your phone.
  *
- * When it reaches zero the phone buzzes and the bar changes state. There is no
- * push notification — that would need notification permission and a matching
- * disclosure, for a timer that is only useful while you are holding the phone.
+ * When it reaches zero the phone buzzes and the bar changes state. If the user
+ * has opted in, a local notification is also scheduled for the same deadline,
+ * so the alert still arrives with the phone locked or the app in the
+ * background. It is scheduled on the phone: no server, no push token, no signal.
  */
-export function RestTimerProvider({ children, defaultSeconds }: ProviderProps) {
+export function RestTimerProvider({
+  children,
+  defaultSeconds,
+  alertEnabled = false,
+  signedIn = false,
+}: ProviderProps) {
   const preferred = clampRest(defaultSeconds ?? DEFAULT_REST_SECONDS);
 
   const [endsAt, setEndsAt] = useState<number | null>(null);
@@ -71,6 +83,30 @@ export function RestTimerProvider({ children, defaultSeconds }: ProviderProps) {
   const [finished, setFinished] = useState(false);
   // Stops the buzz repeating on every tick once the deadline has passed.
   const buzzed = useRef(false);
+  // Whether this session put an alert in the queue. Cancelling only what we
+  // scheduled means a fresh launch does not wipe an alert still waiting from
+  // before iOS closed the app in the background — that one should still land.
+  const alertPending = useRef(false);
+
+  // Keep the one notification in step with the deadline: starting schedules
+  // it, a nudge reschedules it, skipping or finishing cancels it.
+  useEffect(() => {
+    const plan = restAlertPlan({
+      endsAtMs: endsAt,
+      finished,
+      enabled: alertEnabled,
+      signedIn,
+      nowMs: Date.now(),
+    });
+    if (plan.kind === 'schedule') {
+      const { title, body } = restAlertContent(totalSeconds);
+      scheduleRestAlert(plan.seconds, title, body);
+      alertPending.current = true;
+    } else if (alertPending.current) {
+      cancelRestAlert();
+      alertPending.current = false;
+    }
+  }, [endsAt, finished, totalSeconds, alertEnabled, signedIn]);
 
   useEffect(() => {
     if (endsAt == null) return;

@@ -69,7 +69,7 @@ A live workout timer, plus totals for time, volume, reps and sets.
 Activity tracking for runs, sports and cardio machines, timed live or entered by hand.
 A calendar for planning sessions ahead, logging rest days, and reviewing what you have done.
 A body chart showing which muscle groups you have and have not trained this week.
-A rest timer between sets, set to whatever length you want, that starts on its own when you save a set.
+A rest timer between sets, set to whatever length you want, that starts on its own when you save a set and can alert you when rest is over, even with your phone locked.
 Tiered trophies across nine ranks, from Wood to Legend, for the main lifts, calisthenics, and lifetime weight moved.
 XP and levels earned from the training you log, unlocking badges as you climb.
 A feed of your friends' recent sessions that you can react to, and profiles showing their streaks, levels and progress.

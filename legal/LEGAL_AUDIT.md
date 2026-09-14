@@ -3,6 +3,12 @@
 **Audited: 11 September 2026** against commit `1902db5`, covering every migration
 through `0010_moderation_queue.sql`.
 
+**Amended 14 September 2026** for two changes: the contact address moved to
+`ruststrengthsupport@gmail.com`, and an opt-in "rest over" notification was added.
+The notification is the first device permission the app can request, so the
+statements about permissions below and in the privacy policy were corrected
+(policy 1.3.0).
+
 This supersedes the audit of 7 September, which predated the friend feed,
 reactions, XP and badges, offline storage, the moderation queue, progress charts
 and the welcome cards.
@@ -58,6 +64,7 @@ app makes no network call to any host other than your own Supabase project.
 
 Runtime dependencies are the Expo and React Native platform, `@supabase/supabase-js`,
 TanStack Query and its storage persister, AsyncStorage, NetInfo, `expo-crypto`,
+`expo-notifications` (local scheduling only — no push token is ever requested),
 `react-native-svg`, `react-hook-form`, `zod` and Ionicons. All permissively
 licensed. None phones home.
 
@@ -74,8 +81,18 @@ including IP addresses.
 
 **Not collected:** real name, phone number, location of any precision, photos,
 video, contacts, microphone, camera, advertising identifiers, biometrics,
-government identifiers, payment details. **The app requests no device
-permissions at all** — verified in the resolved iOS configuration.
+government identifiers, payment details, push tokens.
+
+**Device permissions: notifications only, and only on request.** Nothing is
+asked at launch. The system prompt appears when the user switches on "Alert when
+rest is over" in Profile. The alert is a local notification scheduled on the
+phone; the code never calls `getExpoPushTokenAsync` or `getDevicePushTokenAsync`,
+so no device identifier exists to collect. The on/off choice is stored on the
+device only. No new data type, so the privacy manifest is unchanged.
+
+The notifications module adds Apple's `aps-environment` entitlement to the build
+regardless of whether push is used. That is a build detail, not data collection,
+but the App ID needs the Push Notifications capability enabled for signing.
 
 ---
 
@@ -114,7 +131,8 @@ permissions at all** — verified in the resolved iOS configuration.
   cards. There is an automated test that fails the build on a list of claim
   phrases, and another that keeps the "not medical advice" line present.
 - **The published legal site matches the in-app documents**, because both are
-  generated from the same source. Verified live today at version 1.2.0.
+  generated from the same source. Verified live at version 1.2.0 on 11 September;
+regenerated at 1.3.0 on 14 September.
 
 ---
 
@@ -130,6 +148,7 @@ permissions at all** — verified in the resolved iOS configuration.
 | Reports were written and never read | Medium | Fixed in `0010` — a queue with status, plus `legal/MODERATION.md` |
 | Sign-up told users to check their email when already signed in | Low | Fixed |
 | No error boundary; a render crash showed a dead screen | Low | Fixed |
+| Rest-over notification would have made "requests no device permissions" in the policy untrue | Medium | Fixed before shipping — policy 1.3.0 describes the one opt-in permission |
 
 ---
 

@@ -91,6 +91,17 @@ TestFlight will be. Things that behave differently outside Expo Go:
   the screenshots are valid. Run them through `npm run screenshots` afterwards.
 - **Test offline.** Airplane mode works the same in Expo Go.
 
+## Push Notifications capability
+
+The rest-over alert is a local notification, but `expo-notifications` still
+adds Apple's `aps-environment` entitlement to every build. The App ID therefore
+needs **Push Notifications** ticked at developer.apple.com → Identifiers →
+`com.ruststrength.app`, or signing fails with a provisioning profile that
+"doesn't include the aps-environment entitlement".
+
+An App Store Connect API key cannot change capabilities, so tick it by hand. No
+push key or certificate is needed — nothing is ever pushed.
+
 ## The order once Apple approves
 
 1. `eas build --platform ios --profile production`

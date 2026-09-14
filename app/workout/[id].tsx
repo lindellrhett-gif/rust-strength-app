@@ -23,6 +23,7 @@ import {
   type WorkoutBlock,
 } from '@/domain/templates';
 import { trimWeight } from '@/lib/format';
+import { useRestTimer } from '@/providers/RestTimerProvider';
 import { colors, rpeColor } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -38,6 +39,7 @@ export default function WorkoutScreen() {
   const deleteSet = useDeleteSet(id!);
   const removeSlot = useRemoveWorkoutExercise(id!);
   const saveAsTemplate = useSaveWorkoutAsTemplate();
+  const restTimer = useRestTimer();
 
   const [showSave, setShowSave] = useState(false);
 
@@ -93,6 +95,9 @@ export default function WorkoutScreen() {
         {
           text: 'Finish',
           onPress: async () => {
+            // A rest still counting down would otherwise buzz, and send its
+            // notification, after the session is already over.
+            restTimer.stop();
             endWorkout.end(id!);
             router.replace({ pathname: '/workout/summary', params: { id } });
           },
@@ -115,6 +120,7 @@ export default function WorkoutScreen() {
         text: 'Delete it',
         style: 'destructive',
         onPress: async () => {
+          restTimer.stop();
           await cancelWorkout.mutateAsync(id!);
           router.replace('/(tabs)');
         },

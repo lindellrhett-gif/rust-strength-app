@@ -36,7 +36,9 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 ### What we do NOT collect
 
-We do not collect your real name, phone number, precise or approximate location, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information. The app requests **no device permissions**.
+We do not collect your real name, phone number, precise or approximate location, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information.
+
+The only device permission the app can ask for is **notifications**, and only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us. You can turn it off in the app or in your phone's settings at any time.
 
 ## 2. Health and fitness information
 
