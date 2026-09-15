@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card } from '@/components';
 import { FeedCard } from '@/components/FeedCard';
 import { Field } from '@/components/Field';
+import { keyboardAware } from '@/components/keyboard';
 import { useFriendFeed, useReact } from '@/data/feed';
 import {
   useFriendships,
@@ -176,7 +177,7 @@ function FriendsTab() {
   const knownIds = new Set(edges.map((e) => e.otherUserId));
 
   return (
-    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
       <Card title="Find lifters">
         <Field
           label="Search by username"

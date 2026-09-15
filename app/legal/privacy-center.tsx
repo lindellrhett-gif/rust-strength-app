@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Field } from '@/components';
+import { keyboardAware } from '@/components/keyboard';
 import {
   useBlockedUsers,
   useDeleteMyAccount,
@@ -71,7 +72,7 @@ export default function PrivacyCenter() {
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: 'Privacy & legal' }} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Card title="Documents">
           <LinkRow label="Privacy Policy" onPress={() => router.push('/legal/privacy')} />
           <LinkRow label="Terms of Service" onPress={() => router.push('/legal/terms')} />

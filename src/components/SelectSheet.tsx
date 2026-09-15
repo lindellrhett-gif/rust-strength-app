@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 
+import { keyboardAware } from './keyboard';
 import { ModalScreen } from './ModalScreen';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -70,7 +71,7 @@ export function SelectSheet({
         <FlatList
           data={filtered}
           keyExtractor={(o) => o.id}
-          keyboardShouldPersistTaps="handled"
+          {...keyboardAware}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <Pressable

@@ -1,5 +1,6 @@
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { Stack } from 'expo-router';
+import { getFocusedRouteNameFromRoute } from 'expo-router/react-navigation';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -9,6 +10,7 @@ import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { registerMutationDefaults } from '@/data/mutationDefaults';
 import { useProfile } from '@/data/profile';
+import { tabTitle } from '@/domain/tabs';
 import { CACHE_MAX_AGE, persister, queryClient } from '@/lib/queryClient';
 import { startNetworkWatcher } from '@/lib/network';
 import {
@@ -72,9 +74,18 @@ function RootNavigator() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      {/* `(tabs)` owns "/" — its layout redirects to (auth) when signed out. */}
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="(auth)" />
+      {/*
+        `(tabs)` owns "/" — its layout redirects to (auth) when signed out.
+        Its title is never shown, but iOS uses it as the back button label on
+        every screen opened from a tab, and without one that label is the
+        folder name "(tabs)". Naming it after the focused tab means the button
+        says where it goes: "Today", "Stats", "Friends".
+      */}
+      <Stack.Screen
+        name="(tabs)"
+        options={({ route }) => ({ title: tabTitle(getFocusedRouteNameFromRoute(route)) })}
+      />
+      <Stack.Screen name="(auth)" options={{ title: 'Sign in' }} />
       <Stack.Screen name="workout/[id]" options={{ headerShown: true, title: 'Workout' }} />
       <Stack.Screen name="friend/[id]" options={{ headerShown: true, title: 'Profile' }} />
       <Stack.Screen name="exercise/[id]" options={{ headerShown: true, title: 'Progress' }} />

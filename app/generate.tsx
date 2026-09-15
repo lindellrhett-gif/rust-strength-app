@@ -10,6 +10,7 @@ import { useProfile } from '@/data/profile';
 import { useRecentHistoryByExercise } from '@/data/sets';
 import { useWeeklyCoverage } from '@/data/stats';
 import { SaveTemplateModal } from '@/components/SaveTemplateModal';
+import { keyboardAware } from '@/components/keyboard';
 import { useAddWorkoutExercises, useSaveTemplate } from '@/data/templates';
 import { useStartWorkout } from '@/data/workouts';
 import {
@@ -152,7 +153,7 @@ export default function GenerateWorkout() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Card title="What are you training?">
           <View style={styles.chips}>
             {(Object.keys(FOCUS_LABELS) as Focus[]).map((f) => (

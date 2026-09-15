@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
@@ -28,7 +28,11 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
       onRequestClose={onClose}
       onShow={() => setName(initialName)}
     >
-      <View style={styles.backdrop}>
+      {/* Lifts the sheet above the keyboard instead of letting it cover the field. */}
+      <KeyboardAvoidingView
+        style={styles.backdrop}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>New exercise</Text>
           <Field label="Name" value={name} onChangeText={setName} autoFocus placeholder="e.g. Incline Machine Press" />
@@ -53,7 +57,7 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
             />
           </View>
         </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

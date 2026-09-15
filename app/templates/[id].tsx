@@ -7,6 +7,7 @@ import { Button, Field, LoadingView } from '@/components';
 import { CreateExerciseModal } from '@/components/CreateExerciseModal';
 import { NumberStepper } from '@/components/NumberStepper';
 import { SelectSheet, type Option } from '@/components/SelectSheet';
+import { keyboardAware } from '@/components/keyboard';
 import { useCreateExercise, useExercises } from '@/data/exercises';
 import { useProfile } from '@/data/profile';
 import { useSaveTemplate, useTemplate } from '@/data/templates';
@@ -127,7 +128,7 @@ export default function TemplateEditor() {
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: isNew ? 'New preset' : 'Edit preset' }} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Field
           label="Preset name"
           value={name}

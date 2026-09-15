@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
@@ -37,7 +37,11 @@ export function SaveTemplateModal({
       onRequestClose={onClose}
       onShow={() => setName(initialName)}
     >
-      <View style={styles.backdrop}>
+      {/* Lifts the sheet above the keyboard instead of letting it cover the field. */}
+      <KeyboardAvoidingView
+        style={styles.backdrop}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>Save as preset</Text>
           <Text style={text.bodyMuted}>
@@ -79,7 +83,7 @@ export function SaveTemplateModal({
             />
           </View>
         </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

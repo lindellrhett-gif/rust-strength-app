@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { keyboardAware } from './keyboard';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/typography';
 
@@ -27,10 +28,7 @@ export function Screen({
   return (
     <SafeAreaView style={styles.safe} edges={edges}>
       {scroll ? (
-        <ScrollView
-          contentContainerStyle={[styles.content, contentStyle]}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={[styles.content, contentStyle]} {...keyboardAware}>
           {children}
         </ScrollView>
       ) : (

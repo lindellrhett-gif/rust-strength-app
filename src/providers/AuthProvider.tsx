@@ -19,6 +19,20 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /**
+   * True from the moment a reset code is submitted until the new password is
+   * saved or the reset is abandoned. The code signs the user in, and without
+   * this the auth layout would whisk them into the app before they had chosen
+   * a new password.
+   */
+  recovering: boolean;
+  sendResetCode: (email: string) => Promise<void>;
+  /** Checks the emailed code. Signs the user in, with `recovering` held true. */
+  verifyResetCode: (email: string, code: string) => Promise<void>;
+  /** Saves the new password and ends the reset. */
+  setNewPassword: (password: string) => Promise<void>;
+  /** Leaves a half-finished reset, signing out if the code was already used. */
+  abandonReset: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -26,6 +40,12 @@ const AuthContext = createContext<AuthState | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [initializing, setInitializing] = useState(true);
+  const [recovering, setRecovering] = useState(false);
+  // Mirrors `recovering` for the async functions below. They are created once
+  // per render, and a screen can still hold an old copy when it unmounts — an
+  // old copy reading stale state could sign someone out right after a reset
+  // that succeeded.
+  const recoveringRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -87,8 +107,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       },
+      recovering,
+      sendResetCode: async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        if (error) throw error;
+      },
+      verifyResetCode: async (email, code) => {
+        // Set before the request, not after: the session lands through
+        // onAuthStateChange, and the layout must already know to stay put.
+        recoveringRef.current = true;
+        setRecovering(true);
+        const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'recovery' });
+        if (error) {
+          recoveringRef.current = false;
+          setRecovering(false);
+          throw error;
+        }
+      },
+      setNewPassword: async (password) => {
+        // On failure `recovering` stays true, so the user is still on the form
+        // and can try another password without needing a fresh code.
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw error;
+        recoveringRef.current = false;
+        setRecovering(false);
+      },
+      abandonReset: async () => {
+        // A used code has already signed them in with the old password still
+        // set. Leaving that session behind would be a sign-in they never
+        // finished, so end it.
+        if (!recoveringRef.current) return;
+        recoveringRef.current = false;
+        await supabase.auth.signOut().catch(() => {});
+        setRecovering(false);
+      },
     }),
-    [session, initializing],
+    [session, initializing, recovering],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

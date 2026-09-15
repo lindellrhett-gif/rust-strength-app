@@ -39,7 +39,7 @@ export const LEGAL = {
    * app currently re-prompts an existing user on a bump — see the legal audit.
    * Harmless before launch, since there are no users holding an old version.
    */
-  version: '1.3.0',
+  version: '1.3.1',
 
   /** Last substantive edit to the documents. */
   lastUpdated: 'September 14, 2026',

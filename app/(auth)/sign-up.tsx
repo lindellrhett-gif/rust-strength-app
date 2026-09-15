@@ -1,6 +1,6 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { useAcceptTerms } from '@/data/privacy';
@@ -67,7 +67,8 @@ export default function SignUp() {
 
   return (
     <Screen scroll>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* The scroll view insets itself for the keyboard; see keyboardAware. */}
+      <View>
         <View style={styles.header}>
           <Text style={text.hero}>Create account</Text>
           <Text style={text.bodyMuted}>Track lifts across any gym, any machine.</Text>
@@ -124,7 +125,7 @@ export default function SignUp() {
           <Text style={text.bodyMuted}>Already have an account? </Text>
           <Text style={styles.linkAccent}>Sign in</Text>
         </Link>
-      </KeyboardAvoidingView>
+      </View>
     </Screen>
   );
 }

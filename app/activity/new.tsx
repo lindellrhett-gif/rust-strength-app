@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Field } from '@/components';
 import { NumberStepper } from '@/components/NumberStepper';
+import { keyboardAware } from '@/components/keyboard';
 import { useLogActivity } from '@/data/activities';
 import {
   ACTIVITY_FIELDS,
@@ -125,7 +126,7 @@ export default function NewActivity() {
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: 'Log activity' }} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Card title="What did you do?">
           <View style={styles.chips}>
             {ACTIVITY_KINDS.map((k) => (

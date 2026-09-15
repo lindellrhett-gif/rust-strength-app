@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
@@ -33,7 +33,11 @@ export function ReportUserModal({ visible, username, busy, onSubmit, onClose }: 
         setDetails('');
       }}
     >
-      <View style={styles.backdrop}>
+      {/* Lifts the sheet above the keyboard instead of letting it cover the field. */}
+      <KeyboardAvoidingView
+        style={styles.backdrop}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>Report @{username}</Text>
           <Text style={text.bodyMuted}>
@@ -75,7 +79,7 @@ export function ReportUserModal({ visible, username, busy, onSubmit, onClose }: 
             />
           </View>
         </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

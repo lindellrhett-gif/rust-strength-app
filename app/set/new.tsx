@@ -10,6 +10,7 @@ import { NumberStepper } from '@/components/NumberStepper';
 import { RestTimerBar } from '@/components/RestTimerBar';
 import { RpeSelector } from '@/components/RpeSelector';
 import { SelectSheet, type Option } from '@/components/SelectSheet';
+import { keyboardAware } from '@/components/keyboard';
 import { useCreateExercise, useExercises } from '@/data/exercises';
 import { useCreateMachine, useMachines } from '@/data/machines';
 import { useProfile } from '@/data/profile';
@@ -163,7 +164,7 @@ export default function NewSet() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         {/* Exercise + machine selectors */}
         <SelectorRow
           label="Exercise"

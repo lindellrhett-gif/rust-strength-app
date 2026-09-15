@@ -1,5 +1,14 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useId, useState } from 'react';
+import {
+  InputAccessoryView,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -27,6 +36,9 @@ export function NumberStepper({
   suffix,
 }: NumberStepperProps) {
   const [draft, setDraft] = useState<string | null>(null);
+  // Each stepper gets its own accessory bar, so one inside a modal still finds
+  // its own rather than one registered on the screen underneath.
+  const accessoryId = `stepper-done-${useId()}`;
 
   const clamp = (n: number) => Math.min(max, Math.max(min, n));
   const round = (n: number) => Number(n.toFixed(precision));
@@ -65,7 +77,24 @@ export function NumberStepper({
             keyboardType="decimal-pad"
             selectTextOnFocus
             style={styles.valueText}
+            inputAccessoryViewID={Platform.OS === 'ios' ? accessoryId : undefined}
+            accessibilityLabel={label}
           />
+          {Platform.OS === 'ios' ? (
+            // The iOS number pad has no return key. Without this bar the only
+            // way to put the keyboard away is to find something else to tap.
+            <InputAccessoryView nativeID={accessoryId}>
+              <View style={styles.accessory}>
+                <Pressable
+                  onPress={() => Keyboard.dismiss()}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.accessoryDone}>Done</Text>
+                </Pressable>
+              </View>
+            </InputAccessoryView>
+          ) : null}
           {suffix ? <Text style={styles.suffix}>{suffix}</Text> : null}
         </View>
 
@@ -116,4 +145,14 @@ const styles = StyleSheet.create({
     minWidth: 60,
   },
   suffix: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+  accessory: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surfaceRaised,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  accessoryDone: { color: colors.primary, fontSize: 16, fontWeight: '700' },
 });

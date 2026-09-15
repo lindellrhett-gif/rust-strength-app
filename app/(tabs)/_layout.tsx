@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, Tabs } from 'expo-router';
 
+import { TAB_TITLES } from '@/domain/tabs';
 import { useAuth } from '@/providers/AuthProvider';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import { colors } from '@/theme/colors';
@@ -29,21 +30,21 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Today',
+            title: TAB_TITLES.index,
             tabBarIcon: ({ color, size }) => <Ionicons name="barbell" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
           name="calendar"
           options={{
-            title: 'Calendar',
+            title: TAB_TITLES.calendar,
             tabBarIcon: ({ color, size }) => <Ionicons name="calendar" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
           name="stats"
           options={{
-            title: 'Stats',
+            title: TAB_TITLES.stats,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="stats-chart" color={color} size={size} />
             ),
@@ -52,14 +53,14 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="friends"
           options={{
-            title: 'Friends',
+            title: TAB_TITLES.friends,
             tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
-            title: 'Profile',
+            title: TAB_TITLES.profile,
             tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} />,
           }}
         />

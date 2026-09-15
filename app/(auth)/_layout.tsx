@@ -4,8 +4,10 @@ import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 
 export default function AuthLayout() {
-  const { session } = useAuth();
-  if (session) return <Redirect href="/(tabs)" />;
+  const { session, recovering } = useAuth();
+  // A reset code signs the user in before they have chosen a new password, so
+  // hold them here until the reset screen says it is done.
+  if (session && !recovering) return <Redirect href="/(tabs)" />;
 
   return (
     <Stack

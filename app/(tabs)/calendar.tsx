@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, LoadingView } from '@/components';
 import { Field } from '@/components/Field';
 import { MonthCalendar } from '@/components/MonthCalendar';
+import { keyboardAware } from '@/components/keyboard';
 import {
   useCreatePlannedSession,
   useDeletePlannedSession,
@@ -143,7 +144,7 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Card>
           <MonthCalendar
             month={month}

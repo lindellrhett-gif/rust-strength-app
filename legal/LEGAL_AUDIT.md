@@ -154,6 +154,16 @@ regenerated at 1.3.0 on 14 September.
 
 ## 4. NEEDS FIXING BEFORE LAUNCH
 
+**Connect a custom email (SMTP) provider, or password reset will not reach
+users.** Added 14 September with the forgotten-password flow. Supabase's built-in
+email only delivers to members of your Supabase team and is capped at two emails
+an hour for the whole project. A real user who taps "Forgot password?" will get no
+email. The provider you pick then receives users' email addresses and the text of
+the reset email, so it becomes a third party the privacy policy must name, next to
+Supabase. **Which provider is your choice** — it involves an account, possibly a
+domain, and a data processing agreement — so it is not made here. The policy
+already says email is used for reset codes (1.3.1); it does not yet name a sender.
+
 **Decide your App Store territories, and understand what worldwide means.**
 The last audit recorded a US-only launch. That decision has to be *made* in App
 Store Connect — the default is all territories. If you publish worldwide, the
