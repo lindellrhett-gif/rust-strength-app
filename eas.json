@@ -12,7 +12,6 @@
       },
       "environment": "development"
     },
-
     "ios-check": {
       "distribution": "internal",
       "ios": {
@@ -23,7 +22,6 @@
       },
       "environment": "preview"
     },
-
     "android-check": {
       "distribution": "internal",
       "android": {
@@ -34,7 +32,6 @@
       },
       "environment": "preview"
     },
-
     "preview": {
       "distribution": "internal",
       "ios": {
@@ -60,6 +57,13 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6811736131",
+        "ascApiKeyPath": "C:\\Users\\linde\\.appstore\\AuthKey_YCFLG6VQPQ.p8",
+        "ascApiKeyIssuerId": "197de65e-b4f2-4110-95ba-c6b15ef610aa",
+        "ascApiKeyId": "YCFLG6VQPQ"
+      }
+    }
   }
 }
