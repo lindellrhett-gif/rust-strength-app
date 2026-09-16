@@ -19,6 +19,24 @@ import { spacing, text } from '@/theme/typography';
 type Step = 'email' | 'code';
 
 /**
+ * The friendly message, plus — in development only — what Supabase actually
+ * said. "Something went wrong" is right for users and useless for working out
+ * why an email did not send (usually SMTP settings or the email template).
+ */
+function describeError(error: unknown): string {
+  const friendly = resetErrorMessage(error);
+  if (!__DEV__) return friendly;
+  const e = (typeof error === 'object' && error !== null ? error : {}) as {
+    message?: string;
+    code?: string;
+    status?: number;
+  };
+  console.warn('Password reset failed', error);
+  const detail = [e.status, e.code, e.message].filter(Boolean).join(' | ');
+  return detail ? `${friendly}\n\n[dev] ${detail}` : friendly;
+}
+
+/**
  * Forgotten password: request a code by email, then enter it with a new
  * password. Two steps on one screen so a person who leaves to read their email
  * comes back to exactly where they were.
@@ -60,7 +78,7 @@ export default function ForgotPassword() {
       setStep('code');
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
-      setError(resetErrorMessage(e));
+      setError(describeError(e));
     } finally {
       setBusy(false);
     }
@@ -83,7 +101,7 @@ export default function ForgotPassword() {
       // with the new password.
       await setNewPassword(password);
     } catch (e) {
-      setError(resetErrorMessage(e));
+      setError(describeError(e));
       setBusy(false);
     }
   };

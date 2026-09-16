@@ -93,13 +93,14 @@ You can remove a friend or block someone at any time. Blocking removes any exist
 
 We do not sell your personal information and we do not share it for cross-context behavioural advertising.
 
-We use one service provider:
+We use two service providers:
 
 | Provider | What it does | What it receives |
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
+| Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
 
-Supabase processes this on our behalf under its own security and privacy terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+Each processes this on our behalf under its own security and privacy terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
 
 We use **no** analytics, advertising, crash-reporting, or tracking services.
 

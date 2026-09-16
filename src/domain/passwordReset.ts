@@ -94,6 +94,11 @@ export function resetErrorMessage(error: unknown): string {
   if (e.code === 'same_password' || message.includes('different from the old')) {
     return 'Choose a password different from your old one.';
   }
+  // Supabase accepted the request but its email sender failed — almost always
+  // the SMTP settings or the template. Nothing the user can fix, so say so.
+  if (message.includes('error sending')) {
+    return `We could not send the email right now. Please try again later.`;
+  }
   if (message.includes('network') || message.includes('fetch')) {
     return 'No connection. Check your signal and try again.';
   }

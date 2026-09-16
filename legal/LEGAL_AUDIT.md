@@ -57,6 +57,7 @@ Free. No purchases, no subscription, no advertising, no analytics.
 | **Expo / EAS** | Build service | Source at build time. No user data. |
 | **Apple** | Distribution | Whatever App Store Connect collects from purchasers. No data flows from the app to Apple. |
 | **GitHub Pages** | Hosts the legal site | Visitor IPs in its own logs. No app data. |
+| **Google (Gmail SMTP)** | Sends password reset emails for Supabase, from `ruststrengthsupport@gmail.com` | A user's email address and reset code, only when they request a reset. Never contacted by the app itself. |
 
 **Verified: no analytics, crash reporting, advertising or attribution SDK is
 present.** I searched the dependency tree and the source for every common one. The
@@ -154,15 +155,23 @@ regenerated at 1.3.0 on 14 September.
 
 ## 4. NEEDS FIXING BEFORE LAUNCH
 
-**Connect a custom email (SMTP) provider, or password reset will not reach
-users.** Added 14 September with the forgotten-password flow. Supabase's built-in
-email only delivers to members of your Supabase team and is capped at two emails
-an hour for the whole project. A real user who taps "Forgot password?" will get no
-email. The provider you pick then receives users' email addresses and the text of
-the reset email, so it becomes a third party the privacy policy must name, next to
-Supabase. **Which provider is your choice** — it involves an account, possibly a
-domain, and a data processing agreement — so it is not made here. The policy
-already says email is used for reset codes (1.3.1); it does not yet name a sender.
+**Password reset email goes through a personal Gmail account — acceptable to
+start, not a long-term arrangement.** Resolved 16 September: Supabase now sends
+through Gmail SMTP from `ruststrengthsupport@gmail.com`, so resets reach real
+users, and policy 1.4.0 names Google as the second service provider. What remains:
+
+- A consumer Gmail account comes with **no data processing agreement**. That is
+  tolerable for a US-only launch at small volume; it is not adequate if you
+  publish in the EU or UK, where GDPR expects one with every processor.
+- Gmail caps sending at roughly **500 messages a day** and can suspend accounts
+  that look like bulk senders. Fine for resets; not for anything larger.
+- Everything depends on **that account's App Password**. If 2-Step Verification
+  is turned off or the password revoked, resets stop silently. Check the Supabase
+  Auth logs if users report missing emails.
+
+Moving to a transactional provider (Mailtrap, Postmark, Resend) with your own
+domain fixes all three. It needs only a change of SMTP settings in Supabase and a
+one-line update to the policy's provider table.
 
 **Decide your App Store territories, and understand what worldwide means.**
 The last audit recorded a US-only launch. That decision has to be *made* in App

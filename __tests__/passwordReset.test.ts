@@ -101,6 +101,15 @@ describe('resetErrorMessage', () => {
     expect(resetErrorMessage({ code: 'same_password' })).toMatch(/different/);
   });
 
+  it('does not blame the user when the email could not be sent', () => {
+    const message = resetErrorMessage({
+      status: 500,
+      code: 'unexpected_failure',
+      message: 'Error sending recovery email',
+    });
+    expect(message).toMatch(/could not send the email/);
+  });
+
   it('explains a lost connection', () => {
     expect(resetErrorMessage(new TypeError('Network request failed'))).toMatch(/No connection/);
   });
