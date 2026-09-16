@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: September 14, 2026**
+**Last updated: September 16, 2026**
 
 Rust Strength is operated by Rhett Lindell ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
