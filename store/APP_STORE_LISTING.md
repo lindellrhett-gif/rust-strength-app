@@ -143,10 +143,68 @@ Profile > Privacy & legal > Delete my account.
 Levels and badges are worked out from the user's own logged training. The
 Influencer and Beta Tester badges are awarded by the developer and cannot be
 obtained in the app; there is nothing to purchase anywhere in this build.
+
+Notifications: the app never asks for notification permission on launch. It
+asks only if the user turns on Profile > Rest timer > "Alert when rest is over".
+That alert is a local notification scheduled on the device for when the rest
+timer ends. The app does not use push notifications and never requests a push
+token.
+
+Password reset: "Forgot password?" on the sign-in screen emails a one-time
+code, which the user enters in the app with a new password.
 ```
 
 Create the demo account before submitting and put its credentials in the
 "Sign-in required" fields. A reviewer who cannot get in will reject the build.
+
+## App Privacy (the "nutrition label")
+
+App Store Connect → your app → **App Privacy** → **Get Started**. These answers
+must agree with the privacy policy and with the privacy manifest in `app.json`.
+Apple compares the manifest against this questionnaire, and a mismatch between
+the label and what the app does is grounds for removal.
+
+**Do you or your third-party partners collect data from this app?** Yes.
+
+Select exactly these data types, and nothing else:
+
+| Category | Data type | What it is in Rust Strength |
+|---|---|---|
+| Contact Info | **Email Address** | Sign-in, and password reset codes |
+| Health & Fitness | **Fitness** | Workouts, sets, weights, reps, RPE, activities, steps, distance, calories |
+| Health & Fitness | **Health** | Bodyweight, which is optional but user-provided health data |
+| User Content | **Other User Content** | Usernames, display names, exercise, machine, preset and activity names, reactions, and reports filed about other users |
+| Identifiers | **User ID** | The account ID and username |
+
+For **every one** of the five, answer:
+
+| Question | Answer |
+|---|---|
+| Purposes | **App Functionality** only |
+| Linked to the user's identity? | **Yes** — it is stored against their account |
+| Used for tracking? | **No** |
+
+Leave everything else unticked. The ones most likely to tempt a wrong answer:
+
+- **Name:** no. The app never asks for a real name. Usernames and display names
+  are covered by User ID and Other User Content.
+- **Device ID:** no. No push token or advertising identifier is ever created.
+- **Coarse / Precise Location:** no. Supabase's server logs record IP addresses
+  for security, but the app does not derive or use location from them.
+- **Crash Data, Performance Data, Other Diagnostic Data:** no. There is no crash
+  reporting or analytics SDK.
+- **Product Interaction, Other Usage Data:** no. Nothing records how the app is
+  used.
+- **Customer Support:** no. Support is by email outside the app, not collected
+  in it.
+- **Search History:** no. A friend search is sent to the database to look up a
+  username and is not saved there.
+
+**Privacy Policy URL:** `https://lindellrhett-gif.github.io/rust-strength/privacy.html`
+
+If the app ever adds analytics, crash reporting, advertising, location, or real
+push notifications, this section, the manifest and the policy all change
+together.
 
 ## Screenshots
 

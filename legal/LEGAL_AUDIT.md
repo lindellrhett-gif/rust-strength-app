@@ -126,8 +126,13 @@ but the App ID needs the Push Notifications capability enabled for signing.
   is useless unless RLS is wrong, which it is not. No service-role key anywhere
   in the source or git history.
 - **App Transport Security is on** as of today. Expo's default had it disabled.
-- **The iOS privacy manifest is accurate** as of today: four collected data types,
-  none tracking, all for app functionality.
+- **The iOS privacy manifest is accurate** as of 16 September: five collected data
+  types (email, user ID, fitness, health, other user content). Until then it
+  declared `NSPrivacyCollectedDataTypeHealthAndFitness`, which is not one of
+  Apple's values, so workout data was effectively undeclared. A test now checks
+  every type and purpose against Apple's list. None is used for tracking; all are
+  for app functionality. The App Privacy answers in `store/APP_STORE_LISTING.md`
+  match it.
 - **No health or results claims** anywhere in the listing copy or the welcome
   cards. There is an automated test that fails the build on a list of claim
   phrases, and another that keeps the "not medical advice" line present.
@@ -144,6 +149,7 @@ regenerated at 1.3.0 on 14 September.
 | Sign-out left the previous account's data in the app's cache | High | Fixed — cache and its on-disk copy cleared on account change |
 | Reaction rows were readable by friends, contradicting the policy's "not who left them" | Medium | Fixed in `0009` — direct reads limited to your own rows |
 | Privacy manifest declared the app collects nothing | Medium | Fixed — all four data types declared |
+| Privacy manifest used an invented type, `HealthAndFitness`, so workout data was undeclared | Medium | Fixed 16 September — split into Apple's `Fitness` and `Health`; a test validates every value |
 | App Transport Security disabled by Expo's default | Medium | Fixed — ATS on, HTTPS only |
 | Offline storage put training data on the phone, undisclosed | Medium | Fixed today — policy Sections 6, 7 and 11 now describe it |
 | Reports were written and never read | Medium | Fixed in `0010` — a queue with status, plus `legal/MODERATION.md` |
