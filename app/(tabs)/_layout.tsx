@@ -1,14 +1,29 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, Tabs } from 'expo-router';
 
+import { ConsentScreen } from '@/components/ConsentScreen';
+import { useProfile } from '@/data/profile';
+import { needsConsent } from '@/domain/consent';
 import { TAB_TITLES } from '@/domain/tabs';
+import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import { colors } from '@/theme/colors';
 
 export default function TabsLayout() {
   const { session } = useAuth();
+  const profile = useProfile();
   if (!session) return <Redirect href="/(auth)/sign-in" />;
+
+  // Only once the profile has actually loaded: a slow or offline start must
+  // not lock someone out of their own training while it is still unknown.
+  if (profile.data) {
+    const record = {
+      termsVersion: profile.data.terms_version,
+      ageConfirmedAt: profile.data.age_confirmed_at,
+    };
+    if (needsConsent(record, LEGAL.version)) return <ConsentScreen record={record} />;
+  }
 
   // Wrapped here rather than at the root so the welcome cards can only appear
   // once someone is actually signed in, never over the sign-in screen.

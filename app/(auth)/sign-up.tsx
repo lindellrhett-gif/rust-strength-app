@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
-import { useAcceptTerms } from '@/data/privacy';
+import { Checkbox } from '@/components/Checkbox';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
@@ -16,11 +16,10 @@ export default function SignUp() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // Two separate confirmations: an age gate (13+) and acceptance of the
-  // documents. Both are recorded on the profile after sign-up.
+  // documents. Both are recorded on the profile when the account is created.
   const [ageOk, setAgeOk] = useState(false);
   const [termsOk, setTermsOk] = useState(false);
   const router = useRouter();
-  const acceptTerms = useAcceptTerms();
 
   const submit = async () => {
     setError(null);
@@ -35,32 +34,27 @@ export default function SignUp() {
     }
     setBusy(true);
     try {
-      await signUp(email.trim(), password);
+      // Consent travels with the sign-up request and is saved when the account
+      // is created, so it is on record even before the email is confirmed.
+      await signUp(email.trim(), password, {
+        termsVersion: LEGAL.version,
+        ageConfirmed: ageOk,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not create account.');
       setBusy(false);
       return;
     }
 
-    // If email confirmation is off we can sign straight in, and the (auth)
-    // layout redirects into the tabs once the session lands.
+    // With email confirmation off this signs straight in, and the (auth)
+    // layout redirects into the tabs once the session lands. With it on, it
+    // fails until the link is tapped, which is the expected path.
     try {
       await signIn(email.trim(), password);
     } catch {
-      setNotice('Account created. Check your email to confirm, then sign in.');
-      setBusy(false);
-      return;
-    }
-
-    // Stamp the profile now that there is a session; the trigger has already
-    // created the row. Kept in its own block: a failure here means the consent
-    // record did not save, which is not the same thing as needing to confirm an
-    // email, and telling someone to check their inbox when they are already
-    // signed in sends them nowhere.
-    try {
-      await acceptTerms.mutateAsync();
-    } catch {
-      setNotice('Signed in. We could not save your acceptance — please reopen the app.');
+      setNotice(
+        `Almost done. We emailed a confirmation link to ${email.trim()}. Tap it, then come back here and sign in. Check your spam folder if it is not there in a minute.`,
+      );
     }
     setBusy(false);
   };
@@ -130,44 +124,7 @@ export default function SignUp() {
   );
 }
 
-function Checkbox({
-  checked,
-  onToggle,
-  label,
-}: {
-  checked: boolean;
-  onToggle: () => void;
-  label: string;
-}) {
-  return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
-      style={styles.checkRow}
-    >
-      <View style={[styles.checkBox, checked && styles.checkBoxOn]}>
-        {checked ? <Text style={styles.checkMark}>✓</Text> : null}
-      </View>
-      <Text style={styles.checkLabel}>{label}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkBox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: '#2A323C',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkBoxOn: { backgroundColor: '#4F8CFF', borderColor: '#4F8CFF' },
-  checkMark: { color: '#0B0D10', fontSize: 14, fontWeight: '900' },
-  checkLabel: { color: '#9AA7B4', fontSize: 14, flexShrink: 1 },
   legalLinks: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   legalLink: { color: '#4F8CFF', fontSize: 13, fontWeight: '700' },
   legalDot: { color: '#5E6B78' },

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Delete your account · Rust Strength</title>
-<meta name="description" content="How to delete your Rust Strength account and data.">
+<title>Email confirmed · Rust Strength</title>
+<meta name="description" content="Your Rust Strength email address is confirmed.">
 <link rel="icon" href="./icon.png">
 <style>
 :root { color-scheme: dark; }
@@ -66,54 +66,40 @@ footer {
   </nav>
 </header>
 <main>
-<h1>Delete your account and data</h1>
-<p>You can delete your Rust Strength account at any time. You do
-not need to contact us, and you do not need to ask permission.</p>
-
+<div id="confirmed">
+<h1>Your email is confirmed</h1>
+<p>Your Rust Strength account is ready.</p>
 <div class="card">
-  <h2>In the app (fastest)</h2>
-  <div class="step"><div class="n">1</div><div>Open Rust Strength and go to the <strong>Profile</strong> tab.</div></div>
-  <div class="step"><div class="n">2</div><div>Tap <strong>Privacy &amp; legal</strong>.</div></div>
-  <div class="step"><div class="n">3</div><div>Tap <strong>Delete my account</strong> and confirm by typing <strong>DELETE</strong>.</div></div>
-  <p>Deletion happens immediately and cannot be undone.</p>
+  <div class="step"><div class="n">1</div><div>Go back to the <strong>Rust Strength</strong> app on your phone.</div></div>
+  <div class="step"><div class="n">2</div><div>Sign in with the email and password you just signed up with.</div></div>
+</div>
+<p>You can close this page.</p>
 </div>
 
+<div id="failed" hidden>
+<h1>This link has expired or was already used</h1>
+<p>Confirmation links work once and expire after a while.</p>
 <div class="card">
-  <h2>By email</h2>
-  <p>If you can no longer sign in, email
-  <a href="mailto:ruststrengthsupport@gmail.com?subject=Account%20deletion%20request">ruststrengthsupport@gmail.com</a>
-  from the address on your account with the subject
-  &ldquo;Account deletion request&rdquo;. We will verify you own the address and
-  delete the account within <strong>30 days</strong>.</p>
+  <div class="step"><div class="n">1</div><div>Open the <strong>Rust Strength</strong> app and try to sign in.</div></div>
+  <div class="step"><div class="n">2</div><div>If your email is already confirmed, you are in. If not, tap <strong>Resend confirmation email</strong> and use the newest email.</div></div>
+</div>
+<p>Still stuck? Email <a href="mailto:ruststrengthsupport@gmail.com">ruststrengthsupport@gmail.com</a>.</p>
 </div>
 
-<h2>What gets deleted</h2>
-<p>Everything tied to your account is removed permanently:</p>
-<ul>
-  <li>Your login and email address</li>
-  <li>Your username, display name, bodyweight and preferences</li>
-  <li>Every workout, set, exercise, preset, planned session and rest day</li>
-  <li>Every activity you logged, including any distance, steps or calories</li>
-  <li>Your gyms and machines</li>
-  <li>Your friendships and any pending friend requests</li>
-</ul>
-
-<h2>What may be kept, and for how long</h2>
-<ul>
-  <li><strong>Reports you filed about other users.</strong> Kept without your
-  identity attached, so that a report cannot be erased by deleting the account
-  that made it. Retained up to <strong>12 months</strong>.</li>
-  <li><strong>Routine server logs</strong> held by our hosting provider, which
-  may contain an IP address. These expire on their own, normally within
-  <strong>30 days</strong>.</li>
-</ul>
-<p>Backups are overwritten on a rolling cycle, so a copy of deleted data may
-persist in backup storage for a short period before being cycled out.</p>
-
-<h2>Export instead</h2>
-<p>If you want a copy of your data before deleting it, use
-<strong>Profile → Privacy &amp; legal → Download my data</strong> first. Deletion
-is permanent and we cannot restore an account afterwards.</p>
+<script>
+(function () {
+  var params = new URLSearchParams(
+    (location.hash || '').replace(/^#/, '') + '&' + (location.search || '').replace(/^\?/, '')
+  );
+  if (params.get('error') || params.get('error_code')) {
+    document.getElementById('confirmed').hidden = true;
+    document.getElementById('failed').hidden = false;
+  }
+  if (location.hash || location.search) {
+    history.replaceState(null, '', location.pathname);
+  }
+})();
+</script>
 </main>
 <footer>
   <p>Rust Strength is operated by Rhett Lindell.

@@ -245,8 +245,8 @@ not need to contact us, and you do not need to ask permission.</p>
 <div class="card">
   <h2>In the app (fastest)</h2>
   <div class="step"><div class="n">1</div><div>Open ${escapeHtml(LEGAL.appName)} and go to the <strong>Profile</strong> tab.</div></div>
-  <div class="step"><div class="n">2</div><div>Tap <strong>Privacy &amp; data</strong>.</div></div>
-  <div class="step"><div class="n">3</div><div>Tap <strong>Delete my account</strong> and confirm by typing your username.</div></div>
+  <div class="step"><div class="n">2</div><div>Tap <strong>Privacy &amp; legal</strong>.</div></div>
+  <div class="step"><div class="n">3</div><div>Tap <strong>Delete my account</strong> and confirm by typing <strong>DELETE</strong>.</div></div>
   <p>Deletion happens immediately and cannot be undone.</p>
 </div>
 
@@ -284,7 +284,7 @@ persist in backup storage for a short period before being cycled out.</p>
 
 <h2>Export instead</h2>
 <p>If you want a copy of your data before deleting it, use
-<strong>Profile → Privacy &amp; data → Export my data</strong> first. Deletion
+<strong>Profile → Privacy &amp; legal → Download my data</strong> first. Deletion
 is permanent and we cannot restore an account afterwards.</p>`,
     { description: `How to delete your ${LEGAL.appName} account and data.` },
   ),
@@ -301,7 +301,7 @@ and we will get back to you.</p>
   <h2>Common requests</h2>
   <ul>
     <li><a href="./delete-account.html">Delete my account and data</a></li>
-    <li>Export my data — <strong>Profile → Privacy &amp; data → Export my data</strong></li>
+    <li>Download my data — <strong>Profile → Privacy &amp; legal → Download my data</strong></li>
     <li>Report a user — open their profile and tap <strong>Report</strong></li>
     <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a></li>
   </ul>
@@ -310,6 +310,57 @@ and we will get back to you.</p>
 <p>If someone is using ${escapeHtml(LEGAL.appName)} to harass you, report them
 from their profile in the app, or email us. We review every report and can
 remove content or terminate accounts.</p>`,
+  ),
+);
+
+// Where the "confirm your email" link lands. Supabase redirects here after
+// confirming the address, so this page has to reassure and point back to the
+// app — before it existed the link opened a blank localhost page and people
+// assumed sign-up had failed.
+//
+// Supabase appends session tokens (or an error) to the URL. The script reads
+// only the error fields to pick a message, then strips the whole fragment and
+// query from the address bar and history, so no token lingers in a URL that
+// might be copied or shared. Nothing is stored or sent anywhere.
+fs.writeFileSync(
+  path.join(docs, 'email-confirmed.html'),
+  page(
+    'Email confirmed',
+    `<div id="confirmed">
+<h1>Your email is confirmed</h1>
+<p>Your ${escapeHtml(LEGAL.appName)} account is ready.</p>
+<div class="card">
+  <div class="step"><div class="n">1</div><div>Go back to the <strong>${escapeHtml(LEGAL.appName)}</strong> app on your phone.</div></div>
+  <div class="step"><div class="n">2</div><div>Sign in with the email and password you just signed up with.</div></div>
+</div>
+<p>You can close this page.</p>
+</div>
+
+<div id="failed" hidden>
+<h1>This link has expired or was already used</h1>
+<p>Confirmation links work once and expire after a while.</p>
+<div class="card">
+  <div class="step"><div class="n">1</div><div>Open the <strong>${escapeHtml(LEGAL.appName)}</strong> app and try to sign in.</div></div>
+  <div class="step"><div class="n">2</div><div>If your email is already confirmed, you are in. If not, tap <strong>Resend confirmation email</strong> and use the newest email.</div></div>
+</div>
+<p>Still stuck? Email <a href="mailto:${escapeHtml(LEGAL.contactEmail)}">${escapeHtml(LEGAL.contactEmail)}</a>.</p>
+</div>
+
+<script>
+(function () {
+  var params = new URLSearchParams(
+    (location.hash || '').replace(/^#/, '') + '&' + (location.search || '').replace(/^\\?/, '')
+  );
+  if (params.get('error') || params.get('error_code')) {
+    document.getElementById('confirmed').hidden = true;
+    document.getElementById('failed').hidden = false;
+  }
+  if (location.hash || location.search) {
+    history.replaceState(null, '', location.pathname);
+  }
+})();
+</script>`,
+    { description: `Your ${LEGAL.appName} email address is confirmed.` },
   ),
 );
 

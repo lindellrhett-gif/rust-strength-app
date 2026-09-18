@@ -19,9 +19,9 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 ### You give us directly
 
-- **Email address and password.** Required to create an account and sign in. We also use your email address to send you a one-time code if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
+- **Email address and password.** Required to create an account and sign in. We also use your email address to send you a link to confirm it when you sign up, and a one-time code if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
 - **Username and display name.** Your account starts with a randomly generated handle (for example \`lifter_7f3a91\`). It contains nothing about you. You may change it, and only after you choose your own handle do you become findable by other users.
-- **Bodyweight (optional).** Used only to fill in the weight for bodyweight exercises such as pull-ups. You can leave it blank and the app works normally.
+- **Bodyweight (optional).** Used only to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine. You can leave it blank; assisted exercises then ask for it before you log them.
 - **Training data.** Exercises, weights, reps, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
@@ -32,6 +32,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 - **Timestamps.** When workouts and activities start and end, so the app can show durations, streaks and history.
 - **A random account identifier.** Used to link your data to your account.
+- **A record of your agreement.** When you accept the Terms and Privacy Policy and confirm your age, we store which version you accepted and when. We store that you confirmed your age, never your date of birth.
 - **Server logs.** Our hosting provider records standard technical information, including IP addresses, to operate and secure the service.
 
 ### What we do NOT collect

@@ -25,6 +25,12 @@ export const LEGAL = {
    */
   privacyPolicyUrl: 'https://lindellrhett-gif.github.io/rust-strength/privacy.html',
   termsUrl: 'https://lindellrhett-gif.github.io/rust-strength/terms.html',
+  /**
+   * Where the sign-up confirmation link lands. Must also be listed under
+   * Supabase → Authentication → URL Configuration → Redirect URLs, or Supabase
+   * ignores it and falls back to the Site URL.
+   */
+  emailConfirmedUrl: 'https://lindellrhett-gif.github.io/rust-strength/email-confirmed.html',
 
   // --- Settled by the decisions already made -------------------------------
 
@@ -35,14 +41,14 @@ export const LEGAL = {
   minimumAge: 13,
 
   /**
-   * Bumped whenever the documents change materially. Note that nothing in the
-   * app currently re-prompts an existing user on a bump — see the legal audit.
-   * Harmless before launch, since there are no users holding an old version.
+   * major.minor.patch. A major or minor bump is a material change: every
+   * signed-in user is asked to accept again (see src/domain/consent.ts). A
+   * patch — a clarification, a new contact address — asks nobody.
    */
-  version: '1.4.0',
+  version: '1.4.1',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'September 16, 2026',
+  lastUpdated: 'September 18, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

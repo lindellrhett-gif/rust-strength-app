@@ -10,14 +10,28 @@ import {
 } from 'react';
 
 import { persister, queryClient } from '@/lib/queryClient';
+import { LEGAL } from '@/legal/config';
 import { supabase } from '@/lib/supabase';
+
+export interface SignUpConsent {
+  /** The Terms / Privacy Policy version the user agreed to. */
+  termsVersion: string;
+  /** They confirmed they meet the minimum age. */
+  ageConfirmed: boolean;
+}
 
 interface AuthState {
   session: Session | null;
   userId: string | null;
   initializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  /**
+   * Creates the account with the user's consent attached, so it is recorded
+   * even when email confirmation means nobody is signed in yet.
+   */
+  signUp: (email: string, password: string, consent: SignUpConsent) => Promise<void>;
+  /** Sends the confirmation email again, for a link that expired or never arrived. */
+  resendConfirmation: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   /**
    * True from the moment a reset code is submitted until the new password is
@@ -99,8 +113,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
-      signUp: async (email, password) => {
-        const { error } = await supabase.auth.signUp({ email, password });
+      signUp: async (email, password, consent) => {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            // Read by the database trigger that creates the profile, which
+            // stamps the consent onto it (migration 0011).
+            data: { terms_version: consent.termsVersion, age_confirmed: consent.ageConfirmed },
+            // Without this the confirmation link lands on Supabase's Site URL,
+            // which defaulted to a blank localhost page.
+            emailRedirectTo: LEGAL.emailConfirmedUrl,
+          },
+        });
+        if (error) throw error;
+      },
+      resendConfirmation: async (email) => {
+        const { error } = await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: LEGAL.emailConfirmedUrl },
+        });
         if (error) throw error;
       },
       signOut: async () => {

@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last updated: September 16, 2026**
+**Last updated: September 18, 2026**
 
 These Terms are an agreement between you and Rhett Lindell ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 

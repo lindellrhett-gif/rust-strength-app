@@ -1,29 +1,63 @@
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
+import { UNCONFIRMED_MESSAGE, isUnconfirmedEmail } from '@/domain/authErrors';
+import { RESEND_COOLDOWN_SECONDS, resetErrorMessage } from '@/domain/passwordReset';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
 
 export default function SignIn() {
-  const { signIn } = useAuth();
+  const { signIn, resendConfirmation } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Set when sign-in failed only because the email is unconfirmed.
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
 
   const submit = async () => {
     setError(null);
+    setNotice(null);
+    setUnconfirmed(false);
     setBusy(true);
     try {
       // The (auth) layout redirects into the tabs once the session lands.
       await signIn(email.trim(), password);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not sign in.');
+      if (isUnconfirmedEmail(e)) {
+        setUnconfirmed(true);
+        setError(UNCONFIRMED_MESSAGE);
+      } else {
+        setError(e instanceof Error ? e.message : 'Could not sign in.');
+      }
     } finally {
       setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    setResending(true);
+    try {
+      await resendConfirmation(email.trim());
+      setError(null);
+      setNotice(`Sent. Check ${email.trim()} for a new confirmation link, including spam.`);
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+    } catch (e) {
+      setError(resetErrorMessage(e));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -60,6 +94,16 @@ export default function SignIn() {
           <Text style={styles.linkAccent}>Forgot password?</Text>
         </Pressable>
         {error ? <Text style={styles.error}>{error}</Text> : null}
+        {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+        {unconfirmed ? (
+          <Button
+            label={cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend confirmation email'}
+            variant="secondary"
+            onPress={resend}
+            loading={resending}
+            disabled={cooldown > 0}
+          />
+        ) : null}
         <Button label="Sign in" onPress={submit} loading={busy} size="lg" />
       </View>
 
@@ -76,6 +120,7 @@ const styles = StyleSheet.create({
   form: { gap: spacing.lg },
   forgot: { alignSelf: 'flex-end', marginTop: -spacing.sm },
   error: { color: '#F26D6D', fontSize: 14 },
+  notice: { color: '#9AA7B4', fontSize: 14 },
   link: { marginTop: spacing.md, textAlign: 'center' },
   linkAccent: { color: '#4F8CFF', fontWeight: '700' },
 });
