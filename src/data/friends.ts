@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import {
+  periodSince,
+  type LeaderboardPerson,
+  type LeaderboardPeriod,
+} from '@/domain/leaderboard';
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -198,6 +203,36 @@ export function useFriendPRs(targetUserId: string | undefined) {
         bestE1rm[key] = Math.max(bestE1rm[key] ?? 0, Number(row.best_e1rm) || 0);
       }
       return { bestWeight, bestReps, bestE1rm };
+    },
+  });
+}
+
+/**
+ * You and your accepted friends, with the totals the leaderboard ranks on.
+ * One request for everyone; the server decides who is included.
+ */
+export function useLeaderboard(period: LeaderboardPeriod) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.leaderboard(period),
+    enabled: !!userId,
+    queryFn: async (): Promise<LeaderboardPerson[]> => {
+      const since = periodSince(period, Date.now());
+      const { data, error } = await supabase.rpc('rpc_friend_leaderboard', {
+        p_since: since ? since.toISOString() : null,
+      });
+      if (error) throw error;
+      return (data ?? []).map((row) => ({
+        userId: row.user_id,
+        username: row.username,
+        displayName: row.display_name,
+        unit: row.unit === 'kg' ? 'kg' : 'lb',
+        isMe: !!row.is_me,
+        totalVolume: Number(row.total_volume) || 0,
+        workoutSeconds: Number(row.workout_seconds) || 0,
+        activitySeconds: Number(row.activity_seconds) || 0,
+        workoutDates: row.workout_dates ?? [],
+      }));
     },
   });
 }

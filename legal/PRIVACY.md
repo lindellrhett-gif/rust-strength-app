@@ -13,7 +13,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Email address and password.** Required to create an account and sign in. We also use your email address to send you a link to confirm it when you sign up, and a one-time code if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
 - **Username and display name.** Your account starts with a randomly generated handle (for example `lifter_7f3a91`). It contains nothing about you. You may change it, and only after you choose your own handle do you become findable by other users.
 - **Bodyweight (optional).** Used only to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine. You can leave it blank; assisted exercises then ask for it before you log them.
-- **Training data.** Exercises, weights, reps, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
+- **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
 - **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
@@ -58,7 +58,8 @@ We do not use your information for advertising, profiling, or automated decision
 The social features are **opt-in**. Until you choose a username and add a friend, nobody can see anything.
 
 - **Anyone signed in** can search usernames and display names — but only for accounts that have chosen their own handle. Nothing else is visible.
-- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, how many friends you have, your per-exercise personal bests, and the dates you worked out.
+- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, how many friends you have, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
+- **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency and activity time. It uses only the figures listed above, and only you and your accepted friends appear on it.
 - **Accepted friends also see a summary of each session in the feed** (see below).
 - **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, or the individual sets inside a workout.
 

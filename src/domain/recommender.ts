@@ -29,6 +29,8 @@ export const RPE_CORRECTION_MAX = 0.07;
 export const RECENT_SET_WINDOW = 6;
 
 export const DEFAULT_REP_RANGE: readonly [number, number] = [6, 8];
+/** Most reps a set or a target can have. High enough for push-up and sit-up sets. */
+export const MAX_REPS = 200;
 
 // --- Types -----------------------------------------------------------------
 
@@ -133,7 +135,7 @@ export function repRangeOrDefault(low: number, high: number): [number, number] {
   const lo = Math.round(low);
   const hi = Math.round(high);
   if (!Number.isFinite(lo) || !Number.isFinite(hi)) return [...DEFAULT_REP_RANGE];
-  if (lo < 1 || hi < 1 || lo > hi || hi > 30) return [...DEFAULT_REP_RANGE];
+  if (lo < 1 || hi < 1 || lo > hi || hi > MAX_REPS) return [...DEFAULT_REP_RANGE];
   return [lo, hi];
 }
 
@@ -371,6 +373,95 @@ export function recommendReps(input: RepsInput): RepsRecommendation {
   return {
     suggestedReps,
     estimatedMaxReps: Math.round(ema * 10) / 10,
+    confidence: confidenceFor(recent.length),
+    rationale: parts.join(' · '),
+  };
+}
+
+// --- Timed exercises: progress by time -----------------------------------------
+
+/** Holds are suggested in steps this size, in seconds. */
+export const HOLD_STEP_SECONDS = 5;
+/** A suggestion may add at most this fraction of the last hold... */
+export const MAX_HOLD_JUMP_FRACTION = 0.2;
+/** ...or this many seconds, whichever is more, so short holds can still grow. */
+export const MIN_HOLD_JUMP_SECONDS = 10;
+/** Each rep in reserve on a hold's RPE is read as this much more time. */
+export const HOLD_RESERVE_FRACTION = 0.1;
+
+export interface HoldSet {
+  seconds: number;
+  rpe: number | null;
+  isWarmup: boolean;
+  /** Weight held on top, like a plate on the back. null or 0 for none. */
+  addedWeight: number | null;
+  performedAt: string | number | Date;
+}
+
+export interface DurationInput {
+  history: HoldSet[];
+  /** Only holds at the same added weight count toward the target. */
+  addedWeight: number;
+}
+
+export interface DurationRecommendation {
+  suggestedSeconds: number | null;
+  /** Smoothed longest hold the user could manage, in seconds. */
+  estimatedMaxSeconds: number | null;
+  confidence: Confidence;
+  rationale: string;
+}
+
+/**
+ * Planks, wall sits, dead hangs: progress is time.
+ *
+ * The same idea as reps for bodyweight work. Each hold says how long was
+ * possible: the time held, stretched by the reserve its RPE implies (RPE 8 on
+ * a 60-second plank reads as about 72 seconds possible). Those are smoothed
+ * newest-heaviest and the suggestion is that long, rounded to 5 seconds, and
+ * never more than a modest step past the last hold.
+ */
+export function recommendDuration(input: DurationInput): DurationRecommendation {
+  const working = input.history
+    .filter((s) => !s.isWarmup && s.seconds > 0 && sameAdded(s.addedWeight, input.addedWeight))
+    .sort((a, b) => toTime(a.performedAt) - toTime(b.performedAt));
+  const recent = working.slice(-RECENT_SET_WINDOW);
+
+  if (recent.length === 0) {
+    return {
+      suggestedSeconds: null,
+      estimatedMaxSeconds: null,
+      confidence: 'low',
+      rationale:
+        input.history.some((s) => !s.isWarmup && s.seconds > 0)
+          ? 'No holds at this added weight yet. Log one to get a time target.'
+          : 'Log your first hold to get a time target.',
+    };
+  }
+
+  const capacity = (s: HoldSet) => s.seconds * (1 + HOLD_RESERVE_FRACTION * repsInReserve(s.rpe));
+  let ema = capacity(recent[0]);
+  for (let i = 1; i < recent.length; i += 1) {
+    ema = EMA_ALPHA * capacity(recent[i]) + (1 - EMA_ALPHA) * ema;
+  }
+
+  const last = recent[recent.length - 1];
+  const ceiling = last.seconds + Math.max(MIN_HOLD_JUMP_SECONDS, last.seconds * MAX_HOLD_JUMP_FRACTION);
+  const step = (s: number) => Math.round(s / HOLD_STEP_SECONDS) * HOLD_STEP_SECONDS;
+  // The ceiling rounds down to a step too, so the suggestion is always one.
+  const topStep = Math.max(
+    HOLD_STEP_SECONDS,
+    Math.floor(ceiling / HOLD_STEP_SECONDS) * HOLD_STEP_SECONDS,
+  );
+  const suggestedSeconds = clamp(step(ema), HOLD_STEP_SECONDS, topStep);
+
+  const parts = [`Based on ${recent.length} recent hold${recent.length === 1 ? '' : 's'}`];
+  if (last.rpe != null && last.rpe < 8) parts.push('last hold felt easy — go longer');
+  else if (last.rpe != null && last.rpe >= 9.5) parts.push('last hold was close to your limit');
+
+  return {
+    suggestedSeconds,
+    estimatedMaxSeconds: Math.round(ema),
     confidence: confidenceFor(recent.length),
     rationale: parts.join(' · '),
   };

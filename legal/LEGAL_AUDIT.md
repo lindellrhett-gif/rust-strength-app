@@ -17,6 +17,13 @@ account is created rather than after sign-in; a re-acceptance screen for materia
 document changes; the email confirmation link landing on a real page; and the
 published account-deletion steps corrected to match the app (policy 1.4.1).
 
+**Amended again 18 September 2026** for: timed exercises (sets can record how
+long a hold lasted), and a friends leaderboard. The leaderboard shows accepted
+friends only the totals their profile of you already showed, plus whether you
+log in lb or kg so totals compare fairly; both are now disclosed (policy 1.4.2,
+a patch: no new category of data and no new recipient, so nobody is asked to
+accept again).
+
 This supersedes the audit of 7 September, which predated the friend feed,
 reactions, XP and badges, offline storage, the moderation queue, progress charts
 and the welcome cards.
@@ -387,8 +394,8 @@ badge and they make a claim you would not make, that is your problem too.
 
 | Document | Status |
 |---|---|
-| Privacy Policy | Published, v1.4.1 |
-| Terms of Service | Published, v1.4.1 |
+| Privacy Policy | Published, v1.4.2 |
+| Terms of Service | Published, v1.4.2 |
 | Support page | Published |
 | Account deletion page | Published — Apple wants a web-reachable route |
 | Incident response plan | `legal/INCIDENT_RESPONSE.md` |

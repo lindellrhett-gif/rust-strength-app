@@ -12,7 +12,7 @@ import { useCreateExercise, useExercises } from '@/data/exercises';
 import { useProfile } from '@/data/profile';
 import { useSaveTemplate, useTemplate } from '@/data/templates';
 import { asLoadType, exerciseSublabel } from '@/domain/loadType';
-import { repRangeOrDefault } from '@/domain/recommender';
+import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
 import { normalizeTemplateName, type TemplateDraftItem } from '@/domain/templates';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -190,7 +190,7 @@ export default function TemplateEditor() {
                   value={item.targetRepHigh}
                   onChange={(n) => updateItem(index, { targetRepHigh: n })}
                   min={item.targetRepLow}
-                  max={30}
+                  max={MAX_REPS}
                 />
               </View>
 

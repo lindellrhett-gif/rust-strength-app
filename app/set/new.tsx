@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card } from '@/components';
 import { CreateExerciseModal } from '@/components/CreateExerciseModal';
 import { CreateMachineModal } from '@/components/CreateMachineModal';
+import { HoldTimer } from '@/components/HoldTimer';
 import { NumberStepper } from '@/components/NumberStepper';
 import { RestTimerBar } from '@/components/RestTimerBar';
 import { RpeSelector } from '@/components/RpeSelector';
@@ -21,14 +22,20 @@ import {
   assistedLoad,
   bodyweightLoad,
   exerciseSublabel,
+  formatHold,
+  formatSetSummary,
 } from '@/domain/loadType';
+import { lastTopSet } from '@/domain/lastSession';
 import {
+  MAX_REPS,
   recommendAssisted,
+  recommendDuration,
   recommendNextWeight,
   recommendReps,
   repRangeOrDefault,
 } from '@/domain/recommender';
 import { roundToIncrement } from '@/domain/rounding';
+import { formatDate, todayLocal, toLocalDateString } from '@/lib/dates';
 import { trimWeight } from '@/lib/format';
 import { useRestTimer } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
@@ -60,6 +67,9 @@ export default function NewSet() {
   // Bodyweight exercises: anything added on top, like a vest or dip belt.
   const [added, setAdded] = useState(0);
   const [addedTouched, setAddedTouched] = useState(false);
+  // Timed exercises: the hold, in seconds.
+  const [hold, setHold] = useState(0);
+  const [holdTouched, setHoldTouched] = useState(false);
   const [reps, setReps] = useState(8);
   const [repsTouched, setRepsTouched] = useState(false);
   const [rpe, setRpe] = useState<number | null>(null);
@@ -106,7 +116,7 @@ export default function NewSet() {
   ).length;
   const isFirstWorkingSet = priorWorkingForExercise === 0;
 
-  // Bodyweight: start from whatever was added last time (0 if never).
+  // Bodyweight and timed: start from whatever was added last time (0 if never).
   const lastAdded = useMemo(() => {
     const newest = (history.data ?? []).find((s) => !s.isWarmup && s.addedWeight != null);
     return newest?.addedWeight ?? 0;
@@ -162,6 +172,26 @@ export default function NewSet() {
     });
   }, [exerciseId, history.data, loadType, displayAdded]);
 
+  const holdRec = useMemo(() => {
+    if (!exerciseId || !history.data || loadType !== 'timed') return null;
+    return recommendDuration({
+      history: history.data.map((s) => ({
+        seconds: s.durationSeconds ?? 0,
+        rpe: s.rpe,
+        isWarmup: s.isWarmup,
+        addedWeight: s.addedWeight ?? null,
+        performedAt: s.performedAt,
+      })),
+      addedWeight: displayAdded,
+    });
+  }, [exerciseId, history.data, loadType, displayAdded]);
+
+  // The best set from the last session of this exercise, as a number to beat.
+  const lastTop = useMemo(
+    () => (history.data ? lastTopSet(history.data, workoutId, loadType) : null),
+    [history.data, workoutId, loadType],
+  );
+
   // Each field shows the suggestion until the user edits it themselves.
   const suggestedWeight = weightedRec?.suggestedWeight ?? null;
   const displayWeight = !weightTouched && suggestedWeight != null ? suggestedWeight : weight;
@@ -171,6 +201,9 @@ export default function NewSet() {
   const displayReps =
     loadType === 'bodyweight' && !repsTouched && suggestedReps != null ? suggestedReps : reps;
 
+  const suggestedHold = holdRec?.suggestedSeconds ?? null;
+  const displayHold = !holdTouched && suggestedHold != null ? suggestedHold : hold;
+
   const assistError = loadType === 'assisted' ? assistProblem(bodyWeight, displayAssist) : null;
 
   const resetInputs = () => {
@@ -178,6 +211,8 @@ export default function NewSet() {
     setAssistTouched(false);
     setAddedTouched(false);
     setRepsTouched(false);
+    setHoldTouched(false);
+    setHold(0);
   };
 
   const pickExercise = (id: string) => {
@@ -200,35 +235,51 @@ export default function NewSet() {
       ? displayWeight > 0
       : loadType === 'assisted'
         ? assistError == null
-        : true;
-  const canSave = !!exerciseId && loadOk && displayReps > 0 && (isWarmup || rpe != null);
+        : loadType === 'timed'
+          ? displayHold > 0
+          : true;
+  const canSave =
+    !!exerciseId && loadOk && (loadType === 'timed' || displayReps > 0) && (isWarmup || rpe != null);
 
   const save = (thenAddAnother: boolean) => {
     if (!canSave || !workoutId || !exerciseId) return;
 
     // `weight` is always the load actually moved, so volume, records and e1RM
     // work the same for every type. What was typed is kept alongside it.
-    const load =
-      loadType === 'assisted'
-        ? {
+    const load = (() => {
+      switch (loadType) {
+        case 'assisted':
+          return {
             weight: assistedLoad(bodyWeight ?? 0, displayAssist),
             isBodyweight: true,
             assistWeight: displayAssist,
             addedWeight: null,
-          }
-        : loadType === 'bodyweight'
-          ? {
-              weight: bodyweightLoad(bodyWeight, displayAdded),
-              isBodyweight: true,
-              assistWeight: null,
-              addedWeight: displayAdded,
-            }
-          : {
-              weight: roundToIncrement(displayWeight, increment),
-              isBodyweight,
-              assistWeight: null,
-              addedWeight: null,
-            };
+          };
+        case 'timed':
+          // A hold lifts nothing, so only weight added on top is stored.
+          return {
+            weight: bodyweightLoad(null, displayAdded),
+            isBodyweight: true,
+            assistWeight: null,
+            addedWeight: displayAdded,
+            durationSeconds: displayHold,
+          };
+        case 'bodyweight':
+          return {
+            weight: bodyweightLoad(bodyWeight, displayAdded),
+            isBodyweight: true,
+            assistWeight: null,
+            addedWeight: displayAdded,
+          };
+        default:
+          return {
+            weight: roundToIncrement(displayWeight, increment),
+            isBodyweight,
+            assistWeight: null,
+            addedWeight: null,
+          };
+      }
+    })();
 
     // Synchronous: the set goes into the cache now and reaches the server when
     // there is a connection. Waiting on the network here would leave the button
@@ -236,9 +287,10 @@ export default function NewSet() {
     addSet.add({
       workoutId,
       exerciseId,
-      machineId: loadType === 'bodyweight' ? null : machineId,
+      machineId: loadType === 'bodyweight' || loadType === 'timed' ? null : machineId,
       ...load,
-      reps: displayReps,
+      // A hold is stored as one rep of its duration.
+      reps: loadType === 'timed' ? 1 : displayReps,
       rpe: isWarmup ? null : rpe,
       isWarmup,
       targetRepLow: repLow,
@@ -287,7 +339,7 @@ export default function NewSet() {
         setReps(n);
       }}
       min={1}
-      max={100}
+      max={MAX_REPS}
     />
   );
 
@@ -301,8 +353,8 @@ export default function NewSet() {
           placeholder={!exercise}
           onPress={() => setShowExercisePicker(true)}
         />
-        {/* A pull-up bar has no weight stack, so bodyweight moves skip this. */}
-        {loadType !== 'bodyweight' ? (
+        {/* A pull-up bar or a plank has no weight stack, so these skip it. */}
+        {loadType !== 'bodyweight' && loadType !== 'timed' ? (
           <SelectorRow
             label="Machine"
             value={machine?.label ?? 'Choose machine (optional)'}
@@ -316,6 +368,22 @@ export default function NewSet() {
           <Card title="Suggested next set">
             {history.isLoading ? (
               <Text style={text.bodyMuted}>Loading your history…</Text>
+            ) : loadType === 'timed' ? (
+              holdRec?.suggestedSeconds != null ? (
+                <>
+                  <Text style={styles.suggestBig}>
+                    {formatHold(holdRec.suggestedSeconds)} hold
+                    {displayAdded > 0 ? (
+                      <Text style={text.bodyMuted}>
+                        {'  '}+ {trimWeight(displayAdded)} {unit}
+                      </Text>
+                    ) : null}
+                  </Text>
+                  <Text style={text.caption}>{holdRec.rationale}</Text>
+                </>
+              ) : (
+                <Text style={text.bodyMuted}>{holdRec?.rationale ?? 'Log a hold to get a time target.'}</Text>
+              )
             ) : loadType === 'assisted' ? (
               bodyWeight == null ? (
                 <BodyweightPrompt unit={unit} />
@@ -378,6 +446,14 @@ export default function NewSet() {
                 No history for this exercise yet. Log this set and the next suggestion will use it.
               </Text>
             )}
+            {!history.isLoading && lastTop ? (
+              <Text style={[text.caption, styles.lastTime]}>
+                Last time ({sessionDay(lastTop.performedAt)}): top set{' '}
+                <Text style={styles.lastTimeSet}>{formatSetSummary(lastTop.set, unit)}</Text>
+                {' · '}
+                {lastTop.workingSets} set{lastTop.workingSets === 1 ? '' : 's'}
+              </Text>
+            ) : null}
           </Card>
         ) : null}
 
@@ -409,9 +485,22 @@ export default function NewSet() {
           </View>
         ) : null}
 
-        {loadType === 'bodyweight' ? (
+        {loadType === 'timed' ? (
+          <Card title="Time">
+            <HoldTimer
+              value={displayHold}
+              target={suggestedHold}
+              onChange={(s) => {
+                setHoldTouched(true);
+                setHold(s);
+              }}
+            />
+          </Card>
+        ) : null}
+
+        {loadType === 'bodyweight' || loadType === 'timed' ? (
           <>
-            {repsStepper}
+            {loadType === 'bodyweight' ? repsStepper : null}
             <View>
               <NumberStepper
                 label={`Added weight (${unit})`}
@@ -419,17 +508,20 @@ export default function NewSet() {
                 onChange={(n) => {
                   setAddedTouched(true);
                   setAdded(n);
-                  // A new added weight has its own rep target.
+                  // A new added weight has its own target.
                   setRepsTouched(false);
+                  setHoldTouched(false);
                 }}
                 step={addedStep}
                 precision={1}
                 min={0}
               />
               <Text style={[text.caption, styles.under]}>
-                {bodyWeight == null
-                  ? 'Leave at 0 for plain bodyweight. Add your bodyweight in Profile so these sets count toward volume and records.'
-                  : 'Leave at 0 for plain bodyweight, or add a vest or dip belt.'}
+                {loadType === 'timed'
+                  ? 'Leave at 0 for bodyweight, or add a plate or vest.'
+                  : bodyWeight == null
+                    ? 'Leave at 0 for plain bodyweight. Add your bodyweight in Profile so these sets count toward volume and records.'
+                    : 'Leave at 0 for plain bodyweight, or add a vest or dip belt.'}
               </Text>
             </View>
           </>
@@ -474,7 +566,7 @@ export default function NewSet() {
           </View>
         ) : null}
 
-        {loadType !== 'bodyweight' ? repsStepper : null}
+        {loadType === 'weighted' || loadType === 'assisted' ? repsStepper : null}
 
         <View style={styles.warmupRow}>
           <Text style={text.body}>Warmup set</Text>
@@ -557,6 +649,16 @@ export default function NewSet() {
   );
 }
 
+/** "today", "yesterday" or "Sep 12, 2026", for the last-time line. */
+function sessionDay(when: string | number | Date): string {
+  const day = toLocalDateString(when);
+  if (day === todayLocal()) return 'today';
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (day === toLocalDateString(yesterday)) return 'yesterday';
+  return formatDate(when);
+}
+
 /**
  * Assisted sets are bodyweight minus assistance, so they cannot be logged
  * without a bodyweight. Asking for it here beats sending someone to Profile
@@ -623,6 +725,8 @@ const styles = StyleSheet.create({
   selectorPressed: { backgroundColor: colors.border },
   suggestBig: { color: colors.primary, fontSize: 28, fontWeight: '800' },
   under: { marginTop: spacing.sm },
+  lastTime: { marginTop: spacing.sm },
+  lastTimeSet: { color: colors.text, fontWeight: '700' },
   prompt: { gap: spacing.sm },
   warmupRow: {
     flexDirection: 'row',

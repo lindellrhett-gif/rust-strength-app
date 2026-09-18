@@ -41,19 +41,32 @@ export function useWorkouts() {
   });
 }
 
+/**
+ * One session. `data` is null only when the server answered and has no such
+ * workout; a failed request is an error, so a screen can tell "gone" from
+ * "could not reach it".
+ */
 export function useWorkout(id: string | undefined) {
+  const client = useQueryClient();
   return useQuery({
     queryKey: qk.workout(id ?? 'none'),
     enabled: !!id,
-    queryFn: async (): Promise<Workout> => {
+    queryFn: async (): Promise<Workout | null> => {
       const { data, error } = await supabase
         .from('workouts')
         .select('*')
         .eq('id', id!)
-        .single();
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
+    // Resuming from Home: the open session is already cached, so start from
+    // it. It stays on screen even if the refetch fails, rather than an error.
+    initialData: () => {
+      const open = client.getQueryData<Workout | null>(qk.openWorkout);
+      return open && open.id === id ? open : undefined;
+    },
+    initialDataUpdatedAt: () => client.getQueryState(qk.openWorkout)?.dataUpdatedAt,
   });
 }
 

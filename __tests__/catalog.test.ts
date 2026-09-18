@@ -5,10 +5,12 @@ import { LOAD_TYPES } from '../src/domain/loadType';
 import { MUSCLE_GROUPS } from '../src/domain/stats';
 
 const migration = readFileSync('supabase/migrations/0011_exercise_types_catalog.sql', 'utf8');
+/** 0013 adds the timed holds to the catalog. */
+const timedMigration = readFileSync('supabase/migrations/0013_timed_sets_leaderboard.sql', 'utf8');
 
 /** The catalog rows: ('Name', 'group', 'equipment', 'load_type'). */
 const rows = [
-  ...migration.matchAll(
+  ...(migration + timedMigration).matchAll(
     /\(\s*'((?:[^']|'')+)',\s*'(\w+)',\s*'(\w+)',\s*'(\w+)'\s*\)/g,
   ),
 ].map((m) => ({
@@ -57,6 +59,12 @@ describe('exercise catalog', () => {
     expect(find('Dip')).toBe('bodyweight');
     expect(find('Assisted Dip')).toBe('assisted');
     expect(find('Push-Up')).toBe('bodyweight');
+  });
+
+  it('has timed holds, and makes planks timed', () => {
+    const timed = rows.filter((r) => r.loadType === 'timed').map((r) => r.name);
+    expect(timed).toEqual(expect.arrayContaining(['Wall Sit', 'Dead Hang', 'Hollow Body Hold']));
+    expect(timedMigration).toMatch(/set load_type = 'timed'[\s\S]*'plank', 'side plank'/);
   });
 
   it('gives bodyweight exercises no equipment requirement', () => {

@@ -21,7 +21,8 @@ interface Props {
 function guessLoadType(name: string): LoadType {
   const n = name.toLowerCase();
   if (n.includes('assist')) return 'assisted';
-  if (/push-?up|pull-?up|chin-?up|\bdips?\b|plank|sit-?up|crunch|burpee/.test(n)) {
+  if (/plank|\bhold\b|wall sit|dead hang|arm hang|l-sit/.test(n)) return 'timed';
+  if (/push-?up|pull-?up|chin-?up|\bdips?\b|sit-?up|crunch|burpee/.test(n)) {
     return 'bodyweight';
   }
   return 'weighted';

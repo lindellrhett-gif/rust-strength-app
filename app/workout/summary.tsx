@@ -13,6 +13,7 @@ import { useSetsForWorkout } from '@/data/sets';
 import { useSaveWorkoutAsTemplate } from '@/data/templates';
 import { useWorkout, useWorkoutSummary } from '@/data/workouts';
 import { elapsedSeconds, formatDurationShort } from '@/domain/duration';
+import { formatHold } from '@/domain/loadType';
 import { buildSummary, summaryHeadline } from '@/domain/workoutSummary';
 import { sessionXp } from '@/domain/xp';
 import { compact, trimWeight } from '@/lib/format';
@@ -32,6 +33,17 @@ export default function WorkoutSummaryScreen() {
   const { level, ready: levelReady } = useMyLevel();
 
   const [showSave, setShowSave] = useState(false);
+
+  // Timed exercises: the longest hold per exercise. The summary's weight and
+  // reps would read "0 lb × 1" for a plank, so its time is shown instead.
+  const longestHold = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const s of sets.data ?? []) {
+      if (s.is_warmup || s.duration_seconds == null) continue;
+      out[s.exercise_id] = Math.max(out[s.exercise_id] ?? 0, s.duration_seconds);
+    }
+    return out;
+  }, [sets.data]);
   /**
    * The level being celebrated, captured once. Holding it in state matters:
    * writing `level_seen` makes the "is this new?" test false again, and without
@@ -174,12 +186,16 @@ export default function WorkoutSummaryScreen() {
                   <Text style={text.body}>{e.exerciseName}</Text>
                   <Text style={text.caption}>
                     {e.workingSets} set{e.workingSets === 1 ? '' : 's'} · top{' '}
-                    {trimWeight(e.bestWeight)} {unit} × {e.bestReps}
+                    {longestHold[e.exerciseId] != null
+                      ? `${formatHold(longestHold[e.exerciseId])} hold`
+                      : `${trimWeight(e.bestWeight)} ${unit} × ${e.bestReps}`}
                   </Text>
                 </View>
-                <Text style={text.caption}>
-                  {compact(e.volume)} {unit}
-                </Text>
+                {e.volume > 0 ? (
+                  <Text style={text.caption}>
+                    {compact(e.volume)} {unit}
+                  </Text>
+                ) : null}
               </View>
             ))
           )}

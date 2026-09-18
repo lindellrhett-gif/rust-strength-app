@@ -16,7 +16,7 @@ import {
 } from '@/data/templates';
 import { useDeleteWorkout, useEndWorkout, useWorkout } from '@/data/workouts';
 import { type GroupableSet } from '@/domain/grouping';
-import { formatSetLoad } from '@/domain/loadType';
+import { formatHold, formatSetLoad } from '@/domain/loadType';
 import {
   buildWorkoutBlocks,
   nextUpBlock,
@@ -59,6 +59,7 @@ export default function WorkoutScreen() {
         isBodyweight: s.is_bodyweight,
         assistWeight: s.assist_weight ?? null,
         addedWeight: s.added_weight ?? null,
+        durationSeconds: s.duration_seconds ?? null,
         e1rm: s.e1rm,
         orderIndex: s.order_index,
       })),
@@ -73,7 +74,24 @@ export default function WorkoutScreen() {
   const upNext = useMemo(() => nextUpBlock(blocks), [blocks]);
 
   if (workout.isLoading) return <LoadingView />;
-  if (!workout.data) return <EmptyState title="Workout not found" />;
+  if (!workout.data) {
+    // An error means the workout could not be reached, not that it is gone.
+    return workout.isError ? (
+      <View style={styles.problem}>
+        <EmptyState
+          title="Couldn't load this workout"
+          message="Check your connection. Your sets are safe."
+        />
+        <Button
+          label={workout.isFetching ? 'Trying…' : 'Try again'}
+          onPress={() => workout.refetch()}
+          disabled={workout.isFetching}
+        />
+      </View>
+    ) : (
+      <EmptyState title="Workout not found" message="It may have been cancelled on another device." />
+    );
+  }
 
   const inProgress = !workout.data.ended_at;
   const volume = blocks.reduce((sum, b) => sum + b.volume, 0);
@@ -338,6 +356,15 @@ function ExerciseBlock({
             style={({ pressed }) => [styles.setRow, pressed && styles.setRowPressed]}
           >
             <Text style={styles.setNum}>{badge}</Text>
+            {s.durationSeconds != null ? (
+              <Text style={styles.setMain}>
+                {formatHold(s.durationSeconds)}
+                <Text style={text.bodyMuted}>{'  hold'}</Text>
+                {s.weight > 0 ? (
+                  <Text style={text.caption}>{`  + ${trimWeight(s.weight)} ${unit}`}</Text>
+                ) : null}
+              </Text>
+            ) : (
             <Text style={styles.setMain}>
               {formatSetLoad(s, unit)}
               {s.isBodyweight && s.weight > 0 ? (
@@ -346,6 +373,7 @@ function ExerciseBlock({
               <Text style={text.bodyMuted}>{'   ×   '}</Text>
               {s.reps}
             </Text>
+            )}
             {s.rpe != null ? (
               <View style={[styles.rpe, { borderColor: rpeColor(s.rpe) }]}>
                 <Text style={[styles.rpeText, { color: rpeColor(s.rpe) }]}>{s.rpe}</Text>
@@ -380,6 +408,7 @@ function ExerciseBlock({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  problem: { flex: 1, justifyContent: 'center', padding: spacing.lg, gap: spacing.lg },
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',

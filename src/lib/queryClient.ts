@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
 
+import { retryDelay, shouldRetry } from './sessionGuard';
+
 /** How long a cached answer is still worth showing while offline. */
 export const CACHE_MAX_AGE = 1000 * 60 * 60 * 24 * 7;
 
@@ -12,7 +14,9 @@ export const queryClient = new QueryClient({
       // Must outlive the persisted copy, or restored entries are collected
       // before they can be shown.
       gcTime: CACHE_MAX_AGE,
-      retry: 2,
+      // Twice, or for about a minute while an expired session is refreshed.
+      retry: shouldRetry,
+      retryDelay,
       refetchOnWindowFocus: false,
       // Fire once even with no connection, then stop retrying and keep serving
       // what is cached, rather than spinning against a dead network.
@@ -23,7 +27,8 @@ export const queryClient = new QueryClient({
       // failed, and resumes when the network returns — which is the whole point
       // of the offline queue.
       networkMode: 'online',
-      retry: 2,
+      retry: shouldRetry,
+      retryDelay,
     },
   },
 });
@@ -78,6 +83,7 @@ export const qk = {
   userSearch: ['user-search'] as const,
   friendStats: (userId: string) => ['friend-stats', userId] as const,
   friendPRs: (userId: string) => ['friend-prs', userId] as const,
+  leaderboard: (period: string) => ['leaderboard', period] as const,
   templates: ['templates'] as const,
   template: (id: string) => ['templates', id] as const,
   workoutExercises: (workoutId: string) => ['workout-exercises', workoutId] as const,

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -19,17 +19,33 @@ import { keyboardAware } from '@/components/keyboard';
 import { useFriendFeed, useReact } from '@/data/feed';
 import {
   useFriendships,
+  useLeaderboard,
   useRemoveFriend,
   useRespondToRequest,
   useSearchUsers,
   useSendFriendRequest,
 } from '@/data/friends';
+import { useProfile } from '@/data/profile';
+import { TIER_COLOR } from '@/domain/achievements';
 import type { ReactionId } from '@/domain/feed';
+import {
+  LEADERBOARD_METRICS,
+  LEADERBOARD_PERIODS,
+  METRIC_HAS_PERIOD,
+  METRIC_LABEL,
+  PERIOD_LABEL,
+  formatMetric,
+  metricNote,
+  rankLeaderboard,
+  type LeaderboardMetric,
+  type LeaderboardPeriod,
+} from '@/domain/leaderboard';
+import { todayLocal } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
-type Tab = 'feed' | 'friends';
+type Tab = 'feed' | 'leaders' | 'friends';
 
 export default function FriendsScreen() {
   const [tab, setTab] = useState<Tab>('feed');
@@ -41,6 +57,11 @@ export default function FriendsScreen() {
       <View style={styles.tabs}>
         <TabButton label="Feed" active={tab === 'feed'} onPress={() => setTab('feed')} />
         <TabButton
+          label="Leaderboard"
+          active={tab === 'leaders'}
+          onPress={() => setTab('leaders')}
+        />
+        <TabButton
           label="Friends"
           badge={incoming.length}
           active={tab === 'friends'}
@@ -48,7 +69,13 @@ export default function FriendsScreen() {
         />
       </View>
 
-      {tab === 'feed' ? <FeedTab /> : <FriendsTab />}
+      {tab === 'feed' ? (
+        <FeedTab />
+      ) : tab === 'leaders' ? (
+        <LeaderboardTab onFindFriends={() => setTab('friends')} />
+      ) : (
+        <FriendsTab />
+      )}
     </SafeAreaView>
   );
 }
@@ -155,6 +182,136 @@ function FeedTab() {
         )
       }
     />
+  );
+}
+
+// --- Leaderboard --------------------------------------------------------------
+
+/** Medal colours for the top three, borrowed from the trophy tiers. */
+const MEDAL = [TIER_COLOR.gold, TIER_COLOR.silver, TIER_COLOR.wood];
+
+/**
+ * You and your friends, ranked on one figure at a time. Who appears is decided
+ * by `rpc_friend_leaderboard`: you plus accepted friends, nobody else.
+ */
+function LeaderboardTab({ onFindFriends }: { onFindFriends: () => void }) {
+  const router = useRouter();
+  const profile = useProfile();
+  const unit = profile.data?.unit ?? 'lb';
+  const [metric, setMetric] = useState<LeaderboardMetric>('streak');
+  const [period, setPeriod] = useState<LeaderboardPeriod>('month');
+  const board = useLeaderboard(period);
+  const today = todayLocal();
+
+  const rows = useMemo(
+    () => rankLeaderboard(board.data ?? [], metric, today, unit),
+    [board.data, metric, today, unit],
+  );
+  const aloneOnBoard = !board.isLoading && rows.filter((r) => !r.person.isMe).length === 0;
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          refreshing={board.isFetching && !board.isLoading}
+          onRefresh={() => board.refetch()}
+          tintColor={colors.primary}
+        />
+      }
+    >
+      <View style={styles.chips}>
+        {LEADERBOARD_METRICS.map((m) => (
+          <Pressable
+            key={m}
+            onPress={() => setMetric(m)}
+            style={[styles.chip, metric === m && styles.chipOn]}
+            accessibilityRole="button"
+            accessibilityState={{ selected: metric === m }}
+          >
+            <Text style={[styles.chipText, metric === m && styles.chipTextOn]}>
+              {METRIC_LABEL[m]}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {METRIC_HAS_PERIOD[metric] ? (
+        <View style={styles.periods}>
+          {LEADERBOARD_PERIODS.map((p) => (
+            <Pressable
+              key={p}
+              onPress={() => setPeriod(p)}
+              style={[styles.period, period === p && styles.periodOn]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: period === p }}
+            >
+              <Text style={[styles.chipText, period === p && styles.chipTextOn]}>
+                {PERIOD_LABEL[p]}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      <Card title={METRIC_LABEL[metric]}>
+        {board.isLoading ? (
+          <Text style={text.bodyMuted}>Loading…</Text>
+        ) : board.isError && rows.length === 0 ? (
+          <Text style={text.bodyMuted}>Could not load the leaderboard. Pull down to try again.</Text>
+        ) : (
+          rows.map((r) => (
+            <Pressable
+              key={r.person.userId}
+              disabled={r.person.isMe}
+              onPress={() => router.push(`/friend/${r.person.userId}`)}
+              style={({ pressed }) => [
+                styles.row,
+                r.person.isMe && styles.meRow,
+                pressed && styles.rowPressed,
+              ]}
+              accessibilityLabel={`Rank ${r.rank}, ${r.person.isMe ? 'you' : r.person.username}, ${formatMetric(r.value, metric, unit)}`}
+            >
+              <View
+                style={[
+                  styles.rank,
+                  r.rank <= 3 && r.value > 0 && { borderColor: MEDAL[r.rank - 1] },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.rankText,
+                    r.rank <= 3 && r.value > 0 && { color: MEDAL[r.rank - 1] },
+                  ]}
+                >
+                  {r.rank}
+                </Text>
+              </View>
+              <View style={styles.rowMain}>
+                <Text style={text.body} numberOfLines={1}>
+                  @{r.person.username}
+                  {r.person.isMe ? <Text style={text.caption}>{'  you'}</Text> : null}
+                </Text>
+                {r.person.displayName ? (
+                  <Text style={text.caption} numberOfLines={1}>
+                    {r.person.displayName}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={styles.score}>{formatMetric(r.value, metric, unit)}</Text>
+            </Pressable>
+          ))
+        )}
+        <Text style={[text.caption, styles.note]}>{metricNote(metric, period)}</Text>
+      </Card>
+
+      {aloneOnBoard ? (
+        <Card title="Just you so far">
+          <Text style={text.bodyMuted}>Add friends to see how you stack up.</Text>
+          <Button label="Find friends" variant="secondary" onPress={onFindFriends} />
+        </Card>
+      ) : null}
+    </ScrollView>
   );
 }
 
@@ -351,4 +508,41 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: spacing.xs },
   chev: { color: colors.textFaint, fontSize: 22, fontWeight: '700' },
   cancel: { color: colors.danger, fontWeight: '700' },
+
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  chipText: { color: colors.textMuted, fontSize: 14, fontWeight: '700' },
+  chipTextOn: { color: colors.onPrimary },
+  periods: { flexDirection: 'row', gap: spacing.sm },
+  period: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  periodOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  meRow: { backgroundColor: colors.surfaceRaised },
+  rank: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rankText: { color: colors.textMuted, fontSize: 14, fontWeight: '800' },
+  score: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  note: { marginTop: spacing.sm },
 });

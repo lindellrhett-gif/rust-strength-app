@@ -20,7 +20,7 @@ import {
   totalTiersEarned,
   totalTiersAvailable,
 } from '@/domain/achievements';
-import { repRangeOrDefault } from '@/domain/recommender';
+import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
 import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
 import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { todayLocal } from '@/lib/dates';
@@ -191,7 +191,7 @@ export default function ProfileScreen() {
             value={repHigh}
             onChange={setHigh}
             min={repLow}
-            max={30}
+            max={MAX_REPS}
           />
         </View>
         {rangeDirty ? (

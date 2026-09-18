@@ -7,6 +7,7 @@ import { toLocalDateString } from '@/lib/dates';
 import { newId } from '@/lib/ids';
 import type { MuscleGroup, SetRow } from '@/lib/database.types';
 import { e1rmFromSet, type LoggedSet } from '@/domain/recommender';
+import type { SessionSet } from '@/domain/lastSession';
 import type { ProgressSet } from '@/domain/progress';
 import { insertSetRow } from './mutationDefaults';
 import { useAuth } from '@/providers/AuthProvider';
@@ -69,27 +70,36 @@ export function useExerciseProgress(exerciseId: string | undefined) {
   });
 }
 
+/** A set from an exercise's history: what the recommenders and "last time" read. */
+export type HistorySet = LoggedSet & SessionSet;
+
 /** Recent sets for one exercise (any workout) — feeds the recommender. */
 export function useExerciseHistory(exerciseId: string | undefined) {
   return useQuery({
     queryKey: qk.exerciseHistory(exerciseId ?? 'none'),
     enabled: !!exerciseId,
-    queryFn: async (): Promise<LoggedSet[]> => {
+    queryFn: async (): Promise<HistorySet[]> => {
       const { data, error } = await supabase
         .from('sets')
-        .select('weight, reps, rpe, is_warmup, machine_id, performed_at, added_weight')
+        .select(
+          'workout_id, weight, reps, rpe, is_warmup, is_bodyweight, machine_id, performed_at, assist_weight, added_weight, duration_seconds',
+        )
         .eq('exercise_id', exerciseId!)
         .order('performed_at', { ascending: false })
         .limit(20);
       if (error) throw error;
       return (data ?? []).map((s) => ({
+        workoutId: s.workout_id,
         weight: s.weight,
         reps: s.reps,
         rpe: s.rpe,
         isWarmup: s.is_warmup,
+        isBodyweight: s.is_bodyweight,
         machineId: s.machine_id,
         performedAt: s.performed_at,
+        assistWeight: s.assist_weight,
         addedWeight: s.added_weight,
+        durationSeconds: s.duration_seconds,
       }));
     },
   });
@@ -108,6 +118,8 @@ export interface AddSetInput {
   assistWeight?: number | null;
   /** Bodyweight exercises: weight added on top. `weight` is bodyweight plus this. */
   addedWeight?: number | null;
+  /** Timed exercises: the hold, in seconds. Such a set is stored as one rep. */
+  durationSeconds?: number | null;
   targetRepLow: number;
   targetRepHigh: number;
   orderIndex: number;
@@ -164,6 +176,7 @@ export function useAddSet() {
         is_bodyweight: input.isBodyweight,
         assist_weight: input.assistWeight ?? null,
         added_weight: input.addedWeight ?? null,
+        duration_seconds: input.durationSeconds ?? null,
         target_rep_low: input.targetRepLow,
         target_rep_high: input.targetRepHigh,
         e1rm,

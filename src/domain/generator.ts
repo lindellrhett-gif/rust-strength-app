@@ -42,9 +42,10 @@ export interface GeneratorExercise {
   /**
    * Only weighted exercises get a starting weight. For bodyweight moves the
    * target is reps, and for assisted ones a weight would be the load moved,
-   * not the assistance to set, so neither is shown a number.
+   * not the assistance to set, so neither is shown a number. Timed holds
+   * are suggested in seconds on the set screen.
    */
-  loadType?: 'weighted' | 'bodyweight' | 'assisted';
+  loadType?: 'weighted' | 'bodyweight' | 'assisted' | 'timed';
 }
 
 export type Focus = 'full-body' | 'upper' | 'lower' | 'push' | 'pull';
@@ -202,9 +203,11 @@ export function generateWorkout(input: GenerateInput): GeneratedWorkout {
           ? 'bodyweight — aim for more reps than last time'
           : choice.loadType === 'assisted'
             ? 'assisted — the set screen suggests your assistance'
-            : weight == null
-              ? 'no history yet — pick a weight by feel'
-              : 'weight from your e1RM',
+            : choice.loadType === 'timed'
+              ? 'timed — aim to hold longer than last time'
+              : weight == null
+                ? 'no history yet — pick a weight by feel'
+                : 'weight from your e1RM',
       );
 
       picked.push({

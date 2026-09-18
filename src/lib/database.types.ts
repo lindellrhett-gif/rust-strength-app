@@ -169,6 +169,7 @@ export type Database = {
           is_bodyweight: boolean;
           assist_weight: number | null;
           added_weight: number | null;
+          duration_seconds: number | null;
           target_rep_low: number;
           target_rep_high: number;
           e1rm: number;
@@ -189,6 +190,7 @@ export type Database = {
           is_bodyweight?: boolean;
           assist_weight?: number | null;
           added_weight?: number | null;
+          duration_seconds?: number | null;
           target_rep_low?: number;
           target_rep_high?: number;
           e1rm?: number;
@@ -205,6 +207,7 @@ export type Database = {
           is_bodyweight?: boolean;
           assist_weight?: number | null;
           added_weight?: number | null;
+          duration_seconds?: number | null;
           e1rm?: number;
           order_index?: number;
         };
@@ -571,6 +574,20 @@ export type Database = {
           friend_count: number;
         }[];
       };
+      rpc_friend_leaderboard: {
+        Args: { p_since?: string | null };
+        Returns: {
+          user_id: string;
+          username: string;
+          display_name: string | null;
+          unit: 'lb' | 'kg';
+          is_me: boolean;
+          total_volume: number;
+          workout_seconds: number;
+          activity_seconds: number;
+          workout_dates: string[];
+        }[];
+      };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
       can_react_to: { Args: { p_type: string; p_id: string }; Returns: boolean };
       rpc_friend_feed: {
@@ -700,7 +717,7 @@ export type Database = {
         | 'dance'
         | 'stretching'
         | 'other';
-      exercise_load_type: 'weighted' | 'bodyweight' | 'assisted';
+      exercise_load_type: 'weighted' | 'bodyweight' | 'assisted' | 'timed';
       equipment_kind:
         | 'barbell'
         | 'dumbbell'

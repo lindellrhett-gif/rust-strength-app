@@ -64,6 +64,8 @@ Autoregulated weight suggestions after every set, with a plain-English reason fo
 Estimated one-rep max per exercise, updated as you train.
 Over 200 exercises built in, or add your own.
 Bodyweight exercises suggest more reps, with optional added weight. Assisted pull-ups and dips suggest less assistance as you get stronger.
+Timed holds like planks and wall sits, with a built-in hold timer and a suggested time to beat.
+Your top set from last time, shown while you log, so there is always a number to beat.
 Sets grouped by exercise, so five sets of bench read as one block.
 Workout presets — save "Push Day 1" once and start it pre-loaded with every exercise.
 A workout generator that builds a session from the equipment you actually have, prioritising the muscles you have not trained this week.
@@ -75,6 +77,7 @@ A rest timer between sets, set to whatever length you want, that starts on its o
 Tiered trophies across nine ranks, from Wood to Legend, for the main lifts, calisthenics, and lifetime weight moved.
 XP and levels earned from the training you log, unlocking badges as you climb.
 A feed of your friends' recent sessions that you can react to, and profiles showing their streaks, levels and progress.
+A friends leaderboard for current streak, weight lifted, workout time, consistency and activity time.
 
 DESIGNED TO ASK FOR LITTLE
 
@@ -88,7 +91,7 @@ Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/privacy.html
 Terms of Service: https://lindellrhett-gif.github.io/rust-strength/terms.html
 ```
 
-`3,412 characters of 4,000`
+`3,697 characters of 4,000`
 
 ## URLs
 
@@ -133,8 +136,9 @@ and no advertising in this build.
 
 User-generated content: users choose a username and display name, and may name
 their own exercises, machines, presets and activities. Accepted friends can
-view each other's profiles and a feed of each other's finished sessions, and
-can react to a post from a fixed set of four reactions. There is no free-text
+view each other's profiles, a feed of each other's finished sessions and a
+leaderboard of their totals, and can react to a post from a fixed set of four
+reactions. There is no free-text
 commenting or messaging anywhere in the app.
 
 Reporting and blocking are available from any user's profile (Friends tab >

@@ -21,6 +21,8 @@ export interface GroupableSet {
   assistWeight?: number | null;
   /** Bodyweight sets: weight added on top. */
   addedWeight?: number | null;
+  /** Timed sets: the hold, in seconds. Such a set has reps = 1. */
+  durationSeconds?: number | null;
   e1rm: number;
   orderIndex: number;
 }
