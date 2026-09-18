@@ -1,5 +1,7 @@
 # Pre-launch legal & privacy audit — Rust Strength
 
+Prepared by Rhett Lindell.
+
 **Audited: 11 September 2026** against commit `1902db5`, covering every migration
 through `0010_moderation_queue.sql`.
 
@@ -9,6 +11,12 @@ The notification is the first device permission the app can request, so the
 statements about permissions below and in the privacy policy were corrected
 (policy 1.3.0).
 
+**Amended 18 September 2026** for: exercise types (weights, bodyweight, assisted)
+and a full exercise catalog; more activity kinds; consent now recorded when an
+account is created rather than after sign-in; a re-acceptance screen for material
+document changes; the email confirmation link landing on a real page; and the
+published account-deletion steps corrected to match the app (policy 1.4.1).
+
 This supersedes the audit of 7 September, which predated the friend feed,
 reactions, XP and badges, offline storage, the moderation queue, progress charts
 and the welcome cards.
@@ -17,24 +25,24 @@ and the welcome cards.
 
 ## 0. What this is, and what it is not
 
-I am not a lawyer and this is not legal advice. This is an engineer reading the
-code and the documents and reporting what does not line up.
+This is not legal advice and was not written by a lawyer. It is a review of the
+code and the documents against each other, reporting what does not line up.
 
 **This report does not say the app is compliant, and nothing here makes it
-lawsuit-proof.** Several items below genuinely need a lawyer, and I have said so
-rather than guessing.
+lawsuit-proof.** Several items below genuinely need a lawyer, and they are marked
+as such rather than guessed at.
 
-**What I checked:** the source, the database schema and every row-level security
+**Checked:** the source, the database schema and every row-level security
 policy, the generated legal documents, the live published site, the App Store
 listing copy, the build configuration and the dependency tree.
 
-**What I could not check**, and where the risk therefore sits with you:
+**Not checkable from the code**, so the risk sits outside this review:
 
 - **The Supabase dashboard.** Auth settings, email confirmation, rate limits,
   backups and plan tier are invisible from the code. Several items below depend
   on them.
-- **The app at runtime.** I cannot drive your phone, and nearly everything is
-  behind a sign-in I should not be creating.
+- **The app at runtime.** Behaviour on a real phone is covered by TestFlight
+  testing, not by this review.
 - **Anything about the real world** — whether the name is already a trademark,
   which countries you will publish in, what your insurance covers.
 
@@ -60,7 +68,7 @@ Free. No purchases, no subscription, no advertising, no analytics.
 | **Google (Gmail SMTP)** | Sends password reset emails for Supabase, from `ruststrengthsupport@gmail.com` | A user's email address and reset code, only when they request a reset. Never contacted by the app itself. |
 
 **Verified: no analytics, crash reporting, advertising or attribution SDK is
-present.** I searched the dependency tree and the source for every common one. The
+present.** The dependency tree and the source were searched for every common one. The
 app makes no network call to any host other than your own Supabase project.
 
 Runtime dependencies are the Expo and React Native platform, `@supabase/supabase-js`,
@@ -100,7 +108,7 @@ but the App ID needs the Push Notifications capability enabled for signing.
 ## 2. PASS — checked and properly handled
 
 - **Row-level security is enabled on every table**, and the policies are scoped
-  to `auth.uid()`. I read each one.
+  to `auth.uid()`. Each one was read.
 - **`profile_badges` has a select policy and nothing else.** With RLS on and no
   insert policy, a signed-in user cannot award themselves the Influencer badge
   through the API. Only the service role can write it.
@@ -194,10 +202,14 @@ everything fails and you are rejected for something that is not a bug. The same
 plan gets you real backups, which matters when you are holding people's entire
 training history.
 
-**Turn on email confirmation.** Still off. Note that turning it on breaks the
-consent recording in the sign-up flow — the app currently signs the user straight
-in and stamps acceptance, and with confirmation on there is no session to stamp.
-Tell me when you flip it and I will fix the flow.
+**Email confirmation — resolved 18 September.** With confirmation on, consent was
+never recorded: acceptance was stamped only after an automatic sign-in, which an
+unconfirmed email makes impossible. The sign-up request now carries the accepted
+version and the age confirmation, and the trigger that creates the profile saves
+them (migration 0011). Accounts created before the fix have no record and are
+asked to accept on their next launch. The confirmation link now lands on
+`email-confirmed.html` instead of a blank localhost page, which requires the
+Supabase Site URL and Redirect URLs to be set to it.
 
 **Create the App Review demo account** with real logged history. A reviewer who
 cannot get past the sign-in screen rejects the build.
@@ -206,16 +218,17 @@ cannot get past the sign-in screen rejects the build.
 characters client-side; the server should enforce at least that too, or the
 client check is decoration.
 
-**No re-acceptance when the documents change.** The config comment said a version
-bump "re-prompts for acceptance". Nothing in the app does that — the comment is
-corrected as of today. Harmless now, since no users hold an old version, but the
-first post-launch change to the Terms will pass silently unless you build it.
+**Re-acceptance when the documents change — built 18 September.** The policy
+promises to ask users to accept a materially changed version. A major or minor
+version bump now shows every signed-in user a consent screen before the app; a
+patch bump does not. Choosing the right kind of bump is the only thing to get
+right when editing the documents.
 
 ---
 
 ## 5. NEEDS ATTORNEY REVIEW
 
-These are judgement calls I am not qualified to make.
+These are legal judgement calls, not engineering ones.
 
 **Washington's My Health My Data Act, and its imitators.** This was the largest
 open question in the first audit and the friend feed has made it larger. The Act
@@ -242,8 +255,8 @@ hold, is a business and legal decision.
 
 **Your insurance and your business structure.** Whether operating as a named
 individual rather than through an entity is the right exposure for a product that
-advises physical exertion. This has legal consequences and it is not a decision I
-can make from the code.
+advises physical exertion. This has legal consequences and it is not a decision
+the code can make.
 
 ---
 
@@ -291,7 +304,7 @@ as of today.
 matches a prefix, returns at most twenty, excludes blocked users in both
 directions, and only ever returns accounts that have chosen a handle. It returns
 a username and display name, never training data. This is the same exposure any
-app with username search has. I would leave it.
+app with username search has. Acceptable as it is.
 
 **`user_reports` has no retention limit.** Reports — including free text one user
 wrote about another — are kept indefinitely. Consider deleting resolved reports
@@ -307,7 +320,7 @@ with retention on their schedule rather than yours, which the policy also says.
 
 **The database is the strong part.** Row-level security on every table, scoped
 policies, definer functions that check friendship, and an admin function that
-`authenticated` cannot call. I read all of it.
+`authenticated` cannot call. All of it was read.
 
 **There is no rate limiting beyond Supabase's defaults.** Username search, friend
 requests and report filing are all callable as fast as the API allows. For an app
@@ -374,8 +387,8 @@ badge and they make a claim you would not make, that is your problem too.
 
 | Document | Status |
 |---|---|
-| Privacy Policy | Published, v1.2.0 |
-| Terms of Service | Published, v1.2.0 |
+| Privacy Policy | Published, v1.4.1 |
+| Terms of Service | Published, v1.4.1 |
 | Support page | Published |
 | Account deletion page | Published — Apple wants a web-reachable route |
 | Incident response plan | `legal/INCIDENT_RESPONSE.md` |
@@ -402,8 +415,8 @@ badge and they make a claim you would not make, that is your problem too.
 
 ### HIGH — strongly recommended before launch
 
-5. **Turn on email confirmation**, and have me fix the consent recording when you
-   do.
+5. **Email confirmation: done.** Set the Supabase Site URL and Redirect URLs to
+   `email-confirmed.html` so the link lands somewhere useful.
 6. **Take Section 5 to a lawyer**, with the Washington My Health My Data question
    first.
 7. **Test the offline support on a real phone.** It has never run on one. That is
@@ -415,7 +428,7 @@ badge and they make a claim you would not make, that is your problem too.
 
 9. Add a third-party licences screen.
 10. Set a retention period for resolved reports.
-11. Build the re-acceptance prompt for document changes, before you need it.
+11. **Re-acceptance prompt: done.** Bump the minor version for material changes.
 12. Start the daily moderation check now, so it is a habit before it matters.
 
 ### LOW
@@ -427,7 +440,7 @@ badge and they make a claim you would not make, that is your problem too.
 
 ## 13. Decisions only you can make
 
-I have not guessed at any of these.
+None of these can be settled from the code.
 
 1. **Which countries you publish in.** Everything about the GDPR follows from it.
 2. **Whether to operate as an individual or form an entity.** You are currently
