@@ -4,6 +4,10 @@
  * lives in the UI; this module just deals in seconds.
  */
 
+/**
+ * Every kind the database accepts. New values are appended before 'other' so
+ * the order matches the enum's history; the form shows them by group instead.
+ */
 export const ACTIVITY_KINDS = [
   'run',
   'walk',
@@ -20,6 +24,35 @@ export const ACTIVITY_KINDS = [
   'boxing',
   'climbing',
   'yoga',
+  'pickleball',
+  'volleyball',
+  'baseball',
+  'softball',
+  'football',
+  'hockey',
+  'golf',
+  'badminton',
+  'table_tennis',
+  'racquetball',
+  'squash',
+  'lacrosse',
+  'rugby',
+  'ultimate_frisbee',
+  'wrestling',
+  'martial_arts',
+  'skiing',
+  'snowboarding',
+  'skating',
+  'skateboarding',
+  'surfing',
+  'kayaking',
+  'paddleboarding',
+  'spin',
+  'hiit',
+  'crossfit',
+  'pilates',
+  'dance',
+  'stretching',
   'other',
 ] as const;
 
@@ -41,34 +74,141 @@ export const ACTIVITY_LABEL: Record<ActivityKind, string> = {
   boxing: 'Boxing',
   climbing: 'Climbing',
   yoga: 'Yoga',
+  pickleball: 'Pickleball',
+  volleyball: 'Volleyball',
+  baseball: 'Baseball',
+  softball: 'Softball',
+  football: 'Football',
+  hockey: 'Hockey',
+  golf: 'Golf',
+  badminton: 'Badminton',
+  table_tennis: 'Table Tennis',
+  racquetball: 'Racquetball',
+  squash: 'Squash',
+  lacrosse: 'Lacrosse',
+  rugby: 'Rugby',
+  ultimate_frisbee: 'Ultimate Frisbee',
+  wrestling: 'Wrestling',
+  martial_arts: 'Martial Arts',
+  skiing: 'Skiing',
+  snowboarding: 'Snowboarding',
+  skating: 'Skating',
+  skateboarding: 'Skateboarding',
+  surfing: 'Surfing',
+  kayaking: 'Kayaking',
+  paddleboarding: 'Paddleboarding',
+  spin: 'Spin Class',
+  hiit: 'HIIT',
+  crossfit: 'CrossFit',
+  pilates: 'Pilates',
+  dance: 'Dance',
+  stretching: 'Stretching',
   other: 'Other',
 };
+
+/** How the activity form lays the kinds out. Every kind appears exactly once. */
+export const ACTIVITY_GROUPS: readonly { title: string; kinds: readonly ActivityKind[] }[] = [
+  {
+    title: 'Cardio',
+    kinds: ['run', 'walk', 'hike', 'cycle', 'swim', 'row', 'stairmaster', 'elliptical', 'jump_rope'],
+  },
+  {
+    title: 'Classes',
+    kinds: ['spin', 'hiit', 'crossfit', 'yoga', 'pilates', 'dance', 'stretching'],
+  },
+  {
+    title: 'Racquet sports',
+    kinds: ['pickleball', 'tennis', 'badminton', 'table_tennis', 'racquetball', 'squash'],
+  },
+  {
+    title: 'Team sports',
+    kinds: [
+      'basketball',
+      'soccer',
+      'football',
+      'volleyball',
+      'baseball',
+      'softball',
+      'hockey',
+      'lacrosse',
+      'rugby',
+      'ultimate_frisbee',
+    ],
+  },
+  { title: 'Combat', kinds: ['boxing', 'martial_arts', 'wrestling'] },
+  {
+    title: 'Outdoors',
+    kinds: [
+      'climbing',
+      'golf',
+      'skiing',
+      'snowboarding',
+      'skating',
+      'skateboarding',
+      'surfing',
+      'kayaking',
+      'paddleboarding',
+    ],
+  },
+  { title: 'Something else', kinds: ['other'] },
+];
+
+type Fields = { distance: boolean; steps: boolean; calories: boolean };
+const TIMED: Fields = { distance: false, steps: false, calories: true };
+const RANGED: Fields = { distance: true, steps: false, calories: true };
+const ON_FOOT: Fields = { distance: true, steps: true, calories: true };
 
 /**
  * Which optional metrics are worth offering for each kind. Everything stays
  * optional — this only decides what the form shows by default, so a basketball
  * game does not ask for distance.
  */
-export const ACTIVITY_FIELDS: Record<
-  ActivityKind,
-  { distance: boolean; steps: boolean; calories: boolean }
-> = {
-  run: { distance: true, steps: true, calories: true },
-  walk: { distance: true, steps: true, calories: true },
-  hike: { distance: true, steps: true, calories: true },
-  cycle: { distance: true, steps: false, calories: true },
-  swim: { distance: true, steps: false, calories: true },
-  row: { distance: true, steps: false, calories: true },
+export const ACTIVITY_FIELDS: Record<ActivityKind, Fields> = {
+  run: ON_FOOT,
+  walk: ON_FOOT,
+  hike: ON_FOOT,
+  cycle: RANGED,
+  swim: RANGED,
+  row: RANGED,
   stairmaster: { distance: false, steps: true, calories: true },
-  elliptical: { distance: true, steps: false, calories: true },
-  jump_rope: { distance: false, steps: false, calories: true },
-  basketball: { distance: false, steps: false, calories: true },
-  soccer: { distance: true, steps: false, calories: true },
-  tennis: { distance: false, steps: false, calories: true },
-  boxing: { distance: false, steps: false, calories: true },
-  climbing: { distance: false, steps: false, calories: true },
-  yoga: { distance: false, steps: false, calories: true },
-  other: { distance: true, steps: true, calories: true },
+  elliptical: RANGED,
+  jump_rope: TIMED,
+  basketball: TIMED,
+  soccer: RANGED,
+  tennis: TIMED,
+  boxing: TIMED,
+  climbing: TIMED,
+  yoga: TIMED,
+  pickleball: TIMED,
+  volleyball: TIMED,
+  baseball: TIMED,
+  softball: TIMED,
+  football: TIMED,
+  hockey: TIMED,
+  golf: ON_FOOT,
+  badminton: TIMED,
+  table_tennis: TIMED,
+  racquetball: TIMED,
+  squash: TIMED,
+  lacrosse: TIMED,
+  rugby: TIMED,
+  ultimate_frisbee: TIMED,
+  wrestling: TIMED,
+  martial_arts: TIMED,
+  skiing: RANGED,
+  snowboarding: TIMED,
+  skating: RANGED,
+  skateboarding: RANGED,
+  surfing: TIMED,
+  kayaking: RANGED,
+  paddleboarding: RANGED,
+  spin: RANGED,
+  hiit: TIMED,
+  crossfit: TIMED,
+  pilates: TIMED,
+  dance: TIMED,
+  stretching: TIMED,
+  other: ON_FOOT,
 };
 
 export const DISTANCE_UNITS = ['mi', 'km', 'm'] as const;

@@ -41,6 +41,8 @@ export interface LoggedSet {
   machineId: string | null;
   /** Anything Date-parseable; used only for recency ordering. */
   performedAt: string | number | Date;
+  /** Bodyweight exercises only: weight added on top of bodyweight. */
+  addedWeight?: number | null;
 }
 
 export interface RecommendInput {
@@ -158,19 +160,18 @@ function rpeCorrection(last: LoggedSet, repLow: number): number {
   return 0;
 }
 
-export function recommendNextWeight(input: RecommendInput): Recommendation {
-  const repRange = repRangeOrDefault(input.targetRepLow, input.targetRepHigh);
-  const estimate = estimateE1rm(input.history);
+interface Target {
+  /** Load to aim for, before rounding to a real step. */
+  load: number;
+  estimate: E1rmEstimate;
+  last: LoggedSet;
+  correction: number;
+}
 
-  if (estimate.count === 0) {
-    return {
-      suggestedWeight: null,
-      repRange,
-      e1rm: null,
-      confidence: 'low',
-      rationale: 'Log your first working set to get a recommendation.',
-    };
-  }
+/** The unrounded load for the next set, or null with no working history. */
+function targetLoad(input: RecommendInput, repRange: [number, number]): Target | null {
+  const estimate = estimateE1rm(input.history);
+  if (estimate.count === 0) return null;
 
   const last = estimate.sortedWorkingSets[estimate.sortedWorkingSets.length - 1];
   const targetReps = Math.round((repRange[0] + repRange[1]) / 2);
@@ -179,21 +180,18 @@ export function recommendNextWeight(input: RecommendInput): Recommendation {
   const baseWeight = estimate.value / (1 + EPLEY_K * targetReps);
 
   const correction = rpeCorrection(last, repRange[0]);
-  let adjusted = baseWeight * (1 + correction);
-
   // Never jump more than MAX_STEP_CHANGE from the last set.
-  adjusted = clamp(
-    adjusted,
+  const load = clamp(
+    baseWeight * (1 + correction),
     last.weight * (1 - MAX_STEP_CHANGE),
     last.weight * (1 + MAX_STEP_CHANGE),
   );
 
-  const bias: RoundingBias = input.isFirstWorkingSet ? 'down' : 'nearest';
-  let suggestedWeight = roundToIncrement(adjusted, input.increment, bias);
-  if (suggestedWeight <= 0) {
-    suggestedWeight = input.increment > 0 ? input.increment : 1;
-  }
+  return { load, estimate, last, correction };
+}
 
+function rationaleFor(target: Target, input: RecommendInput): string[] {
+  const { estimate, last, correction } = target;
   const parts: string[] = [
     `Based on ${estimate.count} recent set${estimate.count === 1 ? '' : 's'}`,
   ];
@@ -206,12 +204,174 @@ export function recommendNextWeight(input: RecommendInput): Recommendation {
   ) {
     parts.push('different machine than last time — adjust by feel');
   }
+  return parts;
+}
+
+export function recommendNextWeight(input: RecommendInput): Recommendation {
+  const repRange = repRangeOrDefault(input.targetRepLow, input.targetRepHigh);
+  const target = targetLoad(input, repRange);
+
+  if (!target) {
+    return {
+      suggestedWeight: null,
+      repRange,
+      e1rm: null,
+      confidence: 'low',
+      rationale: 'Log your first working set to get a recommendation.',
+    };
+  }
+
+  const bias: RoundingBias = input.isFirstWorkingSet ? 'down' : 'nearest';
+  let suggestedWeight = roundToIncrement(target.load, input.increment, bias);
+  if (suggestedWeight <= 0) {
+    suggestedWeight = input.increment > 0 ? input.increment : 1;
+  }
 
   return {
     suggestedWeight,
     repRange,
-    e1rm: Math.round(estimate.value * 10) / 10,
-    confidence: confidenceFor(estimate.count),
+    e1rm: Math.round(target.estimate.value * 10) / 10,
+    confidence: confidenceFor(target.estimate.count),
+    rationale: rationaleFor(target, input).join(' · '),
+  };
+}
+
+// --- Assisted exercises ------------------------------------------------------
+
+export interface AssistedInput extends RecommendInput {
+  /**
+   * The user's bodyweight now. History carries the load actually moved
+   * (bodyweight minus assistance at the time), so it stays right as their
+   * bodyweight changes.
+   */
+  bodyWeight: number;
+}
+
+export interface AssistedRecommendation extends Recommendation {
+  /** Assistance to set on the machine. 0 means try it with none. */
+  suggestedAssist: number | null;
+}
+
+/**
+ * Assisted pull-ups, dips and the like. The maths runs on the load actually
+ * moved, exactly as for a weighted lift, then converts back to assistance:
+ * assistance = bodyweight - target load. Getting stronger means less of it.
+ */
+export function recommendAssisted(input: AssistedInput): AssistedRecommendation {
+  const repRange = repRangeOrDefault(input.targetRepLow, input.targetRepHigh);
+  const target = targetLoad(input, repRange);
+
+  if (!target || !(input.bodyWeight > 0)) {
+    return {
+      suggestedWeight: null,
+      suggestedAssist: null,
+      repRange,
+      e1rm: null,
+      confidence: 'low',
+      rationale: target
+        ? 'Add your bodyweight in Profile to get assistance suggestions.'
+        : 'Log your first working set to get a recommendation.',
+    };
+  }
+
+  // Rounding favours more assistance on the first working set — the easier
+  // side, as 'down' is for a weighted lift.
+  const bias: RoundingBias = input.isFirstWorkingSet ? 'up' : 'nearest';
+  const assist = clamp(
+    roundToIncrement(input.bodyWeight - target.load, input.increment, bias),
+    0,
+    input.bodyWeight,
+  );
+
+  const parts = rationaleFor(target, input);
+  if (assist === 0) parts.push('you may be ready to try it with no assistance');
+
+  return {
+    suggestedAssist: assist,
+    suggestedWeight: Math.max(0, Math.round((input.bodyWeight - assist) * 10) / 10),
+    repRange,
+    e1rm: Math.round(target.estimate.value * 10) / 10,
+    confidence: confidenceFor(target.estimate.count),
+    rationale: parts.join(' · '),
+  };
+}
+
+// --- Bodyweight exercises: progress by reps ------------------------------------
+
+/** The most a single suggestion may add over the last set's reps. */
+export const MAX_REP_JUMP = 5;
+
+export interface RepSet {
+  reps: number;
+  rpe: number | null;
+  isWarmup: boolean;
+  /** Weight added on top of bodyweight; null or 0 for plain bodyweight. */
+  addedWeight: number | null;
+  performedAt: string | number | Date;
+}
+
+export interface RepsInput {
+  history: RepSet[];
+  /** The added weight about to be used. Only sets at the same added weight count. */
+  addedWeight: number;
+}
+
+export interface RepsRecommendation {
+  suggestedReps: number | null;
+  /** Smoothed reps the user could do to failure at this added weight. */
+  estimatedMaxReps: number | null;
+  confidence: Confidence;
+  rationale: string;
+}
+
+function sameAdded(a: number | null, b: number): boolean {
+  return Math.abs((a ?? 0) - b) < 0.01;
+}
+
+/**
+ * Push-ups, pull-ups, dips: the load is the body, so progress is reps.
+ *
+ * Each set says how many reps were possible — the reps done plus the reps left
+ * in reserve its RPE implies. Those are smoothed newest-heaviest, the same way
+ * the weight recommender smooths e1RM, and the suggestion is that many: a set
+ * taken to failure. Someone who had reps left last time is therefore asked for
+ * more; someone who ground out their last rep is asked to match it.
+ */
+export function recommendReps(input: RepsInput): RepsRecommendation {
+  const working = input.history
+    .filter((s) => !s.isWarmup && s.reps > 0 && sameAdded(s.addedWeight, input.addedWeight))
+    .sort((a, b) => toTime(a.performedAt) - toTime(b.performedAt));
+  const recent = working.slice(-RECENT_SET_WINDOW);
+
+  if (recent.length === 0) {
+    return {
+      suggestedReps: null,
+      estimatedMaxReps: null,
+      confidence: 'low',
+      rationale:
+        working.length === 0 && input.history.some((s) => !s.isWarmup && s.reps > 0)
+          ? 'No sets at this added weight yet. Log one to get a rep target.'
+          : 'Log your first working set to get a rep target.',
+    };
+  }
+
+  const capacity = (s: RepSet) => s.reps + repsInReserve(s.rpe);
+  let ema = capacity(recent[0]);
+  for (let i = 1; i < recent.length; i += 1) {
+    ema = EMA_ALPHA * capacity(recent[i]) + (1 - EMA_ALPHA) * ema;
+  }
+
+  const last = recent[recent.length - 1];
+  const suggestedReps = clamp(Math.round(ema), 1, last.reps + MAX_REP_JUMP);
+
+  const parts = [`Based on ${recent.length} recent set${recent.length === 1 ? '' : 's'}`];
+  if (last.rpe != null && last.rpe < 8) parts.push('last set felt easy — go for more');
+  else if (last.rpe != null && last.rpe >= 9.5) parts.push('last set was close to failure');
+
+  return {
+    suggestedReps,
+    estimatedMaxReps: Math.round(ema * 10) / 10,
+    confidence: confidenceFor(recent.length),
     rationale: parts.join(' · '),
   };
 }

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
 import { Field } from './Field';
+import { LOAD_TYPES, LOAD_TYPE_HINT, LOAD_TYPE_LABEL, type LoadType } from '@/domain/loadType';
 import { MUSCLE_GROUPS, type MuscleGroup } from '@/domain/stats';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -12,13 +13,24 @@ interface Props {
   visible: boolean;
   initialName?: string;
   busy?: boolean;
-  onSubmit: (input: { name: string; muscleGroup: MuscleGroup }) => void;
+  onSubmit: (input: { name: string; muscleGroup: MuscleGroup; loadType: LoadType }) => void;
   onClose: () => void;
+}
+
+/** A starting guess from the name, so "Assisted Dip" arrives already set up. */
+function guessLoadType(name: string): LoadType {
+  const n = name.toLowerCase();
+  if (n.includes('assist')) return 'assisted';
+  if (/push-?up|pull-?up|chin-?up|\bdips?\b|plank|sit-?up|crunch|burpee/.test(n)) {
+    return 'bodyweight';
+  }
+  return 'weighted';
 }
 
 export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit, onClose }: Props) {
   const [name, setName] = useState(initialName);
   const [group, setGroup] = useState<MuscleGroup>('chest');
+  const [loadType, setLoadType] = useState<LoadType>('weighted');
 
   return (
     <Modal
@@ -26,7 +38,10 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
       transparent
       animationType="fade"
       onRequestClose={onClose}
-      onShow={() => setName(initialName)}
+      onShow={() => {
+        setName(initialName);
+        setLoadType(guessLoadType(initialName));
+      }}
     >
       {/* Lifts the sheet above the keyboard instead of letting it cover the field. */}
       <KeyboardAvoidingView
@@ -36,6 +51,25 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>New exercise</Text>
           <Field label="Name" value={name} onChangeText={setName} autoFocus placeholder="e.g. Incline Machine Press" />
+
+          <Text style={text.label}>TYPE</Text>
+          <View style={styles.groups}>
+            {LOAD_TYPES.map((t) => (
+              <Pressable
+                key={t}
+                onPress={() => setLoadType(t)}
+                style={[styles.chip, loadType === t && styles.chipActive]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: loadType === t }}
+              >
+                <Text style={[styles.chipText, loadType === t && styles.chipTextActive]}>
+                  {LOAD_TYPE_LABEL[t]}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <Text style={text.caption}>{LOAD_TYPE_HINT[loadType]}</Text>
+
           <Text style={text.label}>MUSCLE GROUP</Text>
           <View style={styles.groups}>
             {MUSCLE_GROUPS.map((g) => (
@@ -52,7 +86,9 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
             <Button label="Cancel" variant="ghost" onPress={onClose} />
             <Button
               label="Add"
-              onPress={() => name.trim() && onSubmit({ name: name.trim(), muscleGroup: group })}
+              onPress={() =>
+                name.trim() && onSubmit({ name: name.trim(), muscleGroup: group, loadType })
+              }
               loading={busy}
             />
           </View>

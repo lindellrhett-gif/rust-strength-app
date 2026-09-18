@@ -11,6 +11,7 @@ import { keyboardAware } from '@/components/keyboard';
 import { useCreateExercise, useExercises } from '@/data/exercises';
 import { useProfile } from '@/data/profile';
 import { useSaveTemplate, useTemplate } from '@/data/templates';
+import { asLoadType, exerciseSublabel } from '@/domain/loadType';
 import { repRangeOrDefault } from '@/domain/recommender';
 import { normalizeTemplateName, type TemplateDraftItem } from '@/domain/templates';
 import { colors } from '@/theme/colors';
@@ -63,7 +64,11 @@ export default function TemplateEditor() {
     () =>
       (exercises.data ?? [])
         .filter((e) => !chosen.has(e.id))
-        .map((e) => ({ id: e.id, label: e.name, sublabel: e.muscle_group })),
+        .map((e) => ({
+          id: e.id,
+          label: e.name,
+          sublabel: exerciseSublabel(e.muscle_group, asLoadType(e.load_type)),
+        })),
     [exercises.data, chosen],
   );
 

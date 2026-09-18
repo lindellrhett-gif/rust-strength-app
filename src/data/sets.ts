@@ -77,7 +77,7 @@ export function useExerciseHistory(exerciseId: string | undefined) {
     queryFn: async (): Promise<LoggedSet[]> => {
       const { data, error } = await supabase
         .from('sets')
-        .select('weight, reps, rpe, is_warmup, machine_id, performed_at')
+        .select('weight, reps, rpe, is_warmup, machine_id, performed_at, added_weight')
         .eq('exercise_id', exerciseId!)
         .order('performed_at', { ascending: false })
         .limit(20);
@@ -89,6 +89,7 @@ export function useExerciseHistory(exerciseId: string | undefined) {
         isWarmup: s.is_warmup,
         machineId: s.machine_id,
         performedAt: s.performed_at,
+        addedWeight: s.added_weight,
       }));
     },
   });
@@ -103,6 +104,10 @@ export interface AddSetInput {
   rpe: number | null;
   isWarmup: boolean;
   isBodyweight: boolean;
+  /** Assisted exercises: the assistance entered. `weight` is bodyweight minus this. */
+  assistWeight?: number | null;
+  /** Bodyweight exercises: weight added on top. `weight` is bodyweight plus this. */
+  addedWeight?: number | null;
   targetRepLow: number;
   targetRepHigh: number;
   orderIndex: number;
@@ -157,6 +162,8 @@ export function useAddSet() {
         rpe: input.rpe,
         is_warmup: input.isWarmup,
         is_bodyweight: input.isBodyweight,
+        assist_weight: input.assistWeight ?? null,
+        added_weight: input.addedWeight ?? null,
         target_rep_low: input.targetRepLow,
         target_rep_high: input.targetRepHigh,
         e1rm,

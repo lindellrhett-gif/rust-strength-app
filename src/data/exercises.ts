@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { LoadType } from '@/domain/loadType';
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import type { Exercise, MuscleGroup } from '@/lib/database.types';
@@ -23,13 +24,21 @@ export function useCreateExercise() {
   const { userId } = useAuth();
   const client = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { name: string; muscleGroup: MuscleGroup }): Promise<Exercise> => {
+    mutationFn: async (input: {
+      name: string;
+      muscleGroup: MuscleGroup;
+      loadType: LoadType;
+    }): Promise<Exercise> => {
       const { data, error } = await supabase
         .from('exercises')
         .insert({
           user_id: userId!,
           name: input.name.trim(),
           muscle_group: input.muscleGroup,
+          load_type: input.loadType,
+          // The workout generator filters by equipment; a bodyweight exercise
+          // needs none, so it stays eligible whatever the user has with them.
+          equipment: input.loadType === 'bodyweight' ? 'bodyweight' : null,
           is_custom: true,
         })
         .select('*')

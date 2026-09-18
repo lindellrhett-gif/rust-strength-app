@@ -17,6 +17,10 @@ export interface GroupableSet {
   rpe: number | null;
   isWarmup: boolean;
   isBodyweight: boolean;
+  /** Assisted sets: the assistance entered. `weight` is the load moved. */
+  assistWeight?: number | null;
+  /** Bodyweight sets: weight added on top. */
+  addedWeight?: number | null;
   e1rm: number;
   orderIndex: number;
 }

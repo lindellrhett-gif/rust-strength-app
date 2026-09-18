@@ -21,6 +21,7 @@ import {
   type Focus,
   type GeneratorExercise,
 } from '@/domain/generator';
+import { asLoadType } from '@/domain/loadType';
 import { repRangeOrDefault } from '@/domain/recommender';
 import { weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
@@ -67,6 +68,7 @@ export default function GenerateWorkout() {
         id: e.id,
         name: e.name,
         muscleGroup: e.muscle_group,
+        loadType: asLoadType(e.load_type),
         equipment: (e.equipment ?? null) as Equipment | null,
       })),
     [exercises.data],

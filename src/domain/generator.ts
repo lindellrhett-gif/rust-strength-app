@@ -39,6 +39,12 @@ export interface GeneratorExercise {
   muscleGroup: MuscleGroup;
   /** null = usable with anything (custom exercises default to this). */
   equipment: Equipment | null;
+  /**
+   * Only weighted exercises get a starting weight. For bodyweight moves the
+   * target is reps, and for assisted ones a weight would be the load moved,
+   * not the assistance to set, so neither is shown a number.
+   */
+  loadType?: 'weighted' | 'bodyweight' | 'assisted';
 }
 
 export type Focus = 'full-body' | 'upper' | 'lower' | 'push' | 'pull';
@@ -180,7 +186,10 @@ export function generateWorkout(input: GenerateInput): GeneratedWorkout {
       addedThisPass = true;
 
       const trainedThisWeek = input.weekCoverage[group] ?? 0;
-      const weight = suggestWeight(input.historyByExercise[choice.id], targetReps, increment);
+      const weighted = (choice.loadType ?? 'weighted') === 'weighted';
+      const weight = weighted
+        ? suggestWeight(input.historyByExercise[choice.id], targetReps, increment)
+        : null;
 
       const reasons: string[] = [];
       reasons.push(
@@ -188,7 +197,15 @@ export function generateWorkout(input: GenerateInput): GeneratedWorkout {
           ? `${group} not trained yet this week`
           : `${group} · ${trainedThisWeek} set${trainedThisWeek === 1 ? '' : 's'} so far this week`,
       );
-      reasons.push(weight == null ? 'no history yet — pick a weight by feel' : 'weight from your e1RM');
+      reasons.push(
+        choice.loadType === 'bodyweight'
+          ? 'bodyweight — aim for more reps than last time'
+          : choice.loadType === 'assisted'
+            ? 'assisted — the set screen suggests your assistance'
+            : weight == null
+              ? 'no history yet — pick a weight by feel'
+              : 'weight from your e1RM',
+      );
 
       picked.push({
         exerciseId: choice.id,

@@ -62,11 +62,13 @@ WHAT YOU GET
 
 Autoregulated weight suggestions after every set, with a plain-English reason for each one.
 Estimated one-rep max per exercise, updated as you train.
+Over 200 exercises built in, or add your own.
+Bodyweight exercises suggest more reps, with optional added weight. Assisted pull-ups and dips suggest less assistance as you get stronger.
 Sets grouped by exercise, so five sets of bench read as one block.
 Workout presets — save "Push Day 1" once and start it pre-loaded with every exercise.
 A workout generator that builds a session from the equipment you actually have, prioritising the muscles you have not trained this week.
 A live workout timer, plus totals for time, volume, reps and sets.
-Activity tracking for runs, sports and cardio machines, timed live or entered by hand.
+Activity tracking for runs, cardio machines, classes and more than 40 sports and activities from pickleball to skiing, timed live or entered by hand.
 A calendar for planning sessions ahead, logging rest days, and reviewing what you have done.
 A body chart showing which muscle groups you have and have not trained this week.
 A rest timer between sets, set to whatever length you want, that starts on its own when you save a set and can alert you when rest is over, even with your phone locked.
@@ -86,7 +88,7 @@ Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/privacy.html
 Terms of Service: https://lindellrhett-gif.github.io/rust-strength/terms.html
 ```
 
-`~2,600 characters`
+`3,412 characters of 4,000`
 
 ## URLs
 

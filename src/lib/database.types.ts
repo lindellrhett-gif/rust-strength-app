@@ -16,6 +16,7 @@ export type Json =
 
 type MG = Database['public']['Enums']['muscle_group'];
 type EQ = Database['public']['Enums']['equipment_kind'];
+type LT = Database['public']['Enums']['exercise_load_type'];
 
 export type Database = {
   public: {
@@ -110,6 +111,7 @@ export type Database = {
           name: string;
           muscle_group: MG;
           equipment: EQ | null;
+          load_type: LT;
           is_custom: boolean;
           created_at: string;
         };
@@ -119,10 +121,11 @@ export type Database = {
           name: string;
           muscle_group: MG;
           equipment?: EQ | null;
+          load_type?: LT;
           is_custom?: boolean;
           created_at?: string;
         };
-        Update: { name?: string; muscle_group?: MG; equipment?: EQ | null };
+        Update: { name?: string; muscle_group?: MG; equipment?: EQ | null; load_type?: LT };
         Relationships: [];
       };
       workouts: {
@@ -164,6 +167,8 @@ export type Database = {
           rpe: number | null;
           is_warmup: boolean;
           is_bodyweight: boolean;
+          assist_weight: number | null;
+          added_weight: number | null;
           target_rep_low: number;
           target_rep_high: number;
           e1rm: number;
@@ -182,6 +187,8 @@ export type Database = {
           rpe?: number | null;
           is_warmup?: boolean;
           is_bodyweight?: boolean;
+          assist_weight?: number | null;
+          added_weight?: number | null;
           target_rep_low?: number;
           target_rep_high?: number;
           e1rm?: number;
@@ -196,6 +203,8 @@ export type Database = {
           rpe?: number | null;
           is_warmup?: boolean;
           is_bodyweight?: boolean;
+          assist_weight?: number | null;
+          added_weight?: number | null;
           e1rm?: number;
           order_index?: number;
         };
@@ -661,7 +670,37 @@ export type Database = {
         | 'boxing'
         | 'climbing'
         | 'yoga'
+        | 'pickleball'
+        | 'volleyball'
+        | 'baseball'
+        | 'softball'
+        | 'football'
+        | 'hockey'
+        | 'golf'
+        | 'badminton'
+        | 'table_tennis'
+        | 'racquetball'
+        | 'squash'
+        | 'lacrosse'
+        | 'rugby'
+        | 'ultimate_frisbee'
+        | 'wrestling'
+        | 'martial_arts'
+        | 'skiing'
+        | 'snowboarding'
+        | 'skating'
+        | 'skateboarding'
+        | 'surfing'
+        | 'kayaking'
+        | 'paddleboarding'
+        | 'spin'
+        | 'hiit'
+        | 'crossfit'
+        | 'pilates'
+        | 'dance'
+        | 'stretching'
         | 'other';
+      exercise_load_type: 'weighted' | 'bodyweight' | 'assisted';
       equipment_kind:
         | 'barbell'
         | 'dumbbell'

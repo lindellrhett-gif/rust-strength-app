@@ -16,6 +16,7 @@ import {
 } from '@/data/templates';
 import { useDeleteWorkout, useEndWorkout, useWorkout } from '@/data/workouts';
 import { type GroupableSet } from '@/domain/grouping';
+import { formatSetLoad } from '@/domain/loadType';
 import {
   buildWorkoutBlocks,
   nextUpBlock,
@@ -56,6 +57,8 @@ export default function WorkoutScreen() {
         rpe: s.rpe,
         isWarmup: s.is_warmup,
         isBodyweight: s.is_bodyweight,
+        assistWeight: s.assist_weight ?? null,
+        addedWeight: s.added_weight ?? null,
         e1rm: s.e1rm,
         orderIndex: s.order_index,
       })),
@@ -336,7 +339,7 @@ function ExerciseBlock({
           >
             <Text style={styles.setNum}>{badge}</Text>
             <Text style={styles.setMain}>
-              {s.isBodyweight ? 'BW' : trimWeight(s.weight)}
+              {formatSetLoad(s, unit)}
               {s.isBodyweight && s.weight > 0 ? (
                 <Text style={text.caption}>{`  (${trimWeight(s.weight)})`}</Text>
               ) : null}

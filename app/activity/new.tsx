@@ -9,7 +9,7 @@ import { keyboardAware } from '@/components/keyboard';
 import { useLogActivity } from '@/data/activities';
 import {
   ACTIVITY_FIELDS,
-  ACTIVITY_KINDS,
+  ACTIVITY_GROUPS,
   ACTIVITY_LABEL,
   DISTANCE_UNITS,
   fromSeconds,
@@ -128,19 +128,26 @@ export default function NewActivity() {
 
       <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
         <Card title="What did you do?">
-          <View style={styles.chips}>
-            {ACTIVITY_KINDS.map((k) => (
-              <Pressable
-                key={k}
-                onPress={() => setKind(k)}
-                style={[styles.chip, kind === k && styles.chipOn]}
-              >
-                <Text style={[styles.chipText, kind === k && styles.chipTextOn]}>
-                  {ACTIVITY_LABEL[k]}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+          {ACTIVITY_GROUPS.map((group) => (
+            <View key={group.title} style={styles.group}>
+              <Text style={text.label}>{group.title.toUpperCase()}</Text>
+              <View style={styles.chips}>
+                {group.kinds.map((k) => (
+                  <Pressable
+                    key={k}
+                    onPress={() => setKind(k)}
+                    style={[styles.chip, kind === k && styles.chipOn]}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: kind === k }}
+                  >
+                    <Text style={[styles.chipText, kind === k && styles.chipTextOn]}>
+                      {ACTIVITY_LABEL[k]}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ))}
           <Field
             label="Name (optional)"
             value={name}
@@ -274,6 +281,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.lg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  group: { gap: spacing.xs },
   chip: {
     paddingVertical: 6,
     paddingHorizontal: spacing.md,
