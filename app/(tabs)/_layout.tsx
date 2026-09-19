@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, Tabs } from 'expo-router';
+import { useState } from 'react';
 
 import { ConsentScreen } from '@/components/ConsentScreen';
 import { useProfile } from '@/data/profile';
@@ -13,6 +14,8 @@ import { colors } from '@/theme/colors';
 export default function TabsLayout() {
   const { session } = useAuth();
   const profile = useProfile();
+  // The version agreed to on the consent screen during this session, if any.
+  const [acceptedVersion, setAcceptedVersion] = useState<string | null>(null);
   if (!session) return <Redirect href="/(auth)/sign-in" />;
 
   // Only once the profile has actually loaded: a slow or offline start must
@@ -22,7 +25,9 @@ export default function TabsLayout() {
       termsVersion: profile.data.terms_version,
       ageConfirmedAt: profile.data.age_confirmed_at,
     };
-    if (needsConsent(record, LEGAL.version)) return <ConsentScreen record={record} />;
+    if (acceptedVersion !== LEGAL.version && needsConsent(record, LEGAL.version)) {
+      return <ConsentScreen record={record} onAccepted={setAcceptedVersion} />;
+    }
   }
 
   // Wrapped here rather than at the root so the welcome cards can only appear

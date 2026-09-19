@@ -19,7 +19,14 @@ import { spacing, text } from '@/theme/typography';
  * Same two confirmations as sign-up, recorded the same way. The only way past
  * it is to agree or to sign out — the documents can be read from here first.
  */
-export function ConsentScreen({ record }: { record: ConsentRecord }) {
+export function ConsentScreen({
+  record,
+  onAccepted,
+}: {
+  record: ConsentRecord;
+  /** Called once the agreement is saved, so the app opens straight away. */
+  onAccepted: (version: string) => void;
+}) {
   const router = useRouter();
   const { signOut } = useAuth();
   const accept = useAcceptTerms();
@@ -28,8 +35,14 @@ export function ConsentScreen({ record }: { record: ConsentRecord }) {
 
   const agree = () => {
     accept.mutate(undefined, {
-      onError: () =>
-        Alert.alert('Could not save', 'Check your connection and try again.'),
+      onSuccess: (accepted) => onAccepted(accepted.terms_version),
+      onError: (error) =>
+        Alert.alert(
+          'Could not save',
+          error instanceof Error && error.message
+            ? error.message
+            : 'Check your connection and try again.',
+        ),
     });
   };
 

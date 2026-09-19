@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { Profile } from '@/lib/database.types';
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { LEGAL } from '@/legal/config';
@@ -39,18 +40,34 @@ export function useAcceptTerms() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: async () => {
+      if (!userId) throw new Error('You are signed out. Sign in again to continue.');
       const now = new Date().toISOString();
-      const { error } = await supabase
+      const accepted = {
+        terms_accepted_at: now,
+        terms_version: LEGAL.version,
+        age_confirmed_at: now,
+      };
+      // An update that matches no row is not an error to the database, so ask
+      // for the row back: without it a failed save looks like a successful one.
+      const { data, error } = await supabase
         .from('profiles')
-        .update({
-          terms_accepted_at: now,
-          terms_version: LEGAL.version,
-          age_confirmed_at: now,
-        })
-        .eq('user_id', userId!);
+        .update(accepted)
+        .eq('user_id', userId)
+        .select('user_id');
       if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Your agreement could not be saved. Sign out, sign back in and try again.');
+      }
+      return accepted;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.profile }),
+    onSuccess: (accepted) => {
+      // Update the cached profile now, so the consent screen goes away without
+      // waiting on a refetch, then refetch to be sure it matches the server.
+      client.setQueryData<Profile>(qk.profile, (current) =>
+        current ? { ...current, ...accepted } : current,
+      );
+      void client.invalidateQueries({ queryKey: qk.profile });
+    },
   });
 }
 

@@ -99,7 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     if (lastUserId.current !== id) {
       lastUserId.current = id;
-      queryClient.clear();
+      // Reset, not clear: clearing removes queries that mounted screens are
+      // still attached to, and those screens then never see fresh data (which
+      // is how the consent screen could fail to go away after agreeing).
+      // Resetting drops every cached answer all the same, and refetches what
+      // is on screen for the new account.
+      queryClient.getMutationCache().clear();
+      void queryClient.resetQueries();
       void persister.removeClient();
     }
   }, [session]);
