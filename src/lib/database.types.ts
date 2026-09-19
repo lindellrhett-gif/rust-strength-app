@@ -557,7 +557,7 @@ export type Database = {
         Returns: { user_id: string; username: string; display_name: string | null }[];
       };
       rpc_friend_stats: {
-        Args: { target: string };
+        Args: { target: string; p_today?: string };
         Returns: {
           user_id: string;
           username: string;
@@ -572,10 +572,13 @@ export type Database = {
           activity_count: number;
           activity_kinds: number;
           friend_count: number;
+          current_streak: number;
+          best_streak: number;
+          consistency_30: number;
         }[];
       };
       rpc_friend_leaderboard: {
-        Args: { p_since?: string | null };
+        Args: { p_since?: string | null; p_today?: string };
         Returns: {
           user_id: string;
           username: string;
@@ -585,7 +588,8 @@ export type Database = {
           total_volume: number;
           workout_seconds: number;
           activity_seconds: number;
-          workout_dates: string[];
+          current_streak: number;
+          consistency_30: number;
         }[];
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };

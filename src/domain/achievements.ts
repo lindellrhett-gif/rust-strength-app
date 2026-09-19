@@ -504,16 +504,18 @@ export function topAchievements(
 }
 
 /**
- * Share of the last `windowDays` days that had a workout, as 0..1.
- * This is the "consistency" figure shown on profiles.
+ * Share of the last `windowDays` days that had a workout or a rest day, as
+ * 0..1. This is the "consistency" figure shown on profiles: planned rest is
+ * part of training, so it does not count against you.
  */
 export function consistency(
   workoutDates: string[],
   today: string,
   windowDays = 30,
+  restDates: string[] = [],
 ): number {
   if (windowDays <= 0) return 0;
-  const days = new Set(workoutDates);
+  const days = new Set([...workoutDates, ...restDates]);
   const end = new Date(`${today}T00:00:00Z`).getTime();
   if (Number.isNaN(end)) return 0;
 

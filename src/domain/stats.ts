@@ -50,8 +50,12 @@ function normalizeDates(dates: string[]): string[] {
 // --- Streaks ------------------------------------------------------------------
 
 /**
- * Consecutive days worked out, ending today or yesterday (so the streak does
- * not "break" simply because the user has not trained yet today).
+ * Training days in the current run, ending today or yesterday (so the streak
+ * does not "break" simply because the user has not trained yet today).
+ *
+ * Rest days keep a run going but do not add to it: train Monday, rest
+ * Tuesday, train Wednesday is a streak of 2, still alive. The server applies
+ * the same rules for friends (`streak_stats`, migration 0014).
  */
 export function currentStreak(
   workoutDates: string[],
@@ -70,17 +74,15 @@ export function currentStreak(
   else return 0;
 
   let streak = 0;
-  let sawWorkout = false;
   while (counts(cursor)) {
-    streak += 1;
-    if (trained.has(cursor)) sawWorkout = true;
+    if (trained.has(cursor)) streak += 1;
     cursor = addDays(cursor, -1);
   }
-  // A run made only of rest days is not a streak, however long it is.
-  return sawWorkout ? streak : 0;
+  // A run made only of rest days counts no training days, so it is 0.
+  return streak;
 }
 
-/** Longest run of consecutive workout days ever. */
+/** Most training days in any one run; rest days join a run but add nothing. */
 export function bestStreak(workoutDates: string[], restDates: string[] = []): number {
   const trained = new Set(normalizeDates(workoutDates));
   if (trained.size === 0) return 0;
@@ -88,23 +90,11 @@ export function bestStreak(workoutDates: string[], restDates: string[] = []): nu
 
   let best = 0;
   let run = 0;
-  let runHasWorkout = false;
-
-  const closeRun = () => {
-    if (runHasWorkout) best = Math.max(best, run);
-  };
-
   for (let i = 0; i < days.length; i += 1) {
-    if (i > 0 && daysBetween(days[i - 1], days[i]) === 1) {
-      run += 1;
-    } else {
-      closeRun();
-      run = 1;
-      runHasWorkout = false;
-    }
-    if (trained.has(days[i])) runHasWorkout = true;
+    if (i > 0 && daysBetween(days[i - 1], days[i]) !== 1) run = 0;
+    if (trained.has(days[i])) run += 1;
+    best = Math.max(best, run);
   }
-  closeRun();
   return best;
 }
 
@@ -170,11 +160,13 @@ export function uncoveredGroups(
   return MUSCLE_GROUPS.filter((g) => (coverage[g] ?? 0) === 0);
 }
 
-/** Monday-based start of the ISO week containing `date` (`YYYY-MM-DD`). */
+/**
+ * The Sunday that starts the week containing `date` (`YYYY-MM-DD`). Weeks
+ * run Sunday to Saturday everywhere in the app, matching the calendar.
+ */
 export function weekStart(date: string): string {
   const ms = toUtcMs(date);
   if (Number.isNaN(ms)) return date;
   const dow = new Date(ms).getUTCDay(); // 0 Sun … 6 Sat
-  const backToMonday = (dow + 6) % 7;
-  return addDays(date, -backToMonday);
+  return addDays(date, -dow);
 }

@@ -51,15 +51,30 @@ describe('currentStreak', () => {
 });
 
 describe('rest days and streaks', () => {
-  it('bridges a gap so the streak survives a day off', () => {
-    // Trained Mon and Wed, rested Tue.
+  it('bridges a gap so the streak survives a day off, without counting it', () => {
+    // Trained Tue and Thu, rested Wed: two workout days, still alive.
     expect(
       currentStreak(['2026-09-01', '2026-09-03'], '2026-09-03', ['2026-09-02']),
-    ).toBe(3);
+    ).toBe(2);
   });
 
   it('keeps the streak alive when today is a rest day', () => {
-    expect(currentStreak(['2026-09-02'], '2026-09-03', ['2026-09-03'])).toBe(2);
+    expect(currentStreak(['2026-09-02'], '2026-09-03', ['2026-09-03'])).toBe(1);
+  });
+
+  it('keeps it alive across several rest days in a row', () => {
+    expect(
+      currentStreak(
+        ['2026-09-01', '2026-09-02', '2026-09-06'],
+        '2026-09-06',
+        ['2026-09-03', '2026-09-04', '2026-09-05'],
+      ),
+    ).toBe(3);
+  });
+
+  it('ignores rest days planned for the future', () => {
+    expect(currentStreak(['2026-09-03'], '2026-09-03', ['2026-09-04', '2026-09-05'])).toBe(1);
+    expect(bestStreak(['2026-09-03'], ['2026-09-04', '2026-09-05'])).toBe(1);
   });
 
   it('still breaks on a day that was neither trained nor rested', () => {
@@ -72,8 +87,10 @@ describe('rest days and streaks', () => {
     expect(currentStreak([], '2026-09-03', ['2026-09-01', '2026-09-02', '2026-09-03'])).toBe(0);
   });
 
-  it('counts rest days toward the best streak too', () => {
-    expect(bestStreak(['2026-09-01', '2026-09-03'], ['2026-09-02'])).toBe(3);
+  it('lets rest days join a best streak without adding to it', () => {
+    expect(bestStreak(['2026-09-01', '2026-09-03'], ['2026-09-02'])).toBe(2);
+    // Without the rest day the run breaks in two.
+    expect(bestStreak(['2026-09-01', '2026-09-03'])).toBe(1);
   });
 
   it('does not let a run of pure rest become a best streak', () => {
@@ -156,11 +173,14 @@ describe('weeklyCoverage', () => {
 });
 
 describe('weekStart', () => {
-  it('returns the Monday of the containing week', () => {
-    const monday = weekStart('2026-09-03');
-    expect(daysBetween(monday, '2026-09-03')).toBeGreaterThanOrEqual(0);
-    expect(daysBetween(monday, '2026-09-03')).toBeLessThanOrEqual(6);
-    // The Monday of a week is its own week start.
-    expect(weekStart(monday)).toBe(monday);
+  it('returns the Sunday that starts the week, like the calendar', () => {
+    // 2026-09-03 is a Thursday; its week began Sunday 2026-08-30.
+    expect(weekStart('2026-09-03')).toBe('2026-08-30');
+    expect(new Date('2026-08-30T00:00:00Z').getUTCDay()).toBe(0);
+    // A Sunday is its own week start, and Saturday is the week's last day.
+    expect(weekStart('2026-08-30')).toBe('2026-08-30');
+    expect(weekStart('2026-09-05')).toBe('2026-08-30');
+    expect(weekStart('2026-09-06')).toBe('2026-09-06');
+    expect(daysBetween(weekStart('2026-09-03'), '2026-09-03')).toBe(4);
   });
 });

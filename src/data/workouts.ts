@@ -1,10 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
 import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { newId } from '@/lib/ids';
 import type { Workout } from '@/lib/database.types';
+import type { SetPatch } from '@/domain/workoutEdit';
 import { endWorkoutRow, insertWorkoutRow } from './mutationDefaults';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -161,20 +162,104 @@ export function useEndWorkout() {
   return { end, isPending: mutation.isPending, error: mutation.error };
 }
 
+/**
+ * Everything derived from logged training, refreshed after a workout is edited
+ * or deleted: history, totals, records, streaks, the weight recommendations'
+ * set history, the feed and the leaderboard.
+ */
+function refreshTrainingData(client: QueryClient, workoutId: string): void {
+  for (const key of [
+    ['workouts'],
+    ['sets'],
+    ['stats'],
+    qk.feed,
+    ['leaderboard'],
+    qk.workoutSummary(workoutId),
+    qk.workoutExercises(workoutId),
+  ]) {
+    void client.invalidateQueries({ queryKey: key });
+  }
+}
+
+/**
+ * Delete a workout, from history or by cancelling one in progress. Its sets
+ * go with it (the database cascades), so they stop counting toward totals,
+ * records, streaks and the next weight suggestion.
+ */
 export function useDeleteWorkout() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
+      // No row deleted is fine: a session cancelled before it ever reached
+      // the server has nothing there to remove.
       const { error } = await supabase.from('workouts').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: qk.openWorkout });
-      client.invalidateQueries({ queryKey: qk.workouts });
-      client.invalidateQueries({ queryKey: qk.totals });
-      client.invalidateQueries({ queryKey: qk.workoutDates });
-      client.invalidateQueries({ queryKey: qk.prs });
-      client.invalidateQueries({ queryKey: qk.feed });
+    onSuccess: (_data, id) => {
+      // Drop the cached copies straight away, so nothing shows the deleted
+      // session while the refetches run.
+      client.removeQueries({ queryKey: qk.workout(id) });
+      client.removeQueries({ queryKey: qk.setsForWorkout(id) });
+      refreshTrainingData(client, id);
+    },
+  });
+}
+
+export interface WorkoutReview {
+  id: string;
+  name: string | null;
+  endedAt: string;
+  /** Only the sets that changed, with every column to write. */
+  sets: { id: string; patch: SetPatch }[];
+}
+
+/** Wait (briefly) for writes still queued from the session to reach the server. */
+async function settleQueuedWrites(client: QueryClient, timeoutMs = 10_000): Promise<void> {
+  void client.resumePausedMutations();
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const busy =
+      client.isMutating({ mutationKey: mk.startWorkout }) +
+      client.isMutating({ mutationKey: mk.addSet }) +
+      client.isMutating({ mutationKey: mk.endWorkout });
+    if (busy === 0) return;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error('Your workout is still syncing. Check your connection and try again.');
+}
+
+/**
+ * Save the review of a finished workout: its name, its length (as an end
+ * time) and any sets whose weight or reps were corrected.
+ *
+ * Waits for the session's own queued writes first. Otherwise a Finish sent
+ * with no signal could land after this and put the old end time back, and an
+ * edit to a set the server has not received yet would change nothing.
+ */
+export function useSaveWorkoutReview() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (review: WorkoutReview) => {
+      await settleQueuedWrites(client);
+
+      const { data, error } = await supabase
+        .from('workouts')
+        .update({ name: review.name, ended_at: review.endedAt })
+        .eq('id', review.id)
+        .select('id');
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error('That workout could not be found.');
+
+      for (const s of review.sets) {
+        const { error: setError } = await supabase.from('sets').update(s.patch).eq('id', s.id);
+        if (setError) throw setError;
+      }
+    },
+    onSuccess: (_data, review) => {
+      client.setQueryData<Workout | null>(qk.workout(review.id), (current) =>
+        current ? { ...current, name: review.name, ended_at: review.endedAt } : current,
+      );
+      refreshTrainingData(client, review.id);
     },
   });
 }

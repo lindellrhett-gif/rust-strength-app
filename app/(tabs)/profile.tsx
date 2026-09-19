@@ -10,6 +10,7 @@ import { NumberStepper } from '@/components/NumberStepper';
 import { RestAlertToggle } from '@/components/RestAlertToggle';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
+import { useRestDays } from '@/data/restDays';
 import { useWorkoutDates } from '@/data/stats';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -34,6 +35,7 @@ export default function ProfileScreen() {
   const update = useUpdateProfile();
 
   const dates = useWorkoutDates();
+  const restDays = useRestDays();
   const today = todayLocal();
   const router = useRouter();
   const onboarding = useOnboardingControls();
@@ -61,7 +63,14 @@ export default function ProfileScreen() {
   const equipment = p.equipment ?? [];
   const restSeconds = rest ?? p.rest_seconds;
   const restDirty = restSeconds !== p.rest_seconds;
-  const consistency30 = Math.round(consistency(dates.data ?? [], today, 30) * 100);
+  const consistency30 = Math.round(
+    consistency(
+      dates.data ?? [],
+      today,
+      30,
+      (restDays.data ?? []).map((r) => r.rest_date),
+    ) * 100,
+  );
 
   const setUnit = (unit: WeightUnit) => update.mutate({ unit });
 

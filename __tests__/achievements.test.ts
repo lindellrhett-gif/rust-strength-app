@@ -281,4 +281,19 @@ describe('consistency', () => {
   it('is zero for a nonsensical window', () => {
     expect(consistency(['2026-09-06'], '2026-09-06', 0)).toBe(0);
   });
+
+  it('counts rest days, so training with planned rest can reach 100%', () => {
+    const trained: string[] = [];
+    const rested: string[] = [];
+    for (let i = 0; i < 30; i += 1) {
+      const d = new Date(Date.UTC(2026, 8, 6) - i * 86_400_000).toISOString().slice(0, 10);
+      (i % 2 === 0 ? trained : rested).push(d);
+    }
+    expect(consistency(trained, '2026-09-06', 30)).toBeCloseTo(0.5, 5);
+    expect(consistency(trained, '2026-09-06', 30, rested)).toBe(1);
+  });
+
+  it('does not double-count a day that was both trained and rested', () => {
+    expect(consistency(['2026-09-06'], '2026-09-06', 30, ['2026-09-06'])).toBeCloseTo(1 / 30, 5);
+  });
 });

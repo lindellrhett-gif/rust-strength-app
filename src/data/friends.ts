@@ -5,6 +5,7 @@ import {
   type LeaderboardPerson,
   type LeaderboardPeriod,
 } from '@/domain/leaderboard';
+import { todayLocal } from '@/lib/dates';
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -140,6 +141,11 @@ export interface FriendStats {
   activityCount: number;
   activityKinds: number;
   friendCount: number;
+  /** Worked out by the server with rest days counted; the rest days stay private. */
+  currentStreak: number;
+  bestStreak: number;
+  /** 0..100 over the last 30 days. */
+  consistency30: number;
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -149,6 +155,7 @@ export function useFriendStats(targetUserId: string | undefined) {
     queryFn: async (): Promise<FriendStats | null> => {
       const { data, error } = await supabase.rpc('rpc_friend_stats', {
         target: targetUserId!,
+        p_today: todayLocal(),
       });
       if (error) throw error;
       const row = (data ?? [])[0];
@@ -167,6 +174,9 @@ export function useFriendStats(targetUserId: string | undefined) {
         activityCount: Number(row.activity_count) || 0,
         activityKinds: Number(row.activity_kinds) || 0,
         friendCount: Number(row.friend_count) || 0,
+        currentStreak: Number(row.current_streak) || 0,
+        bestStreak: Number(row.best_streak) || 0,
+        consistency30: Number(row.consistency_30) || 0,
       };
     },
   });
@@ -220,6 +230,7 @@ export function useLeaderboard(period: LeaderboardPeriod) {
       const since = periodSince(period, Date.now());
       const { data, error } = await supabase.rpc('rpc_friend_leaderboard', {
         p_since: since ? since.toISOString() : null,
+        p_today: todayLocal(),
       });
       if (error) throw error;
       return (data ?? []).map((row) => ({
@@ -231,7 +242,8 @@ export function useLeaderboard(period: LeaderboardPeriod) {
         totalVolume: Number(row.total_volume) || 0,
         workoutSeconds: Number(row.workout_seconds) || 0,
         activitySeconds: Number(row.activity_seconds) || 0,
-        workoutDates: row.workout_dates ?? [],
+        currentStreak: Number(row.current_streak) || 0,
+        consistency: Number(row.consistency_30) || 0,
       }));
     },
   });

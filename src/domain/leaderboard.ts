@@ -3,9 +3,7 @@
  * time. Pure, so the ranking and the unit conversion can be tested.
  */
 
-import { consistency } from './achievements';
 import { formatDurationShort } from './duration';
-import { currentStreak } from './stats';
 
 export const LEADERBOARD_METRICS = [
   'streak',
@@ -64,8 +62,10 @@ export interface LeaderboardPerson {
   totalVolume: number;
   workoutSeconds: number;
   activitySeconds: number;
-  /** Training days, YYYY-MM-DD. */
-  workoutDates: string[];
+  /** Training days in the current run; rest days keep it alive but add nothing. */
+  currentStreak: number;
+  /** Share of the last 30 days trained or rested, 0..100. */
+  consistency: number;
 }
 
 export interface LeaderboardRow {
@@ -84,20 +84,17 @@ export function convertVolume(volume: number, from: 'lb' | 'kg', to: 'lb' | 'kg'
 export function metricValue(
   person: LeaderboardPerson,
   metric: LeaderboardMetric,
-  today: string,
   viewerUnit: 'lb' | 'kg',
 ): number {
   switch (metric) {
     case 'streak':
-      // Training days only. A friend's rest days stay private, so counting
-      // your own would rank you on something they cannot have.
-      return currentStreak(person.workoutDates, today);
+      return person.currentStreak;
     case 'volume':
       return Math.round(convertVolume(person.totalVolume, person.unit, viewerUnit));
     case 'workoutTime':
       return person.workoutSeconds;
     case 'consistency':
-      return Math.round(consistency(person.workoutDates, today, CONSISTENCY_WINDOW_DAYS) * 100);
+      return person.consistency;
     case 'activityTime':
       return person.activitySeconds;
   }
@@ -110,11 +107,10 @@ export function metricValue(
 export function rankLeaderboard(
   people: LeaderboardPerson[],
   metric: LeaderboardMetric,
-  today: string,
   viewerUnit: 'lb' | 'kg',
 ): LeaderboardRow[] {
   const scored = people
-    .map((person) => ({ person, value: metricValue(person, metric, today, viewerUnit) }))
+    .map((person) => ({ person, value: metricValue(person, metric, viewerUnit) }))
     .sort((a, b) => b.value - a.value || a.person.username.localeCompare(b.person.username));
 
   const rows: LeaderboardRow[] = [];
@@ -143,9 +139,9 @@ export function formatMetric(value: number, metric: LeaderboardMetric, unit: 'lb
 export function metricNote(metric: LeaderboardMetric, period: LeaderboardPeriod): string {
   switch (metric) {
     case 'streak':
-      return 'Days in a row with a finished workout. Rest days are private, so they are not counted here.';
+      return 'Workout days in a row. A rest day keeps a streak going but does not add to it.';
     case 'consistency':
-      return `Share of the last ${CONSISTENCY_WINDOW_DAYS} days with a finished workout.`;
+      return `Share of the last ${CONSISTENCY_WINDOW_DAYS} days with a finished workout or a rest day.`;
     case 'volume':
       return `Weight × reps across finished workouts, ${periodPhrase(period)}. Converted to your unit.`;
     case 'workoutTime':

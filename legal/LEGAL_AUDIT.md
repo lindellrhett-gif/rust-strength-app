@@ -24,6 +24,13 @@ log in lb or kg so totals compare fairly; both are now disclosed (policy 1.4.2,
 a patch: no new category of data and no new recipient, so nobody is asked to
 accept again).
 
+**Amended 18 September 2026 (policy 1.4.3)** for: rest days now keep a streak
+alive and count toward consistency on friends' profiles and the leaderboard.
+The server works those figures out and returns only the numbers, so rest days
+themselves still reach nobody; the policy now says the two figures reflect
+them. Also: finished workouts can be edited and deleted, and friends' workout
+time was being overstated (summed once per set) and is corrected.
+
 This supersedes the audit of 7 September, which predated the friend feed,
 reactions, XP and badges, offline storage, the moderation queue, progress charts
 and the welcome cards.
@@ -394,8 +401,8 @@ badge and they make a claim you would not make, that is your problem too.
 
 | Document | Status |
 |---|---|
-| Privacy Policy | Published, v1.4.2 |
-| Terms of Service | Published, v1.4.2 |
+| Privacy Policy | Published, v1.4.3 |
+| Terms of Service | Published, v1.4.3 |
 | Support page | Published |
 | Account deletion page | Published — Apple wants a web-reachable route |
 | Incident response plan | `legal/INCIDENT_RESPONSE.md` |

@@ -26,7 +26,9 @@ import {
   useSendFriendRequest,
 } from '@/data/friends';
 import { useProfile } from '@/data/profile';
-import { TIER_COLOR } from '@/domain/achievements';
+import { useRestDays } from '@/data/restDays';
+import { useWorkoutDates } from '@/data/stats';
+import { TIER_COLOR, consistency } from '@/domain/achievements';
 import type { ReactionId } from '@/domain/feed';
 import {
   LEADERBOARD_METRICS,
@@ -40,6 +42,7 @@ import {
   type LeaderboardMetric,
   type LeaderboardPeriod,
 } from '@/domain/leaderboard';
+import { currentStreak } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
@@ -201,12 +204,25 @@ function LeaderboardTab({ onFindFriends }: { onFindFriends: () => void }) {
   const [metric, setMetric] = useState<LeaderboardMetric>('streak');
   const [period, setPeriod] = useState<LeaderboardPeriod>('month');
   const board = useLeaderboard(period);
+  const workoutDates = useWorkoutDates();
+  const restDays = useRestDays();
   const today = todayLocal();
 
-  const rows = useMemo(
-    () => rankLeaderboard(board.data ?? [], metric, today, unit),
-    [board.data, metric, today, unit],
-  );
+  // Your own row uses the same local figures as your Profile, so the two never
+  // disagree. Friends' come from the server, worked out by the same rules.
+  const mine = useMemo(() => {
+    if (!workoutDates.data || !restDays.data) return null;
+    const rest = restDays.data.map((r) => r.rest_date);
+    return {
+      currentStreak: currentStreak(workoutDates.data, today, rest),
+      consistency: Math.round(consistency(workoutDates.data, today, 30, rest) * 100),
+    };
+  }, [workoutDates.data, restDays.data, today]);
+
+  const rows = useMemo(() => {
+    const people = (board.data ?? []).map((p) => (p.isMe && mine ? { ...p, ...mine } : p));
+    return rankLeaderboard(people, metric, unit);
+  }, [board.data, mine, metric, unit]);
   const aloneOnBoard = !board.isLoading && rows.filter((r) => !r.person.isMe).length === 0;
 
   return (

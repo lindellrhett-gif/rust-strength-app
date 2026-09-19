@@ -4,7 +4,7 @@ import { addDays } from '@/domain/stats';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
-const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const WEEKDAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 export interface MonthCalendarProps {
   /** Any date inside the month to render, as YYYY-MM-DD. */
@@ -25,7 +25,7 @@ export interface MonthCalendarProps {
 }
 
 /**
- * Monday-first month grid, drawn as an actual grid: every day is a bordered
+ * Sunday-first month grid, like a wall calendar, drawn as an actual grid: every day is a bordered
  * square box, so the month reads as a wall calendar rather than a scatter of
  * circles. Built from plain date arithmetic to stay consistent with the app's
  * `YYYY-MM-DD` local-date handling.
@@ -44,7 +44,7 @@ export function MonthCalendar({
 }: MonthCalendarProps) {
   const [y, m] = month.split('-').map(Number);
   const first = `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-01`;
-  const firstDow = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7; // Mon = 0
+  const firstDow = new Date(Date.UTC(y, m - 1, 1)).getUTCDay(); // Sun = 0
   const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
 
   const cells: (string | null)[] = [];

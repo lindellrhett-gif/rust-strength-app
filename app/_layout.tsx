@@ -98,6 +98,10 @@ function RootNavigator() {
         options={{ headerShown: true, title: 'Privacy & legal' }}
       />
       <Stack.Screen
+        name="workout/review"
+        options={{ headerShown: true, title: 'Review workout' }}
+      />
+      <Stack.Screen
         name="workout/summary"
         options={{ headerShown: true, title: 'Workout complete' }}
       />

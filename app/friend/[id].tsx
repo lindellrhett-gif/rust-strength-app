@@ -13,7 +13,6 @@ import { useFriendPRs, useFriendStats } from '@/data/friends';
 import { useProfile } from '@/data/profile';
 import { useBlockUser, useReportUser } from '@/data/privacy';
 import {
-  consistency,
   earnedCount,
   evaluateAchievements,
   totalTiersEarned,
@@ -21,8 +20,7 @@ import {
 import { evaluateBadges } from '@/domain/badges';
 import { computeXp, levelProgress, strengthScore } from '@/domain/xp';
 import { formatDurationShort } from '@/domain/duration';
-import { bestStreak, currentStreak, MUSCLE_GROUPS } from '@/domain/stats';
-import { todayLocal } from '@/lib/dates';
+import { MUSCLE_GROUPS } from '@/domain/stats';
 import { compact } from '@/lib/format';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -33,7 +31,6 @@ export default function FriendProfile() {
   const prs = useFriendPRs(id);
   const badgeIds = useGrantedBadges(id);
   const me = useProfile();
-  const today = todayLocal();
 
   const unit = me.data?.unit ?? 'lb';
   const router = useRouter();
@@ -49,8 +46,8 @@ export default function FriendProfile() {
       totalReps: stats.data.totalReps,
       totalSets: stats.data.totalSets,
       totalSeconds: stats.data.totalSeconds,
-      currentStreak: currentStreak(stats.data.workoutDates, today),
-      bestStreak: bestStreak(stats.data.workoutDates),
+      currentStreak: stats.data.currentStreak,
+      bestStreak: stats.data.bestStreak,
       // Weekly coverage is private to each user, so a friend's full-body
       // trophy cannot be evaluated here.
       groupsThisWeek: 0,
@@ -64,13 +61,12 @@ export default function FriendProfile() {
       // which is the same assumption the rest of this screen already makes.
       unit,
     });
-  }, [stats.data, today, prs.data, unit]);
+  }, [stats.data, prs.data, unit]);
 
   /**
    * Their level, worked out by the same code that works out yours, from the
-   * aggregates the server returns. One caveat: rest days stay private, so a
-   * streak they bridged with a rest day is not counted here and their level can
-   * read a little low. It never reads high.
+   * aggregates the server returns. Streaks come from the server with rest days
+   * counted, so their rest days stay private and the level still matches.
    */
   const xp = useMemo(() => {
     if (!stats.data) return null;
@@ -79,7 +75,7 @@ export default function FriendProfile() {
       totalSets: stats.data.totalSets,
       totalVolume: stats.data.totalVolume,
       totalActivities: stats.data.activityCount,
-      bestStreak: bestStreak(stats.data.workoutDates),
+      bestStreak: stats.data.bestStreak,
       friendCount: stats.data.friendCount,
       trophyTiers: totalTiersEarned(achievements),
       strengthScore: strengthScore(prs.data?.bestE1rm ?? {}),
@@ -102,9 +98,9 @@ export default function FriendProfile() {
   if (!stats.data) return <EmptyState title="Profile not found" />;
 
   const s = stats.data;
-  const streak = currentStreak(s.workoutDates, today);
-  const best = bestStreak(s.workoutDates);
-  const consistency30 = Math.round(consistency(s.workoutDates, today, 30) * 100);
+  const streak = s.currentStreak;
+  const best = s.bestStreak;
+  const consistency30 = s.consistency30;
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>

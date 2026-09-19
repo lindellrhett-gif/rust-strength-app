@@ -45,7 +45,7 @@ export const LEGAL = {
    * signed-in user is asked to accept again (see src/domain/consent.ts). A
    * patch — a clarification, a new contact address — asks nobody.
    */
-  version: '1.4.2',
+  version: '1.4.3',
 
   /** Last substantive edit to the documents. */
   lastUpdated: 'September 18, 2026',

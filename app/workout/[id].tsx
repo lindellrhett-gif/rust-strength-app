@@ -120,7 +120,8 @@ export default function WorkoutScreen() {
             // notification, after the session is already over.
             restTimer.stop();
             endWorkout.end(id!);
-            router.replace({ pathname: '/workout/summary', params: { id } });
+            // Review first: fix the length, name or a mistyped set, then the summary.
+            router.replace({ pathname: '/workout/review', params: { id, from: 'finish' } });
           },
         },
       ],
@@ -147,6 +148,27 @@ export default function WorkoutScreen() {
         },
       },
     ]);
+  };
+
+  /** Delete a finished workout from history, and everything logged in it. */
+  const deleteFromHistory = () => {
+    Alert.alert(
+      'Delete this workout?',
+      `This removes it and all ${workingCount} set${workingCount === 1 ? '' : 's'} in it from your history. They will no longer count toward your stats, records, streak or weight suggestions. This cannot be undone.`,
+      [
+        { text: 'Keep it', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () =>
+            cancelWorkout.mutate(id!, {
+              onSuccess: () => router.back(),
+              onError: (e) =>
+                Alert.alert('Could not delete', e instanceof Error ? e.message : 'Please try again.'),
+            }),
+        },
+      ],
+    );
   };
 
   const confirmDelete = (setId: string) =>
@@ -255,21 +277,29 @@ export default function WorkoutScreen() {
             </View>
           </>
         ) : (
-          <View style={styles.footerRow}>
+          <>
+            <View style={styles.footerRow}>
+              <Button
+                label="Edit workout"
+                variant="secondary"
+                onPress={() => router.push({ pathname: '/workout/review', params: { id } })}
+                style={styles.footerBtn}
+              />
+              <Button
+                label="Save as preset"
+                variant="secondary"
+                onPress={() => setShowSave(true)}
+                disabled={!hasSets}
+                style={styles.footerBtn}
+              />
+            </View>
             <Button
-              label="Save as preset"
-              variant="secondary"
-              onPress={() => setShowSave(true)}
-              disabled={!hasSets}
-              style={styles.footerBtn}
+              label="Delete workout"
+              variant="danger"
+              onPress={deleteFromHistory}
+              loading={cancelWorkout.isPending}
             />
-            <Button
-              label="Back"
-              variant="secondary"
-              onPress={() => router.back()}
-              style={styles.footerBtn}
-            />
-          </View>
+          </>
         )}
       </View>
 
