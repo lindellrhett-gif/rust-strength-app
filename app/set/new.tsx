@@ -15,7 +15,13 @@ import { keyboardAware } from '@/components/keyboard';
 import { useCreateExercise, useExercises } from '@/data/exercises';
 import { useCreateMachine, useMachines } from '@/data/machines';
 import { useProfile, useUpdateProfile } from '@/data/profile';
-import { useAddSet, useExerciseHistory, useSetsForWorkout } from '@/data/sets';
+import {
+  useAddSet,
+  useExerciseHistory,
+  useMachineSetHistory,
+  useSetsForWorkout,
+} from '@/data/sets';
+import { useWorkoutExercises } from '@/data/templates';
 import {
   asLoadType,
   assistProblem,
@@ -26,6 +32,7 @@ import {
   formatSetSummary,
 } from '@/domain/loadType';
 import { lastTopSet } from '@/domain/lastSession';
+import { historyForMachine } from '@/domain/machines';
 import {
   MAX_REPS,
   recommendAssisted,
@@ -52,13 +59,17 @@ export default function NewSet() {
   const machines = useMachines();
   const profile = useProfile();
   const existingSets = useSetsForWorkout(workoutId);
+  const slots = useWorkoutExercises(workoutId);
+  const machineSets = useMachineSetHistory();
   const createExercise = useCreateExercise();
   const createMachine = useCreateMachine();
   const addSet = useAddSet();
   const restTimer = useRestTimer();
 
   const [exerciseId, setExerciseId] = useState<string | null>(presetExerciseId ?? null);
-  const [machineId, setMachineId] = useState<string | null>(null);
+  // The machine chosen here. Until one is, the exercise's last machine is used.
+  const [pickedMachineId, setPickedMachineId] = useState<string | null>(null);
+  const [machineTouched, setMachineTouched] = useState(false);
   const [weight, setWeight] = useState(0);
   const [weightTouched, setWeightTouched] = useState(false);
   // Assisted exercises: the assistance on the machine.
@@ -84,15 +95,30 @@ export default function NewSet() {
 
   const exercise = exercises.data?.find((e) => e.id === exerciseId) ?? null;
   const loadType = asLoadType(exercise?.load_type);
+  const history = useExerciseHistory(exerciseId ?? undefined);
+
+  // Default to the machine this exercise was last done on, so its own history
+  // and any learned conversion apply without a tap.
+  const lastMachineId = useMemo(() => {
+    const known = new Set((machines.data ?? []).map((m) => m.id));
+    const newest = (history.data ?? []).find((s) => !s.isWarmup && s.machineId && known.has(s.machineId));
+    return newest?.machineId ?? null;
+  }, [history.data, machines.data]);
+  const machineId = machineTouched ? pickedMachineId : lastMachineId;
   const machine = machines.data?.find((m) => m.id === machineId) ?? null;
+  const machineLabel = (id: string) => machines.data?.find((m) => m.id === id)?.label ?? 'another machine';
   const unit = profile.data?.unit ?? 'lb';
   const increment = machine?.increment ?? 5;
   // Plates and vests come in smaller steps than a weight stack.
   const addedStep = unit === 'kg' ? 2.5 : 5;
+  // A preset's rep range for this exercise wins over the one in Profile:
+  // calf raises planned at 10–15 are suggested a weight for 10–15.
+  const slot = (slots.data ?? []).find((s) => s.exerciseId === exerciseId) ?? null;
   const [repLow, repHigh] = repRangeOrDefault(
-    profile.data?.target_rep_low ?? 6,
-    profile.data?.target_rep_high ?? 8,
+    slot?.targetRepLow ?? profile.data?.target_rep_low ?? 6,
+    slot?.targetRepHigh ?? profile.data?.target_rep_high ?? 8,
   );
+  const rangeFromPreset = slot != null;
 
   const bodyWeight = profile.data?.body_weight ?? null;
 
@@ -109,8 +135,6 @@ export default function NewSet() {
     setWeight(bodyWeight);
   };
 
-  const history = useExerciseHistory(exerciseId ?? undefined);
-
   const priorWorkingForExercise = (existingSets.data ?? []).filter(
     (s) => s.exercise_id === exerciseId && !s.is_warmup,
   ).length;
@@ -123,17 +147,44 @@ export default function NewSet() {
   }, [history.data]);
   const displayAdded = addedTouched ? added : lastAdded;
 
+  // History in the units of the machine in use: its own sets, plus sets on
+  // other machines scaled by what has been learned about how they compare.
+  const onMachine = useMemo(
+    () =>
+      history.data ? historyForMachine(history.data, machineId, machineSets.data ?? []) : null,
+    [history.data, machineId, machineSets.data],
+  );
+
   const weightedRec = useMemo(() => {
-    if (!exerciseId || !history.data || loadType !== 'weighted') return null;
+    if (!exerciseId || !onMachine || loadType !== 'weighted') return null;
     return recommendNextWeight({
-      history: history.data,
+      history: onMachine.history,
       targetRepLow: repLow,
       targetRepHigh: repHigh,
       increment,
       currentMachineId: machineId,
       isFirstWorkingSet,
     });
-  }, [exerciseId, history.data, loadType, repLow, repHigh, increment, machineId, isFirstWorkingSet]);
+  }, [exerciseId, onMachine, loadType, repLow, repHigh, increment, machineId, isFirstWorkingSet]);
+
+  // What to say about machines under the suggestion.
+  const machineNotes = useMemo(() => {
+    if (!onMachine || loadType !== 'weighted' || !machine) return [] as string[];
+    const notes = onMachine.conversions.map(
+      (c) =>
+        `Includes your sets on ${machineLabel(c.machineId)}, scaled ×${trimWeight(c.ratio)} (learned from ${c.pairs} session${c.pairs === 1 ? '' : 's'}).`,
+    );
+    if (onMachine.usedUnrecorded) notes.push('Based on earlier sets with no machine recorded.');
+    return notes;
+    // machineLabel reads machines.data, which is in the list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onMachine, loadType, machine, machines.data]);
+  const firstTimeOnMachine =
+    loadType === 'weighted' &&
+    machine != null &&
+    onMachine != null &&
+    onMachine.history.length === 0 &&
+    onMachine.unmatched.length > 0;
 
   const assistedRec = useMemo(() => {
     if (!exerciseId || !history.data || loadType !== 'assisted') return null;
@@ -218,13 +269,17 @@ export default function NewSet() {
   const pickExercise = (id: string) => {
     setExerciseId(id);
     setShowExercisePicker(false);
+    // Back to "the machine this exercise was last done on".
+    setMachineTouched(false);
+    setPickedMachineId(null);
     resetInputs();
     setIsBodyweight(false);
     if (reps === 8) setReps(Math.round((repLow + repHigh) / 2));
   };
 
   const pickMachine = (id: string) => {
-    setMachineId(id);
+    setMachineTouched(true);
+    setPickedMachineId(id === NO_MACHINE ? null : id);
     setShowMachinePicker(false);
     setWeightTouched(false);
     setAssistTouched(false);
@@ -323,12 +378,14 @@ export default function NewSet() {
       label: e.name,
       sublabel: exerciseSublabel(e.muscle_group, asLoadType(e.load_type)),
     })) ?? [];
-  const machineOptions: Option[] =
-    machines.data?.map((m) => ({
+  const machineOptions: Option[] = [
+    { id: NO_MACHINE, label: 'No machine', sublabel: 'Free weights, or not on a stack' },
+    ...(machines.data?.map((m) => ({
       id: m.id,
       label: m.label,
       sublabel: `${trimWeight(m.increment)} ${unit} steps`,
-    })) ?? [];
+    })) ?? []),
+  ];
 
   const repsStepper = (
     <NumberStepper
@@ -440,7 +497,19 @@ export default function NewSet() {
                   Working e1RM ≈ {trimWeight(weightedRec.e1rm ?? 0)} {unit} ·{' '}
                   {weightedRec.confidence} confidence
                 </Text>
+                {machineNotes.map((n) => (
+                  <Text key={n} style={text.caption}>
+                    {n}
+                  </Text>
+                ))}
               </>
+            ) : firstTimeOnMachine && machine ? (
+              <Text style={text.bodyMuted}>
+                First time doing this on {machine.label}. Pick a weight by feel: after this session
+                the app learns how it compares with{' '}
+                {onMachine!.unmatched.map(machineLabel).join(' and ')} and converts your weights
+                from then on.
+              </Text>
             ) : (
               <Text style={text.bodyMuted}>
                 No history for this exercise yet. Log this set and the next suggestion will use it.
@@ -455,6 +524,12 @@ export default function NewSet() {
               </Text>
             ) : null}
           </Card>
+        ) : null}
+
+        {exerciseId && rangeFromPreset && (loadType === 'weighted' || loadType === 'assisted') ? (
+          <Text style={[text.caption, styles.rangeNote]}>
+            Aiming for {repLow}–{repHigh} reps, from this workout&apos;s preset.
+          </Text>
         ) : null}
 
         {/* Only on screen once a rest is actually running. */}
@@ -692,6 +767,9 @@ function BodyweightPrompt({ unit }: { unit: string }) {
   );
 }
 
+/** The picker's "No machine" option. */
+const NO_MACHINE = '__none__';
+
 function SelectorRow({
   label,
   value,
@@ -726,6 +804,7 @@ const styles = StyleSheet.create({
   suggestBig: { color: colors.primary, fontSize: 28, fontWeight: '800' },
   under: { marginTop: spacing.sm },
   lastTime: { marginTop: spacing.sm },
+  rangeNote: { marginTop: -spacing.sm },
   lastTimeSet: { color: colors.text, fontWeight: '700' },
   prompt: { gap: spacing.sm },
   warmupRow: {

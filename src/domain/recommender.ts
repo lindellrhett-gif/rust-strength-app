@@ -178,8 +178,10 @@ function targetLoad(input: RecommendInput, repRange: [number, number]): Target |
   const last = estimate.sortedWorkingSets[estimate.sortedWorkingSets.length - 1];
   const targetReps = Math.round((repRange[0] + repRange[1]) / 2);
 
-  // Invert Epley for the target reps at RPE 10 (no reps in reserve).
-  const baseWeight = estimate.value / (1 + EPLEY_K * targetReps);
+  // Invert Epley for the target reps at RPE 10 (no reps in reserve), capped
+  // exactly as the estimate was. Otherwise a 10–15 range would be priced with
+  // more reps than any set was ever credited with, and come out too light.
+  const baseWeight = estimate.value / (1 + EPLEY_K * Math.min(targetReps, MAX_EFFECTIVE_REPS));
 
   const correction = rpeCorrection(last, repRange[0]);
   // Never jump more than MAX_STEP_CHANGE from the last set.

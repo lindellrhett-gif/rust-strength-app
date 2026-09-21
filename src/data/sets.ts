@@ -8,6 +8,7 @@ import { newId } from '@/lib/ids';
 import type { MuscleGroup, SetRow } from '@/lib/database.types';
 import { e1rmFromSet, type LoggedSet } from '@/domain/recommender';
 import type { SessionSet } from '@/domain/lastSession';
+import type { MachineSet } from '@/domain/machines';
 import type { ProgressSet } from '@/domain/progress';
 import { insertSetRow } from './mutationDefaults';
 import { useAuth } from '@/providers/AuthProvider';
@@ -86,7 +87,9 @@ export function useExerciseHistory(exerciseId: string | undefined) {
         )
         .eq('exercise_id', exerciseId!)
         .order('performed_at', { ascending: false })
-        .limit(20);
+        // Enough to span several machines; the recommender itself reads only
+        // the last few sets on the machine in use.
+        .limit(200);
       if (error) throw error;
       return (data ?? []).map((s) => ({
         workoutId: s.workout_id,
@@ -101,6 +104,42 @@ export function useExerciseHistory(exerciseId: string | undefined) {
         addedWeight: s.added_weight,
         durationSeconds: s.duration_seconds,
       }));
+    },
+  });
+}
+
+/**
+ * Working sets on any machine, across every exercise: what the app learns
+ * machine-to-machine conversions from. Assisted sets and holds are left out;
+ * their weight is not a reading off the stack.
+ */
+export function useMachineSetHistory() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.machineHistory,
+    enabled: !!userId,
+    queryFn: async (): Promise<MachineSet[]> => {
+      const { data, error } = await supabase
+        .from('sets')
+        .select('exercise_id, workout_id, machine_id, weight, reps, rpe, performed_at')
+        .not('machine_id', 'is', null)
+        .eq('is_warmup', false)
+        .is('assist_weight', null)
+        .is('duration_seconds', null)
+        .order('performed_at', { ascending: false })
+        .limit(1500);
+      if (error) throw error;
+      return (data ?? [])
+        .filter((s) => s.machine_id != null)
+        .map((s) => ({
+          exerciseId: s.exercise_id,
+          workoutId: s.workout_id,
+          machineId: s.machine_id!,
+          weight: s.weight,
+          reps: s.reps,
+          rpe: s.rpe,
+          performedAt: s.performed_at,
+        }));
     },
   });
 }
@@ -146,6 +185,7 @@ export function useAddSet() {
       client.invalidateQueries({ queryKey: qk.setsForWorkout(row.workout_id) });
       client.invalidateQueries({ queryKey: qk.exerciseHistory(row.exercise_id) });
       client.invalidateQueries({ queryKey: qk.exerciseProgress(row.exercise_id) });
+      client.invalidateQueries({ queryKey: qk.machineHistory });
       client.invalidateQueries({ queryKey: qk.totals });
       client.invalidateQueries({ queryKey: qk.prs });
       client.invalidateQueries({ queryKey: ['stats', 'coverage'] });
