@@ -41,6 +41,7 @@ export default function NewActivity() {
   const [manual, setManual] = useState(false);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(30);
+  const [seconds, setSeconds] = useState(0);
 
   const [distance, setDistance] = useState(0);
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>('mi');
@@ -59,7 +60,7 @@ export default function NewActivity() {
     return () => clearInterval(id);
   }, [running]);
 
-  const durationSeconds = manual ? toSeconds(hours, minutes) : liveSeconds;
+  const durationSeconds = manual ? toSeconds(hours, minutes, seconds) : liveSeconds;
   const fields = ACTIVITY_FIELDS[kind];
 
   const toggleTimer = () => {
@@ -91,6 +92,7 @@ export default function NewActivity() {
         const split = fromSeconds(liveSeconds);
         setHours(split.hours);
         setMinutes(split.minutes);
+        setSeconds(split.seconds);
       }
     }
     setManual(toManual);
@@ -176,7 +178,14 @@ export default function NewActivity() {
                 onChange={setMinutes}
                 min={0}
                 max={59}
-                step={5}
+              />
+              {/* Exact, so a run time is a time and not a rounded one. */}
+              <NumberStepper
+                label="Seconds"
+                value={seconds}
+                onChange={setSeconds}
+                min={0}
+                max={59}
               />
             </>
           ) : (

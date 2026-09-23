@@ -10,7 +10,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 ### You give us directly
 
-- **Email address and password.** Required to create an account and sign in. We also use your email address to send you a link to confirm it when you sign up, and a one-time code if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
+- **Email address and password.** Required to create an account and sign in. We also use your email address to send you a one-time code to confirm it when you sign up, and another if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
 - **Username and display name.** Your account starts with a randomly generated handle (for example `lifter_7f3a91`). It contains nothing about you. You may change it, and only after you choose your own handle do you become findable by other users.
 - **Bodyweight (optional).** Used only to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine. You can leave it blank; assisted exercises then ask for it before you log them.
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.

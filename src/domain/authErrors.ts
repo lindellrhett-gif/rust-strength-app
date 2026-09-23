@@ -24,4 +24,4 @@ export function isUnconfirmedEmail(error: unknown): boolean {
 }
 
 export const UNCONFIRMED_MESSAGE =
-  'Your email is not confirmed yet. Tap the link in the email we sent when you signed up, then sign in. Cannot find it? Send a new one below.';
+  'Your email is not confirmed yet. Enter the code we emailed you when you signed up. Cannot find it? Ask for a new one below.';

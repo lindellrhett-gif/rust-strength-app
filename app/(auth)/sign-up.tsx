@@ -4,12 +4,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { Checkbox } from '@/components/Checkbox';
+import { confirmErrorMessage } from '@/domain/emailConfirm';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
 
 export default function SignUp() {
   const { signUp, signIn } = useAuth();
+  const [submitted, setSubmitted] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -33,28 +35,35 @@ export default function SignUp() {
       return;
     }
     setBusy(true);
+    let needsConfirmation = true;
     try {
       // Consent travels with the sign-up request and is saved when the account
       // is created, so it is on record even before the email is confirmed.
-      await signUp(email.trim(), password, {
+      const result = await signUp(email.trim(), password, {
         termsVersion: LEGAL.version,
         ageConfirmed: ageOk,
       });
+      needsConfirmation = result.needsConfirmation;
+      setSubmitted(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not create account.');
+      setError(confirmErrorMessage(e));
       setBusy(false);
       return;
     }
 
-    // With email confirmation off this signs straight in, and the (auth)
-    // layout redirects into the tabs once the session lands. With it on, it
-    // fails until the link is tapped, which is the expected path.
+    if (needsConfirmation) {
+      // The code goes in on the next screen, which can also send a new one.
+      router.replace({ pathname: '/(auth)/confirm-email', params: { email: email.trim() } });
+      setBusy(false);
+      return;
+    }
+
+    // Confirmation is switched off, so the account is usable now: sign in and
+    // the (auth) layout redirects into the tabs once the session lands.
     try {
       await signIn(email.trim(), password);
     } catch {
-      setNotice(
-        `Almost done. We emailed a confirmation link to ${email.trim()}. Tap it, then come back here and sign in. Check your spam folder if it is not there in a minute.`,
-      );
+      setNotice('Account created. Sign in to continue.');
     }
     setBusy(false);
   };
@@ -113,6 +122,21 @@ export default function SignUp() {
             size="lg"
             disabled={!ageOk || !termsOk}
           />
+          {/* A sign-up that went through but left them here (confirmation off
+              and the sign-in failed) still needs a way on. */}
+          {submitted ? (
+            <Pressable
+              onPress={() =>
+                router.replace({
+                  pathname: '/(auth)/confirm-email',
+                  params: { email: email.trim() },
+                })
+              }
+              hitSlop={8}
+            >
+              <Text style={styles.legalLink}>Enter the code we emailed</Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <Link href="/(auth)/sign-in" style={styles.link}>

@@ -40,8 +40,14 @@ describe('formatDurationShort', () => {
     expect(formatDurationShort(2 * 3600 + 30 * 60)).toBe('2h 30m');
   });
 
-  it('shows <1m for sub-minute totals', () => {
-    expect(formatDurationShort(0)).toBe('<1m');
+  it('shows 0m for nothing at all, like every other stat', () => {
+    expect(formatDurationShort(0)).toBe('0m');
+    expect(formatDurationShort(-10)).toBe('0m');
+    expect(formatDurationShort(NaN)).toBe('0m');
+  });
+
+  it('shows <1m for a real but sub-minute total', () => {
+    expect(formatDurationShort(1)).toBe('<1m');
     expect(formatDurationShort(59)).toBe('<1m');
   });
 });

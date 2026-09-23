@@ -119,17 +119,27 @@ describe('duration conversion', () => {
   });
 
   it('round-trips back to hours and minutes', () => {
-    expect(fromSeconds(5400)).toEqual({ hours: 1, minutes: 30 });
-    expect(fromSeconds(0)).toEqual({ hours: 0, minutes: 0 });
+    expect(fromSeconds(5400)).toEqual({ hours: 1, minutes: 30, seconds: 0 });
+    expect(fromSeconds(0)).toEqual({ hours: 0, minutes: 0, seconds: 0 });
   });
 
   it('drops leftover seconds when splitting', () => {
-    expect(fromSeconds(5445)).toEqual({ hours: 1, minutes: 30 });
+    // Seconds are kept: a run time is a personal record, not a rounded one.
+    expect(fromSeconds(5445)).toEqual({ hours: 1, minutes: 30, seconds: 45 });
   });
 
   it('treats nonsense input as zero', () => {
     expect(toSeconds(NaN, NaN)).toBe(0);
-    expect(fromSeconds(-100)).toEqual({ hours: 0, minutes: 0 });
+    expect(fromSeconds(-100)).toEqual({ hours: 0, minutes: 0, seconds: 0 });
+  });
+
+  it('keeps a typed-in run time exact to the second', () => {
+    expect(toSeconds(0, 22, 47)).toBe(22 * 60 + 47);
+    expect(toSeconds(1, 5, 9)).toBe(3600 + 5 * 60 + 9);
+    // A time entered with no seconds still works.
+    expect(toSeconds(0, 30)).toBe(1800);
+    const split = fromSeconds(toSeconds(0, 22, 47));
+    expect(split).toEqual({ hours: 0, minutes: 22, seconds: 47 });
   });
 });
 

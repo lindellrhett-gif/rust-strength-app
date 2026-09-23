@@ -24,6 +24,13 @@ log in lb or kg so totals compare fairly; both are now disclosed (policy 1.4.2,
 a patch: no new category of data and no new recipient, so nobody is asked to
 accept again).
 
+**Amended 23 September 2026 (policy 1.4.4).** New accounts are confirmed with
+a code typed into the app rather than a link, after testers reported links that
+were already "expired" on arrival: a confirmation link is single-use and mail
+apps and security scanners open links before the recipient does. The policy's
+description of what the email contains is updated to match. No change to what
+is collected or who receives it, so it is a patch and nobody re-accepts.
+
 **Amended 18 September 2026 (policy 1.4.3)** for: rest days now keep a streak
 alive and count toward consistency on friends' profiles and the leaderboard.
 The server works those figures out and returns only the numbers, so rest days
@@ -401,8 +408,8 @@ badge and they make a claim you would not make, that is your problem too.
 
 | Document | Status |
 |---|---|
-| Privacy Policy | Published, v1.4.3 |
-| Terms of Service | Published, v1.4.3 |
+| Privacy Policy | Published, v1.4.4 |
+| Terms of Service | Published, v1.4.4 |
 | Support page | Published |
 | Account deletion page | Published — Apple wants a web-reachable route |
 | Incident response plan | `legal/INCIDENT_RESPONSE.md` |

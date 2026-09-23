@@ -26,9 +26,12 @@ export function formatClock(totalSeconds: number): string {
     : `${minutes}:${pad(seconds)}`;
 }
 
-/** Compact human duration for stat tiles: "12h 30m", "45m", "<1m". */
+/** Compact human duration for stat tiles: "12h 30m", "45m", "<1m", "0m". */
 export function formatDurationShort(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds || 0));
+  // Nothing logged reads as 0m, like every other stat. Only a real but tiny
+  // amount is worth saying "less than a minute" about.
+  if (s === 0) return '0m';
   if (s < 60) return '<1m';
   const hours = Math.floor(s / 3600);
   const minutes = Math.floor((s % 3600) / 60);

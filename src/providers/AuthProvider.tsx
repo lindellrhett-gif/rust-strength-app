@@ -28,10 +28,19 @@ interface AuthState {
   /**
    * Creates the account with the user's consent attached, so it is recorded
    * even when email confirmation means nobody is signed in yet.
+   *
+   * Resolves with `needsConfirmation`: true when the account exists but no
+   * session was issued, which means the emailed code has to be entered first.
    */
-  signUp: (email: string, password: string, consent: SignUpConsent) => Promise<void>;
-  /** Sends the confirmation email again, for a link that expired or never arrived. */
+  signUp: (
+    email: string,
+    password: string,
+    consent: SignUpConsent,
+  ) => Promise<{ needsConfirmation: boolean }>;
+  /** Sends the confirmation email again, for a code that expired or never arrived. */
   resendConfirmation: (email: string) => Promise<void>;
+  /** Confirms a new account with the code from the email, which signs them in. */
+  confirmEmail: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   /**
    * True from the moment a reset code is submitted until the new password is
@@ -120,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
       },
       signUp: async (email, password, consent) => {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -133,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
         if (error) throw error;
+        return { needsConfirmation: data.session == null };
       },
       resendConfirmation: async (email) => {
         const { error } = await supabase.auth.resend({
@@ -140,6 +150,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email,
           options: { emailRedirectTo: LEGAL.emailConfirmedUrl },
         });
+        if (error) throw error;
+      },
+      confirmEmail: async (email, code) => {
+        // 'signup' is the type Supabase issues for a new account's code. It
+        // both confirms the address and signs them in, so the (auth) layout
+        // takes them into the app from here.
+        const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'signup' });
         if (error) throw error;
       },
       signOut: async () => {

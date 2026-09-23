@@ -285,17 +285,24 @@ export function validateActivity(draft: ActivityDraft): ValidationResult {
   return { ok: true, error: null };
 }
 
-/** Turn hours/minutes pickers into the seconds the record stores. */
-export function toSeconds(hours: number, minutes: number): number {
-  const h = Number.isFinite(hours) ? Math.max(0, Math.floor(hours)) : 0;
-  const m = Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) : 0;
-  return h * 3600 + m * 60;
+/**
+ * Turn the hours/minutes/seconds pickers into the seconds the record stores.
+ * Seconds are kept exactly: a 22:47 five-kilometre run is a personal record,
+ * and rounding it to the minute would lose the thing being tracked.
+ */
+export function toSeconds(hours: number, minutes: number, seconds = 0): number {
+  const whole = (n: number) => (Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
+  return whole(hours) * 3600 + whole(minutes) * 60 + whole(seconds);
 }
 
-/** Split seconds back into whole hours and leftover minutes, for editing. */
-export function fromSeconds(seconds: number): { hours: number; minutes: number } {
-  const s = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
-  return { hours: Math.floor(s / 3600), minutes: Math.floor((s % 3600) / 60) };
+/** Split seconds back into hours, minutes and seconds, for editing. */
+export function fromSeconds(total: number): {
+  hours: number;
+  minutes: number;
+  seconds: number;
+} {
+  const s = Number.isFinite(total) ? Math.max(0, Math.floor(total)) : 0;
+  return { hours: Math.floor(s / 3600), minutes: Math.floor((s % 3600) / 60), seconds: s % 60 };
 }
 
 export interface ActivityTotals {

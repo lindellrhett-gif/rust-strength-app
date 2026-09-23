@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { UNCONFIRMED_MESSAGE, isUnconfirmedEmail } from '@/domain/authErrors';
-import { RESEND_COOLDOWN_SECONDS, resetErrorMessage } from '@/domain/passwordReset';
+import { confirmErrorMessage } from '@/domain/emailConfirm';
+import { RESEND_COOLDOWN_SECONDS } from '@/domain/passwordReset';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
 
@@ -52,14 +53,17 @@ export default function SignIn() {
     try {
       await resendConfirmation(email.trim());
       setError(null);
-      setNotice(`Sent. Check ${email.trim()} for a new confirmation link, including spam.`);
+      setNotice(`Sent. Check ${email.trim()} for a confirmation code, including spam.`);
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
-      setError(resetErrorMessage(e));
+      setError(confirmErrorMessage(e));
     } finally {
       setResending(false);
     }
   };
+
+  const enterCode = () =>
+    router.push({ pathname: '/(auth)/confirm-email', params: { email: email.trim() } });
 
   // Carries over whatever was typed, so nobody enters their email twice.
   const forgot = () =>
@@ -96,13 +100,16 @@ export default function SignIn() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         {unconfirmed ? (
-          <Button
-            label={cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend confirmation email'}
-            variant="secondary"
-            onPress={resend}
-            loading={resending}
-            disabled={cooldown > 0}
-          />
+          <>
+            <Button label="Enter confirmation code" variant="secondary" onPress={enterCode} />
+            <Button
+              label={cooldown > 0 ? `Resend in ${cooldown}s` : 'Email me a new code'}
+              variant="ghost"
+              onPress={resend}
+              loading={resending}
+              disabled={cooldown > 0}
+            />
+          </>
         ) : null}
         <Button label="Sign in" onPress={submit} loading={busy} size="lg" />
       </View>
