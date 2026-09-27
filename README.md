@@ -39,6 +39,7 @@ AI development, software engineering, or cybersecurity.
 | **App code** | About 19,600 lines of TypeScript across the screens, components, domain logic and data layer |
 | **Database** | About 3,000 lines of SQL in 14 migrations, including tables, Row Level Security policies and server functions |
 | **Tests** | 519 Jest tests in 36 suites, plus strict TypeScript and ESLint |
+| **Tools** | Git, EAS Build, TestFlight, and Claude Code for AI-assisted development |
 | **Users** | Beta tested on TestFlight before submission |
 
 ### A five-minute code tour
@@ -263,9 +264,8 @@ I built Rust Strength on my own:
 - **Launch:** handled the builds, TestFlight, and App Store submission, plus the
   privacy policy, terms, and account deletion that App Review requires.
 
-I used AI-assisted development with Claude Code throughout. I owned the
-architecture and data design, reviewed the generated code, and led debugging
-and testing.
+Claude Code was one of the tools I used during development. I owned the
+architecture and data design, and led debugging and testing.
 
 **Links:** [Portfolio](https://lindellrhett-gif.github.io/) ·
 [Support and legal pages](https://lindellrhett-gif.github.io/rust-strength/) ·
