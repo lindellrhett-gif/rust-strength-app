@@ -19,6 +19,72 @@ TestFlight · **Role:** solo developer · **Built:** September 2026
 
 ---
 
+## For employers and reviewers
+
+Hi, I'm Rhett Lindell, a Computer Science student (Cybersecurity minor) at the
+University of North Dakota, graduating May 2029. I'm looking for internships in
+AI development, software engineering, or cybersecurity.
+
+[Portfolio](https://lindellrhett-gif.github.io/) ·
+[Résumé](https://lindellrhett-gif.github.io/resume.html) ·
+[LinkedIn](https://www.linkedin.com/in/rhett-lindell) ·
+[lindellrhett@gmail.com](mailto:lindellrhett@gmail.com)
+
+### At a glance
+
+| | |
+|---|---|
+| **Scope** | A full iOS app, from the database to the App Store submission, built solo |
+| **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026 |
+| **App code** | About 19,600 lines of TypeScript across the screens, components, domain logic and data layer |
+| **Database** | About 3,000 lines of SQL in 14 migrations, including tables, Row Level Security policies and server functions |
+| **Tests** | 519 Jest tests in 36 suites, plus strict TypeScript and ESLint |
+| **Users** | Beta tested on TestFlight before submission |
+
+### A five-minute code tour
+
+If you only open a few files, open these:
+
+| What it shows | Where to look |
+|---|---|
+| **Algorithm design:** the next-set weight recommender (estimated one-rep max, smoothing, safety limits) | [`src/domain/recommender.ts`](src/domain/recommender.ts) · [tests](__tests__/recommender.test.ts) |
+| **Working from real data:** learning the conversion between two gym machines from paired sessions | [`src/domain/machines.ts`](src/domain/machines.ts) · [tests](__tests__/machines.test.ts) |
+| **Database security:** friendships, and profiles only visible to friends, enforced by Row Level Security | [`supabase/migrations/0002_milestone2.sql`](supabase/migrations/0002_milestone2.sql) |
+| **A privacy fix and a performance fix** found in my own pre-launch review | [`supabase/migrations/0009_feed_hardening.sql`](supabase/migrations/0009_feed_hardening.sql) |
+| **Advanced SQL:** streaks and consistency calculated on the server with a gaps-and-islands query | [`supabase/migrations/0014_streaks_friend_time.sql`](supabase/migrations/0014_streaks_friend_time.sql) |
+| **Offline-first sync:** writes queued in order and replayed when the connection returns | [`src/data/mutationDefaults.ts`](src/data/mutationDefaults.ts) · [`src/data/workouts.ts`](src/data/workouts.ts) |
+| **Debugging an auth race:** holding data requests until an expired session refreshes | [`src/lib/sessionGuard.ts`](src/lib/sessionGuard.ts) · [`src/lib/supabase.ts`](src/lib/supabase.ts) |
+| **One source for legal text:** the Privacy Policy and Terms generated for the app and the website from the same code | [`scripts/build-legal.js`](scripts/build-legal.js) |
+
+### Problems I solved
+
+- **"Workout not found" after an hour away.** While the app sat in the
+  background, the sign-in token expired, so requests went out with only the
+  public key. Row Level Security then correctly returned nothing. A fetch guard
+  now holds those requests until the session refreshes, and retries them with
+  backoff.
+- **A friend's workout time showing 23 hours instead of 2.** A SQL query joined
+  sets before adding up session lengths, so each workout was counted once per
+  set. I split the totals into separate lateral joins.
+- **Users unable to confirm their email.** Some email security filters open
+  links to scan them, which can use up a single-use confirmation link before
+  the user taps it. Sign-up and password reset now use 6-digit codes instead.
+- **Getting stronger looked like a machine difference.** The first
+  machine-ratio model paired a new personal record with an older session on the
+  other machine. Pairing each session only with its nearest counterpart inside a
+  time window fixed it, and there are tests for it.
+
+### Run the tests
+
+The core logic is pure TypeScript, so the tests need no database or phone:
+
+```bash
+npm install
+npm test
+```
+
+---
+
 ## Features
 
 **Training**
