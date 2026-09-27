@@ -1,161 +1,202 @@
-# Gym App
+# Rust Strength
 
-Workout tracker with **autoregulated weight recommendations**. Log each set with
-weight, reps, RPE and the machine you used; the app estimates your one-rep max
-(e1RM) and tells you what to load for the next set to hit failure inside your
-target rep range (default 6–8).
+**A workout tracker for iPhone that tells you what weight to put on the bar for your next set.**
 
-**Milestone 1** (this build): auth, workout logging loop, the recommender,
-history, and stats (all-time totals, streaks, weekly whole-body coverage, PRs).
-Deferred: AI-generated workouts, calendar/planning, friends/social, ML
-personalization.
+You log a set with its weight, reps, and how hard it felt. The app estimates
+your current strength from your recent sets and suggests the load for the next
+one. Over time it learns your gym's machines too, so a PR on one cable stack
+carries over to a differently labeled one.
 
-Stack: Expo (React Native) + TypeScript, Supabase (Postgres + Auth + RLS),
-TanStack Query. Permanent dark theme.
+**Status:** submitted to the App Store (in review) after beta testing on
+TestFlight · **Role:** solo developer · **Built:** September 2026
+
+<p align="center">
+  <img src="media/screenshots/suggestion.png" width="200" alt="Add set screen with a suggested next weight of 230 lb for 4 to 6 reps, the estimated one-rep max, last session's top set, and a rest timer" />
+  <img src="media/screenshots/today.png" width="200" alt="Today screen with a 5-day streak, pounds lifted, sets, and total training time" />
+  <img src="media/screenshots/workout.png" width="200" alt="Active workout from a preset, with elapsed time, planned sets, and a rest timer" />
+  <img src="media/screenshots/friends.png" width="200" alt="Friends feed showing finished sessions with personal records, volume, sets and reps" />
+</p>
 
 ---
 
-## 1. Prerequisites
+## Features
 
-- **Node.js 20 LTS** — <https://nodejs.org>. Verify: `node -v`, `npm -v`.
-- **Expo Go** app on your phone (iOS App Store / Google Play) for testing.
-- A free **Supabase** account — <https://supabase.com>.
+**Training**
+- **Next-set weight suggestions** from your recent history, aimed at the rep
+  range you set for that exercise.
+- **Machine-aware recommendations.** The app keeps each machine's history
+  separate and learns the conversion between two machines from sessions done
+  close together.
+- **Four exercise types:** weighted, bodyweight (with added weight), assisted
+  (like an assisted pull-up machine), and **timed holds** with a built-in
+  countdown timer and suggested hold times.
+- **Rest timer** that starts when you save a set, with a notification when rest
+  is over, even with the phone locked.
+- **Presets** with a rep range per exercise, and a **workout generator** that
+  builds a session from your equipment and what you have not trained this week.
+- **Review screen** after each workout to fix the name, the length, or any
+  mistyped set.
+- **200+ built-in exercises**, plus your own.
+- **Activities** such as runs and classes, timed live or entered to the second.
 
-## 2. Install dependencies
+**Progress**
+- Streaks, 30-day consistency, volume, time trained, and personal records.
+  Planned rest days keep a streak alive without adding to it.
+- A progress chart per exercise, and a body chart of what you trained this week.
+- Levels, trophies, and badges.
 
-```bash
-cd C:\dev\gym-app
-npm install
-```
+**Friends**
+- Friend requests by username, and a **feed** of friends' finished sessions
+  with reactions.
+- A **leaderboard** ranking you and your friends by streak, weight lifted,
+  workout time, consistency, and activity time, over a chosen period.
+- Blocking, reporting, and a switch to stop sharing your workouts.
 
-Dependencies are already installed and version-aligned to **Expo SDK 57**. Keep
-the project on whatever SDK your Expo Go app uses — Expo Go only runs the newest
-SDK, so if it auto-updates and the app refuses to open, realign with:
+**Reliability and privacy**
+- **Works offline.** Sets logged with no signal are queued and sync when the
+  connection returns. Nothing is lost if the app is closed mid-workout.
+- **Download all your data** or **delete your account** from inside the app.
 
-```bash
-npm install expo@latest
-```
+---
 
-then `npx expo install --fix`.
+## Tech stack
 
-> **Do not move this project into a OneDrive-synced folder.** OneDrive syncs each
-> of the ~1,500 files npm unpacks, which turns a 2-minute install into hours and
-> can corrupt `node_modules` if interrupted.
+| Layer | Tools |
+|---|---|
+| App | TypeScript, React Native 0.86, React 19, Expo SDK 57, Expo Router |
+| Data and sync | TanStack Query v5 with a persisted offline cache and queued writes, supabase-js |
+| Backend | Supabase: PostgreSQL, Auth, Row Level Security, SQL functions |
+| Forms and validation | React Hook Form, Zod |
+| Graphics | react-native-svg for charts and the body chart |
+| Testing and quality | Jest with ts-jest (36 suites, 519 tests), ESLint, strict TypeScript |
+| Release | EAS Build and EAS Submit, TestFlight, App Store Connect |
+| Website | Static HTML generated by a Node script and hosted on GitHub Pages |
 
-## 3. Create the Supabase project
+---
 
-1. In the Supabase dashboard: **New project**. Pick a name and a database
-   password (save it somewhere).
-2. Wait for it to finish provisioning (~2 min).
-3. **Project Settings → API**: copy the **Project URL** and the **anon public**
-   key.
+## How it works
 
-## 4. Apply the database schema
+### The recommender
 
-**Option A — dashboard (no CLI needed):**
+The core logic lives in [`src/domain/recommender.ts`](src/domain/recommender.ts).
+It is pure TypeScript with no React or network code, so it is fully unit
+tested.
 
-1. Open **SQL Editor** in the dashboard.
-2. Paste the contents of [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql), run it.
-3. Paste the contents of [`supabase/migrations/0002_milestone2.sql`](supabase/migrations/0002_milestone2.sql), run it.
-4. Paste the contents of [`supabase/seed.sql`](supabase/seed.sql), run it.
+1. **Estimate strength from each set.** How hard the set felt (RPE) becomes
+   reps left in reserve. Weight and reps-to-failure go into the Epley formula
+   to estimate a one-rep max (e1RM). Reps are capped at 12 in the formula,
+   because the estimate stops being reliable for long sets.
+2. **Smooth the estimate.** An exponential moving average over the last six
+   working sets, so one great or terrible day does not swing the next
+   suggestion.
+3. **Pick the next load.** The formula is run backwards for the target rep
+   range, nudged by the last set's RPE, limited to a 15% change from last
+   time, and rounded to what that machine or bar can actually load.
 
-Run them in that order. All three are safe to re-run, so if you are unsure
-whether one applied, just run it again.
+Timed holds use a separate, simpler model that works in 5-second steps.
 
-**Option B — Supabase CLI:**
+### Learning machines
 
-```bash
-npm i -g supabase
-supabase link --project-ref <your-project-ref>
-supabase db push
-supabase db execute --file supabase/seed.sql
-```
+Two cable stacks in the same gym can be labeled completely differently, so
+50 lb on one is 100 lb on another. [`src/domain/machines.ts`](src/domain/machines.ts)
+learns that ratio automatically:
 
-### Auth setting
+- It pairs sessions of the same exercise on the two machines that were done
+  within 14 days of each other. Each session is matched only to its closest
+  counterpart, so getting stronger over time is not mistaken for a difference
+  between machines.
+- It takes the **median** ratio of the 12 most recent pairs, which ignores one
+  odd session.
+- Before suggesting a weight, it converts history from the other machine using
+  that ratio. A new PR on machine 1 moves the suggestion on machine 2.
 
-For the fastest local testing, turn **off** email confirmation:
-**Authentication → Providers → Email → "Confirm email" = off**. With it on, the
-sign-up screen tells you to confirm via email before signing in.
+### Offline-first sync
 
-## 5. Configure the app
+Gym basements have bad signal, so the app is built to work without it.
 
-```bash
-cp .env.example .env
-```
+- TanStack Query's cache is saved to device storage, so the app opens with your
+  data straight away.
+- Writes are queued in order (start workout, then add a set, then finish) and
+  replayed when the connection returns.
+- A custom fetch guard stops the app sending a data request while its sign-in
+  session is still refreshing. Without it, returning after an hour away could
+  show "workout not found". Requests retry with backoff instead.
 
-Edit `.env`:
+### Security and privacy
 
-```
-EXPO_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-public-key>
-```
+Every table has **Row Level Security** turned on, so the database itself
+refuses requests for anyone else's data, whatever the app sends.
 
-## 6. Run it
+- Your own rows are only reachable by you (`user_id = auth.uid()`).
+- Anything that reads another person's data runs through a SQL function that
+  checks, inside the database:
+  - you are accepted friends,
+  - they have sharing turned on,
+  - neither of you has blocked the other.
+- Friends only ever get **summaries**: a finished session's totals, leaderboard
+  figures, and records. The set-by-set log of a workout never leaves the server.
+- Reaction rows are readable only by the person who left them, so the database
+  enforces the Privacy Policy's promise that you see counts, not names.
+- Badges have no write policy at all. Only an admin can award one, so nobody can
+  grant themselves "Influencer" through the API.
+- Sign-up and password reset use one-time email codes.
+- The only key in the app is Supabase's public anon key. There is no service
+  role key anywhere in the app.
 
-```bash
-npx expo start -c
-```
+### Legal and store readiness
 
-Scan the QR code with Expo Go (Android) or the Camera app (iOS). `-c` clears the
-cache so the new `.env` is picked up.
-
-## 7. Tests
-
-The correctness-critical logic (e1RM, next-weight, rounding, streaks, coverage)
-is pure and unit-tested:
-
-```bash
-npm test          # one run
-npm run typecheck # tsc --noEmit
-npm run lint
-```
+The Privacy Policy and Terms are written in [`src/legal/`](src/legal). One
+script ([`scripts/build-legal.js`](scripts/build-legal.js)) generates both the
+in-app screens and the public website from that source, so the two can never
+say different things. The app also includes account deletion inside the app,
+a data export, age confirmation, and a user-content moderation workflow for
+reported users.
 
 ---
 
 ## Project layout
 
 ```
-app/                      Expo Router screens
-  (auth)/                 sign-in, sign-up
-  (tabs)/                 Today, History, Stats, Profile
-  workout/[id].tsx        active / past session
-  set/new.tsx             add-set modal with the live recommendation
+app/                 Screens, routed by file with Expo Router
+  (auth)/            Sign in, sign up, email code, password reset
+  (tabs)/            Today, Calendar, Stats, Friends, Profile
+  workout/           Active workout, review, summary
+  set/new.tsx        Add-set screen with the live suggestion
 src/
-  domain/                 PURE, tested logic
-    recommender.ts        e1RM + next-set weight
-    rounding.ts           round to a machine's weight step
-    stats.ts              streaks, totals, weekly coverage
-  data/                   TanStack Query hooks over Supabase
-  lib/                    supabase client, query client, env, formatting
-  components/             Screen, Button, Card, NumberStepper, RpeSelector, …
-  providers/AuthProvider.tsx
-  theme/                  single dark palette
+  domain/            Pure, unit-tested logic: recommender, machines, streaks,
+                     leaderboard, generator, XP, and more
+  data/              TanStack Query hooks over Supabase
+  components/        Shared UI, the hold timer, charts
+  lib/               Supabase client, session guard, query client
+  legal/             Privacy Policy and Terms source
 supabase/
-  migrations/0001_init.sql
-  migrations/0002_milestone2.sql
-  seed.sql
-__tests__/                recommender / rounding / stats specs
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0014)
+  email-templates/   Code-based sign-up and reset emails
+__tests__/           Jest specs
+scripts/             Legal site, icon and screenshot generators
 ```
 
-## How the recommender works
+## Running it locally
 
-See the header comment in [`src/domain/recommender.ts`](src/domain/recommender.ts).
-Short version:
+See **[SETUP.md](SETUP.md)**.
 
-1. **e1RM per set** — RPE becomes reps-in-reserve (`RIR = 10 − RPE`); Epley on
-   `reps + RIR`.
-2. **Working e1RM** — exponential moving average over your recent working sets for
-   that exercise.
-3. **Next weight** — invert Epley for the middle of your rep range, nudge for the
-   last set's RPE, clamp the change to ±15%, round to the machine's step.
+---
 
-Every set stores `machine_id`, `rpe`, and `e1rm` so a later personalized model
-(per-machine strength offsets) has the data it needs.
+## My role
 
-## Regenerating DB types
+I built Rust Strength on my own:
 
-After changing the schema:
+- **Product and design:** chose the features, designed the screens, and worked
+  through feedback from TestFlight testers.
+- **Architecture:** chose the stack, designed the Postgres data model, and
+  planned the offline sync.
+- **Security:** wrote the Row Level Security policies and permission-checked
+  SQL functions.
+- **Algorithms:** built the weight recommender and the machine-conversion
+  learning, both with unit tests.
+- **Launch:** handled the builds, TestFlight, and App Store submission, plus the
+  privacy policy, terms, and account deletion that App Review requires.
 
-```bash
-npx supabase gen types typescript --project-id <ref> > src/lib/database.types.ts
-```
+**Links:** [Portfolio](https://lindellrhett-gif.github.io/) ·
+[Support and legal pages](https://lindellrhett-gif.github.io/rust-strength/) ·
+[GitHub](https://github.com/lindellrhett-gif)
