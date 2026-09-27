@@ -197,6 +197,10 @@ I built Rust Strength on my own:
 - **Launch:** handled the builds, TestFlight, and App Store submission, plus the
   privacy policy, terms, and account deletion that App Review requires.
 
+I used AI-assisted development with Claude Code throughout. I owned the
+architecture and data design, reviewed the generated code, and led debugging
+and testing.
+
 **Links:** [Portfolio](https://lindellrhett-gif.github.io/) ·
 [Support and legal pages](https://lindellrhett-gif.github.io/rust-strength/) ·
 [GitHub](https://github.com/lindellrhett-gif)
