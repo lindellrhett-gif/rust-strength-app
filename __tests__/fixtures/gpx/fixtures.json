@@ -1,0 +1,49 @@
+{
+  "steady-5k": {
+    "distanceM": 5000,
+    "movingSeconds": 1667,
+    "elapsedSeconds": 1667
+  },
+  "tunnel": {
+    "distanceM": 3000,
+    "movingSeconds": 1000,
+    "elapsedSeconds": 1000
+  },
+  "stoplight": {
+    "distanceM": 3000,
+    "movingSeconds": 1000,
+    "elapsedSeconds": 1044
+  },
+  "jittery-start": {
+    "distanceM": 2000,
+    "movingSeconds": 667,
+    "elapsedSeconds": 683
+  },
+  "spike": {
+    "distanceM": 2000,
+    "movingSeconds": 667,
+    "elapsedSeconds": 667
+  },
+  "walk-breaks": {
+    "distanceM": 2400,
+    "movingSeconds": 1115,
+    "elapsedSeconds": 1115
+  },
+  "hill": {
+    "distanceM": 3000,
+    "movingSeconds": 1071,
+    "elapsedSeconds": 1071,
+    "elevationGainM": 30,
+    "elevationLossM": 30
+  },
+  "paused": {
+    "distanceM": 2000,
+    "movingSeconds": 667,
+    "elapsedSeconds": 847
+  },
+  "signal-jump": {
+    "distanceM": 3000,
+    "movingSeconds": 1000,
+    "elapsedSeconds": 1030
+  }
+}
