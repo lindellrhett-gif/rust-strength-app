@@ -22,4 +22,12 @@ module.exports = defineConfig([
       },
     },
   },
+  {
+    // Database tests run under plain Node as ES modules.
+    files: ['supabase/tests/**/*.mjs'],
+    languageOptions: {
+      sourceType: 'module',
+      globals: { console: 'readonly', process: 'readonly' },
+    },
+  },
 ]);
