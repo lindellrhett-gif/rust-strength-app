@@ -10,7 +10,7 @@
       "env": {
         "APP_VARIANT": "development"
       },
-      "environment": "development"
+      "environment": "preview"
     },
     "ios-check": {
       "distribution": "internal",

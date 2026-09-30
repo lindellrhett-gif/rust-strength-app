@@ -26,8 +26,8 @@ it does not touch Apple.
 ### Give EAS your Supabase config
 
 `.env` is gitignored, so EAS never receives it. Each build profile reads its
-values from an EAS environment instead (pinned in `eas.json`: `ios-check`,
-`android-check` and `preview` use **preview**; `production` uses
+values from an EAS environment instead (pinned in `eas.json`: `development`,
+`ios-check`, `android-check` and `preview` use **preview**; `production` uses
 **production**). Add both values to both environments, copying them from your
 `.env`:
 
