@@ -264,8 +264,27 @@ I built Rust Strength on my own:
 - **Launch:** handled the builds, TestFlight, and App Store submission, plus the
   privacy policy, terms, and account deletion that App Review requires.
 
-Claude Code was one of the tools I used during development. I owned the
-architecture and data design, and led debugging and testing.
+### How I used AI tools
+
+I used Claude Code as a development tool, and it wrote a large share of the
+implementation. That is how one person took a full app from first commit to
+App Store submission in three weeks. The engineering decisions stayed with me:
+
+- **I set the structure first.** I designed the data model, the Row Level
+  Security rules, the offline sync approach, and how the recommender should
+  behave, then had Claude Code build against that design one piece at a time.
+- **I reviewed every change.** Nothing went in until I had read it and tested
+  it. When something was wrong, I diagnosed the cause and directed the fix;
+  [Problems I solved](#problems-i-solved) has examples.
+- **Tests are the guardrail.** The core logic is pure TypeScript covered by 519
+  Jest tests, under strict TypeScript and ESLint, so generated code has to pass
+  the same checks as anything I write by hand.
+- **I audited it before launch.** My own pre-launch review of the database found
+  a privacy issue and a performance issue, both fixed in
+  [`0009_feed_hardening.sql`](supabase/migrations/0009_feed_hardening.sql).
+
+AI tools let me move faster; owning the design and verifying the output is what
+makes the result reliable. I'm happy to walk through any part of the code.
 
 **Links:** [Portfolio](https://lindellrhett-gif.github.io/) ·
 [Support and legal pages](https://lindellrhett-gif.github.io/rust-strength/) ·
