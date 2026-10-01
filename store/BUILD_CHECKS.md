@@ -100,7 +100,40 @@ needs **Push Notifications** ticked at developer.apple.com → Identifiers →
 "doesn't include the aps-environment entitlement".
 
 An App Store Connect API key cannot change capabilities, so tick it by hand. No
-push key or certificate is needed — nothing is ever pushed.
+push key or certificate is needed — nothing is ever pushed. The dev app ID,
+`com.ruststrength.app.dev`, needs it ticked too.
+
+## Dependencies: change the lockfile with npm 10
+
+EAS installs with `npm ci` using **npm 10.9.8**. A lockfile written by a newer
+npm (12 on this PC) can leave out packages npm 10 expects, and the build then
+fails in "Install dependencies" with `Missing: <package> from lock file`. So
+whenever a dependency changes, write the lockfile with EAS's version:
+
+```
+npx npm@10.9.8 install
+npx npm@10.9.8 ci --include=dev
+```
+
+The second command is exactly what EAS runs; if it passes here, it passes there.
+
+Five Expo patch updates are held back in `package.json` (`expo.install.exclude`):
+`expo`, `expo-constants`, `expo-linking`, `expo-notifications`, `expo-router`.
+The newer `expo` brings an `expo-modules-core` that wants `react-native-worklets`
+0.10, while `react-native-reanimated` (used by the router) needs 0.12; npm then
+installs two copies of a native module. The held versions are the ones the
+App Store build shipped with. Drop the exclusion once a newer SDK patch lines
+them up again (`npx expo-doctor` will say).
+
+## Building the dev app without the Apple ID
+
+Apple refuses EAS's password login for this account, so dev builds sign in
+with the App Store Connect API key instead. In the PowerShell window you build
+from, first set `EXPO_ASC_API_KEY_PATH`, `EXPO_ASC_KEY_ID`, `EXPO_ASC_ISSUER_ID`,
+`EXPO_APPLE_TEAM_ID` and `EXPO_APPLE_TEAM_TYPE=INDIVIDUAL`. The key cannot
+register a new iPhone, so add devices by hand at developer.apple.com → Devices
+(the UDID comes from `eas device:create`). If EAS ever asks for the Apple ID
+password, stop: that path is what locked the account before.
 
 ## The order once Apple approves
 
