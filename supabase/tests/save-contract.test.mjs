@@ -37,9 +37,12 @@ await asUser(db, runner, async () => {
   check('distance and times are stored exactly', run?.distance_m === input.p_distance_m &&
     run?.moving_seconds === input.p_moving_seconds && run?.elapsed_seconds === input.p_elapsed_seconds);
 
-  const { rows: act } = await db.query(`select kind, distance, distance_unit, duration_seconds from activities where id = $1`, [input.p_id]);
-  check('it shows up as a run in the activity log, in km', act[0]?.kind === 'run' && act[0]?.distance_unit === 'km' &&
-    Math.abs(act[0]?.distance - input.p_distance_m / 1000) < 0.01 && act[0]?.duration_seconds === input.p_moving_seconds, act[0]);
+  check('steps come back', input.p_steps > 0 && run?.steps === input.p_steps, run?.steps);
+
+  const { rows: act } = await db.query(`select kind, distance, distance_unit, duration_seconds, steps from activities where id = $1`, [input.p_id]);
+  check('it shows up as a run in the activity log, in km, with its steps', act[0]?.kind === 'run' && act[0]?.distance_unit === 'km' &&
+    Math.abs(act[0]?.distance - input.p_distance_m / 1000) < 0.01 && act[0]?.duration_seconds === input.p_moving_seconds &&
+    act[0]?.steps === input.p_steps, act[0]);
 
   const replay = await errorOf(() => db.query(sql, values));
   check('a replayed save from the offline queue is harmless', replay === null, replay);

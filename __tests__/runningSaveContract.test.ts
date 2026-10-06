@@ -28,6 +28,7 @@ function buildInput() {
     startedAt: recorder.startedAt,
     unit: 'km',
     mapVisibility: 'private',
+    steps: 4980,
   });
   // The default name depends on the machine's time zone; naming has its own tests.
   return { ...input, p_name: 'Morning run' };

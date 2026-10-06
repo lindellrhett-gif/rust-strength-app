@@ -3,6 +3,7 @@
  * whether there is anything worth saving. Pure, no I/O.
  */
 
+import { plausibleSteps } from './steps';
 import { routePayload, type RunSummary } from './summarize';
 import type { RunDistanceUnit } from './units';
 
@@ -19,7 +20,7 @@ export function defaultRunName(startedAt: Date): string {
   return 'Night run';
 }
 
-/** The arguments of rpc_save_run (migration 0015). */
+/** The arguments of rpc_save_run (migrations 0015 and 0017). */
 export interface SaveRunInput {
   p_id: string;
   p_performed_at: string;
@@ -41,6 +42,7 @@ export interface SaveRunInput {
   p_times: number[] | null;
   p_best_efforts: Record<string, number>;
   p_map_visibility: 'private' | 'friends';
+  p_steps: number | null;
 }
 
 export interface RecordedRunMeta {
@@ -48,6 +50,8 @@ export interface RecordedRunMeta {
   startedAt: number;
   unit: RunDistanceUnit;
   mapVisibility: 'private' | 'friends';
+  /** Steps the phone counted while recording, when it could. */
+  steps?: number | null;
 }
 
 /**
@@ -93,5 +97,6 @@ export function buildSaveRunInput(summary: RunSummary, meta: RecordedRunMeta): S
     p_times: route.times,
     p_best_efforts: { ...summary.bestEfforts } as Record<string, number>,
     p_map_visibility: meta.mapVisibility,
+    p_steps: plausibleSteps(meta.steps, summary.elapsedSeconds),
   };
 }

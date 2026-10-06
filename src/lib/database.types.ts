@@ -598,6 +598,7 @@ export type Database = {
           p_times?: number[] | null;
           p_best_efforts?: Json;
           p_map_visibility?: 'private' | 'friends';
+          p_steps?: number | null;
         };
         Returns: string;
       };
@@ -609,6 +610,7 @@ export type Database = {
           note: string | null;
           performed_at: string;
           calories: number | null;
+          steps: number | null;
           distance_unit: 'mi' | 'km' | 'm' | null;
           source: 'gps' | 'manual' | 'treadmill';
           distance_m: number;

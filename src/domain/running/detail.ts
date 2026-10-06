@@ -27,6 +27,8 @@ export interface RunDetail {
   note: string | null;
   performedAt: string;
   calories: number | null;
+  /** Steps the phone counted during the run, when it could. */
+  steps: number | null;
   unit: RunDistanceUnit;
   source: 'gps' | 'manual' | 'treadmill';
   distanceM: number;
@@ -50,6 +52,7 @@ export interface RunRow {
   note: string | null;
   performed_at: string;
   calories: number | null;
+  steps: number | null;
   distance_unit: string | null;
   source: 'gps' | 'manual' | 'treadmill';
   distance_m: number;
@@ -113,6 +116,7 @@ export function parseRunRow(row: RunRow): RunDetail {
     note: row.note,
     performedAt: row.performed_at,
     calories: row.calories,
+    steps: num(row.steps),
     unit: row.distance_unit === 'km' ? 'km' : 'mi',
     source: row.source,
     distanceM: row.distance_m,

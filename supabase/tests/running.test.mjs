@@ -28,7 +28,8 @@ const SAVE = `select rpc_save_run(
   p_moving_seconds => $5, p_elapsed_seconds => $6, p_distance_unit => $7,
   p_name => $8, p_note => $9, p_elevation_gain_m => $10, p_elevation_loss_m => $11,
   p_calories => $12, p_effort => $13, p_splits => $14, p_polyline => $15,
-  p_alts => $16, p_times => $17, p_best_efforts => $18, p_map_visibility => $19
+  p_alts => $16, p_times => $17, p_best_efforts => $18, p_map_visibility => $19,
+  p_steps => $20
 ) as id`;
 
 function gpsRun(overrides = {}) {
@@ -52,6 +53,7 @@ function gpsRun(overrides = {}) {
     times,
     efforts: JSON.stringify({ mile: 470 }),
     map: 'private',
+    steps: 4200,
     ...overrides,
   };
 }
@@ -60,6 +62,7 @@ const save = (r) =>
   db.query(SAVE, [
     r.id, r.performedAt, r.source, r.distanceM, r.moving, r.elapsed, r.unit, r.name, r.note,
     r.gain, r.loss, r.calories, r.effort, r.splits, r.polyline, r.alts, r.times, r.efforts, r.map,
+    r.steps,
   ]);
 
 // --- Saving and reading back -----------------------------------------------
@@ -73,10 +76,11 @@ await asUser(db, alice, async () => {
   const { rows: count } = await db.query(`select count(*)::int n from activities where id = $1`, [run.id]);
   check('the replay made no duplicate', count[0].n === 1, count);
 
-  const { rows: act } = await db.query(`select kind, distance, distance_unit, duration_seconds, calories, name from activities where id = $1`, [run.id]);
+  const { rows: act } = await db.query(`select kind, distance, distance_unit, duration_seconds, calories, steps, name from activities where id = $1`, [run.id]);
   check('the activity is a run, in miles, timed by moving time',
     act[0].kind === 'run' && act[0].distance_unit === 'mi' && Math.abs(act[0].distance - 3.1) < 0.01 &&
     act[0].duration_seconds === 1500 && act[0].calories === 350 && act[0].name === 'Morning run', act[0]);
+  check('the run’s steps go in the activity, like any walk or run', act[0].steps === 4200, act[0]);
 
   const { rows: got } = await db.query(`select * from rpc_get_run($1)`, [run.id]);
   const g = got[0];
@@ -85,6 +89,7 @@ await asUser(db, alice, async () => {
   check('altitudes come back point for point',
     g.alts.length === alts.length && g.alts.every((a, i) => Math.abs(a - alts[i]) < 0.01));
   check('best efforts come back', g.best_efforts.mile === 470, g.best_efforts);
+  check('steps come back', g.steps === 4200, g.steps);
   check('run fields come back', g.source === 'gps' && g.moving_seconds === 1500 && g.elapsed_seconds === 1560 &&
     g.effort === 6 && g.has_elevation === true && g.map_visibility === 'private', g);
 
@@ -116,13 +121,15 @@ await rejects('refuses altitudes that do not match', { alts: alts.slice(3) }, /a
 await rejects('refuses a garbled route', { polyline: '_p~iF~ps|U_' }, /could not be read|2 to 20000|needs a time/);
 await rejects('refuses a recorded run with no route', { polyline: null }, /needs its route/);
 await rejects('refuses a route on a typed-in run', { source: 'manual' }, /Only a recorded run/);
-await rejects('refuses an impossible pace', { distanceM: 4990, moving: 500, elapsed: 600, times: times.map((t) => Math.floor(t / 4)) }, /check|constraint/i);
+await rejects('refuses an impossible pace', { distanceM: 4990, moving: 500, elapsed: 600, steps: null, times: times.map((t) => Math.floor(t / 4)) }, /check|constraint/i);
 await rejects('refuses effort outside 1–10', { effort: 11 }, /Effort/);
 await rejects('refuses a 10K best effort on a 5K run', { efforts: JSON.stringify({ '10k': 3000 }) }, /does not fit/);
 await rejects('refuses an unknown best effort', { efforts: JSON.stringify({ '3k': 600 }) }, /Unknown best effort/);
 await rejects('refuses a best effort faster than possible', { efforts: JSON.stringify({ mile: 100 }) }, /does not fit/);
 await rejects('refuses a very long title', { name: 'x'.repeat(81) }, /80 characters/);
 await rejects('refuses an unknown map setting', { map: 'everyone' }, /Map visibility/);
+await rejects('refuses more steps than anyone could take in the time', { steps: 1560 * 5 + 1 }, /step count/);
+await rejects('refuses a negative step count', { steps: -1 }, /step count/);
 await rejects('refuses a future date', { performedAt: '2030-01-01T00:00:00Z' }, /believable/);
 await rejects('refuses an elapsed time shorter than moving', { elapsed: 1000, times: times.map((t) => Math.floor(t / 2)) }, /check|constraint/i);
 

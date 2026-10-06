@@ -7,13 +7,14 @@ import {
   type NewRun,
 } from '../src/domain/running/activeRunStore';
 import { parseRunRow, type RunRow } from '../src/domain/running/detail';
-import { gpsQuality, routeSegments } from '../src/domain/running/display';
+import { gpsQuality, regionAround, regionForPoints, routeSegments } from '../src/domain/running/display';
 import { filterFixes } from '../src/domain/running/filter';
 import { offset } from '../src/domain/running/geo';
 import { accessMessage, locationAccess } from '../src/domain/running/permission';
 import { encodePolyline } from '../src/domain/running/polyline';
 import { initialRecorder, reduceRecorder } from '../src/domain/running/recorder';
 import { buildSaveRunInput, defaultRunName, MIN_SAVE_DISTANCE_M, unsavableReason } from '../src/domain/running/save';
+import { cadence, plausibleSteps } from '../src/domain/running/steps';
 import { summarizeRun } from '../src/domain/running/summarize';
 import type { CleanFix, GpsFix } from '../src/domain/running/types';
 import { hasFeature } from '../src/domain/entitlements';
@@ -193,6 +194,14 @@ describe('saving a recording', () => {
     expect(input.p_splits[0]).toHaveLength(3);
     expect(input.p_best_efforts.mile).toBeGreaterThan(0);
     expect(input.p_calories).toBeGreaterThan(0);
+    expect(input.p_steps).toBeNull();
+  });
+
+  it('saves the steps the phone counted, unless they are impossible', () => {
+    const summary = summarizeRun(fixes, finished, { autoPause: true, unit: 'mi', bodyweightKg: 80 });
+    const meta = { runId: 'run-1', startedAt: T0, unit: 'mi' as const, mapVisibility: 'private' as const };
+    expect(buildSaveRunInput(summary, { ...meta, steps: 1712.4 }).p_steps).toBe(1712);
+    expect(buildSaveRunInput(summary, { ...meta, steps: 10_000_000 }).p_steps).toBeNull();
   });
 
   it('refuses to save a run too short to be real', () => {
@@ -200,6 +209,25 @@ describe('saving a recording', () => {
     expect(tiny.distanceM).toBeLessThan(MIN_SAVE_DISTANCE_M);
     expect(unsavableReason(tiny)).toBe('too-short');
     expect(() => buildSaveRunInput(tiny, { runId: 'r', startedAt: T0, unit: 'mi', mapVisibility: 'private' })).toThrow();
+  });
+});
+
+describe('steps and cadence', () => {
+  it('works out cadence from moving time', () => {
+    expect(cadence(3400, 20 * 60)).toBe(170);
+    expect(cadence(null, 1200)).toBeNull();
+    expect(cadence(0, 1200)).toBeNull();
+    expect(cadence(50, 20)).toBeNull(); // too short to say
+    expect(cadence(100_000, 60)).toBeNull(); // nobody takes 100,000 steps a minute
+  });
+
+  it('only saves step counts that are possible in the time', () => {
+    expect(plausibleSteps(4200.6, 1500)).toBe(4201);
+    expect(plausibleSteps(1500 * 5, 1500)).toBe(7500);
+    expect(plausibleSteps(1500 * 5 + 1, 1500)).toBeNull();
+    expect(plausibleSteps(-3, 1500)).toBeNull();
+    expect(plausibleSteps(undefined, 1500)).toBeNull();
+    expect(plausibleSteps(Number.NaN, 1500)).toBeNull();
   });
 });
 
@@ -250,6 +278,25 @@ describe('route display', () => {
     expect(routeSegments(live)).toHaveLength(1);
   });
 
+  it('zooms the live map to a few blocks around the runner, not the whole world', () => {
+    const r = regionAround(HOME);
+    expect(r.latitude).toBe(HOME.lat);
+    // About 600 m of map either way: a fraction of a hundredth of a degree.
+    expect(r.latitudeDelta).toBeCloseTo(600 / 111_320, 6);
+    expect(r.longitudeDelta).toBeGreaterThan(r.latitudeDelta); // degrees of longitude are shorter up north
+    expect(r.longitudeDelta).toBeLessThan(0.01);
+  });
+
+  it('fits a route with a margin, but never zooms tighter than a few hundred metres', () => {
+    const route = [HOME, offset(HOME, 3000, 90)];
+    const r = regionForPoints(route)!;
+    expect(r.longitude).toBeCloseTo((route[0].lon + route[1].lon) / 2, 6);
+    expect(r.longitudeDelta).toBeCloseTo((route[1].lon - route[0].lon) * 1.3, 6);
+    const tiny = regionForPoints([HOME, offset(HOME, 20, 0)])!;
+    expect(tiny.latitudeDelta).toBeCloseTo(300 / 111_320, 6);
+    expect(regionForPoints([])).toBeNull();
+  });
+
   it('rates GPS by accuracy', () => {
     expect(gpsQuality(null)).toBe('searching');
     expect(gpsQuality(8)).toBe('good');
@@ -265,6 +312,7 @@ describe('reading a saved run back', () => {
     note: null,
     performed_at: '2026-09-26T13:00:00Z',
     calories: 300,
+    steps: 240,
     distance_unit: 'km',
     source: 'gps',
     distance_m: 200,
@@ -291,6 +339,7 @@ describe('reading a saved run back', () => {
     expect(run.route[2]).toMatchObject({ alt: 252, t: 70 });
     expect(run.splits).toEqual([{ seconds: 70, elevationChangeM: 1.5, distanceM: 200 }]);
     expect(run.bestEfforts).toEqual({ mile: 400 });
+    expect(run.steps).toBe(240);
   });
 
   it('copes with a typed-in run and a broken polyline', () => {

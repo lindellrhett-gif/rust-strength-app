@@ -1,7 +1,8 @@
 /**
  * What a run has to look like before it is saved, whether recorded, typed in
  * for a treadmill, or edited afterwards. The database enforces the same
- * limits (migration 0015); this gives the screen a readable reason first.
+ * limits (migrations 0015 and 0017); this gives the screen a readable reason
+ * first.
  * Pure, no I/O.
  */
 
@@ -16,6 +17,8 @@ export const RUN_LIMITS = {
   maxAverageSpeedMps: 7,
   titleMax: 80,
   noteMax: 2000,
+  /** Five steps a second, 300 a minute: past an all-out sprint. */
+  maxStepsPerSecond: 5,
 } as const;
 
 export interface RunDraft {
