@@ -18,9 +18,11 @@ import {
 import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useOpenWorkout, useStartWorkout } from '@/data/workouts';
 import { formatDurationShort } from '@/domain/duration';
+import { hasFeature } from '@/domain/entitlements';
 import { currentStreak, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { compact } from '@/lib/format';
+import { useActiveRun } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
@@ -36,6 +38,8 @@ export default function Today() {
   const totals = useAllTimeTotals();
   const planned = usePlannedSessions();
   const startWorkout = useStartWorkout();
+  const activeRun = useActiveRun();
+  const runInProgress = activeRun != null && activeRun.meta.recorder.status !== 'idle';
 
   const unit = profile.data?.unit ?? 'lb';
   const todayStr = todayLocal();
@@ -138,6 +142,13 @@ export default function Today() {
                   style={styles.secondaryBtn}
                 />
               </View>
+              {hasFeature('running') ? (
+                <Button
+                  label={runInProgress ? 'Resume run' : 'Start a run'}
+                  variant="secondary"
+                  onPress={() => router.push('/run/record')}
+                />
+              ) : null}
               <Button
                 label="Log an activity instead"
                 variant="ghost"

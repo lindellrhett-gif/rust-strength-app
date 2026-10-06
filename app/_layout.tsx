@@ -18,6 +18,9 @@ import {
   loadRestAlertSetting,
   useRestAlertEnabled,
 } from '@/lib/restNotifications';
+// Defines the GPS task at import time, so iOS can deliver a run's location
+// fixes even when it relaunches the app in the background.
+import '@/lib/runTracker';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
@@ -117,6 +120,12 @@ function RootNavigator() {
         name="set/new"
         options={{ headerShown: true, presentation: 'modal', title: 'Add set' }}
       />
+      {/* No swipe-to-dismiss: a stray swipe must never abandon a run. */}
+      <Stack.Screen
+        name="run/record"
+        options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
+      <Stack.Screen name="run/[id]" options={{ headerShown: true, title: 'Run' }} />
     </Stack>
   );
 }
