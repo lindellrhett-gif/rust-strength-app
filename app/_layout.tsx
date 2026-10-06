@@ -2,6 +2,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Stack } from 'expo-router';
 import { getFocusedRouteNameFromRoute } from 'expo-router/react-navigation';
 import { StatusBar } from 'expo-status-bar';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -33,6 +34,11 @@ startNetworkWatcher();
 registerMutationDefaults(queryClient);
 installNotificationHandler();
 loadRestAlertSetting();
+
+// Dev builds only: a test run takes the phone out of Wi-Fi range of the dev
+// server. The app keeps working, and this warning would otherwise sit over
+// the run controls.
+if (__DEV__) LogBox.ignoreLogs([/Disconnected from Metro/]);
 
 /**
  * Expo Router installs an error boundary from a route file's `ErrorBoundary`
