@@ -7,8 +7,8 @@ your current strength from your recent sets and suggests the load for the next
 one. Over time it learns your gym's machines too, so a PR on one cable stack
 carries over to a differently labeled one.
 
-**Status:** submitted to the App Store (in review) after beta testing on
-TestFlight · **Role:** solo developer · **Built:** September 2026
+**Status:** [live on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) since October 2, 2026, after beta
+testing on TestFlight · **Role:** solo developer · **Built:** September 2026
 
 <p align="center">
   <img src="media/screenshots/suggestion.png" width="200" alt="Add set screen with a suggested next weight of 230 lb for 4 to 6 reps, the estimated one-rep max, last session's top set, and a rest timer" />
@@ -35,12 +35,12 @@ AI development, software engineering, or cybersecurity.
 | | |
 |---|---|
 | **Scope** | A full iOS app, from the database to the App Store submission, built solo |
-| **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026 |
+| **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026; released October 2, 2026 |
 | **App code** | About 19,600 lines of TypeScript across the screens, components, domain logic and data layer |
 | **Database** | About 3,000 lines of SQL in 14 migrations, including tables, Row Level Security policies and server functions |
 | **Tests** | 519 Jest tests in 36 suites, plus strict TypeScript and ESLint |
 | **Tools** | Git, EAS Build, TestFlight, and Claude Code for AI-assisted development |
-| **Users** | Beta tested on TestFlight before submission |
+| **Users** | Beta tested on TestFlight, now [on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) |
 
 ### A five-minute code tour
 
