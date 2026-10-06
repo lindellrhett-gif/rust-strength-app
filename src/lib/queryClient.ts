@@ -60,6 +60,8 @@ export const mk = {
   addSet: ['mutation', 'add-set'] as const,
   startWorkout: ['mutation', 'start-workout'] as const,
   endWorkout: ['mutation', 'end-workout'] as const,
+  /** A finished run, often saved right where the signal dropped. */
+  saveRun: ['mutation', 'save-run'] as const,
 };
 
 /** Central place for query keys so invalidation stays consistent. */
@@ -95,4 +97,7 @@ export const qk = {
   workoutSummary: (workoutId: string) => ['workout-summary', workoutId] as const,
   feed: ['feed'] as const,
   badges: (userId: string) => ['badges', userId] as const,
+  runs: ['runs'] as const,
+  run: (id: string) => ['runs', id] as const,
+  runPreferences: ['run-preferences'] as const,
 };

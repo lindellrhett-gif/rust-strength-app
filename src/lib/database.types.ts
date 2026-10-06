@@ -418,6 +418,35 @@ export type Database = {
         Update: { status?: string; details?: string | null };
         Relationships: [];
       };
+      run_preferences: {
+        Row: {
+          user_id: string;
+          auto_pause: boolean;
+          audio_cues: boolean;
+          share_default: boolean;
+          map_default: 'private' | 'friends';
+          weekly_goal_m: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          auto_pause?: boolean;
+          audio_cues?: boolean;
+          share_default?: boolean;
+          map_default?: 'private' | 'friends';
+          weekly_goal_m?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          auto_pause?: boolean;
+          audio_cues?: boolean;
+          share_default?: boolean;
+          map_default?: 'private' | 'friends';
+          weekly_goal_m?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       rest_days: {
         Row: {
           id: string;
@@ -548,6 +577,56 @@ export type Database = {
       };
     };
     Functions: {
+      rpc_save_run: {
+        Args: {
+          p_id: string;
+          p_performed_at: string;
+          p_source: 'gps' | 'manual' | 'treadmill';
+          p_distance_m: number;
+          p_moving_seconds: number;
+          p_elapsed_seconds: number;
+          p_distance_unit: 'mi' | 'km';
+          p_name?: string | null;
+          p_note?: string | null;
+          p_elevation_gain_m?: number | null;
+          p_elevation_loss_m?: number | null;
+          p_calories?: number | null;
+          p_effort?: number | null;
+          p_splits?: Json;
+          p_polyline?: string | null;
+          p_alts?: number[] | null;
+          p_times?: number[] | null;
+          p_best_efforts?: Json;
+          p_map_visibility?: 'private' | 'friends';
+        };
+        Returns: string;
+      };
+      rpc_get_run: {
+        Args: { p_activity_id: string };
+        Returns: {
+          id: string;
+          name: string | null;
+          note: string | null;
+          performed_at: string;
+          calories: number | null;
+          distance_unit: 'mi' | 'km' | 'm' | null;
+          source: 'gps' | 'manual' | 'treadmill';
+          distance_m: number;
+          moving_seconds: number;
+          elapsed_seconds: number;
+          elevation_gain_m: number | null;
+          elevation_loss_m: number | null;
+          effort: number | null;
+          splits: Json;
+          has_elevation: boolean;
+          map_visibility: 'private' | 'friends';
+          route_id: string | null;
+          polyline: string | null;
+          alts: number[] | null;
+          times: number[] | null;
+          best_efforts: Json;
+        }[];
+      };
       rpc_weekly_coverage: {
         Args: { week_start: string };
         Returns: { muscle_group: MG; set_count: number }[];
