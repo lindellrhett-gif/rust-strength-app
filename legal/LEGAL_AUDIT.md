@@ -472,3 +472,34 @@ None of these can be settled from the code.
    further, or exclude that state.
 6. **How fast you commit to answering reports.** The runbook says daily. That is
    a promise you are making to Apple and to your users.
+
+---
+
+## 14. Pending: the running update (not released yet)
+
+The running feature is being built on the `feature/running` branch, and the
+released app contains none of it. Everything above describes the released
+app. Before the running update ships, the documents have to catch up with the
+new data it collects:
+
+1. **Precise location.** The app records a GPS route while a run is recording,
+   and stores it with the run (`runs.route`, migration 0015). The Privacy
+   Policy says no location is collected (`src/legal/privacy.ts`, "We do not
+   collect … precise or approximate location"). That line must change, and the
+   policy must cover stored routes, privacy zones, the per-run map sharing
+   choice, export and deletion. Then bump the legal version and rebuild the
+   site with `npm run legal`.
+2. **Step counts from the phone's motion sensors.** With the Motion & Fitness
+   permission, the app reads step counts from the iPhone's pedometer
+   (expo-sensors). A recorded run's step total is saved in `activities.steps`
+   (migration 0017). Today's step count is shown on the Today screen and never
+   leaves the phone. The policy currently says step counts are stored "only if
+   you choose to enter them", so it must also say that runs record steps
+   automatically once the permission is given.
+3. **App Store privacy labels.** Add **Precise Location** (linked to the user,
+   app functionality). Steps already fall under the **Fitness** label.
+4. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` has
+   already been added to `app.json`. Fitness was already declared.
+5. **Attorney.** Location combined with fitness data adds to the Washington My
+   Health My Data question in section 5. This has not been reviewed, and is not
+   claimed to be compliant.
