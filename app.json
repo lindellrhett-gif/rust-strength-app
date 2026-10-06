@@ -115,8 +115,14 @@
           "locationWhenInUsePermission": "Rust Strength uses your location while you record a run, to measure your distance, pace and route.",
           "locationAlwaysAndWhenInUsePermission": "Rust Strength uses your location while a run is recording, including with your screen locked, so it keeps measuring distance and pace. Tracking stops as soon as you finish the run.",
           "locationAlwaysPermission": "Rust Strength uses your location while a run is recording, including with your screen locked, so it keeps measuring distance and pace. Tracking stops as soon as you finish the run.",
-          "motionUsagePermission": false,
+          "motionUsagePermission": "Rust Strength counts your steps with your iPhone's motion sensors, to show today's steps and the steps and cadence of each run you record.",
           "isIosBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Rust Strength counts your steps with your iPhone's motion sensors, to show today's steps and the steps and cadence of each run you record."
         }
       ],
       [

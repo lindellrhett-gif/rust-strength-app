@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, LoadingView, StatTile } from '@/components';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { BodyChart } from '@/components/BodyChart';
+import { StepsTodayCard } from '@/components/StepsTodayCard';
 import { GlyphIcon } from '@/components/TrophyIcon';
 import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
@@ -97,6 +98,8 @@ export default function Today() {
           />
           <StatTile value={String(totals.data?.totalWorkouts ?? 0)} label="workouts all-time" />
         </View>
+
+        {hasFeature('running') ? <StepsTodayCard /> : null}
 
         {todaysPlans.length > 0 ? (
           <Card title="Planned for today">

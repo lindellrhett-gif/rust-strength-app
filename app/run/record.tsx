@@ -12,7 +12,7 @@ import {
   Vibration,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
 import { RunMap } from '@/components/RunMap';
@@ -21,14 +21,17 @@ import { DEFAULT_RUN_PREFERENCES, useRunPreferences, useSaveRun } from '@/data/r
 import { formatClock } from '@/domain/duration';
 import { gpsQuality, routeSegments, type GpsQuality } from '@/domain/running/display';
 import { filterFixes } from '@/domain/running/filter';
+import type { LatLon } from '@/domain/running/geo';
 import { accessMessage, type LocationAccess } from '@/domain/running/permission';
 import {
   countdownRemaining,
   initialRecorder,
+  recordingIntervals,
   reduceRecorder,
   type RecorderEvent,
 } from '@/domain/running/recorder';
 import { buildSaveRunInput, unsavableReason } from '@/domain/running/save';
+import { cadence } from '@/domain/running/steps';
 import { liveStats, summarizeRun } from '@/domain/running/summarize';
 import { runUnitFor, toKilograms, toUnit, type RunDistanceUnit } from '@/domain/running/units';
 import { newId } from '@/lib/ids';
@@ -39,12 +42,17 @@ import {
   stopRunTracking,
 } from '@/lib/runTracker';
 import { runStore } from '@/lib/runStore';
+import { getStepAccess, requestStepAccess, stepsDuring, stepsDuringWithin } from '@/lib/steps';
 import { useActiveRun } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
 /** Big numbers grow with Dynamic Type, but never past what fits on screen. */
 const BIG_SCALE = 1.3;
+/** How often the step count refreshes while recording. */
+const STEPS_REFRESH_MS = 5000;
+/** A slow pedometer answer never holds up saving the run. */
+const STEPS_SAVE_TIMEOUT_MS = 2500;
 
 const announce = (message: string) => AccessibilityInfo.announceForAccessibility(message);
 
@@ -62,6 +70,10 @@ async function dispatch(event: RecorderEvent): Promise<void> {
 
 export default function RecordRunScreen() {
   const router = useRouter();
+  // Real padding from the root's insets, not a SafeAreaView: this screen is a
+  // full-screen modal, where a native safe-area view can miss the Dynamic
+  // Island (see ModalScreen).
+  const insets = useSafeAreaInsets();
   const profile = useProfile();
   const prefsQuery = useRunPreferences();
   const prefs = prefsQuery.data ?? DEFAULT_RUN_PREFERENCES;
@@ -74,9 +86,11 @@ export default function RecordRunScreen() {
   const autoPause = run?.meta.autoPause ?? prefs.autoPause;
 
   const [access, setAccess] = useState<LocationAccess | null>(null);
-  const [previewAccuracy, setPreviewAccuracy] = useState<number | null>(null);
+  /** Where the phone is before the run starts, and how sure it is. */
+  const [preview, setPreview] = useState<(LatLon & { accuracy: number | null }) | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
+  const [steps, setSteps] = useState<number | null>(null);
 
   // Location access, and again when coming back from the Settings app.
   useEffect(() => {
@@ -96,14 +110,22 @@ export default function RecordRunScreen() {
     };
   }, []);
 
-  // Before the run: watch GPS so the runner can wait for a good signal.
+  // Before the run: watch GPS so the runner can wait for a good signal. The
+  // last known position puts the map in the right place straight away.
   useEffect(() => {
     if (access !== 'granted' || status !== 'idle') return;
     let alive = true;
     let sub: Location.LocationSubscription | null = null;
+    Location.getLastKnownPositionAsync()
+      .then((l) => {
+        if (alive && l) {
+          setPreview((p) => p ?? { lat: l.coords.latitude, lon: l.coords.longitude, accuracy: null });
+        }
+      })
+      .catch(() => undefined);
     Location.watchPositionAsync(
       { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 1000, distanceInterval: 0 },
-      (l) => setPreviewAccuracy(l.coords.accuracy ?? null),
+      (l) => setPreview({ lat: l.coords.latitude, lon: l.coords.longitude, accuracy: l.coords.accuracy ?? null }),
     )
       .then((s) => {
         if (alive) sub = s;
@@ -136,6 +158,24 @@ export default function RecordRunScreen() {
     return () => clearInterval(id);
   }, [status]);
 
+  // Steps so far, from the phone's pedometer, while the run is under way.
+  useEffect(() => {
+    if (status !== 'recording' && status !== 'paused') return;
+    let alive = true;
+    const read = async () => {
+      const rec = runStore.current()?.meta.recorder;
+      if (!rec) return;
+      const n = await stepsDuring(recordingIntervals(rec, Date.now()));
+      if (alive) setSteps(n);
+    };
+    void read();
+    const id = setInterval(() => void read(), STEPS_REFRESH_MS);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [status]);
+
   const live = useMemo(
     () => (run ? liveStats(run.fixes, recorder, now, { autoPause, unit }) : null),
     [run, recorder, now, autoPause, unit],
@@ -153,9 +193,10 @@ export default function RecordRunScreen() {
   }, [autoPaused]);
 
   const lastFix = run?.fixes[run.fixes.length - 1];
+  const position: LatLon | null = status !== 'idle' && lastFix ? lastFix : preview;
   const quality: GpsQuality =
     status === 'idle'
-      ? gpsQuality(previewAccuracy)
+      ? gpsQuality(preview?.accuracy)
       : lastFix && now - lastFix.t < 15_000
         ? gpsQuality(lastFix.accuracy)
         : status === 'recording' && autoPaused
@@ -172,6 +213,9 @@ export default function RecordRunScreen() {
         setAccess(a);
       }
       if (a !== 'granted') return;
+      // Steps are a bonus: whatever the answer, the run goes ahead.
+      if ((await getStepAccess()) === 'undetermined') await requestStepAccess();
+      setSteps(null);
       const runId = newId();
       const bodyweight = profile.data?.body_weight;
       await runStore.start({
@@ -244,12 +288,17 @@ export default function RecordRunScreen() {
       await runStore.setRecorder(rec);
       await stopRunTracking();
       announce('Run finished');
+      const runSteps = await stepsDuringWithin(
+        recordingIntervals(rec, rec.finishedAt ?? Date.now()),
+        STEPS_SAVE_TIMEOUT_MS,
+      );
       save.mutate(
         buildSaveRunInput(summary, {
           runId: current.meta.runId,
           startedAt: rec.startedAt ?? Date.now(),
           unit: current.meta.unit,
           mapVisibility: current.meta.mapVisibility,
+          steps: runSteps,
         }),
       );
       router.replace(`/run/${current.meta.runId}`);
@@ -266,9 +315,15 @@ export default function RecordRunScreen() {
 
   const message = access ? accessMessage(access) : null;
   const distance = toUnit(live?.distanceM ?? 0, unit);
+  const spm = cadence(steps, live?.movingSeconds ?? 0);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom', 'left', 'right']}>
+    <View
+      style={[
+        styles.safe,
+        { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right },
+      ]}
+    >
       <View style={styles.header}>
         {status === 'idle' ? (
           <Pressable
@@ -307,7 +362,8 @@ export default function RecordRunScreen() {
       ) : (
         <RunMap
           segments={segments}
-          follow={status !== 'idle'}
+          position={position}
+          follow
           showsUser
           style={styles.map}
           accessibilityLabel={
@@ -350,6 +406,14 @@ export default function RecordRunScreen() {
               spoken={`Average pace ${paceText(live?.averagePace ?? null)} per ${unit === 'mi' ? 'mile' : 'kilometre'}`}
             />
           </View>
+          {steps != null && steps > 0 ? (
+            <Text
+              style={[text.bodyMuted, styles.steps]}
+              accessibilityLabel={`${steps.toLocaleString('en-US')} steps${spm != null ? `, cadence ${spm} steps per minute` : ''}`}
+            >
+              {steps.toLocaleString('en-US')} steps{spm != null ? ` · ${spm} spm` : ''}
+            </Text>
+          ) : null}
         </View>
       )}
 
@@ -411,7 +475,7 @@ export default function RecordRunScreen() {
           <Button label="Cancel" variant="ghost" onPress={() => void cancelCountdown()} />
         </Pressable>
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -481,6 +545,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   statValue: { fontSize: 30, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+  steps: { textAlign: 'center', fontVariant: ['tabular-nums'] },
   controls: { padding: spacing.lg, gap: spacing.sm },
   controlRow: { flexDirection: 'row', gap: spacing.md },
   flex: { flex: 1 },

@@ -11,6 +11,7 @@ import { formatClock } from '@/domain/duration';
 import { EFFORT_KEYS, EFFORT_LABEL } from '@/domain/running/bestEfforts';
 import type { RunDetail } from '@/domain/running/detail';
 import type { SaveRunInput } from '@/domain/running/save';
+import { cadence } from '@/domain/running/steps';
 import { formatDistance, formatElevation, formatPace, paceSeconds, METERS_PER } from '@/domain/running/units';
 import { mk } from '@/lib/queryClient';
 import { colors } from '@/theme/colors';
@@ -70,6 +71,7 @@ function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
   const unit = run.unit;
   const segments = useMemo(() => (run.route.length >= 2 ? [run.route] : []), [run.route]);
   const date = new Date(run.performedAt);
+  const spm = cadence(run.steps, run.movingSeconds);
   const fastest = run.splits.reduce<number | null>(
     (best, s) => (s.distanceM >= METERS_PER[unit] * 0.99 && (best == null || s.seconds < best) ? s.seconds : best),
     null,
@@ -103,6 +105,10 @@ function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
           value={run.calories != null ? `${run.calories.toLocaleString('en-US')}` : '—'}
           label={run.calories != null ? 'calories (estimate)' : 'add bodyweight for calories'}
         />
+        {run.steps != null && run.steps > 0 ? (
+          <StatTile value={run.steps.toLocaleString('en-US')} label="steps" />
+        ) : null}
+        {spm != null ? <StatTile value={String(spm)} label="cadence (steps/min)" /> : null}
       </View>
 
       {run.splits.length > 0 ? (
