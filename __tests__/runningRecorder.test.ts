@@ -3,9 +3,11 @@ import {
   countdownRemaining,
   elapsedMs,
   initialRecorder,
+  recordingIntervals,
   recordingMs,
   reduceRecorder,
   type RecorderEvent,
+  segmentStartedAt,
   type RecorderState,
 } from '../src/domain/running/recorder';
 import { liveStats } from '../src/domain/running/summarize';
@@ -58,6 +60,48 @@ describe('recorder state machine', () => {
     expect(recordingMs(s, T + 25_000)).toBe(10_000);
   });
 
+  it('remembers each manual pause, for steps and the live clock', () => {
+    const s = play([
+      { type: 'start', now: T, countdownSeconds: 0 },
+      { type: 'pause', now: T + 10_000 },
+      { type: 'resume', now: T + 25_000 },
+      { type: 'pause', now: T + 40_000 },
+      { type: 'finish', now: T + 50_000 },
+    ]);
+    expect(s.pauses).toEqual([
+      [T + 10_000, T + 25_000],
+      [T + 40_000, T + 50_000],
+    ]);
+    expect(recordingIntervals(s, T + 999_999)).toEqual([
+      [T, T + 10_000],
+      [T + 25_000, T + 40_000],
+    ]);
+  });
+
+  it('knows when the current stretch of recording began', () => {
+    const started = play([{ type: 'start', now: T, countdownSeconds: 0 }]);
+    expect(segmentStartedAt(started)).toBe(T);
+    const resumed = play([
+      { type: 'start', now: T, countdownSeconds: 0 },
+      { type: 'pause', now: T + 10_000 },
+      { type: 'resume', now: T + 25_000 },
+    ]);
+    expect(segmentStartedAt(resumed)).toBe(T + 25_000);
+    expect(recordingIntervals(resumed, T + 30_000)).toEqual([
+      [T, T + 10_000],
+      [T + 25_000, T + 30_000],
+    ]);
+  });
+
+  it('has no recording spans before the run starts, and stops them at a pause', () => {
+    expect(recordingIntervals(initialRecorder, T)).toEqual([]);
+    const paused = play([
+      { type: 'start', now: T, countdownSeconds: 0 },
+      { type: 'pause', now: T + 10_000 },
+    ]);
+    expect(recordingIntervals(paused, T + 60_000)).toEqual([[T, T + 10_000]]);
+  });
+
   it('finishes from paused, adding the pause', () => {
     const s = play([
       { type: 'start', now: T, countdownSeconds: 0 },
@@ -98,12 +142,52 @@ describe('liveStats', () => {
     expect(s.averagePace).not.toBeNull();
   });
 
-  it('auto-pauses when fixes stop arriving, and stops the clock', () => {
+  it('keeps the clock running through a signal gap: no fixes is not standing still', () => {
     const s = liveStats(fixesFor(120), recording, T + 140_000, { autoPause: true, unit: 'km' });
+    expect(s.autoPaused).toBe(false);
+    expect(s.holding).toBe(false);
+    expect(s.movingSeconds).toBe(140);
+  });
+
+  /** Running with the phone's speed reading, then standing still for a while. */
+  const runThenStand = (runS: number, standS: number): GpsFix[] => {
+    const run = fixesFor(runS).map((f) => ({ ...f, speed: 3 }));
+    const end = run[run.length - 1];
+    const stand = Array.from({ length: standS }, (_, i) => ({ ...end, t: end.t + (i + 1) * 1000, speed: 0.1 }));
+    return [...run, ...stand];
+  };
+
+  it('auto-pauses when the phone says it is standing still, and stops the clock', () => {
+    const s = liveStats(runThenStand(120, 20), recording, T + 140_000, { autoPause: true, unit: 'km' });
     expect(s.autoPaused).toBe(true);
     expect(s.movingSeconds).toBe(120);
     expect(s.currentPace).toBeNull();
     expect(s.elapsedSeconds).toBe(140);
+  });
+
+  it('holds the clock as soon as you stop, and gives the time back if you move off quickly', () => {
+    const stopped = runThenStand(120, 3);
+    const held = liveStats(stopped, recording, T + 123_500, { autoPause: true, unit: 'km' });
+    expect(held).toMatchObject({ autoPaused: false, holding: true, movingSeconds: 120, currentPace: null });
+
+    const last = stopped[stopped.length - 1];
+    const off = [1, 2, 3, 4].map((i) => {
+      const p = offset(last, i * 3, 90);
+      return { ...last, lat: p.lat, lon: p.lon, t: last.t + i * 1000, speed: 3 };
+    });
+    const moving = liveStats([...stopped, ...off], recording, T + 127_000, { autoPause: true, unit: 'km' });
+    expect(moving.holding).toBe(false);
+    expect(moving.movingSeconds).toBe(127);
+  });
+
+  it('does not count a manual pause while waiting for the first fix after resuming', () => {
+    const resumed = play([
+      { type: 'start', now: T, countdownSeconds: 0 },
+      { type: 'pause', now: T + 60_000 },
+      { type: 'resume', now: T + 120_000 },
+    ]);
+    const s = liveStats(fixesFor(60), resumed, T + 121_000, { autoPause: true, unit: 'km' });
+    expect(s.movingSeconds).toBe(61);
   });
 
   it('keeps the clock running with auto-pause off', () => {

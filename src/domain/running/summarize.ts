@@ -8,9 +8,10 @@ import { estimateCalories } from './calories';
 import { elevationTotals, fillAltitudes } from './elevation';
 import { filterFixes, type FilterReport } from './filter';
 import { encodePolyline } from './polyline';
-import { elapsedMs, recordingMs, type RecorderState } from './recorder';
+import { elapsedMs, recordingMs, segmentStartedAt, type RecorderState } from './recorder';
 import { computeSplits, type Split } from './splits';
-import { AUTO_PAUSE_AFTER_S, buildTrack, trackTotals } from './track';
+import { findStops } from './stops';
+import { buildTrack, stoppedMs, trackTotals, type Stop } from './track';
 import type { GpsFix, TrackPoint } from './types';
 import { METERS_PER, paceSeconds, type RunDistanceUnit } from './units';
 
@@ -42,9 +43,10 @@ export function summarizeRun(
   opts: SummaryOptions,
 ): RunSummary {
   const report = filterFixes(fixes);
-  const track = buildTrack(report.fixes, { autoPause: opts.autoPause });
+  const end = recorder.finishedAt ?? report.fixes[report.fixes.length - 1]?.t ?? 0;
+  const { stops } = findStops(report.motion, end);
+  const track = buildTrack(report.fixes, { autoPause: opts.autoPause, stops });
   const { distanceM } = trackTotals(track);
-  const end = recorder.finishedAt ?? track[track.length - 1]?.t ?? 0;
   const elapsedSeconds = Math.round(elapsedMs(recorder, end) / 1000);
   // Without auto-pause, moving time is simply time spent recording.
   const rawMoving = opts.autoPause ? trackTotals(track).movingSeconds : recordingMs(recorder, end) / 1000;
@@ -106,8 +108,15 @@ export interface LiveStats {
   elapsedSeconds: number;
   currentPace: number | null;
   averagePace: number | null;
-  /** True while auto-pause thinks you have stopped. */
+  /** True once auto-pause is sure you have stopped: the "Auto-paused" label. */
   autoPaused: boolean;
+  /**
+   * True while the clock is held: stopped for sure, or the phone's speed
+   * reading has just dropped to standing and auto-pause is making up its
+   * mind. If you move off again within a few seconds, the held time comes
+   * back.
+   */
+  holding: boolean;
 }
 
 export function liveStats(
@@ -116,22 +125,34 @@ export function liveStats(
   now: number,
   opts: { autoPause: boolean; unit: RunDistanceUnit },
 ): LiveStats {
-  const track = buildTrack(filterFixes(fixes).fixes, { autoPause: opts.autoPause });
+  const report = filterFixes(fixes);
+  const { stops, pending } = findStops(report.motion, now);
+  const track = buildTrack(report.fixes, { autoPause: opts.autoPause, stops });
   const last = track[track.length - 1];
   const distanceM = last?.d ?? 0;
   const recording = recorder.status === 'recording';
 
-  // With auto-pause, no new fix for a while means standing still: the phone
-  // only reports again once you have moved a few metres.
-  const sinceLast = last ? Math.max(0, (now - last.t) / 1000) : 0;
-  const autoPaused = opts.autoPause && recording && last != null && sinceLast >= AUTO_PAUSE_AFTER_S;
+  // No new fix is not the same as standing still: a tunnel or a tall
+  // building drops the signal mid-stride. Only evidence of standing still
+  // pauses the clock.
+  const autoPaused = opts.autoPause && recording && stops.length > 0 && stops[stops.length - 1].open;
+  const held: Stop[] = opts.autoPause && recording && pending?.measured ? [...stops, pending] : stops;
+  const holding = autoPaused || held !== stops;
 
   let movingSeconds: number;
   if (!opts.autoPause) movingSeconds = recordingMs(recorder, now) / 1000;
-  else movingSeconds = (last?.mt ?? 0) + (recording && !autoPaused ? sinceLast : 0);
+  else {
+    movingSeconds = last?.mt ?? 0;
+    if (recording && last) {
+      // Time since the last clean fix, but not from before a manual resume
+      // and not while standing still.
+      const from = Math.max(last.t, segmentStartedAt(recorder) ?? last.t);
+      movingSeconds += Math.max(0, (now - from - stoppedMs(held, from, now)) / 1000);
+    }
+  }
 
   let currentPace: number | null = null;
-  if (last && !autoPaused) {
+  if (last && !holding) {
     let k = track.length - 1;
     while (k > 0 && last.mt - track[k].mt < CURRENT_PACE_WINDOW_S) k -= 1;
     currentPace = paceSeconds(last.d - track[k].d, last.mt - track[k].mt, opts.unit);
@@ -144,5 +165,6 @@ export function liveStats(
     currentPace,
     averagePace: paceSeconds(distanceM, movingSeconds, opts.unit),
     autoPaused,
+    holding,
   };
 }

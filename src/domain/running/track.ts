@@ -7,8 +7,9 @@
  *   - with auto-pause on, any stretch slower than AUTO_PAUSE_SPEED_MPS that
  *     lasts AUTO_PAUSE_AFTER_S or longer, like waiting at a light.
  * A short slow moment, like a sharp turn, stays in. A stop shows up two
- * ways: an interval that is slow on average, or the filter seeing the phone
- * stand still (dropping fixes as jitter) for long enough.
+ * ways: an interval between clean fixes that is slow on average, or a stop
+ * found from the motion samples (stops.ts), which sees the phone standing
+ * still even while its position wanders.
  */
 
 import { haversine } from './geo';
@@ -19,8 +20,26 @@ export const AUTO_PAUSE_SPEED_MPS = 0.5;
 /** A slow stretch this long or longer is a stop. */
 export const AUTO_PAUSE_AFTER_S = 5;
 
+/** A stretch of standing still, found by findStops in stops.ts. */
+export interface Stop {
+  /** Epoch milliseconds. */
+  start: number;
+  end: number;
+  /** Still going when the record ends: the runner is stopped right now. */
+  open: boolean;
+}
+
+/** Milliseconds of the span [from, to] that fall inside the given stops. */
+export function stoppedMs(stops: readonly Stop[], from: number, to: number): number {
+  let ms = 0;
+  for (const s of stops) ms += Math.max(0, Math.min(s.end, to) - Math.max(s.start, from));
+  return ms;
+}
+
 export interface TrackOptions {
   autoPause: boolean;
+  /** Stops found from the motion samples (findStops), taken out of moving time. */
+  stops?: readonly Stop[];
 }
 
 interface Interval {
@@ -28,7 +47,7 @@ interface Interval {
   distance: number;
   seconds: number;
   slow: boolean;
-  /** Seconds the phone was seen standing still inside this interval. */
+  /** Seconds of this interval inside a stop. */
   still: number;
 }
 
@@ -45,8 +64,11 @@ export function buildTrack(fixes: readonly CleanFix[], opts: TrackOptions): Trac
       joined: b.joined,
       distance,
       seconds,
-      slow: seconds > 0 && distance / seconds < AUTO_PAUSE_SPEED_MPS,
-      still: Math.min(seconds, Math.max(0, (b.stillMs ?? 0) / 1000)),
+      // Where the phone measured its speed throughout, the motion samples
+      // already say exactly when it stopped; the average would also take out
+      // the seconds of running either side of the stop.
+      slow: seconds > 0 && distance / seconds < AUTO_PAUSE_SPEED_MPS && !b.measured,
+      still: opts.stops ? Math.min(seconds, stoppedMs(opts.stops, a.t, b.t) / 1000) : 0,
     });
   }
 
@@ -77,10 +99,9 @@ export function buildTrack(fixes: readonly CleanFix[], opts: TrackOptions): Trac
   intervals.forEach((iv, k) => {
     if (iv.joined) {
       d += iv.distance;
-      // A stop seen directly (fixes dropped as jitter for long enough) comes
-      // out even when the interval as a whole averages just over stop speed.
-      const seenStill = opts.autoPause && iv.still >= AUTO_PAUSE_AFTER_S ? iv.still : 0;
-      if (!stopped[k]) mt += iv.seconds - seenStill;
+      // A stop seen directly comes out even when the interval as a whole
+      // averages just over stop speed.
+      if (!stopped[k]) mt += iv.seconds - (opts.autoPause ? iv.still : 0);
     }
     const f = fixes[k + 1];
     track.push({ lat: f.lat, lon: f.lon, alt: f.alt, t: f.t, d, mt });

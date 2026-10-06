@@ -4,9 +4,10 @@
  * Pure, no I/O.
  *
  * Reads <trkseg> (each one is a recording segment), <trkpt lat lon>, <ele>,
- * <time> and <hdop>. GPX has no accuracy radius, so horizontal dilution of
- * precision stands in for it at about 5 metres per unit, which is roughly what
- * a phone reports alongside the same HDOP.
+ * <time>, <hdop>, and <speed> in m/s (plain, or inside <extensions> with a
+ * namespace prefix, as Garmin writes it). GPX has no accuracy radius, so
+ * horizontal dilution of precision stands in for it at about 5 metres per
+ * unit, which is roughly what a phone reports alongside the same HDOP.
  */
 
 import type { GpsFix } from './types';
@@ -19,7 +20,7 @@ const attr = (tag: string, name: string): number => {
 };
 
 const child = (body: string, name: string): string | null => {
-  const m = new RegExp(`<${name}>([^<]*)</${name}>`).exec(body);
+  const m = new RegExp(`<(?:\\w+:)?${name}>([^<]*)</(?:\\w+:)?${name}>`).exec(body);
   return m ? m[1].trim() : null;
 };
 
@@ -34,6 +35,7 @@ export function parseGpx(xml: string): GpsFix[] {
       const ele = child(inner, 'ele');
       const time = child(inner, 'time');
       const hdop = child(inner, 'hdop');
+      const speed = child(inner, 'speed');
       const t = time ? Date.parse(time) : NaN;
       fixes.push({
         lat: attr(m[1], 'lat'),
@@ -41,6 +43,7 @@ export function parseGpx(xml: string): GpsFix[] {
         alt: ele != null && ele !== '' ? Number(ele) : null,
         t,
         accuracy: hdop != null && hdop !== '' ? Number(hdop) * METRES_PER_HDOP : null,
+        ...(speed != null && speed !== '' ? { speed: Number(speed) } : {}),
         seg,
       });
     }

@@ -45,5 +45,20 @@
     "distanceM": 3000,
     "movingSeconds": 1000,
     "elapsedSeconds": 1030
+  },
+  "stoplight-doppler": {
+    "distanceM": 3000,
+    "movingSeconds": 1000,
+    "elapsedSeconds": 1045
+  },
+  "walk-poor-gps": {
+    "distanceM": 1200,
+    "movingSeconds": 889,
+    "elapsedSeconds": 909
+  },
+  "tunnel-doppler": {
+    "distanceM": 3000,
+    "movingSeconds": 1000,
+    "elapsedSeconds": 1000
   }
 }

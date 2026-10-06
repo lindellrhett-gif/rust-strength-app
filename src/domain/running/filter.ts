@@ -15,19 +15,24 @@
  *      them, and the jump itself counts as no distance.
  *   3. Drop fixes too close to the last good fix to be real movement: under
  *      MIN_MOVE_M, or inside most of the accuracy radius. That is the jitter.
- *      Time still passes, so a long stop shows up as a slow interval and
- *      auto-pause can take it out of moving time.
+ *      When the phone's own speed reading says it is standing still, the
+ *      whole accuracy radius counts as jitter. Time still passes, so a long
+ *      stop shows up as a slow interval and auto-pause can take it out of
+ *      moving time.
  *   4. Smooth what is left lightly, which takes the zig-zag out of a straight
  *      line without cutting corners.
  *
  * A signal gap, like a tunnel, needs no special case: the fix after it joins
  * the one before with a straight line if running that far in that time was
  * possible, and is treated as a spike otherwise.
+ *
+ * Alongside the clean fixes it reports what every usable fix says about
+ * moving (see MotionSample), which is what auto-pause works from.
  */
 
 import { haversine, isValidCoord } from './geo';
 import { AUTO_PAUSE_SPEED_MPS } from './track';
-import type { CleanFix, GpsFix } from './types';
+import type { CleanFix, GpsFix, MotionSample } from './types';
 
 /** Fixes vaguer than this are ignored. */
 export const MAX_ACCURACY_M = 25;
@@ -45,9 +50,13 @@ export const MAX_STILL_RADIUS_M = 10;
 export const REANCHOR_FIXES = 3;
 /** Altitudes vaguer than this are dropped; the position is still used. */
 export const MAX_ALT_ACCURACY_M = 20;
+/** Longer than this between usable fixes is a gap in the signal. */
+export const SIGNAL_GAP_S = 10;
 
 export interface FilterReport {
   fixes: CleanFix[];
+  /** One per usable fix, in time order. */
+  motion: MotionSample[];
   rejected: {
     invalid: number;
     inaccurate: number;
@@ -69,6 +78,11 @@ function speed(a: GpsFix, b: GpsFix): number {
   return haversine(a, b) / dt;
 }
 
+/** The phone's measured speed, or null when it gave none. */
+export function measuredSpeed(f: GpsFix): number | null {
+  return f.speed != null && Number.isFinite(f.speed) && f.speed >= 0 ? f.speed : null;
+}
+
 export function filterFixes(input: readonly GpsFix[]): FilterReport {
   const rejected = { invalid: 0, inaccurate: 0, duplicate: 0, spike: 0, stationary: 0 };
 
@@ -81,12 +95,28 @@ export function filterFixes(input: readonly GpsFix[]): FilterReport {
   valid.sort((a, b) => a.t - b.t);
 
   const kept: CleanFix[] = [];
+  const motion: MotionSample[] = [];
   /** Consecutive spike-rejected fixes that agree with one another. */
   let pending: GpsFix[] = [];
   /** Index in `kept` where the current unbroken stretch began. */
   let stretchStart = 0;
-  /** Time of the latest fix dropped as jitter since the last kept fix. */
-  let lastStillT: number | null = null;
+  /** Every fix since the last kept one had a speed reading, with no gap. */
+  let covered = true;
+
+  /**
+   * Records what a fix says about moving. The phone's speed reading decides
+   * when there is one; otherwise `fallback` does, from the positions.
+   */
+  const sample = (fix: GpsFix, fallback: MotionSample['state']) => {
+    const v = measuredSpeed(fix);
+    const prev = motion[motion.length - 1];
+    covered = covered && v != null && (!prev || fix.t - prev.t <= SIGNAL_GAP_S * 1000);
+    motion.push(
+      v != null
+        ? { t: fix.t, seg: fix.seg, state: v < AUTO_PAUSE_SPEED_MPS ? 'still' : 'moving', measured: true }
+        : { t: fix.t, seg: fix.seg, state: fallback, measured: false },
+    );
+  };
 
   for (const raw of valid) {
     if (raw.accuracy != null && raw.accuracy > MAX_ACCURACY_M) {
@@ -101,6 +131,8 @@ export function filterFixes(input: readonly GpsFix[]): FilterReport {
     const last = kept[kept.length - 1];
     if (!last) {
       kept.push({ ...fix, joined: false });
+      sample(fix, 'unsure');
+      covered = true;
       stretchStart = 0;
       continue;
     }
@@ -111,13 +143,15 @@ export function filterFixes(input: readonly GpsFix[]): FilterReport {
     // A new recording segment starts fresh: no line back across a pause.
     if (fix.seg !== last.seg) {
       pending = [];
-      lastStillT = null;
       stretchStart = kept.length;
       kept.push({ ...fix, joined: false });
+      sample(fix, 'unsure');
+      covered = true;
       continue;
     }
 
     if (speed(last, fix) > MAX_SPEED_MPS) {
+      sample(fix, 'unsure');
       const prev = pending[pending.length - 1];
       pending = prev && speed(prev, fix) <= MAX_SPEED_MPS ? [...pending, fix] : [fix];
       rejected.spike += 1;
@@ -146,24 +180,29 @@ export function filterFixes(input: readonly GpsFix[]): FilterReport {
           }),
         );
         pending = [];
-        lastStillT = null;
+        covered = false;
       }
       continue;
     }
     pending = [];
 
-    if (haversine(last, fix) < stillRadius(last, fix)) {
+    const v = measuredSpeed(fix);
+    const standing = v != null && v < AUTO_PAUSE_SPEED_MPS;
+    const accuracy = Math.min(MAX_ACCURACY_M, Math.max(last.accuracy ?? 0, fix.accuracy ?? 0));
+    const radius = standing ? Math.max(stillRadius(last, fix), accuracy) : stillRadius(last, fix);
+    if (haversine(last, fix) < radius) {
       rejected.stationary += 1;
       // Only evidence of standing still if there was no progress either: a
       // slow walk also drops a fix or two, but it keeps getting further away.
-      if (speed(last, fix) < AUTO_PAUSE_SPEED_MPS) lastStillT = fix.t;
+      sample(fix, speed(last, fix) < AUTO_PAUSE_SPEED_MPS ? 'still' : 'unsure');
       continue;
     }
-    kept.push({ ...fix, joined: true, stillMs: lastStillT != null ? lastStillT - last.t : 0 });
-    lastStillT = null;
+    sample(fix, 'moving');
+    kept.push({ ...fix, joined: true, measured: covered });
+    covered = true;
   }
 
-  return { fixes: smooth(kept), rejected };
+  return { fixes: smooth(kept), motion, rejected };
 }
 
 /**

@@ -19,7 +19,6 @@ const EARTH_RADIUS_M = 6_371_008.8;
 const RAD = Math.PI / 180;
 const START = { lat: 47.9253, lon: -97.0329 }; // Grand Forks, ND
 const T0 = Date.parse('2026-09-26T13:00:00Z');
-const FIX_EVERY_S = 2;
 
 // Mulberry32: small, seedable, good enough for noise.
 function rng(seed) {
@@ -58,8 +57,27 @@ function offset(from, metres, bearingDeg) {
  *   { pause: true, jump?: metres }     manual pause: new segment, optionally
  *                                      somewhere else
  *   { teleport: metres }               GPS reappears somewhere impossible
+ *
+ * `every` is seconds between fixes. With `doppler`, each fix also carries the
+ * phone's own speed reading, as an iPhone reports it: close to the true speed
+ * while moving, a few tenths of a m/s of noise while standing.
+ *
+ * With `drift` (0 to 1), the position error wanders smoothly from one fix to
+ * the next instead of being fresh every time, the way a phone's filtered
+ * position does: `noise` is then its typical size in metres and `drift` how
+ * much of it carries over each fix.
  */
-function simulate({ seed, legs, noise = 1.5, accuracy = [5, 8], altitude = () => 256, altNoise = 1.5 }) {
+function simulate({
+  seed,
+  legs,
+  noise = 1.5,
+  accuracy = [5, 8],
+  altitude = () => 256,
+  altNoise = 1.5,
+  every = 2,
+  doppler = false,
+  drift = null,
+}) {
   const rand = rng(seed);
   let pos = { ...START };
   let t = 0;
@@ -69,9 +87,18 @@ function simulate({ seed, legs, noise = 1.5, accuracy = [5, 8], altitude = () =>
   const truth = { distanceM: 0, movingSeconds: 0, elapsedSeconds: 0 };
   const fixes = [];
 
+  let speedNow = 0; // true speed right now, for the Doppler reading
+  const err = { east: 0, north: 0 };
+  const errorAround = (p) => {
+    if (drift == null) return offset(p, Math.abs(gaussian(rand)) * noise, rand() * 360);
+    const fresh = Math.sqrt(1 - drift * drift) * noise;
+    err.east = drift * err.east + gaussian(rand) * fresh;
+    err.north = drift * err.north + gaussian(rand) * fresh;
+    return offset(offset(p, err.east, 90), err.north, 0);
+  };
   const emit = (extra = {}) => {
-    const e = offset(pos, Math.abs(gaussian(rand)) * noise, rand() * 360);
-    fixes.push({
+    const e = errorAround(pos);
+    const fix = {
       lat: e.lat,
       lon: e.lon,
       ele: altitude(along) + gaussian(rand) * altNoise,
@@ -79,13 +106,18 @@ function simulate({ seed, legs, noise = 1.5, accuracy = [5, 8], altitude = () =>
       hdop: (accuracy[0] + rand() * (accuracy[1] - accuracy[0])) / 5,
       seg,
       ...extra,
-    });
+    };
+    if (doppler) {
+      fix.speed = speedNow > 0 ? Math.max(0, speedNow + gaussian(rand) * 0.15) : Math.abs(gaussian(rand)) * 0.12;
+    }
+    fixes.push(fix);
   };
 
   emit();
   for (const leg of legs) {
     if (leg.move != null) {
-      const steps = Math.round(leg.move / (leg.speed * FIX_EVERY_S));
+      speedNow = leg.speed;
+      const steps = Math.round(leg.move / (leg.speed * every));
       const stepM = leg.move / steps;
       for (let i = 0; i < steps; i += 1) {
         pos = offset(pos, stepM, leg.bearing ?? 90);
@@ -96,8 +128,9 @@ function simulate({ seed, legs, noise = 1.5, accuracy = [5, 8], altitude = () =>
       }
       truth.distanceM += leg.move;
     } else if (leg.stop != null) {
-      for (let s = FIX_EVERY_S; s <= leg.stop; s += FIX_EVERY_S) {
-        t += FIX_EVERY_S;
+      speedNow = 0;
+      for (let s = every; s <= leg.stop; s += every) {
+        t += every;
         emit();
       }
     } else if (leg.gap != null) {
@@ -139,7 +172,9 @@ function toGpx(name, fixes) {
               `      <trkpt lat="${f.lat.toFixed(7)}" lon="${f.lon.toFixed(7)}">` +
               `<ele>${f.ele.toFixed(1)}</ele>` +
               `<time>${new Date(T0 + f.t * 1000).toISOString()}</time>` +
-              `<hdop>${f.hdop.toFixed(2)}</hdop></trkpt>`,
+              `<hdop>${f.hdop.toFixed(2)}</hdop>` +
+              (f.speed != null ? `<extensions><speed>${f.speed.toFixed(2)}</speed></extensions>` : '') +
+              '</trkpt>',
           )
           .join('\n') +
         '\n    </trkseg>',
@@ -187,6 +222,37 @@ const SCENARIOS = {
   'signal-jump': {
     seed: 9,
     legs: [{ move: 1500, speed: 3.0 }, { teleport: 2000, after: 30 }, { move: 1500, speed: 3.0 }],
+  },
+  // As an iPhone records today: a fix every second with its speed reading.
+  'stoplight-doppler': {
+    seed: 10,
+    every: 1,
+    doppler: true,
+    noise: 3,
+    drift: 0.9,
+    legs: [{ move: 1500, speed: 3.0 }, { stop: 45 }, { move: 1500, speed: 3.0, bearing: 0 }],
+  },
+  // A walk around the neighbourhood with GPS bouncing off houses and trees.
+  'walk-poor-gps': {
+    seed: 11,
+    every: 1,
+    doppler: true,
+    noise: 6,
+    drift: 0.95,
+    accuracy: [12, 18],
+    legs: [
+      { move: 600, speed: 1.35 },
+      { stop: 20 },
+      { move: 600, speed: 1.35, bearing: 0 },
+    ],
+  },
+  'tunnel-doppler': {
+    seed: 12,
+    every: 1,
+    doppler: true,
+    noise: 3,
+    drift: 0.9,
+    legs: [{ move: 1400, speed: 3.0 }, { gap: 60, speed: 3.0 }, { move: 1420, speed: 3.0 }],
   },
 };
 

@@ -14,7 +14,7 @@
  * has no React Native imports.
  */
 
-import type { RecorderState } from './recorder';
+import { initialRecorder, type RecorderState } from './recorder';
 import type { GpsFix } from './types';
 import type { RunDistanceUnit } from './units';
 
@@ -93,7 +93,15 @@ export function createRunStore(storage: KeyValueStorage): RunStore {
         if (part) fixes.push(...(JSON.parse(part) as GpsFix[]));
       }
       // Anything past fixCount is from a batch whose meta never got written.
-      state = { meta: { ...meta, fixCount: Math.min(meta.fixCount, fixes.length) }, fixes: fixes.slice(0, meta.fixCount) };
+      // Fields added to the recorder since the run began get their defaults.
+      state = {
+        meta: {
+          ...meta,
+          recorder: { ...initialRecorder, ...meta.recorder },
+          fixCount: Math.min(meta.fixCount, fixes.length),
+        },
+        fixes: fixes.slice(0, meta.fixCount),
+      };
     } catch {
       // A damaged record is worth less than a clean start.
       state = null;

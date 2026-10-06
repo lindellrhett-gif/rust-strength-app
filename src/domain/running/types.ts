@@ -15,6 +15,12 @@ export interface GpsFix {
   /** Vertical accuracy in metres, when known. */
   altAccuracy?: number | null;
   /**
+   * Ground speed in m/s as the phone measured it (from the Doppler shift of
+   * the GPS signal), or null when it doesn't know. Far steadier than speed
+   * worked out from positions, so auto-pause trusts it first.
+   */
+  speed?: number | null;
+  /**
    * Recording segment. Starts at 0 and goes up by one after every manual
    * pause, so no distance is counted for wherever you went while paused.
    */
@@ -30,10 +36,23 @@ export interface CleanFix extends GpsFix {
    */
   joined: boolean;
   /**
-   * Milliseconds the phone was seen standing still since the previous clean
-   * fix: from that fix to the last fix dropped as jitter. Auto-pause uses it.
+   * True when the phone's speed reading covered every fix since the previous
+   * clean fix, with no gap in the signal. Auto-pause then trusts the motion
+   * samples for this stretch rather than its average speed.
    */
-  stillMs?: number;
+  measured?: boolean;
+}
+
+/**
+ * What one usable fix says about whether the runner is moving, for
+ * auto-pause. 'unsure' is evidence of neither.
+ */
+export interface MotionSample {
+  t: number;
+  seg: number;
+  state: 'still' | 'moving' | 'unsure';
+  /** True when the phone's own speed reading decided it. */
+  measured: boolean;
 }
 
 /** A point on the finished track, with running totals. */

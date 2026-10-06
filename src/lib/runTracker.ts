@@ -12,10 +12,13 @@
  * iOS relaunches the app in the background to deliver fixes the task exists
  * before any screen renders. app/_layout.tsx imports this file for that.
  *
- * Battery: the most accurate setting with a 5 m distance filter. GPS is the
- * main cost of a run (roughly 8-12% of battery per hour on a recent iPhone),
- * and accurate splits and records are the point of the feature. It runs only
- * between Start and Finish; nothing is tracked otherwise.
+ * Battery: the most accurate setting, with every fix delivered (about one a
+ * second). GPS is the main cost of a run (roughly 8-12% of battery per hour on
+ * a recent iPhone), and accurate splits and records are the point of the
+ * feature. A distance filter would barely save power, since the GPS stays on
+ * either way, and it would hide stops: with no fixes coming in, standing still
+ * looks the same as losing signal. Tracking runs only between Start and
+ * Finish; nothing is tracked otherwise.
  */
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -35,6 +38,8 @@ export function toIncomingFix(l: Location.LocationObject): IncomingFix {
     t: l.timestamp,
     accuracy: l.coords.accuracy ?? null,
     altAccuracy: l.coords.altitudeAccuracy ?? null,
+    // iOS reports -1 when it has no speed reading.
+    speed: l.coords.speed != null && l.coords.speed >= 0 ? l.coords.speed : null,
   };
 }
 
@@ -49,7 +54,7 @@ export async function startRunTracking(): Promise<void> {
   await Location.startLocationUpdatesAsync(RUN_LOCATION_TASK, {
     accuracy: Location.Accuracy.BestForNavigation,
     activityType: Location.ActivityType.Fitness,
-    distanceInterval: 5,
+    distanceInterval: 0,
     pausesUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
