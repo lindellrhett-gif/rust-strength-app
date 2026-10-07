@@ -140,7 +140,7 @@ export default function PrivacyZonesScreen() {
         <Card title="New zone">
           <Field label="Name" value={label} onChangeText={setLabel} placeholder="Home, work…" maxLength={40} />
           <NumberStepper
-            label="Size across (m)"
+            label="Radius (m)"
             value={radiusM}
             onChange={(v) => setRadiusM(Math.max(MIN_RADIUS_M, Math.min(MAX_RADIUS_M, Math.round(v / 50) * 50)))}
             step={100}

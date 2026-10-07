@@ -478,28 +478,50 @@ None of these can be settled from the code.
 ## 14. Pending: the running update (not released yet)
 
 The running feature is being built on the `feature/running` branch, and the
-released app contains none of it. Everything above describes the released
-app. Before the running update ships, the documents have to catch up with the
-new data it collects:
+released app contains none of it. Sections 1 to 13 describe the released app.
 
-1. **Precise location.** The app records a GPS route while a run is recording,
-   and stores it with the run (`runs.route`, migration 0015). The Privacy
-   Policy says no location is collected (`src/legal/privacy.ts`, "We do not
-   collect … precise or approximate location"). That line must change, and the
-   policy must cover stored routes, privacy zones, the per-run map sharing
-   choice, export and deletion. Then bump the legal version and rebuild the
-   site with `npm run legal`.
-2. **Step counts from the phone's motion sensors.** With the Motion & Fitness
-   permission, the app reads step counts from the iPhone's pedometer
-   (expo-sensors). A recorded run's step total is saved in `activities.steps`
-   (migration 0017). Today's step count is shown on the Today screen and never
-   leaves the phone. The policy currently says step counts are stored "only if
-   you choose to enter them", so it must also say that runs record steps
-   automatically once the permission is given.
-3. **App Store privacy labels.** Add **Precise Location** (linked to the user,
-   app functionality). Steps already fall under the **Fitness** label.
-4. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` has
-   already been added to `app.json`. Fitness was already declared.
-5. **Attorney.** Location combined with fitness data adds to the Washington My
+### Done on the branch (legal version 1.5.0)
+
+The documents on the branch now describe the running update. They are **not
+published**: they were rebuilt with the site sync turned off, so the public
+site still shows version 1.4.4, which matches the released app.
+
+1. **Precise location.** The Privacy Policy no longer says no location is
+   collected. It describes recording a route only between Start and Finish
+   (`runs.route`, migration 0015), what is stored with each run, privacy
+   zones, saved routes, running settings, the per-run feed and map choices,
+   the server-side trimming (`run_shared_route`, migration 0021), the run in
+   progress kept on the phone, export (migration 0023) and deletion.
+2. **Steps.** The policy says a recorded run's step total is saved with the
+   run (`activities.steps`, migration 0017) and today's count never leaves
+   the phone (`src/lib/steps.ts` sends nothing).
+3. **Permissions.** The policy lists all three: notifications, location
+   ("While Using the App" only, checked: the code calls only
+   `requestForegroundPermissionsAsync`) and Motion & Fitness.
+4. **Apple Maps** is listed as a service provider, since map tiles for the
+   area on screen are fetched from Apple. Routes are drawn on the phone and
+   are not sent to Apple by the app.
+5. **Terms.** Section 1 now says run figures are GPS and sensor estimates,
+   and adds a short outdoor running safety paragraph.
+6. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` is in
+   `app.json`. Fitness was already declared.
+7. **Fixed while checking:** the privacy zone screen labelled a radius as
+   "Size across", which would have made a zone hide half the distance the
+   user expected. It now says "Radius", as does the server's error message.
+
+Version 1.5.0 is a minor bump, so every signed-in user is asked to accept
+again when they first open 1.1.
+
+### Still to do at release
+
+1. **Publish the documents** with `npm run legal` (with the site repo checked
+   out next to this one), then push `rust-strength-site`. Do this when 1.1 is
+   released, not before, or the public policy describes features users don't
+   have. Change `lastUpdated` in `src/legal/config.ts` to the release date
+   first.
+2. **App Store privacy labels.** Add **Precise Location** (linked to the user,
+   used for app functionality, not tracking). Steps already fall under the
+   **Fitness** label.
+3. **Attorney.** Location combined with fitness data adds to the Washington My
    Health My Data question in section 5. This has not been reviewed, and is not
    claimed to be compliant.

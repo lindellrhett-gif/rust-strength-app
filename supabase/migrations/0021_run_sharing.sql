@@ -140,7 +140,7 @@ begin
     raise exception 'That place is not on the map.';
   end if;
   if p_radius_m is null or p_radius_m < 200 or p_radius_m > 1000 then
-    raise exception 'A privacy zone is 200 to 1000 metres across.';
+    raise exception 'A privacy zone''s radius is 200 to 1000 metres.';
   end if;
   if p_label is not null and char_length(btrim(p_label)) > 40 then
     raise exception 'Keep the name under 40 characters.';
