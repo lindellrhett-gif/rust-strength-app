@@ -23,7 +23,7 @@ import { hasFeature } from '@/domain/entitlements';
 import { currentStreak, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { compact } from '@/lib/format';
-import { useActiveRun } from '@/lib/useActiveRun';
+import { useRunInProgress } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
@@ -39,8 +39,7 @@ export default function Today() {
   const totals = useAllTimeTotals();
   const planned = usePlannedSessions();
   const startWorkout = useStartWorkout();
-  const activeRun = useActiveRun();
-  const runInProgress = activeRun != null && activeRun.meta.recorder.status !== 'idle';
+  const runInProgress = useRunInProgress();
 
   const unit = profile.data?.unit ?? 'lb';
   const todayStr = todayLocal();

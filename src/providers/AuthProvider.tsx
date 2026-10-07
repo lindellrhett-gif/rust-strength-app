@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 
+import { discardActiveRun, discardRunsNotOwnedBy } from '@/lib/activeRun';
 import { persister, queryClient } from '@/lib/queryClient';
 import { LEGAL } from '@/legal/config';
 import { supabase } from '@/lib/supabase';
@@ -116,6 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.getMutationCache().clear();
       void queryClient.resetQueries();
       void persister.removeClient();
+      // A run left on the phone by a different account goes too: one
+      // person's route never stays behind for the next person.
+      if (id) void discardRunsNotOwnedBy(id).catch(() => undefined);
     }
   }, [session]);
 
@@ -160,6 +164,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
       },
       signOut: async () => {
+        // A run still on the phone holds this person's location; it doesn't
+        // outlive their session.
+        await discardActiveRun().catch(() => undefined);
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       },

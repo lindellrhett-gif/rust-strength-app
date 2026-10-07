@@ -19,8 +19,7 @@ import { RunMap } from '@/components/RunMap';
 import { useProfile } from '@/data/profile';
 import { DEFAULT_RUN_PREFERENCES, useRunPreferences, useSaveRun } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
-import { gpsQuality, routeSegments, type GpsQuality } from '@/domain/running/display';
-import { filterFixes } from '@/domain/running/filter';
+import { gpsQuality, liveRefreshMs, routeSegments, type GpsQuality } from '@/domain/running/display';
 import type { LatLon } from '@/domain/running/geo';
 import { accessMessage, type LocationAccess } from '@/domain/running/permission';
 import {
@@ -30,20 +29,19 @@ import {
   reduceRecorder,
   type RecorderEvent,
 } from '@/domain/running/recorder';
-import { buildSaveRunInput, unsavableReason } from '@/domain/running/save';
+import { UNSAVABLE_MESSAGE } from '@/domain/running/finish';
 import { cadence } from '@/domain/running/steps';
-import { liveStats, summarizeRun } from '@/domain/running/summarize';
+import { liveStatsAt, prepareLive } from '@/domain/running/summarize';
 import { runUnitFor, toKilograms, toUnit, type RunDistanceUnit } from '@/domain/running/units';
+import { discardActiveRun, finishActiveRun } from '@/lib/activeRun';
 import { newId } from '@/lib/ids';
-import {
-  getLocationAccess,
-  requestLocationAccess,
-  startRunTracking,
-  stopRunTracking,
-} from '@/lib/runTracker';
+import { getLocationAccess, requestLocationAccess, startRunTracking } from '@/lib/runTracker';
 import { runStore } from '@/lib/runStore';
-import { getStepAccess, requestStepAccess, stepsDuring, stepsDuringWithin } from '@/lib/steps';
+import { getStepAccess, requestStepAccess, stepsDuring } from '@/lib/steps';
 import { useActiveRun } from '@/lib/useActiveRun';
+import { useAppActive } from '@/lib/useAppActive';
+import { useThrottled } from '@/lib/useThrottled';
+import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -51,8 +49,8 @@ import { radius, spacing, text } from '@/theme/typography';
 const BIG_SCALE = 1.3;
 /** How often the step count refreshes while recording. */
 const STEPS_REFRESH_MS = 5000;
-/** A slow pedometer answer never holds up saving the run. */
-const STEPS_SAVE_TIMEOUT_MS = 2500;
+/** "Go" is only announced if the run started this recently, not on coming back to the app. */
+const GO_ANNOUNCE_WINDOW_MS = 2000;
 
 const announce = (message: string) => AccessibilityInfo.announceForAccessibility(message);
 
@@ -74,14 +72,20 @@ export default function RecordRunScreen() {
   // full-screen modal, where a native safe-area view can miss the Dynamic
   // Island (see ModalScreen).
   const insets = useSafeAreaInsets();
+  const { userId } = useAuth();
   const profile = useProfile();
   const prefsQuery = useRunPreferences();
   const prefs = prefsQuery.data ?? DEFAULT_RUN_PREFERENCES;
-  const run = useActiveRun();
+  // Battery: with the phone locked nobody can see this screen, so it stops
+  // following every fix and stops its clock. GPS keeps recording in the
+  // background task either way, and the screen catches up when it is back.
+  const appActive = useAppActive();
+  const run = useActiveRun({ paused: !appActive });
   const save = useSaveRun();
 
   const recorder = run?.meta.recorder ?? initialRecorder;
   const status = recorder.status;
+  const underway = status === 'countdown' || status === 'recording' || status === 'paused';
   const unit: RunDistanceUnit = run?.meta.unit ?? runUnitFor(profile.data?.unit ?? 'lb');
   const autoPause = run?.meta.autoPause ?? prefs.autoPause;
 
@@ -138,29 +142,50 @@ export default function RecordRunScreen() {
     };
   }, [access, status]);
 
-  // The clock. During the countdown it also starts the run when it hits zero.
+  // A run that was under way when the app closed: make sure GPS is back on.
+  // Harmless if it never stopped.
   useEffect(() => {
-    if (status !== 'countdown' && status !== 'recording' && status !== 'paused') return;
-    const id = setInterval(
-      () => {
-        const t = Date.now();
-        setNow(t);
-        const current = runStore.current();
-        const rec = current?.meta.recorder;
-        if (rec?.status === 'countdown' && rec.countdownEndsAt != null && t >= rec.countdownEndsAt) {
-          void dispatch({ type: 'tick', now: t });
-          Vibration.vibrate(300);
-          announce('Go');
-        }
-      },
-      status === 'countdown' ? 200 : 1000,
-    );
-    return () => clearInterval(id);
-  }, [status]);
+    if (access === 'granted' && underway) startRunTracking().catch(() => undefined);
+  }, [access, underway]);
+
+  // The clock, only while the screen can be seen. During the countdown it
+  // also starts the run when it hits zero (the store does the same from the
+  // first fix after it, for when the phone is locked).
+  useEffect(() => {
+    if (!underway || !appActive) return;
+    const tick = () => {
+      const t = Date.now();
+      setNow(t);
+      const rec = runStore.current()?.meta.recorder;
+      if (rec?.status === 'countdown' && rec.countdownEndsAt != null && t >= rec.countdownEndsAt) {
+        void dispatch({ type: 'tick', now: t });
+      }
+    };
+    // Straight away on coming back to the screen, then on the interval.
+    const first = setTimeout(tick, 0);
+    const id = setInterval(tick, status === 'countdown' ? 200 : 1000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, [status, underway, appActive]);
+
+  // "Go", the moment the countdown ends.
+  const lastStatus = useRef(status);
+  useEffect(() => {
+    const started = recorder.startedAt;
+    if (lastStatus.current === 'countdown' && status === 'recording' && started != null) {
+      if (Date.now() - started < GO_ANNOUNCE_WINDOW_MS) {
+        Vibration.vibrate(300);
+        announce('Go');
+      }
+    }
+    lastStatus.current = status;
+  }, [status, recorder.startedAt]);
 
   // Steps so far, from the phone's pedometer, while the run is under way.
   useEffect(() => {
-    if (status !== 'recording' && status !== 'paused') return;
+    if ((status !== 'recording' && status !== 'paused') || !appActive) return;
     let alive = true;
     const read = async () => {
       const rec = runStore.current()?.meta.recorder;
@@ -174,13 +199,17 @@ export default function RecordRunScreen() {
       alive = false;
       clearInterval(id);
     };
-  }, [status]);
+  }, [status, appActive]);
 
+  // The heavy work once per new fix (less often on a long run); the clock
+  // only redoes the cheap part.
+  const fixes = useThrottled(run?.fixes, liveRefreshMs(run?.fixes.length ?? 0));
+  const prepared = useMemo(() => (fixes ? prepareLive(fixes, autoPause) : null), [fixes, autoPause]);
   const live = useMemo(
-    () => (run ? liveStats(run.fixes, recorder, now, { autoPause, unit }) : null),
-    [run, recorder, now, autoPause, unit],
+    () => (prepared ? liveStatsAt(prepared, recorder, now, { autoPause, unit }) : null),
+    [prepared, recorder, now, autoPause, unit],
   );
-  const segments = useMemo(() => routeSegments(filterFixes(run?.fixes ?? []).fixes), [run?.fixes]);
+  const segments = useMemo(() => (prepared ? routeSegments(prepared.fixes) : []), [prepared]);
 
   // Tell VoiceOver when auto-pause kicks in or lets go.
   const lastAutoPaused = useRef(false);
@@ -220,6 +249,7 @@ export default function RecordRunScreen() {
       const bodyweight = profile.data?.body_weight;
       await runStore.start({
         runId,
+        userId,
         recorder: reduceRecorder(initialRecorder, { type: 'start', now: Date.now() }),
         unit,
         autoPause: prefs.autoPause,
@@ -238,10 +268,7 @@ export default function RecordRunScreen() {
     }
   };
 
-  const cancelCountdown = async () => {
-    await stopRunTracking();
-    await runStore.clear();
-  };
+  const cancelCountdown = () => discardActiveRun();
 
   const pause = () => {
     void dispatch({ type: 'pause', now: Date.now() });
@@ -254,54 +281,27 @@ export default function RecordRunScreen() {
   };
 
   const discard = async (runId: string) => {
-    await stopRunTracking();
-    await runStore.clear(runId);
+    await discardActiveRun(runId);
     router.back();
   };
 
   const finish = async () => {
-    const current = runStore.current();
-    if (!current || busy) return;
+    if (busy) return;
+    const alreadyFinished = runStore.current()?.meta.recorder.status === 'finished';
     setBusy(true);
     try {
-      const rec =
-        current.meta.recorder.status === 'finished'
-          ? current.meta.recorder
-          : reduceRecorder(current.meta.recorder, { type: 'finish', now: Date.now() });
-      const summary = summarizeRun(current.fixes, rec, {
-        autoPause: current.meta.autoPause,
-        unit: current.meta.unit,
-        bodyweightKg: current.meta.bodyweightKg,
-      });
-      const reason = unsavableReason(summary);
-      if (reason) {
-        Alert.alert(
-          'Too short to save',
-          reason === 'too-short' ? 'This run is under 50 metres.' : 'No GPS route was recorded.',
-          [
-            ...(rec === current.meta.recorder ? [] : [{ text: 'Keep recording', style: 'cancel' as const }]),
-            { text: 'Discard run', style: 'destructive', onPress: () => void discard(current.meta.runId) },
-          ],
-        );
+      const outcome = await finishActiveRun(Date.now());
+      if (!outcome) return;
+      if (outcome.kind !== 'ready') {
+        Alert.alert('Too short to save', UNSAVABLE_MESSAGE[outcome.kind], [
+          ...(alreadyFinished ? [] : [{ text: 'Keep recording', style: 'cancel' as const }]),
+          { text: 'Discard run', style: 'destructive', onPress: () => void discard(outcome.runId) },
+        ]);
         return;
       }
-      await runStore.setRecorder(rec);
-      await stopRunTracking();
       announce('Run finished');
-      const runSteps = await stepsDuringWithin(
-        recordingIntervals(rec, rec.finishedAt ?? Date.now()),
-        STEPS_SAVE_TIMEOUT_MS,
-      );
-      save.mutate(
-        buildSaveRunInput(summary, {
-          runId: current.meta.runId,
-          startedAt: rec.startedAt ?? Date.now(),
-          unit: current.meta.unit,
-          mapVisibility: current.meta.mapVisibility,
-          steps: runSteps,
-        }),
-      );
-      router.replace(`/run/${current.meta.runId}`);
+      save.mutate(outcome.input);
+      router.replace(`/run/${outcome.runId}`);
     } finally {
       setBusy(false);
     }

@@ -3,8 +3,10 @@ import { Redirect, Tabs } from 'expo-router';
 import { useState } from 'react';
 
 import { ConsentScreen } from '@/components/ConsentScreen';
+import { RunRecovery } from '@/components/RunRecovery';
 import { useProfile } from '@/data/profile';
 import { needsConsent } from '@/domain/consent';
+import { hasFeature } from '@/domain/entitlements';
 import { TAB_TITLES } from '@/domain/tabs';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -34,6 +36,7 @@ export default function TabsLayout() {
   // once someone is actually signed in, never over the sign-in screen.
   return (
     <OnboardingProvider>
+      {hasFeature('running') ? <RunRecovery /> : null}
       <Tabs
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
