@@ -3,6 +3,7 @@
  * whether there is anything worth saving. Pure, no I/O.
  */
 
+import type { Split } from './splits';
 import { plausibleSteps } from './steps';
 import { routePayload, type RunSummary } from './summarize';
 import type { RunDistanceUnit } from './units';
@@ -20,7 +21,7 @@ export function defaultRunName(startedAt: Date): string {
   return 'Night run';
 }
 
-/** The arguments of rpc_save_run (migrations 0015 and 0017). */
+/** The arguments of rpc_save_run (migrations 0015, 0017 and 0018). */
 export interface SaveRunInput {
   p_id: string;
   p_performed_at: string;
@@ -43,6 +44,10 @@ export interface SaveRunInput {
   p_best_efforts: Record<string, number>;
   p_map_visibility: 'private' | 'friends';
   p_steps: number | null;
+  /** Metres so far at each route point. */
+  p_distances: number[] | null;
+  /** Moving seconds so far at each route point. */
+  p_moving_times: number[] | null;
 }
 
 export interface RecordedRunMeta {
@@ -66,6 +71,15 @@ export function unsavableReason(summary: RunSummary): 'too-short' | 'no-route' |
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
+/** Splits as the database stores them: [seconds, elevation change or null, distance]. */
+export function splitsPayload(splits: readonly Split[]): [number, number | null, number][] {
+  return splits.map((s) => [
+    Math.round(s.seconds),
+    s.elevationChangeM == null ? null : round1(s.elevationChangeM),
+    round1(s.distanceM),
+  ]);
+}
+
 /** Builds the save for a recorded run. Throws if the run is not savable. */
 export function buildSaveRunInput(summary: RunSummary, meta: RecordedRunMeta): SaveRunInput {
   const reason = unsavableReason(summary);
@@ -87,16 +101,14 @@ export function buildSaveRunInput(summary: RunSummary, meta: RecordedRunMeta): S
     p_elevation_loss_m: summary.hasElevation ? round1(summary.elevationLossM) : null,
     p_calories: summary.calories,
     p_effort: null,
-    p_splits: summary.splits.map((s) => [
-      Math.round(s.seconds),
-      s.elevationChangeM == null ? null : round1(s.elevationChangeM),
-      round1(s.distanceM),
-    ]),
+    p_splits: splitsPayload(summary.splits),
     p_polyline: route.polyline,
     p_alts: route.alts,
     p_times: route.times,
     p_best_efforts: { ...summary.bestEfforts } as Record<string, number>,
     p_map_visibility: meta.mapVisibility,
     p_steps: plausibleSteps(meta.steps, summary.elapsedSeconds),
+    p_distances: route.distances,
+    p_moving_times: route.moving,
   };
 }

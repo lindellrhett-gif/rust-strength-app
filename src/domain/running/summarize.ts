@@ -74,13 +74,20 @@ export function summarizeRun(
   };
 }
 
-/** A route as the database takes it: one polyline and two parallel arrays. */
+/** A route as the database takes it: one polyline and parallel arrays. */
 export interface RoutePayload {
   polyline: string;
   /** Altitude per point in metres, or null when the run has none. */
   alts: number[] | null;
   /** Seconds from the first point, per point. */
   times: number[];
+  /**
+   * Metres run so far at each point, to 0.1 m. Not the same as measuring the
+   * line: a manual pause leaves a jump in it that was never run.
+   */
+  distances: number[];
+  /** Moving seconds so far at each point. */
+  moving: number[];
 }
 
 export function routePayload(track: readonly TrackPoint[]): RoutePayload | null {
@@ -91,6 +98,8 @@ export function routePayload(track: readonly TrackPoint[]): RoutePayload | null 
     polyline: encodePolyline(track),
     alts: alts ? alts.map((a) => Math.round(a * 10) / 10) : null,
     times: track.map((p) => Math.max(0, Math.round((p.t - t0) / 1000))),
+    distances: track.map((p) => Math.round(p.d * 10) / 10),
+    moving: track.map((p) => Math.round(p.mt)),
   };
 }
 

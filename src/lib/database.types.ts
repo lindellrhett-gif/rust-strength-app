@@ -599,6 +599,8 @@ export type Database = {
           p_best_efforts?: Json;
           p_map_visibility?: 'private' | 'friends';
           p_steps?: number | null;
+          p_distances?: number[] | null;
+          p_moving_times?: number[] | null;
         };
         Returns: string;
       };
@@ -627,7 +629,36 @@ export type Database = {
           alts: number[] | null;
           times: number[] | null;
           best_efforts: Json;
+          distances: number[] | null;
+          moving_times: number[] | null;
         }[];
+      };
+      rpc_update_run_details: {
+        Args: {
+          p_activity_id: string;
+          p_name: string | null;
+          p_note: string | null;
+          p_effort: number | null;
+          p_map_visibility?: 'private' | 'friends' | null;
+        };
+        Returns: undefined;
+      };
+      rpc_crop_run: {
+        Args: {
+          p_activity_id: string;
+          p_from: number;
+          p_to: number;
+          p_distance_m: number;
+          p_moving_seconds: number;
+          p_elapsed_seconds: number;
+          p_elevation_gain_m: number | null;
+          p_elevation_loss_m: number | null;
+          p_calories: number | null;
+          p_splits: Json;
+          p_best_efforts: Json;
+          p_steps: number | null;
+        };
+        Returns: undefined;
       };
       rpc_weekly_coverage: {
         Args: { week_start: string };

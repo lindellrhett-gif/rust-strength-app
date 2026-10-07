@@ -38,6 +38,10 @@ await asUser(db, runner, async () => {
     run?.moving_seconds === input.p_moving_seconds && run?.elapsed_seconds === input.p_elapsed_seconds);
 
   check('steps come back', input.p_steps > 0 && run?.steps === input.p_steps, run?.steps);
+  check('distance so far at every point comes back', run?.distances?.length === input.p_distances.length &&
+    run.distances.every((d, i) => Math.abs(d - input.p_distances[i]) < 0.05));
+  check('moving time so far at every point comes back',
+    JSON.stringify(run?.moving_times) === JSON.stringify(input.p_moving_times));
 
   const { rows: act } = await db.query(`select kind, distance, distance_unit, duration_seconds, steps from activities where id = $1`, [input.p_id]);
   check('it shows up as a run in the activity log, in km, with its steps', act[0]?.kind === 'run' && act[0]?.distance_unit === 'km' &&
