@@ -7,8 +7,8 @@ your current strength from your recent sets and suggests the load for the next
 one. Over time it learns your gym's machines too, so a PR on one cable stack
 carries over to a differently labeled one.
 
-**Status:** submitted to the App Store (in review) after beta testing on
-TestFlight · **Role:** solo developer · **Built:** September 2026
+**Status:** [live on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) since October 2, 2026, after beta
+testing on TestFlight · **Role:** solo developer · **Built:** September 2026
 
 <p align="center">
   <img src="media/screenshots/suggestion.png" width="200" alt="Add set screen with a suggested next weight of 230 lb for 4 to 6 reps, the estimated one-rep max, last session's top set, and a rest timer" />
@@ -35,12 +35,12 @@ AI development, software engineering, or cybersecurity.
 | | |
 |---|---|
 | **Scope** | A full iOS app, from the database to the App Store submission, built solo |
-| **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026 |
+| **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026; released October 2, 2026 |
 | **App code** | About 19,600 lines of TypeScript across the screens, components, domain logic and data layer |
 | **Database** | About 3,000 lines of SQL in 14 migrations, including tables, Row Level Security policies and server functions |
 | **Tests** | 519 Jest tests in 36 suites, plus strict TypeScript and ESLint |
 | **Tools** | Git, EAS Build, TestFlight, and Claude Code for AI-assisted development |
-| **Users** | Beta tested on TestFlight before submission |
+| **Users** | Beta tested on TestFlight, now [on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) |
 
 ### A five-minute code tour
 
@@ -264,8 +264,27 @@ I built Rust Strength on my own:
 - **Launch:** handled the builds, TestFlight, and App Store submission, plus the
   privacy policy, terms, and account deletion that App Review requires.
 
-Claude Code was one of the tools I used during development. I owned the
-architecture and data design, and led debugging and testing.
+### How I used AI tools
+
+I used Claude Code as a development tool, and it wrote a large share of the
+implementation. That is how one person took a full app from first commit to
+App Store submission in three weeks. The engineering decisions stayed with me:
+
+- **I set the structure first.** I designed the data model, the Row Level
+  Security rules, the offline sync approach, and how the recommender should
+  behave, then had Claude Code build against that design one piece at a time.
+- **I reviewed every change.** Nothing went in until I had read it and tested
+  it. When something was wrong, I diagnosed the cause and directed the fix;
+  [Problems I solved](#problems-i-solved) has examples.
+- **Tests are the guardrail.** The core logic is pure TypeScript covered by 519
+  Jest tests, under strict TypeScript and ESLint, so generated code has to pass
+  the same checks as anything I write by hand.
+- **I audited it before launch.** My own pre-launch review of the database found
+  a privacy issue and a performance issue, both fixed in
+  [`0009_feed_hardening.sql`](supabase/migrations/0009_feed_hardening.sql).
+
+AI tools let me move faster; owning the design and verifying the output is what
+makes the result reliable. I'm happy to walk through any part of the code.
 
 **Links:** [Portfolio](https://lindellrhett-gif.github.io/) ·
 [Support and legal pages](https://lindellrhett-gif.github.io/rust-strength/) ·
