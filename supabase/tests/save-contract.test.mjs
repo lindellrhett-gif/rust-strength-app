@@ -48,9 +48,23 @@ await asUser(db, runner, async () => {
     Math.abs(act[0]?.distance - input.p_distance_m / 1000) < 0.01 && act[0]?.duration_seconds === input.p_moving_seconds &&
     act[0]?.steps === input.p_steps, act[0]);
 
+  // A run entered by hand, exactly as the manual screen sends it.
+  const manual = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'manual-run.json'), 'utf8'));
+  const manualNames = Object.keys(manual);
+  const manualErr = await errorOf(() =>
+    db.query(
+      `select rpc_save_run(${manualNames.map((k, i) => `${k} => $${i + 1}`).join(', ')})`,
+      manualNames.map((k) => (k === 'p_splits' || k === 'p_best_efforts' ? JSON.stringify(manual[k]) : manual[k])),
+    ),
+  );
+  check('the database accepts a treadmill run entered by hand', manualErr === null, manualErr);
+  const { rows: m } = await db.query(`select * from rpc_get_run($1)`, [manual.p_id]);
+  check('it comes back as a treadmill run with no route',
+    m[0]?.source === 'treadmill' && m[0]?.polyline === null && m[0]?.effort === 6 && m[0]?.note === 'Incline 1%', m[0]);
+
   const replay = await errorOf(() => db.query(sql, values));
   check('a replayed save from the offline queue is harmless', replay === null, replay);
-  const { rows: count } = await db.query(`select count(*)::int n from runs`);
+  const { rows: count } = await db.query(`select count(*)::int n from runs where activity_id = $1`, [input.p_id]);
   check('and creates no duplicate', count[0].n === 1, count[0]);
 });
 

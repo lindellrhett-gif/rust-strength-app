@@ -16,6 +16,7 @@ import * as path from 'path';
 import { parseRunRow, runRowFromSave } from '../src/domain/running/detail';
 import { cropRun, indexAtDistance, savedTrack } from '../src/domain/running/edit';
 import { parseGpx } from '../src/domain/running/gpx';
+import { buildManualRunInput } from '../src/domain/running/manual';
 import { initialRecorder } from '../src/domain/running/recorder';
 import { buildSaveRunInput } from '../src/domain/running/save';
 import { summarizeRun } from '../src/domain/running/summarize';
@@ -23,6 +24,7 @@ import { summarizeRun } from '../src/domain/running/summarize';
 const GPX = path.join(__dirname, 'fixtures', 'gpx', 'steady-5k.gpx');
 const FIXTURE = path.join(__dirname, '..', 'supabase', 'tests', 'fixtures', 'save-run-5k.json');
 const CROP_FIXTURE = path.join(__dirname, '..', 'supabase', 'tests', 'fixtures', 'crop-run-5k.json');
+const MANUAL_FIXTURE = path.join(__dirname, '..', 'supabase', 'tests', 'fixtures', 'manual-run.json');
 
 function buildInput() {
   const fixes = parseGpx(fs.readFileSync(GPX, 'utf8'));
@@ -64,4 +66,27 @@ it('the trim fixture matches what the app sends', () => {
   if (process.env.UPDATE_FIXTURES) fs.writeFileSync(CROP_FIXTURE, JSON.stringify(input, null, 2) + '\n');
   const fixture = JSON.parse(fs.readFileSync(CROP_FIXTURE, 'utf8'));
   expect(fixture).toEqual(JSON.parse(JSON.stringify(input)));
+});
+
+it('the manual run fixture matches what the app sends', () => {
+  const result = buildManualRunInput(
+    {
+      source: 'treadmill',
+      distance: 3.1,
+      unit: 'mi',
+      movingSeconds: 1680,
+      performedAt: new Date('2026-09-26T13:00:00Z'),
+      title: '',
+      note: 'Incline 1%',
+      effort: 6,
+      bodyweightKg: 75,
+      mapVisibility: 'private',
+    },
+    '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e',
+    Date.parse('2026-09-27T00:00:00Z'),
+  );
+  if (!result.ok) throw new Error(result.error);
+  if (process.env.UPDATE_FIXTURES) fs.writeFileSync(MANUAL_FIXTURE, JSON.stringify(result.input, null, 2) + '\n');
+  const fixture = JSON.parse(fs.readFileSync(MANUAL_FIXTURE, 'utf8'));
+  expect(fixture).toEqual(JSON.parse(JSON.stringify(result.input)));
 });
