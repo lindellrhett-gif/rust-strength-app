@@ -17,7 +17,7 @@
 drop function if exists rpc_save_run(uuid, timestamptz, text, double precision, int, int, text, text,
   text, real, real, int, int, jsonb, text, real[], int[], jsonb, text);
 
-create function rpc_save_run(
+create or replace function rpc_save_run(
   p_id               uuid,
   p_performed_at     timestamptz,
   p_source           text,
@@ -206,7 +206,7 @@ grant execute on function rpc_save_run(uuid, timestamptz, text, double precision
 
 drop function if exists rpc_get_run(uuid);
 
-create function rpc_get_run(p_activity_id uuid)
+create or replace function rpc_get_run(p_activity_id uuid)
 returns table (
   id               uuid,
   name             text,

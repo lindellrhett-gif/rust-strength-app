@@ -22,7 +22,7 @@
 drop function if exists rpc_save_run(uuid, timestamptz, text, double precision, int, int, text, text,
   text, real, real, int, int, jsonb, text, real[], int[], jsonb, text, int, real[], int[]);
 
-create function rpc_save_run(
+create or replace function rpc_save_run(
   p_id               uuid,
   p_performed_at     timestamptz,
   p_source           text,
@@ -243,7 +243,7 @@ grant execute on function rpc_save_run(uuid, timestamptz, text, double precision
   text, real, real, int, int, jsonb, text, real[], int[], jsonb, text, int, real[], int[], uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
-create function rpc_save_route(p_activity_id uuid, p_name text)
+create or replace function rpc_save_route(p_activity_id uuid, p_name text)
 returns uuid
 language plpgsql
 security invoker
@@ -277,7 +277,7 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
-create function rpc_saved_routes()
+create or replace function rpc_saved_routes()
 returns table (
   id            uuid,
   name          text,
@@ -305,7 +305,7 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------------
-create function rpc_saved_route(p_id uuid)
+create or replace function rpc_saved_route(p_id uuid)
 returns table (id uuid, name text, distance_m double precision, polyline text)
 language sql
 security invoker
@@ -317,7 +317,7 @@ as $$
   where s.id = p_id and s.user_id = auth.uid();
 $$;
 
-create function rpc_route_attempts(p_id uuid)
+create or replace function rpc_route_attempts(p_id uuid)
 returns table (activity_id uuid, performed_at timestamptz, name text, moving_seconds int, distance_m double precision)
 language sql
 security invoker
@@ -332,7 +332,7 @@ as $$
 $$;
 
 -- ---------------------------------------------------------------------------
-create function rpc_set_run_route(p_activity_id uuid, p_route_id uuid)
+create or replace function rpc_set_run_route(p_activity_id uuid, p_route_id uuid)
 returns void
 language plpgsql
 security invoker

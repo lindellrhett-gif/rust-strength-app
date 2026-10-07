@@ -28,7 +28,7 @@ alter table runs add column if not exists moving_times int[];
 drop function if exists rpc_save_run(uuid, timestamptz, text, double precision, int, int, text, text,
   text, real, real, int, int, jsonb, text, real[], int[], jsonb, text, int);
 
-create function rpc_save_run(
+create or replace function rpc_save_run(
   p_id               uuid,
   p_performed_at     timestamptz,
   p_source           text,
@@ -243,7 +243,7 @@ grant execute on function rpc_save_run(uuid, timestamptz, text, double precision
 
 drop function if exists rpc_get_run(uuid);
 
-create function rpc_get_run(p_activity_id uuid)
+create or replace function rpc_get_run(p_activity_id uuid)
 returns table (
   id               uuid,
   name             text,
@@ -305,7 +305,7 @@ grant execute on function rpc_get_run(uuid) to authenticated;
 -- rpc_update_run_details: the parts of a run you type in afterwards.
 -- A null map visibility leaves it as it is.
 -- ---------------------------------------------------------------------------
-create function rpc_update_run_details(
+create or replace function rpc_update_run_details(
   p_activity_id    uuid,
   p_name           text,
   p_note           text,
@@ -357,7 +357,7 @@ grant execute on function rpc_update_run_details(uuid, text, text, int, text) to
 -- ---------------------------------------------------------------------------
 -- rpc_crop_run: keep points p_from..p_to (1-based, inclusive) of the route.
 -- ---------------------------------------------------------------------------
-create function rpc_crop_run(
+create or replace function rpc_crop_run(
   p_activity_id      uuid,
   p_from             int,
   p_to               int,

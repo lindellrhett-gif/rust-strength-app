@@ -110,7 +110,7 @@ revoke all on function run_shared_route(uuid) from public, anon, authenticated;
 -- ---------------------------------------------------------------------------
 -- Privacy zones
 -- ---------------------------------------------------------------------------
-create function rpc_my_privacy_zones()
+create or replace function rpc_my_privacy_zones()
 returns table (id uuid, label text, lat double precision, lon double precision, radius_m int)
 language sql
 security invoker
@@ -123,7 +123,7 @@ as $$
   order by z.created_at;
 $$;
 
-create function rpc_add_privacy_zone(p_lat double precision, p_lon double precision, p_radius_m int, p_label text)
+create or replace function rpc_add_privacy_zone(p_lat double precision, p_lon double precision, p_radius_m int, p_label text)
 returns uuid
 language plpgsql
 security invoker
@@ -151,7 +151,7 @@ begin
   return v_id;
 end $$;
 
-create function rpc_remove_privacy_zone(p_id uuid)
+create or replace function rpc_remove_privacy_zone(p_id uuid)
 returns void
 language sql
 security invoker
@@ -172,7 +172,7 @@ grant execute on function rpc_remove_privacy_zone(uuid) to authenticated;
 -- ---------------------------------------------------------------------------
 drop function if exists rpc_update_run_details(uuid, text, text, int, text);
 
-create function rpc_update_run_details(
+create or replace function rpc_update_run_details(
   p_activity_id    uuid,
   p_name           text,
   p_note           text,
@@ -228,7 +228,7 @@ grant execute on function rpc_update_run_details(uuid, text, text, int, text, bo
 -- ---------------------------------------------------------------------------
 drop function if exists rpc_get_run(uuid);
 
-create function rpc_get_run(p_activity_id uuid)
+create or replace function rpc_get_run(p_activity_id uuid)
 returns table (
   id               uuid,
   name             text,
@@ -292,7 +292,7 @@ grant execute on function rpc_get_run(uuid) to authenticated;
 -- ---------------------------------------------------------------------------
 drop function if exists rpc_friend_feed(int, timestamptz);
 
-create function rpc_friend_feed(
+create or replace function rpc_friend_feed(
   p_limit  int default 30,
   p_before timestamptz default null
 )

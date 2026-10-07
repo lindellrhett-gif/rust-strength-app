@@ -10,7 +10,7 @@
 -- SECURITY INVOKER and filtered to auth.uid(): each person only ever sees
 -- their own totals. Signed-in users only, as in 0016. Additive.
 
-create function rpc_running_summary(p_start timestamptz, p_end timestamptz)
+create or replace function rpc_running_summary(p_start timestamptz, p_end timestamptz)
 returns table (
   runs             int,
   distance_m       double precision,
