@@ -3,6 +3,7 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, LoadingView, Pill, StatTile } from '@/components';
+import { RunningCard } from '@/components/RunningCard';
 import { useActivities, useActivityTotals } from '@/data/activities';
 import { useProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
@@ -18,6 +19,7 @@ import {
   topKind,
 } from '@/domain/activities';
 import { formatDurationShort } from '@/domain/duration';
+import { hasFeature } from '@/domain/entitlements';
 import { bestStreak, currentStreak, MUSCLE_GROUPS, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { compact, trimWeight } from '@/lib/format';
@@ -87,6 +89,8 @@ export default function Stats() {
             label="time training"
           />
         </View>
+
+        {hasFeature('running') ? <RunningCard /> : null}
 
         <Card title="Activity time">
           <View style={styles.activityHead}>

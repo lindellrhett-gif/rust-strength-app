@@ -131,6 +131,7 @@ function RootNavigator() {
         name="run/record"
         options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
       />
+      <Stack.Screen name="run/index" options={{ headerShown: true, title: 'Running' }} />
       <Stack.Screen name="run/[id]" options={{ headerShown: true, title: 'Run' }} />
       <Stack.Screen
         name="run/edit/[id]"
