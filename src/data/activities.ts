@@ -13,11 +13,13 @@ export function useActivities(limit = 100) {
     queryFn: async (): Promise<ActivityRecord[]> => {
       const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('*, runs(activity_id)')
         .order('performed_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
-      return (data ?? []).map((a) => ({
+      // The run detail, if any, arrives as one row (or a list of one, from older PostgREST).
+      type Row = (typeof data)[number] & { runs?: unknown };
+      return ((data ?? []) as Row[]).map((a) => ({
         id: a.id,
         kind: a.kind,
         name: a.name,
@@ -27,6 +29,7 @@ export function useActivities(limit = 100) {
         distanceUnit: a.distance_unit,
         steps: a.steps,
         calories: a.calories,
+        hasRunDetail: Array.isArray(a.runs) ? a.runs.length > 0 : a.runs != null,
       }));
     },
   });

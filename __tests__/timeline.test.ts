@@ -74,6 +74,16 @@ describe('buildTimeline', () => {
     expect(titles).toContain('5-a-side');
   });
 
+  it('links a recorded run to its detail page, and leaves other activities unlinked', () => {
+    const entries = buildTimeline(
+      [],
+      [activity({ id: 'run1', kind: 'run', hasRunDetail: true }), activity({ id: 'old', kind: 'run' })],
+      [],
+    );
+    expect(entries.find((e) => e.id === 'activity-run1')?.runId).toBe('run1');
+    expect(entries.find((e) => e.id === 'activity-old')?.runId).toBeUndefined();
+  });
+
   it('includes rest days', () => {
     const [entry] = buildTimeline([], [], [rest()]);
     expect(entry.kind).toBe('rest');

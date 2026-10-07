@@ -189,7 +189,13 @@ export default function CalendarScreen() {
           {dayEntries
             .filter((e) => e.kind !== 'workout')
             .map((e) => (
-              <View key={e.id} style={styles.row}>
+              <Pressable
+                key={e.id}
+                style={({ pressed }) => [styles.row, pressed && e.runId != null && styles.rowPressed]}
+                onPress={() => e.runId && router.push(`/run/${e.runId}`)}
+                disabled={!e.runId}
+                accessibilityRole={e.runId ? 'button' : undefined}
+              >
                 <View
                   style={[
                     styles.kindBar,
@@ -207,7 +213,8 @@ export default function CalendarScreen() {
                       .join(' · ')}
                   </Text>
                 </View>
-              </View>
+                {e.runId ? <Text style={styles.chev}>›</Text> : null}
+              </Pressable>
             ))}
 
           {dayPlans.map((p) => (
@@ -359,15 +366,19 @@ function TimelineRow({
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-      onPress={() => entry.workoutId && router.push(`/workout/${entry.workoutId}`)}
-      disabled={!entry.workoutId}
+      onPress={() =>
+        entry.workoutId
+          ? router.push(`/workout/${entry.workoutId}`)
+          : entry.runId && router.push(`/run/${entry.runId}`)
+      }
+      disabled={!entry.workoutId && !entry.runId}
     >
       <View style={[styles.kindBar, { backgroundColor: tint }]} />
       <View style={styles.rowMain}>
         <Text style={text.body}>{entry.title}</Text>
         <Text style={text.caption}>{sub}</Text>
       </View>
-      {entry.workoutId ? <Text style={styles.chev}>›</Text> : null}
+      {entry.workoutId || entry.runId ? <Text style={styles.chev}>›</Text> : null}
     </Pressable>
   );
 }
