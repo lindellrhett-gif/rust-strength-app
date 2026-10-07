@@ -4,12 +4,17 @@
  * fixture that `npm run test:db` feeds to the database, so the app can't
  * drift from what the database accepts without one of the two suites failing.
  *
- * After an intended change to the save format, regenerate the fixture:
+ * The same goes for trimming a saved run (crop-run-5k.json, fed to
+ * rpc_crop_run by supabase/tests/run-edit.test.mjs).
+ *
+ * After an intended change to either format, regenerate the fixtures:
  *   UPDATE_FIXTURES=1 npx jest runningSaveContract
  */
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { parseRunRow, runRowFromSave } from '../src/domain/running/detail';
+import { cropRun, indexAtDistance, savedTrack } from '../src/domain/running/edit';
 import { parseGpx } from '../src/domain/running/gpx';
 import { initialRecorder } from '../src/domain/running/recorder';
 import { buildSaveRunInput } from '../src/domain/running/save';
@@ -17,6 +22,7 @@ import { summarizeRun } from '../src/domain/running/summarize';
 
 const GPX = path.join(__dirname, 'fixtures', 'gpx', 'steady-5k.gpx');
 const FIXTURE = path.join(__dirname, '..', 'supabase', 'tests', 'fixtures', 'save-run-5k.json');
+const CROP_FIXTURE = path.join(__dirname, '..', 'supabase', 'tests', 'fixtures', 'crop-run-5k.json');
 
 function buildInput() {
   const fixes = parseGpx(fs.readFileSync(GPX, 'utf8'));
@@ -41,5 +47,21 @@ it('the database fixture matches what the app sends', () => {
     fs.writeFileSync(FIXTURE, JSON.stringify(input, null, 2) + '\n');
   }
   const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
+  expect(fixture).toEqual(JSON.parse(JSON.stringify(input)));
+});
+
+/** The same 5K, saved and read back, with its first and last 500 m trimmed off. */
+function buildCrop() {
+  const run = parseRunRow(runRowFromSave(buildInput()));
+  const track = savedTrack(run);
+  const result = cropRun(run, indexAtDistance(track, 500), indexAtDistance(track, run.distanceM - 500));
+  if (!result.ok) throw new Error(result.reason);
+  return result.input;
+}
+
+it('the trim fixture matches what the app sends', () => {
+  const input = buildCrop();
+  if (process.env.UPDATE_FIXTURES) fs.writeFileSync(CROP_FIXTURE, JSON.stringify(input, null, 2) + '\n');
+  const fixture = JSON.parse(fs.readFileSync(CROP_FIXTURE, 'utf8'));
   expect(fixture).toEqual(JSON.parse(JSON.stringify(input)));
 });
