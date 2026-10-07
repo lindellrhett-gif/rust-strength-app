@@ -41,6 +41,8 @@ export interface ActiveRunMeta {
   recorder: RecorderState;
   unit: RunDistanceUnit;
   autoPause: boolean;
+  /** Spoken updates every mile or kilometre. Missing on runs from before them: on. */
+  audioCues?: boolean;
   bodyweightKg: number | null;
   mapVisibility: 'private' | 'friends';
   fixCount: number;

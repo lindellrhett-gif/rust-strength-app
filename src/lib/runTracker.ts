@@ -26,6 +26,7 @@ import * as TaskManager from 'expo-task-manager';
 import { locationAccess, type LocationAccess } from '@/domain/running/permission';
 import type { IncomingFix } from '@/domain/running/activeRunStore';
 
+import { maybeAnnounce } from './runCues';
 import { runStore } from './runStore';
 
 export const RUN_LOCATION_TASK = 'rust-strength.run-location';
@@ -53,6 +54,11 @@ TaskManager.defineTask<{ locations?: Location.LocationObject[] }>(RUN_LOCATION_T
   if (error || !data?.locations?.length) return;
   // The store drops anything that arrives while paused or before the countdown ends.
   await runStore.append(data.locations.map(toIncomingFix));
+  try {
+    maybeAnnounce(runStore.current());
+  } catch {
+    // A missed announcement must never cost a fix.
+  }
 });
 
 export async function startRunTracking(): Promise<void> {

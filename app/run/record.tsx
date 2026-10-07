@@ -253,6 +253,7 @@ export default function RecordRunScreen() {
         recorder: reduceRecorder(initialRecorder, { type: 'start', now: Date.now() }),
         unit,
         autoPause: prefs.autoPause,
+        audioCues: prefs.audioCues,
         bodyweightKg: bodyweight ? toKilograms(bodyweight, profile.data?.unit ?? 'lb') : null,
         mapVisibility: prefs.mapDefault,
       });
