@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -16,7 +16,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
 import { RunMap } from '@/components/RunMap';
+import { SelectSheet } from '@/components/SelectSheet';
 import { useProfile } from '@/data/profile';
+import { useSavedRoute, useSavedRoutes } from '@/data/routes';
 import { DEFAULT_RUN_PREFERENCES, useRunPreferences, useSaveRun } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
 import { gpsQuality, liveRefreshMs, routeSegments, type GpsQuality } from '@/domain/running/display';
@@ -72,6 +74,7 @@ export default function RecordRunScreen() {
   // full-screen modal, where a native safe-area view can miss the Dynamic
   // Island (see ModalScreen).
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ routeId?: string }>();
   const { userId } = useAuth();
   const profile = useProfile();
   const prefsQuery = useRunPreferences();
@@ -95,6 +98,13 @@ export default function RecordRunScreen() {
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
   const [steps, setSteps] = useState<number | null>(null);
+  // A saved route to follow: chosen before the start, then kept with the run.
+  const [chosenRoute, setChosenRoute] = useState<string | null>(params.routeId ?? null);
+  const [pickingRoute, setPickingRoute] = useState(false);
+  const routes = useSavedRoutes();
+  const followedRouteId = status === 'idle' ? chosenRoute : (run?.meta.routeId ?? null);
+  const guide = useSavedRoute(followedRouteId ?? undefined);
+  const guideLine = useMemo(() => (guide.data?.line.length ? [guide.data.line] : []), [guide.data]);
 
   // Location access, and again when coming back from the Settings app.
   useEffect(() => {
@@ -254,6 +264,7 @@ export default function RecordRunScreen() {
         unit,
         autoPause: prefs.autoPause,
         audioCues: prefs.audioCues,
+        routeId: chosenRoute,
         bodyweightKg: bodyweight ? toKilograms(bodyweight, profile.data?.unit ?? 'lb') : null,
         mapVisibility: prefs.mapDefault,
       });
@@ -363,6 +374,7 @@ export default function RecordRunScreen() {
       ) : (
         <RunMap
           segments={segments}
+          faded={guideLine}
           position={position}
           follow
           showsUser
@@ -418,6 +430,23 @@ export default function RecordRunScreen() {
         </View>
       )}
 
+      {followedRouteId || (status === 'idle' && !message && (routes.data?.length ?? 0) > 0) ? (
+        <Pressable
+          style={styles.routeRow}
+          onPress={status === 'idle' ? () => setPickingRoute(true) : undefined}
+          disabled={status !== 'idle'}
+          accessibilityRole={status === 'idle' ? 'button' : undefined}
+          accessibilityLabel={
+            guide.data ? `Following ${guide.data.name}${status === 'idle' ? '. Double tap to change.' : ''}` : 'Follow a saved route'
+          }
+        >
+          <Text style={text.bodyMuted} numberOfLines={1}>
+            {guide.data ? `Following: ${guide.data.name}` : 'Follow a saved route'}
+          </Text>
+          {status === 'idle' ? <Text style={styles.routeChange}>{guide.data ? 'Change' : '›'}</Text> : null}
+        </Pressable>
+      ) : null}
+
       <View style={styles.controls}>
         {status === 'idle' ? (
           message ? null : (
@@ -461,6 +490,20 @@ export default function RecordRunScreen() {
           </View>
         ) : null}
       </View>
+
+      <SelectSheet
+        visible={pickingRoute}
+        title="Follow a saved route"
+        options={[
+          { id: '', label: 'No route', sublabel: 'Just run' },
+          ...(routes.data ?? []).map((r) => ({ id: r.id, label: r.name, sublabel: toUnit(r.distanceM, unit).toFixed(2) + ' ' + unit })),
+        ]}
+        onSelect={(id) => {
+          setPickingRoute(false);
+          setChosenRoute(id || null);
+        }}
+        onClose={() => setPickingRoute(false)}
+      />
 
       {status === 'countdown' ? (
         <Pressable
@@ -548,6 +591,16 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 30, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
   steps: { textAlign: 'center', fontVariant: ['tabular-nums'] },
   controls: { padding: spacing.lg, gap: spacing.sm },
+  routeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    minHeight: 40,
+  },
+  routeChange: { color: colors.primary, fontWeight: '600' },
   controlRow: { flexDirection: 'row', gap: spacing.md },
   flex: { flex: 1 },
   finish: {

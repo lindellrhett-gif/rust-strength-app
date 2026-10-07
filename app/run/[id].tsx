@@ -1,18 +1,21 @@
 import { useMutationState } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, type ReactNode } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { useMemo, useState, type ReactNode } from 'react';
+import { Alert, Platform, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button, Card, EmptyState, LoadingView, Screen, StatTile } from '@/components';
 import { RunChart } from '@/components/RunChart';
 import { RunMap } from '@/components/RunMap';
+import { SelectSheet } from '@/components/SelectSheet';
 import { useProfile } from '@/data/profile';
+import { useSavedRoute, useSavedRoutes, useSaveRoute, useSetRunRoute } from '@/data/routes';
 import { useRun, useSaveRun, useUpdateRunDetails } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
 import { EFFORT_KEYS, EFFORT_LABEL } from '@/domain/running/bestEfforts';
 import { elevationSeries, paceSeries } from '@/domain/running/charts';
 import { parseRunRow, runRowFromSave, type RunDetail } from '@/domain/running/detail';
 import { effortLabel, savedTrack } from '@/domain/running/edit';
+import { attemptPlace, rankAttempts } from '@/domain/running/routes';
 import type { SaveRunInput } from '@/domain/running/save';
 import { cadence } from '@/domain/running/steps';
 import { formatDistance, formatElevation, formatPace, paceSeconds, METERS_PER } from '@/domain/running/units';
@@ -64,7 +67,12 @@ export default function RunSummaryScreen() {
         <RunSummary
           run={run.data}
           onDone={() => router.back()}
-          sharing={<RunSharing run={run.data} onPrivacyZones={() => router.push('/run/privacy-zones')} />}
+          sharing={
+            <>
+              <RunRoute run={run.data} onOpenRoute={(routeId) => router.push(`/run/route/${routeId}`)} />
+              <RunSharing run={run.data} onPrivacyZones={() => router.push('/run/privacy-zones')} />
+            </>
+          }
         />
       </>
     );
@@ -101,6 +109,82 @@ export default function RunSummaryScreen() {
 
   if (run.isPending) return <LoadingView label="Loading run…" />;
   return <EmptyState title="Run not found" message="It may have been deleted." />;
+}
+
+/**
+ * The saved route this run belongs to and where it placed, or a way to save
+ * it as one (or add it to one) so it can be run again and compared.
+ */
+function RunRoute({ run, onOpenRoute }: { run: RunDetail; onOpenRoute: (routeId: string) => void }) {
+  const routes = useSavedRoutes();
+  const route = useSavedRoute(run.routeId ?? undefined);
+  const saveRoute = useSaveRoute();
+  const setRoute = useSetRunRoute();
+  const [picking, setPicking] = useState(false);
+
+  if (run.route.length < 2 && !run.routeId) return null;
+  const fail = (title: string) => (e: unknown) =>
+    Alert.alert(title, e instanceof Error ? e.message : 'Please try again.');
+
+  if (run.routeId) {
+    const place = route.data ? attemptPlace(rankAttempts(route.data.attempts), run.id) : null;
+    return (
+      <Card title="Route">
+        <Pressable onPress={() => onOpenRoute(run.routeId!)} accessibilityRole="button" style={styles.switchRow}>
+          <View style={styles.flex}>
+            <Text style={text.body}>{route.data?.name ?? 'Saved route'}</Text>
+            {place ? <Text style={text.caption}>{place}</Text> : null}
+          </View>
+          <Text style={styles.link}>View ›</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => setRoute.mutate({ runId: run.id, routeId: null }, { onError: fail('Could not change the route') })}
+          accessibilityRole="button"
+          hitSlop={8}
+        >
+          <Text style={styles.subtle}>This wasn’t that route</Text>
+        </Pressable>
+      </Card>
+    );
+  }
+
+  const save = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    saveRoute.mutate({ runId: run.id, name: trimmed }, { onError: fail('Could not save the route') });
+  };
+  const askName = () => {
+    if (Platform.OS === 'ios') {
+      Alert.prompt('Name this route', 'Run it again any time and compare your times.', save, 'plain-text', run.title ?? '');
+    } else {
+      save(run.name);
+    }
+  };
+  const options = (routes.data ?? []).map((r) => ({
+    id: r.id,
+    label: r.name,
+    sublabel: formatDistance(r.distanceM, run.unit),
+  }));
+
+  return (
+    <Card title="Route">
+      <Text style={text.bodyMuted}>Save this route to run it again and compare your times.</Text>
+      <Button label="Save as a route" variant="secondary" onPress={askName} loading={saveRoute.isPending} />
+      {options.length > 0 ? (
+        <Button label="Add to a saved route" variant="ghost" onPress={() => setPicking(true)} />
+      ) : null}
+      <SelectSheet
+        visible={picking}
+        title="Which route was it?"
+        options={options}
+        onSelect={(routeId) => {
+          setPicking(false);
+          setRoute.mutate({ runId: run.id, routeId }, { onError: fail('Could not add it to the route') });
+        }}
+        onClose={() => setPicking(false)}
+      />
+    </Card>
+  );
 }
 
 /**
@@ -306,4 +390,5 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 },
   dim: { color: colors.textFaint },
   link: { color: colors.primary, fontWeight: '600' },
+  subtle: { color: colors.textMuted, fontSize: 14 },
 });

@@ -6,6 +6,7 @@ import { Button, Card, EmptyState, LoadingView, NumberStepper, Screen } from '@/
 import { DistanceBars } from '@/components/DistanceBars';
 import { MonthCalendar } from '@/components/MonthCalendar';
 import { useProfile } from '@/data/profile';
+import { useSavedRoutes } from '@/data/routes';
 import { DEFAULT_RUN_PREFERENCES, useRunHistory, useRunPreferences, useSetWeeklyGoal } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
 import { EFFORT_KEYS, EFFORT_LABEL } from '@/domain/running/bestEfforts';
@@ -42,6 +43,7 @@ export default function RunningHub() {
   const history = useRunHistory();
   const prefs = useRunPreferences().data ?? DEFAULT_RUN_PREFERENCES;
   const runInProgress = useRunInProgress();
+  const routes = useSavedRoutes();
   const today = todayLocal();
 
   const [view, setView] = useState<'week' | 'month'>('week');
@@ -163,6 +165,37 @@ export default function RunningHub() {
           Records come from runs recorded with GPS. The fastest stretch of each distance inside a
           run counts, not only whole races.
         </Text>
+      </Card>
+
+      <Card title="Routes">
+        {(routes.data ?? []).length === 0 ? (
+          <Text style={text.bodyMuted}>
+            Save a run as a route from its summary to run it again and compare your times.
+          </Text>
+        ) : (
+          (routes.data ?? []).map((r) => (
+            <Pressable
+              key={r.id}
+              onPress={() => router.push(`/run/route/${r.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${r.name}, ${formatDistance(r.distanceM, unit)}, ${r.attempts} runs${r.bestSeconds != null ? `, best ${formatClock(r.bestSeconds)}` : ''}`}
+              style={styles.row}
+            >
+              <View style={styles.flex}>
+                <Text style={text.body} numberOfLines={1}>
+                  {r.name}
+                </Text>
+                <Text style={text.caption}>
+                  {formatDistance(r.distanceM, unit)} · {r.attempts === 1 ? '1 run' : `${r.attempts} runs`}
+                </Text>
+              </View>
+              <View style={styles.rowEnd}>
+                <Text style={[text.body, styles.strong]}>{r.bestSeconds != null ? formatClock(r.bestSeconds) : '—'}</Text>
+                <Text style={text.caption}>best</Text>
+              </View>
+            </Pressable>
+          ))
+        )}
       </Card>
 
       <Card>
