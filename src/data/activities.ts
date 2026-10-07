@@ -81,6 +81,8 @@ export function useLogActivity() {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
       client.invalidateQueries({ queryKey: qk.feed });
+      // A run logged by hand belongs in the running history too.
+      client.invalidateQueries({ queryKey: qk.runs });
     },
   });
 }
@@ -96,6 +98,8 @@ export function useDeleteActivity() {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
       client.invalidateQueries({ queryKey: qk.feed });
+      // A run logged by hand belongs in the running history too.
+      client.invalidateQueries({ queryKey: qk.runs });
     },
   });
 }

@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { parseRunRow, type RunDetail } from '@/domain/running/detail';
 import type { CropInput } from '@/domain/running/edit';
+import { forLoad, toHistoryRun, type HistoryRow, type HistoryRun } from '@/domain/running/history';
+import { runningLoad, type RunningLoad } from '@/domain/running/load';
+import { toLocalDateString, todayLocal } from '@/lib/dates';
 import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -146,4 +150,68 @@ export function useDeleteRun() {
       invalidateRun(client, id);
     },
   });
+}
+
+/** How many runs the hub loads: years of running for most people. */
+const HISTORY_LIMIT = 1000;
+
+/**
+ * Every run, newest first: recorded ones with their detail and best efforts,
+ * and runs logged by hand before running existed.
+ */
+export function useRunHistory() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.runHistory,
+    enabled: !!userId,
+    queryFn: async (): Promise<HistoryRun[]> => {
+      const { data, error } = await supabase
+        .from('activities')
+        .select(
+          'id, name, performed_at, distance, distance_unit, duration_seconds, ' +
+            'runs(distance_m, moving_seconds, source, effort, run_best_efforts(effort_key, seconds))',
+        )
+        .eq('user_id', userId!)
+        .eq('kind', 'run')
+        .order('performed_at', { ascending: false })
+        .limit(HISTORY_LIMIT);
+      if (error) throw error;
+      return ((data ?? []) as unknown as (HistoryRow & { runs: HistoryRow['runs'] | HistoryRow['runs'][] })[])
+        .map((row) => ({
+          ...row,
+          // One detail row per run; older PostgREST versions return it as a list.
+          runs: Array.isArray(row.runs) ? (row.runs[0] ?? null) : row.runs,
+        }))
+        .map((row) => toHistoryRun(row, (iso) => toLocalDateString(iso)))
+        .filter((r): r is HistoryRun => r != null);
+    },
+  });
+}
+
+/** Sets or clears the weekly distance goal, in metres. */
+export function useSetWeeklyGoal() {
+  const { userId } = useAuth();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (goalM: number | null) => {
+      const { error } = await supabase
+        .from('run_preferences')
+        .upsert(
+          { user_id: userId!, weekly_goal_m: goalM, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: qk.runPreferences }),
+  });
+}
+
+/**
+ * How much running someone has done lately (src/domain/running/load.ts):
+ * the interface lifting recommendations and the coach will read. Nothing
+ * changes a recommendation with it yet.
+ */
+export function useRunningLoad(): RunningLoad | null {
+  const history = useRunHistory();
+  return useMemo(() => (history.data ? runningLoad(forLoad(history.data), todayLocal()) : null), [history.data]);
 }

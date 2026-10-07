@@ -99,5 +99,6 @@ export const qk = {
   badges: (userId: string) => ['badges', userId] as const,
   runs: ['runs'] as const,
   run: (id: string) => ['runs', id] as const,
+  runHistory: ['runs', '__history'] as const,
   runPreferences: ['run-preferences'] as const,
 };

@@ -633,6 +633,17 @@ export type Database = {
           moving_times: number[] | null;
         }[];
       };
+      rpc_running_summary: {
+        Args: { p_start: string; p_end: string };
+        Returns: {
+          runs: number;
+          distance_m: number;
+          moving_seconds: number;
+          longest_m: number;
+          elevation_gain_m: number;
+          hard_runs: number;
+        }[];
+      };
       rpc_update_run_details: {
         Args: {
           p_activity_id: string;
