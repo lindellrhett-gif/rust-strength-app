@@ -158,6 +158,16 @@ token.
 
 Password reset: "Forgot password?" on the sign-in screen emails a one-time
 code, which the user enters in the app with a new password.
+
+Running (version 1.1): Today > Start run records a run with GPS. Location is
+requested "When In Use" only when the user taps Start (or places a privacy
+zone at their location), and is used only between Start and Save. The location background mode keeps the run recording
+with the screen locked, and the blue location indicator shows while it does.
+The audio background mode is used only to speak distance and pace updates
+during a run with the screen locked, which the user can turn off in Running
+settings. Motion & Fitness is requested to count steps. A run can also be
+entered by hand with no location. Friends see a run's map only if the user
+turns it on for that run, and the server trims its start and end first.
 ```
 
 Create the demo account before submitting and put its credentials in the
@@ -177,12 +187,13 @@ Select exactly these data types, and nothing else:
 | Category | Data type | What it is in Rust Strength |
 |---|---|---|
 | Contact Info | **Email Address** | Sign-in, and password reset codes |
-| Health & Fitness | **Fitness** | Workouts, sets, weights, reps, RPE, activities, steps, distance, calories |
+| Health & Fitness | **Fitness** | Workouts, sets, weights, reps, RPE, activities, runs, steps, distance, calories |
 | Health & Fitness | **Health** | Bodyweight, which is optional but user-provided health data |
 | User Content | **Other User Content** | Usernames, display names, exercise, machine, preset and activity names, reactions, and reports filed about other users |
 | Identifiers | **User ID** | The account ID and username |
+| Location | **Precise Location** | The route of a recorded run, and privacy zones (from version 1.1) |
 
-For **every one** of the five, answer:
+For **every one** of the six, answer:
 
 | Question | Answer |
 |---|---|
@@ -195,8 +206,9 @@ Leave everything else unticked. The ones most likely to tempt a wrong answer:
 - **Name:** no. The app never asks for a real name. Usernames and display names
   are covered by User ID and Other User Content.
 - **Device ID:** no. No push token or advertising identifier is ever created.
-- **Coarse / Precise Location:** no. Supabase's server logs record IP addresses
-  for security, but the app does not derive or use location from them.
+- **Coarse Location:** no. Supabase's server logs record IP addresses for
+  security, but the app does not derive or use location from them. Precise
+  Location covers the runs.
 - **Crash Data, Performance Data, Other Diagnostic Data:** no. There is no crash
   reporting or analytics SDK.
 - **Product Interaction, Other Usage Data:** no. Nothing records how the app is
@@ -208,9 +220,9 @@ Leave everything else unticked. The ones most likely to tempt a wrong answer:
 
 **Privacy Policy URL:** `https://lindellrhett-gif.github.io/rust-strength/privacy.html`
 
-If the app ever adds analytics, crash reporting, advertising, location, or real
-push notifications, this section, the manifest and the policy all change
-together.
+If the app ever adds analytics, crash reporting, advertising, or real push
+notifications, or uses location for anything beyond recording runs, this
+section, the manifest and the policy all change together.
 
 ## Screenshots
 

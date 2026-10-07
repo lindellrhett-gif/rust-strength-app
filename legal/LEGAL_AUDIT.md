@@ -517,8 +517,8 @@ again when they first open 1.1.
 1. **Publish the documents** with `npm run legal` (with the site repo checked
    out next to this one), then push `rust-strength-site`. Do this when 1.1 is
    released, not before, or the public policy describes features users don't
-   have. Change `lastUpdated` in `src/legal/config.ts` to the release date
-   first.
+   have. `lastUpdated` in `src/legal/config.ts` is set just before the
+   production build, so the app and the site show the same date.
 2. **App Store privacy labels.** Add **Precise Location** (linked to the user,
    used for app functionality, not tracking). Steps already fall under the
    **Fitness** label.

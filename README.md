@@ -126,6 +126,58 @@ npm test
 
 ---
 
+## Running (version 1.1, in development)
+
+GPS run tracking, built into the same app: runs are activities, so they
+appear in the Calendar, the friends feed, Stats and the streak.
+
+- **Recording:** a full-screen recorder with a countdown, the time,
+  distance, current and average pace, and the route drawn live on Apple
+  Maps. It keeps recording with the screen locked, survives the app being
+  closed mid-run (reopening offers Resume, Finish or Discard), and counts
+  steps and cadence from the phone's motion sensors.
+- **Auto-pause** goes by the phone's own speed reading, so the clock holds
+  the moment you stop at a light and starts again as you move off. Losing
+  signal in a tunnel doesn't pause it.
+- **Spoken updates** every mile or kilometre, which lower your music while
+  they talk.
+- **Run summary:** map, splits, best efforts inside the run, pace and
+  elevation charts, effort and notes. Runs can be edited, deleted, and
+  trimmed at either end (everything is worked out again from the part
+  kept).
+- **History:** weekly and monthly distance, a weekly goal, records for the
+  mile, 5K, 10K, half and marathon, and a calendar of runs.
+- **Saved routes:** save a run's route, run it again with the route drawn
+  on the map, and compare every attempt.
+- **Sharing:** friends see distance, time and pace by default. The map is
+  shared only if you turn it on for a run, and the server always removes
+  the first and last 200 m and anything inside your privacy zones before
+  anyone else sees it.
+- **Manual entry** for treadmill runs and runs without the phone.
+
+| Where to look | What it shows |
+|---|---|
+| [`src/domain/running/filter.ts`](src/domain/running/filter.ts), [`stops.ts`](src/domain/running/stops.ts) | Cleaning GPS: accuracy, spikes, jitter, and auto-pause from the phone's speed reading |
+| [`__tests__/runningAutoPause.test.ts`](__tests__/runningAutoPause.test.ts) | Simulated runs replayed second by second, as the screen sees them |
+| [`supabase/migrations/0021_run_sharing.sql`](supabase/migrations/0021_run_sharing.sql) | Server-side trimming of shared routes with privacy zones (PostGIS) |
+| [`supabase/tests/sharing.test.mjs`](supabase/tests/sharing.test.mjs) | Proving a shared outline never comes within a privacy zone |
+
+**Permissions.** Location "While Using the App" when a run starts (never
+"Always"), with background location updates while recording; Motion &
+Fitness for steps. The Info.plist strings live in `app.json` (the
+`expo-location` and `expo-sensors` plugins), and `UIBackgroundModes` is
+`location` and `audio`.
+
+**Battery.** GPS at its most accurate setting is the main cost, and it runs
+only between Start and Finish. I haven't measured the drain per hour on a
+real run yet. Every fix is kept (about one a second), because a distance
+filter saves little power while the GPS is on and would hide stops. With the
+phone locked the recording screen does no work at all; with it on, the track
+is cleaned once per new fix and redrawn every 2 to 5 seconds on runs over an
+hour.
+
+---
+
 ## Tech stack
 
 | Layer | Tools |
@@ -229,15 +281,18 @@ app/                 Screens, routed by file with Expo Router
   (tabs)/            Today, Calendar, Stats, Friends, Profile
   workout/           Active workout, review, summary
   set/new.tsx        Add-set screen with the live suggestion
+  run/               Recorder, run summary, editing, history hub, routes
 src/
   domain/            Pure, unit-tested logic: recommender, machines, streaks,
                      leaderboard, generator, XP, and more
+    running/         GPS cleaning, auto-pause, splits, best efforts, charts
   data/              TanStack Query hooks over Supabase
   components/        Shared UI, the hold timer, charts
   lib/               Supabase client, session guard, query client
   legal/             Privacy Policy and Terms source
 supabase/
-  migrations/        Schema, RLS policies and SQL functions (0001 to 0014)
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0023)
+  tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
 __tests__/           Jest specs
 scripts/             Legal site, icon and screenshot generators
