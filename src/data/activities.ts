@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import type { ActivityDraft, ActivityRecord } from '@/domain/activities';
+import { exerciseCaloriesForDay, type ExerciseDay } from '@/domain/exercise';
+import { toLocalDateString } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 
 export function useActivities(limit = 100) {
@@ -105,4 +108,16 @@ export function useDeleteActivity() {
       client.invalidateQueries({ queryKey: qk.runs });
     },
   });
+}
+
+/**
+ * Calories burned exercising on a local date (src/domain/exercise.ts): the
+ * hook the nutrition diary will read. Nothing uses it yet.
+ */
+export function useExerciseCalories(date: string): ExerciseDay | null {
+  const activities = useActivities();
+  return useMemo(
+    () => (activities.data ? exerciseCaloriesForDay(activities.data, date, (iso) => toLocalDateString(iso)) : null),
+    [activities.data, date],
+  );
 }
