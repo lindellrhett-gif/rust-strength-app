@@ -43,6 +43,8 @@ export interface ActiveRunMeta {
   autoPause: boolean;
   /** Spoken updates every mile or kilometre. Missing on runs from before them: on. */
   audioCues?: boolean;
+  /** The saved route being followed, if any. */
+  routeId?: string | null;
   bodyweightKg: number | null;
   mapVisibility: 'private' | 'friends';
   fixCount: number;

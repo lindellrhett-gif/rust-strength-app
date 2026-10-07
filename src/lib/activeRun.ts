@@ -47,6 +47,7 @@ export async function finishActiveRun(finishAt: number): Promise<FinishOutcome |
       unit: run.meta.unit,
       mapVisibility: run.meta.mapVisibility,
       steps,
+      routeId: run.meta.routeId ?? null,
     }),
   };
 }

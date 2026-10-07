@@ -418,6 +418,19 @@ export type Database = {
         Update: { status?: string; details?: string | null };
         Relationships: [];
       };
+      saved_routes: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          distance_m: number;
+          from_activity_id: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: { name?: string };
+        Relationships: [];
+      };
       run_preferences: {
         Row: {
           user_id: string;
@@ -601,6 +614,7 @@ export type Database = {
           p_steps?: number | null;
           p_distances?: number[] | null;
           p_moving_times?: number[] | null;
+          p_route_id?: string | null;
         };
         Returns: string;
       };
@@ -665,6 +679,35 @@ export type Database = {
         Returns: string;
       };
       rpc_remove_privacy_zone: { Args: { p_id: string }; Returns: undefined };
+      rpc_save_route: { Args: { p_activity_id: string; p_name: string }; Returns: string };
+      rpc_saved_routes: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          name: string;
+          distance_m: number;
+          created_at: string;
+          attempts: number;
+          best_seconds: number | null;
+          last_run_at: string | null;
+          outline: string | null;
+        }[];
+      };
+      rpc_saved_route: {
+        Args: { p_id: string };
+        Returns: { id: string; name: string; distance_m: number; polyline: string }[];
+      };
+      rpc_route_attempts: {
+        Args: { p_id: string };
+        Returns: {
+          activity_id: string;
+          performed_at: string;
+          name: string | null;
+          moving_seconds: number;
+          distance_m: number;
+        }[];
+      };
+      rpc_set_run_route: { Args: { p_activity_id: string; p_route_id: string | null }; Returns: undefined };
       rpc_crop_run: {
         Args: {
           p_activity_id: string;

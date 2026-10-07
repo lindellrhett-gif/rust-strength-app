@@ -21,7 +21,7 @@ export function defaultRunName(startedAt: Date): string {
   return 'Night run';
 }
 
-/** The arguments of rpc_save_run (migrations 0015, 0017 and 0018). */
+/** The arguments of rpc_save_run (migrations 0015, 0017, 0018 and 0022). */
 export interface SaveRunInput {
   p_id: string;
   p_performed_at: string;
@@ -48,6 +48,8 @@ export interface SaveRunInput {
   p_distances: number[] | null;
   /** Moving seconds so far at each route point. */
   p_moving_times: number[] | null;
+  /** The saved route this run followed, if any. */
+  p_route_id: string | null;
 }
 
 export interface RecordedRunMeta {
@@ -57,6 +59,8 @@ export interface RecordedRunMeta {
   mapVisibility: 'private' | 'friends';
   /** Steps the phone counted while recording, when it could. */
   steps?: number | null;
+  /** The saved route the runner chose to follow. */
+  routeId?: string | null;
 }
 
 /**
@@ -110,5 +114,6 @@ export function buildSaveRunInput(summary: RunSummary, meta: RecordedRunMeta): S
     p_steps: plausibleSteps(meta.steps, summary.elapsedSeconds),
     p_distances: route.distances,
     p_moving_times: route.moving,
+    p_route_id: meta.routeId ?? null,
   };
 }

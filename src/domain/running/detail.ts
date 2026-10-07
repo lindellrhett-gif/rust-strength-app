@@ -183,7 +183,7 @@ export function runRowFromSave(input: SaveRunInput): RunRow {
     splits: input.p_splits,
     has_elevation: input.p_alts != null,
     map_visibility: input.p_map_visibility,
-    route_id: null,
+    route_id: input.p_route_id,
     polyline: input.p_polyline,
     alts: input.p_alts,
     times: input.p_times,
