@@ -8,6 +8,8 @@
  */
 
 import { formatClock } from './duration';
+import type { LatLon } from './running/geo';
+import { decodePolyline } from './running/polyline';
 import type { TrophyGlyph } from './achievements';
 
 export type FeedSubjectType = 'workout' | 'activity';
@@ -58,6 +60,11 @@ export interface FeedRow {
   badgeIds: string[];
   reactionCounts: Partial<Record<ReactionId, number>>;
   myReaction: ReactionId | null;
+  /**
+   * A shared run's outline as an encoded polyline: already trimmed and
+   * simplified on the server. Null unless the runner shared the map.
+   */
+  routePreview?: string | null;
 }
 
 export interface FeedStat {
@@ -87,9 +94,22 @@ export interface FeedPost {
   reactionCounts: Partial<Record<ReactionId, number>>;
   totalReactions: number;
   myReaction: ReactionId | null;
+  /** A shared run's outline, or null. */
+  route: LatLon[] | null;
 }
 
 const MAX_EXERCISE_CHIPS = 4;
+
+/** The outline of a shared run, or null when there is none or it can't be read. */
+export function routeFrom(encoded: string | null | undefined): LatLon[] | null {
+  if (!encoded) return null;
+  try {
+    const points = decodePolyline(encoded);
+    return points.length >= 2 ? points : null;
+  } catch {
+    return null;
+  }
+}
 
 const comma = (n: number) => Math.round(n).toLocaleString('en-US');
 
@@ -155,6 +175,10 @@ export function postStats(row: FeedRow, unit: 'lb' | 'kg'): FeedStat[] {
     if (row.totalReps > 0) stats.push({ label: 'reps', value: comma(row.totalReps) });
   } else if (row.distance != null && row.distance > 0 && row.distanceUnit) {
     stats.push({ label: row.distanceUnit, value: String(Number(row.distance.toFixed(2))) });
+    // Pace is what a runner looks at first.
+    if (row.activityKind === 'run' && row.durationSeconds > 0 && (row.distanceUnit === 'mi' || row.distanceUnit === 'km')) {
+      stats.push({ label: `per ${row.distanceUnit}`, value: formatClock(Math.round(row.durationSeconds / row.distance)) });
+    }
   }
 
   return stats;
@@ -183,6 +207,7 @@ export function buildFeed(rows: FeedRow[], unit: 'lb' | 'kg'): FeedPost[] {
     reactionCounts: row.reactionCounts,
     totalReactions: totalReactions(row.reactionCounts),
     myReaction: row.myReaction,
+    route: routeFrom(row.routePreview),
   }));
 }
 

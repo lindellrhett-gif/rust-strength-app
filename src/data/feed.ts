@@ -58,6 +58,7 @@ export function useFriendFeed() {
         distanceUnit: r.distance_unit,
         reactionCounts: normaliseCounts(r.reaction_counts),
         myReaction: r.my_reaction && isReactionId(r.my_reaction) ? r.my_reaction : null,
+        routePreview: r.route_preview ?? null,
       }));
 
       return buildFeed(rows, unit);

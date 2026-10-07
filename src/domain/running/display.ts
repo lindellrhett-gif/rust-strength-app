@@ -95,6 +95,34 @@ export function liveRefreshMs(fixCount: number): number {
   return 5000;
 }
 
+/**
+ * A route as an SVG path filling a `width` x `height` box with `padding`,
+ * keeping its true shape (a degree of longitude is shorter than a degree of
+ * latitude away from the equator). Null with fewer than two points.
+ */
+export function outlinePath(points: readonly LatLon[], width: number, height: number, padding = 8): string | null {
+  if (points.length < 2 || width <= padding * 2 || height <= padding * 2) return null;
+  const midLat = points.reduce((s, p) => s + p.lat, 0) / points.length;
+  const kx = Math.cos((midLat * Math.PI) / 180);
+  const xs = points.map((p) => p.lon * kx);
+  const ys = points.map((p) => p.lat);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const spanX = Math.max(...xs) - minX;
+  const spanY = Math.max(...ys) - minY;
+  const scale = Math.min((width - padding * 2) / (spanX || 1e-9), (height - padding * 2) / (spanY || 1e-9));
+  // Centre the shape in whichever direction it doesn't fill.
+  const offX = (width - spanX * scale) / 2;
+  const offY = (height - spanY * scale) / 2;
+  return xs
+    .map((x, i) => {
+      const px = offX + (x - minX) * scale;
+      const py = height - (offY + (ys[i] - minY) * scale);
+      return `${i === 0 ? 'M' : 'L'}${px.toFixed(1)},${py.toFixed(1)}`;
+    })
+    .join('');
+}
+
 /** GPS quality from the latest accuracy radius, for the status pill. */
 export type GpsQuality = 'searching' | 'good' | 'weak';
 
