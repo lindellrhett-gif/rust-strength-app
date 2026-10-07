@@ -5,12 +5,19 @@
  * Adding up every wobble would credit a flat 5K with a hill's worth of climb,
  * so altitudes are smoothed first, and a climb only counts once it clears
  * ELEVATION_THRESHOLD_M from the last turning point (hysteresis).
+ *
+ * The first turning point is the average of the opening few altitudes, not
+ * the first one: starting on a dip in the noise would otherwise count the
+ * next wobble up as a climb, so the same flat stretch could score 0 m or
+ * 10 m depending on exactly where it began (a run trimmed by a few metres).
  */
 
 /** Rises or drops smaller than this are noise. */
 export const ELEVATION_THRESHOLD_M = 3;
 /** Fixes on each side averaged when smoothing altitude. */
-export const ELEVATION_SMOOTH_RADIUS = 2;
+export const ELEVATION_SMOOTH_RADIUS = 4;
+/** How many opening altitudes set the first turning point. */
+export const ELEVATION_START_POINTS = 10;
 
 /** Centred moving average over the known altitudes; unknown ones stay unknown. */
 export function smoothAltitudes(alts: readonly (number | null)[]): (number | null)[] {
@@ -44,7 +51,8 @@ export function elevationTotals(points: readonly { alt: number | null }[]): Elev
 
   let gain = 0;
   let loss = 0;
-  let ref = alts[0];
+  const opening = alts.slice(0, ELEVATION_START_POINTS);
+  let ref = opening.reduce((sum, a) => sum + a, 0) / opening.length;
   for (const a of alts) {
     if (a >= ref + ELEVATION_THRESHOLD_M) {
       gain += a - ref;
