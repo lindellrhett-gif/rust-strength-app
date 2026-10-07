@@ -19,6 +19,7 @@ import {
   type DistanceUnit,
 } from '@/domain/activities';
 import { formatClock, formatDurationShort } from '@/domain/duration';
+import { hasFeature } from '@/domain/entitlements';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -157,6 +158,28 @@ export default function NewActivity() {
             placeholder={ACTIVITY_LABEL[kind]}
             maxLength={60}
           />
+          {kind === 'run' && hasFeature('running') ? (
+            <View style={styles.runHint}>
+              <Text style={text.caption}>
+                Runs have their own screens: record one with GPS for a map, splits and records, or
+                enter one by hand with its pace, effort and notes.
+              </Text>
+              <View style={styles.runHintButtons}>
+                <Button
+                  label="Record with GPS"
+                  variant="secondary"
+                  onPress={() => router.replace('/run/record')}
+                  style={styles.runHintButton}
+                />
+                <Button
+                  label="Enter a run"
+                  variant="ghost"
+                  onPress={() => router.replace('/run/manual')}
+                  style={styles.runHintButton}
+                />
+              </View>
+            </View>
+          ) : null}
         </Card>
 
         <Card title="Time">
@@ -287,6 +310,9 @@ export default function NewActivity() {
 }
 
 const styles = StyleSheet.create({
+  runHint: { gap: spacing.sm },
+  runHintButtons: { flexDirection: 'row', gap: spacing.sm },
+  runHintButton: { flex: 1 },
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.lg },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

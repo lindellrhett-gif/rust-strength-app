@@ -64,11 +64,14 @@ export default function RunningHub() {
   if (history.isPending) return <LoadingView label="Loading your runs…" />;
 
   const startButton = (
-    <Button
-      label={runInProgress ? 'Resume run' : 'Start a run'}
-      size="lg"
-      onPress={() => router.push('/run/record')}
-    />
+    <View style={styles.startButtons}>
+      <Button
+        label={runInProgress ? 'Resume run' : 'Start a run'}
+        size="lg"
+        onPress={() => router.push('/run/record')}
+      />
+      <Button label="Enter a run by hand" variant="ghost" onPress={() => router.push('/run/manual')} />
+    </View>
   );
 
   if (runs.length === 0) {
@@ -365,6 +368,7 @@ function RunRow({ run, unit, onOpen }: { run: HistoryRun; unit: RunDistanceUnit;
 
 const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.lg },
+  startButtons: { gap: spacing.xs },
   weekRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   goal: { gap: spacing.sm },
   goalEdit: { gap: spacing.md },
