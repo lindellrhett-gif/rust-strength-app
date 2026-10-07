@@ -92,6 +92,7 @@ export const qk = {
   workoutExercises: (workoutId: string) => ['workout-exercises', workoutId] as const,
   activities: ['activities'] as const,
   activityTotals: ['activities', 'totals'] as const,
+  activityDates: ['activities', 'dates'] as const,
   restDays: ['rest-days'] as const,
   blockedUsers: ['blocked-users'] as const,
   workoutSummary: (workoutId: string) => ['workout-summary', workoutId] as const,

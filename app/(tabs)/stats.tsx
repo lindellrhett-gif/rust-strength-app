@@ -11,7 +11,7 @@ import {
   useAllTimeTotals,
   useExercisePRs,
   useWeeklyCoverage,
-  useWorkoutDates,
+  useTrainedDates,
 } from '@/data/stats';
 import {
   ACTIVITY_LABEL,
@@ -31,7 +31,7 @@ export default function Stats() {
   const profile = useProfile();
   const totals = useAllTimeTotals();
   const prs = useExercisePRs();
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const thisWeek = weekStart(todayLocal());
   const coverage = useWeeklyCoverage(thisWeek);
   const activityTotalsQuery = useActivityTotals();

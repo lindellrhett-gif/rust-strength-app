@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
@@ -85,6 +86,44 @@ export function useWorkoutDates() {
       return (data ?? []).map((w) => toLocalDateString(w.started_at));
     },
   });
+}
+
+/** Local dates with any activity logged: runs, sports, walks. */
+export function useActivityDates() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.activityDates,
+    enabled: !!userId,
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase.from('activities').select('performed_at').eq('user_id', userId!);
+      if (error) throw error;
+      return (data ?? []).map((a) => toLocalDateString(a.performed_at));
+    },
+  });
+}
+
+/**
+ * Every day you trained: a finished workout or any activity, runs included.
+ * The streak, best streak, consistency and the streak trophy all count from
+ * this. (Before running was added only workouts counted; the server's
+ * streak_stats changes to match in migration 0020, applied at release.)
+ */
+export function useTrainedDates() {
+  const workouts = useWorkoutDates();
+  const activities = useActivityDates();
+  const data = useMemo(
+    () => (workouts.data && activities.data ? [...workouts.data, ...activities.data] : undefined),
+    [workouts.data, activities.data],
+  );
+  return {
+    data,
+    isLoading: workouts.isLoading || activities.isLoading,
+    isRefetching: workouts.isRefetching || activities.isRefetching,
+    refetch: () => {
+      void workouts.refetch();
+      void activities.refetch();
+    },
+  };
 }
 
 export interface TodayTotals {

@@ -14,7 +14,7 @@ import {
   useAllTimeTotals,
   useTodayTotals,
   useWeeklyCoverage,
-  useWorkoutDates,
+  useTrainedDates,
 } from '@/data/stats';
 import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useOpenWorkout, useStartWorkout } from '@/data/workouts';
@@ -32,7 +32,7 @@ export default function Today() {
   const profile = useProfile();
   const open = useOpenWorkout();
   const today = useTodayTotals();
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const restDays = useRestDays();
   const thisWeek = weekStart(todayLocal());
   const coverage = useWeeklyCoverage(thisWeek);

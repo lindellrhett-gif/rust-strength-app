@@ -12,7 +12,7 @@ import {
   useAllTimeTotals,
   useExercisePRs,
   useWeeklyCoverage,
-  useWorkoutDates,
+  useTrainedDates,
 } from './stats';
 import {
   evaluateAchievements,
@@ -50,7 +50,7 @@ export interface LevelSnapshot {
 export function useMyLevel(): LevelSnapshot {
   const profile = useProfile();
   const totals = useAllTimeTotals();
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const prs = useExercisePRs();
   const activity = useActivityTotals();
   const restDays = useRestDays();

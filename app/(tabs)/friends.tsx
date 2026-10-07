@@ -27,7 +27,7 @@ import {
 } from '@/data/friends';
 import { useProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
-import { useWorkoutDates } from '@/data/stats';
+import { useTrainedDates } from '@/data/stats';
 import { TIER_COLOR, consistency } from '@/domain/achievements';
 import type { ReactionId } from '@/domain/feed';
 import {
@@ -204,20 +204,20 @@ function LeaderboardTab({ onFindFriends }: { onFindFriends: () => void }) {
   const [metric, setMetric] = useState<LeaderboardMetric>('streak');
   const [period, setPeriod] = useState<LeaderboardPeriod>('month');
   const board = useLeaderboard(period);
-  const workoutDates = useWorkoutDates();
+  const trainedDates = useTrainedDates();
   const restDays = useRestDays();
   const today = todayLocal();
 
   // Your own row uses the same local figures as your Profile, so the two never
   // disagree. Friends' come from the server, worked out by the same rules.
   const mine = useMemo(() => {
-    if (!workoutDates.data || !restDays.data) return null;
+    if (!trainedDates.data || !restDays.data) return null;
     const rest = restDays.data.map((r) => r.rest_date);
     return {
-      currentStreak: currentStreak(workoutDates.data, today, rest),
-      consistency: Math.round(consistency(workoutDates.data, today, 30, rest) * 100),
+      currentStreak: currentStreak(trainedDates.data, today, rest),
+      consistency: Math.round(consistency(trainedDates.data, today, 30, rest) * 100),
     };
-  }, [workoutDates.data, restDays.data, today]);
+  }, [trainedDates.data, restDays.data, today]);
 
   const rows = useMemo(() => {
     const people = (board.data ?? []).map((p) => (p.isMe && mine ? { ...p, ...mine } : p));

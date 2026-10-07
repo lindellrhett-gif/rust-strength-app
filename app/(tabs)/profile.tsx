@@ -11,7 +11,7 @@ import { RestAlertToggle } from '@/components/RestAlertToggle';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
-import { useWorkoutDates } from '@/data/stats';
+import { useTrainedDates } from '@/data/stats';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { useOnboardingControls } from '@/providers/OnboardingProvider';
@@ -34,7 +34,7 @@ export default function ProfileScreen() {
   const profile = useProfile();
   const update = useUpdateProfile();
 
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const restDays = useRestDays();
   const today = todayLocal();
   const router = useRouter();
