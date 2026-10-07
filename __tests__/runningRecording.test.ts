@@ -7,7 +7,7 @@ import {
   type NewRun,
 } from '../src/domain/running/activeRunStore';
 import { parseRunRow, type RunRow } from '../src/domain/running/detail';
-import { gpsQuality, regionAround, regionForPoints, routeSegments } from '../src/domain/running/display';
+import { gpsQuality, liveRefreshMs, regionAround, regionForPoints, routeSegments } from '../src/domain/running/display';
 import { filterFixes } from '../src/domain/running/filter';
 import { offset } from '../src/domain/running/geo';
 import { accessMessage, locationAccess } from '../src/domain/running/permission';
@@ -46,6 +46,7 @@ function memoryStorage(): KeyValueStorage & { data: Map<string, string>; failNex
 const recording = reduceRecorder(initialRecorder, { type: 'start', now: T0, countdownSeconds: 0 });
 const newRun = (overrides: Partial<NewRun> = {}): NewRun => ({
   runId: 'run-1',
+  userId: 'user-1',
   recorder: recording,
   unit: 'mi',
   autoPause: true,
@@ -71,8 +72,8 @@ describe('active run store', () => {
   it('keeps fixes only while recording, stamped with the segment', async () => {
     const store = createRunStore(memoryStorage());
     await store.start(newRun({ recorder: reduceRecorder(initialRecorder, { type: 'start', now: T0 }) }));
-    // During the countdown nothing counts.
-    expect(await store.append(fixesFrom(0, 3))).toBe(0);
+    // During the countdown (3 s from T0) nothing counts.
+    expect(await store.append(fixesFrom(0, 2))).toBe(0);
     await store.setRecorder(recording);
     expect(await store.append(fixesFrom(0, 3))).toBe(3);
     await store.setRecorder(reduceRecorder(recording, { type: 'pause', now: T0 + 10_000 }));
@@ -295,6 +296,13 @@ describe('route display', () => {
     const tiny = regionForPoints([HOME, offset(HOME, 20, 0)])!;
     expect(tiny.latitudeDelta).toBeCloseTo(300 / 111_320, 6);
     expect(regionForPoints([])).toBeNull();
+  });
+
+  it('redraws a long run less often, to save battery', () => {
+    expect(liveRefreshMs(0)).toBe(0);
+    expect(liveRefreshMs(3599)).toBe(0); // under an hour: every fix
+    expect(liveRefreshMs(3600)).toBe(2000);
+    expect(liveRefreshMs(4 * 3600)).toBe(5000);
   });
 
   it('rates GPS by accuracy', () => {

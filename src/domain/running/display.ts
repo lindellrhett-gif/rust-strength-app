@@ -82,6 +82,19 @@ export function routeSegments(fixes: readonly CleanFix[], maxPoints = MAX_DRAWN_
   return segments.filter((s) => s.length >= 2);
 }
 
+/**
+ * How often the recording screen redraws the route and distance, by how many
+ * fixes the run has (about one a second). Redrawing means re-cleaning the
+ * whole track, which grows with the run, so a long run redraws less often to
+ * save battery. The clock still ticks every second, and GPS recording in the
+ * background is unaffected.
+ */
+export function liveRefreshMs(fixCount: number): number {
+  if (fixCount < 3600) return 0; // under an hour: every fix
+  if (fixCount < 7200) return 2000;
+  return 5000;
+}
+
 /** GPS quality from the latest accuracy radius, for the status pill. */
 export type GpsQuality = 'searching' | 'good' | 'weak';
 

@@ -30,27 +30,37 @@ export interface StopReport {
   pending: (Stop & { measured: boolean }) | null;
 }
 
+/** A still stretch at the end of the samples, not yet closed by movement. */
+export interface StillTail {
+  start: number;
+  lastStill: number;
+  measured: boolean;
+}
+
 /**
- * @param until When the record ends: now while recording, or the finish
- *   time. A stillness still going at the end runs up to it.
+ * The part of finding stops that only depends on the samples: every stop
+ * that has already ended, and the stillness still going at the end, if any.
+ * Worked out once per new fix; closeStops then settles the end against the
+ * clock, which is cheap enough to do every second.
  */
-export function findStops(
-  samples: readonly MotionSample[],
-  until: number | null = null,
-  minSeconds: number = AUTO_PAUSE_AFTER_S,
-): StopReport {
+export interface StopScan {
+  closed: Stop[];
+  tail: StillTail | null;
+}
+
+export function scanStops(samples: readonly MotionSample[], minSeconds: number = AUTO_PAUSE_AFTER_S): StopScan {
   const minMs = minSeconds * 1000;
-  const stops: Stop[] = [];
+  const closed: Stop[] = [];
   let seg: number | null = null;
   /** The latest sign of movement in this segment. */
   let anchor = 0;
   /** The still stretch under way, if any. */
-  let run = null as { start: number; lastStill: number; measured: boolean } | null;
+  let run = null as StillTail | null;
 
   for (const s of samples) {
     const ends = s.seg !== seg || s.state === 'moving';
     if (ends && run) {
-      if (run.lastStill - run.start >= minMs) stops.push({ start: run.start, end: run.lastStill, open: false });
+      if (run.lastStill - run.start >= minMs) closed.push({ start: run.start, end: run.lastStill, open: false });
       run = null;
     }
     if (ends) anchor = s.t;
@@ -64,9 +74,36 @@ export function findStops(
       }
     }
   }
+  return { closed, tail: run };
+}
 
-  if (!run) return { stops, pending: null };
-  const end = Math.max(run.lastStill, until ?? run.lastStill);
-  if (end - run.start >= minMs) return { stops: [...stops, { start: run.start, end, open: true }], pending: null };
-  return { stops, pending: { start: run.start, end, open: true, measured: run.measured } };
+/**
+ * Settles a scan against the end of the record.
+ * @param until When the record ends: now while recording, or the finish
+ *   time. A stillness still going at the end runs up to it.
+ */
+export function closeStops(
+  scan: StopScan,
+  until: number | null = null,
+  minSeconds: number = AUTO_PAUSE_AFTER_S,
+): StopReport {
+  const { closed, tail } = scan;
+  if (!tail) return { stops: closed, pending: null };
+  const end = Math.max(tail.lastStill, until ?? tail.lastStill);
+  if (end - tail.start >= minSeconds * 1000) {
+    return { stops: [...closed, { start: tail.start, end, open: true }], pending: null };
+  }
+  return { stops: closed, pending: { start: tail.start, end, open: true, measured: tail.measured } };
+}
+
+/**
+ * @param until When the record ends: now while recording, or the finish
+ *   time. A stillness still going at the end runs up to it.
+ */
+export function findStops(
+  samples: readonly MotionSample[],
+  until: number | null = null,
+  minSeconds: number = AUTO_PAUSE_AFTER_S,
+): StopReport {
+  return closeStops(scanStops(samples, minSeconds), until, minSeconds);
 }

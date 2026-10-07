@@ -10,7 +10,7 @@ import { filterFixes } from '../src/domain/running/filter';
 import { parseGpx } from '../src/domain/running/gpx';
 import { initialRecorder, type RecorderState } from '../src/domain/running/recorder';
 import { findStops } from '../src/domain/running/stops';
-import { liveStats, summarizeRun, type LiveStats } from '../src/domain/running/summarize';
+import { liveStats, liveStatsAt, prepareLive, summarizeRun, type LiveStats } from '../src/domain/running/summarize';
 import { stoppedMs } from '../src/domain/running/track';
 import type { GpsFix, MotionSample } from '../src/domain/running/types';
 
@@ -97,6 +97,23 @@ describe('auto-pause with the phone’s speed reading', () => {
     const at = (s: number) => ticks.find((t) => t.s === s)!.movingSeconds;
     expect(at(520) - at(470)).toBeGreaterThanOrEqual(49);
     expect(Math.abs(summary(fixes).movingSeconds - truth['tunnel-doppler'].movingSeconds)).toBeLessThanOrEqual(4);
+  });
+});
+
+describe('the live numbers worked out once per fix', () => {
+  it('give exactly the same answer when the clock moves on without a new fix', () => {
+    const fixes = load('stoplight-doppler');
+    const t0 = fixes[0].t;
+    const recorder: RecorderState = { ...initialRecorder, status: 'recording', startedAt: t0 };
+    // Arrived up to 503 s, the runner standing at the light since 500 s.
+    const arrived = fixes.filter((f) => f.t <= t0 + 503_000);
+    const prepared = prepareLive(arrived, true);
+    for (const s of [503, 504, 506, 510, 530]) {
+      const now = t0 + s * 1000;
+      expect(liveStatsAt(prepared, recorder, now, { autoPause: true, unit: 'km' })).toEqual(
+        liveStats(arrived, recorder, now, { autoPause: true, unit: 'km' }),
+      );
+    }
   });
 });
 

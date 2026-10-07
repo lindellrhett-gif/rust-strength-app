@@ -14,7 +14,7 @@
  * has no React Native imports.
  */
 
-import { initialRecorder, type RecorderState } from './recorder';
+import { initialRecorder, reduceRecorder, type RecorderState } from './recorder';
 import type { GpsFix } from './types';
 import type { RunDistanceUnit } from './units';
 
@@ -33,6 +33,11 @@ export interface ActiveRunMeta {
   version: typeof VERSION;
   /** Also the activity id the run is saved under, so a retried save can't duplicate it. */
   runId: string;
+  /**
+   * Who recorded it. A run left on the phone is never offered to, or saved
+   * under, anyone else who signs in. Null for runs from before this existed.
+   */
+  userId: string | null;
   recorder: RecorderState;
   unit: RunDistanceUnit;
   autoPause: boolean;
@@ -97,6 +102,7 @@ export function createRunStore(storage: KeyValueStorage): RunStore {
       state = {
         meta: {
           ...meta,
+          userId: meta.userId ?? null,
           recorder: { ...initialRecorder, ...meta.recorder },
           fixCount: Math.min(meta.fixCount, fixes.length),
         },
@@ -158,7 +164,14 @@ export function createRunStore(storage: KeyValueStorage): RunStore {
       serial(async () => {
         await readDisk();
         if (!state) return 0;
-        const rec = state.meta.recorder;
+        let rec = state.meta.recorder;
+        // The countdown ends on time even with the screen locked, when no
+        // timer on screen is running: the first fix after it starts the run.
+        if (rec.status === 'countdown') {
+          let latest = -Infinity;
+          for (const f of incoming) if (Number.isFinite(f.t) && f.t > latest) latest = f.t;
+          rec = reduceRecorder(rec, { type: 'tick', now: latest });
+        }
         if (rec.status !== 'recording' || rec.startedAt == null) return 0;
         const startedAt = rec.startedAt;
         const accepted: GpsFix[] = incoming
@@ -173,7 +186,7 @@ export function createRunStore(storage: KeyValueStorage): RunStore {
         for (let c = first; c <= last; c += 1) {
           await storage.setItem(chunkKey(c), JSON.stringify(fixes.slice(c * CHUNK_SIZE, (c + 1) * CHUNK_SIZE)));
         }
-        state = { meta: { ...state.meta, fixCount: fixes.length }, fixes };
+        state = { meta: { ...state.meta, recorder: rec, fixCount: fixes.length }, fixes };
         await writeMeta();
         emit();
         return accepted.length;

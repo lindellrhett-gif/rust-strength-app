@@ -10,9 +10,9 @@ import { filterFixes, type FilterReport } from './filter';
 import { encodePolyline } from './polyline';
 import { elapsedMs, recordingMs, segmentStartedAt, type RecorderState } from './recorder';
 import { computeSplits, type Split } from './splits';
-import { findStops } from './stops';
+import { closeStops, findStops, scanStops, type StopScan } from './stops';
 import { buildTrack, stoppedMs, trackTotals, type Stop } from './track';
-import type { GpsFix, TrackPoint } from './types';
+import type { CleanFix, GpsFix, TrackPoint } from './types';
 import { METERS_PER, paceSeconds, type RunDistanceUnit } from './units';
 
 export interface SummaryOptions {
@@ -119,15 +119,35 @@ export interface LiveStats {
   holding: boolean;
 }
 
-export function liveStats(
-  fixes: readonly GpsFix[],
+/**
+ * The heavy half of the live numbers: cleaning the fixes, scanning for stops
+ * and building the track. It only changes when a fix arrives, so the screen
+ * works it out once per fix and reuses it for the clock in between, and for
+ * drawing the route.
+ */
+export interface LiveTrack {
+  /** The clean fixes, for drawing the route. */
+  fixes: CleanFix[];
+  scan: StopScan;
+  track: TrackPoint[];
+}
+
+export function prepareLive(fixes: readonly GpsFix[], autoPause: boolean): LiveTrack {
+  const report = filterFixes(fixes);
+  const scan = scanStops(report.motion);
+  const track = buildTrack(report.fixes, { autoPause, stops: closeStops(scan).stops });
+  return { fixes: report.fixes, scan, track };
+}
+
+/** The live numbers at `now`, from the prepared track. Cheap: safe to run every second. */
+export function liveStatsAt(
+  prepared: LiveTrack,
   recorder: RecorderState,
   now: number,
   opts: { autoPause: boolean; unit: RunDistanceUnit },
 ): LiveStats {
-  const report = filterFixes(fixes);
-  const { stops, pending } = findStops(report.motion, now);
-  const track = buildTrack(report.fixes, { autoPause: opts.autoPause, stops });
+  const { stops, pending } = closeStops(prepared.scan, now);
+  const { track } = prepared;
   const last = track[track.length - 1];
   const distanceM = last?.d ?? 0;
   const recording = recorder.status === 'recording';
@@ -167,4 +187,14 @@ export function liveStats(
     autoPaused,
     holding,
   };
+}
+
+/** The live numbers in one go, for when nothing is being reused. */
+export function liveStats(
+  fixes: readonly GpsFix[],
+  recorder: RecorderState,
+  now: number,
+  opts: { autoPause: boolean; unit: RunDistanceUnit },
+): LiveStats {
+  return liveStatsAt(prepareLive(fixes, opts.autoPause), recorder, now, opts);
 }

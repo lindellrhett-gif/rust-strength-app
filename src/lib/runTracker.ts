@@ -30,6 +30,12 @@ import { runStore } from './runStore';
 
 export const RUN_LOCATION_TASK = 'rust-strength.run-location';
 
+/**
+ * When this copy of the app started. A run found on the phone that was
+ * recording before this moment was interrupted by the app closing.
+ */
+export const LAUNCHED_AT = Date.now();
+
 export function toIncomingFix(l: Location.LocationObject): IncomingFix {
   return {
     lat: l.coords.latitude,
