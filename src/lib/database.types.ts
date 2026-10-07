@@ -613,6 +613,7 @@ export type Database = {
           performed_at: string;
           calories: number | null;
           steps: number | null;
+          share_to_feed: boolean;
           distance_unit: 'mi' | 'km' | 'm' | null;
           source: 'gps' | 'manual' | 'treadmill';
           distance_m: number;
@@ -651,9 +652,19 @@ export type Database = {
           p_note: string | null;
           p_effort: number | null;
           p_map_visibility?: 'private' | 'friends' | null;
+          p_share_to_feed?: boolean | null;
         };
         Returns: undefined;
       };
+      rpc_my_privacy_zones: {
+        Args: Record<string, never>;
+        Returns: { id: string; label: string | null; lat: number; lon: number; radius_m: number }[];
+      };
+      rpc_add_privacy_zone: {
+        Args: { p_lat: number; p_lon: number; p_radius_m: number; p_label: string | null };
+        Returns: string;
+      };
+      rpc_remove_privacy_zone: { Args: { p_id: string }; Returns: undefined };
       rpc_crop_run: {
         Args: {
           p_activity_id: string;
@@ -740,6 +751,7 @@ export type Database = {
           // jsonb object keyed by reaction id, e.g. { fire: 3, strong: 1 }
           reaction_counts: Record<string, number>;
           my_reaction: string | null;
+          route_preview: string | null;
         }[];
       };
       rpc_block_user: { Args: { target: string }; Returns: undefined };

@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -90,6 +90,20 @@ export default function RunningHub() {
 
   return (
     <Screen scroll edges={['left', 'right']} contentStyle={styles.content}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push('/run/settings')}
+              accessibilityRole="button"
+              accessibilityLabel="Running settings"
+              hitSlop={12}
+            >
+              <Text style={styles.link}>Settings</Text>
+            </Pressable>
+          ),
+        }}
+      />
       <Card title="This week">
         <View style={styles.weekRow}>
           <Text style={text.hero}>{formatDistance(weekDistance, unit)}</Text>

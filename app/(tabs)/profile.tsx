@@ -24,6 +24,7 @@ import {
 import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
 import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
 import { EQUIPMENT_OPTIONS } from '@/domain/generator';
+import { hasFeature } from '@/domain/entitlements';
 import { todayLocal } from '@/lib/dates';
 import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
 import { colors } from '@/theme/colors';
@@ -325,6 +326,22 @@ export default function ProfileScreen() {
           <Text style={styles.chev}>›</Text>
         </Pressable>
       </Card>
+
+      {hasFeature('running') ? (
+        <Card title="Running">
+          <Pressable
+            style={styles.legalRow}
+            onPress={() => router.push('/run/settings')}
+            accessibilityRole="button"
+          >
+            <View>
+              <Text style={text.body}>Running settings</Text>
+              <Text style={text.caption}>Auto-pause, sharing and privacy zones</Text>
+            </View>
+            <Text style={styles.chev}>›</Text>
+          </Pressable>
+        </Card>
+      ) : null}
 
       <Card title="Privacy & legal">
         <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>

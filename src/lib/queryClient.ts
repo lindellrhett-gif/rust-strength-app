@@ -101,5 +101,6 @@ export const qk = {
   runs: ['runs'] as const,
   run: (id: string) => ['runs', id] as const,
   runHistory: ['runs', '__history'] as const,
+  privacyZones: ['privacy-zones'] as const,
   runPreferences: ['run-preferences'] as const,
 };

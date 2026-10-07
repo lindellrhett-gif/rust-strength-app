@@ -138,6 +138,8 @@ function RootNavigator() {
         options={{ headerShown: true, presentation: 'modal', title: 'Edit run' }}
       />
       <Stack.Screen name="run/trim/[id]" options={{ headerShown: true, title: 'Trim run' }} />
+      <Stack.Screen name="run/settings" options={{ headerShown: true, title: 'Running settings' }} />
+      <Stack.Screen name="run/privacy-zones" options={{ headerShown: true, title: 'Privacy zones' }} />
     </Stack>
   );
 }

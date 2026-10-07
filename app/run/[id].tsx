@@ -1,13 +1,13 @@
 import { useMutationState } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, type ReactNode } from 'react';
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button, Card, EmptyState, LoadingView, Screen, StatTile } from '@/components';
 import { RunChart } from '@/components/RunChart';
 import { RunMap } from '@/components/RunMap';
 import { useProfile } from '@/data/profile';
-import { useRun, useSaveRun } from '@/data/runs';
+import { useRun, useSaveRun, useUpdateRunDetails } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
 import { EFFORT_KEYS, EFFORT_LABEL } from '@/domain/running/bestEfforts';
 import { elevationSeries, paceSeries } from '@/domain/running/charts';
@@ -61,7 +61,11 @@ export default function RunSummaryScreen() {
             ),
           }}
         />
-        <RunSummary run={run.data} onDone={() => router.back()} />
+        <RunSummary
+          run={run.data}
+          onDone={() => router.back()}
+          sharing={<RunSharing run={run.data} onPrivacyZones={() => router.push('/run/privacy-zones')} />}
+        />
       </>
     );
   }
@@ -99,7 +103,70 @@ export default function RunSummaryScreen() {
   return <EmptyState title="Run not found" message="It may have been deleted." />;
 }
 
-function RunSummary({ run, onDone, banner }: { run: RunDetail; onDone: () => void; banner?: string }) {
+/**
+ * Who sees this run. Friends get stats only unless the map is shared, and a
+ * shared map is trimmed on the server (see migration 0021).
+ */
+function RunSharing({ run, onPrivacyZones }: { run: RunDetail; onPrivacyZones: () => void }) {
+  const update = useUpdateRunDetails();
+  // While a change is on its way, show it rather than the old value.
+  const pending = update.isPending ? update.variables : undefined;
+  const shared = pending?.shareToFeed ?? run.shareToFeed;
+  const mapShared = (pending?.mapVisibility ?? run.mapVisibility) === 'friends';
+
+  const change = (patch: { shareToFeed?: boolean; mapVisibility?: 'private' | 'friends' }) =>
+    update.mutate(
+      { id: run.id, title: run.title, note: run.note, effort: run.effort, ...patch },
+      {
+        onError: (e) =>
+          Alert.alert('Could not change sharing', e instanceof Error ? e.message : 'Please try again.'),
+      },
+    );
+
+  return (
+    <Card title="Sharing">
+      <View style={styles.switchRow}>
+        <Text style={[text.body, styles.flex]}>Share to friends’ feed</Text>
+        <Switch
+          value={shared}
+          onValueChange={(v) => change({ shareToFeed: v })}
+          accessibilityLabel="Share to friends’ feed"
+        />
+      </View>
+      <View style={styles.switchRow}>
+        <Text style={[text.body, styles.flex, !shared && styles.dim]}>Show the map to friends</Text>
+        <Switch
+          value={shared && mapShared}
+          disabled={!shared}
+          onValueChange={(v) => change({ mapVisibility: v ? 'friends' : 'private' })}
+          accessibilityLabel="Show the map to friends"
+        />
+      </View>
+      <Text style={text.caption}>
+        {shared
+          ? mapShared
+            ? 'Friends see your stats and the route, minus the first and last 200 m and anything inside your privacy zones.'
+            : 'Friends see your distance, time and pace. Not the map.'
+          : 'Only you can see this run.'}
+      </Text>
+      <Pressable onPress={onPrivacyZones} accessibilityRole="button" hitSlop={8}>
+        <Text style={styles.link}>Privacy zones ›</Text>
+      </Pressable>
+    </Card>
+  );
+}
+
+function RunSummary({
+  run,
+  onDone,
+  banner,
+  sharing,
+}: {
+  run: RunDetail;
+  onDone: () => void;
+  banner?: string;
+  sharing?: ReactNode;
+}) {
   const profile = useProfile();
   const unit = run.unit;
   const segments = useMemo(() => (run.route.length >= 2 ? [run.route] : []), [run.route]);
@@ -204,6 +271,8 @@ function RunSummary({ run, onDone, banner }: { run: RunDetail; onDone: () => voi
         </Card>
       ) : null}
 
+      {sharing}
+
       {run.calories == null && profile.data && !profile.data.body_weight ? (
         <Text style={text.caption}>
           Calories need your bodyweight. Add it in Profile and future runs will include an estimate.
@@ -234,4 +303,7 @@ const styles = StyleSheet.create({
   splitIndex: { width: 28, color: colors.textMuted },
   splitPace: { fontWeight: '700', fontVariant: ['tabular-nums'] },
   flex: { flex: 1 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 },
+  dim: { color: colors.textFaint },
+  link: { color: colors.primary, fontWeight: '600' },
 });

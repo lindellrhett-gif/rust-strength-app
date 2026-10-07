@@ -103,6 +103,9 @@ export interface RunDetailsEdit {
   title: string | null;
   note: string | null;
   effort: number | null;
+  /** Leave out to keep as it is. */
+  mapVisibility?: 'private' | 'friends';
+  shareToFeed?: boolean;
 }
 
 /**
@@ -118,6 +121,8 @@ export function useUpdateRunDetails() {
         p_name: edit.title,
         p_note: edit.note,
         p_effort: edit.effort,
+        p_map_visibility: edit.mapVisibility ?? null,
+        p_share_to_feed: edit.shareToFeed ?? null,
       });
       if (error) throw error;
     },
@@ -214,4 +219,84 @@ export function useSetWeeklyGoal() {
 export function useRunningLoad(): RunningLoad | null {
   const history = useRunHistory();
   return useMemo(() => (history.data ? runningLoad(forLoad(history.data), todayLocal()) : null), [history.data]);
+}
+
+/** Settings for running, saved per account. */
+export function useUpdateRunPreferences() {
+  const { userId } = useAuth();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (next: RunPreferences) => {
+      const { error } = await supabase.from('run_preferences').upsert(
+        {
+          user_id: userId!,
+          auto_pause: next.autoPause,
+          audio_cues: next.audioCues,
+          share_default: next.shareDefault,
+          map_default: next.mapDefault,
+          weekly_goal_m: next.weeklyGoalM,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      );
+      if (error) throw error;
+    },
+    onMutate: (next) => client.setQueryData(qk.runPreferences, next),
+    onSettled: () => client.invalidateQueries({ queryKey: qk.runPreferences }),
+  });
+}
+
+export interface PrivacyZone {
+  id: string;
+  label: string | null;
+  lat: number;
+  lon: number;
+  radiusM: number;
+}
+
+/** Your privacy zones. Nobody else can read them. */
+export function usePrivacyZones() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.privacyZones,
+    enabled: !!userId,
+    queryFn: async (): Promise<PrivacyZone[]> => {
+      const { data, error } = await supabase.rpc('rpc_my_privacy_zones');
+      if (error) throw error;
+      return (data ?? []).map((z) => ({ id: z.id, label: z.label, lat: z.lat, lon: z.lon, radiusM: z.radius_m }));
+    },
+  });
+}
+
+export function useAddPrivacyZone() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (zone: Omit<PrivacyZone, 'id'>) => {
+      const { error } = await supabase.rpc('rpc_add_privacy_zone', {
+        p_lat: zone.lat,
+        p_lon: zone.lon,
+        p_radius_m: zone.radiusM,
+        p_label: zone.label,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: qk.privacyZones });
+      client.invalidateQueries({ queryKey: qk.feed });
+    },
+  });
+}
+
+export function useRemovePrivacyZone() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.rpc('rpc_remove_privacy_zone', { p_id: id });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: qk.privacyZones });
+      client.invalidateQueries({ queryKey: qk.feed });
+    },
+  });
 }
