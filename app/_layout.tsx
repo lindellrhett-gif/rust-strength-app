@@ -132,6 +132,11 @@ function RootNavigator() {
         options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
       />
       <Stack.Screen name="run/[id]" options={{ headerShown: true, title: 'Run' }} />
+      <Stack.Screen
+        name="run/edit/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Edit run' }}
+      />
+      <Stack.Screen name="run/trim/[id]" options={{ headerShown: true, title: 'Trim run' }} />
     </Stack>
   );
 }

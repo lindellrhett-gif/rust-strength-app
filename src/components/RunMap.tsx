@@ -10,6 +10,8 @@ import { radius, spacing, text } from '@/theme/typography';
 interface RunMapProps {
   /** The route, one line per unbroken stretch. */
   segments: LatLon[][];
+  /** Parts of the route drawn faded, like the bits a trim would cut off. */
+  faded?: LatLon[][];
   /** Where the runner is now. The map opens here, and follows it with `follow`. */
   position?: LatLon | null;
   /** Keep the map centred on `position` as it moves (while recording). */
@@ -35,6 +37,7 @@ const toLatLng = (p: LatLon) => ({ latitude: p.lat, longitude: p.lon });
  */
 export function RunMap({
   segments,
+  faded = [],
   position = null,
   follow = false,
   showsUser = false,
@@ -43,7 +46,7 @@ export function RunMap({
   accessibilityLabel = 'Map of your route',
 }: RunMapProps) {
   const ref = useRef<MapView>(null);
-  const all = segments.flat();
+  const all = [...segments.flat(), ...faded.flat()];
   const region = fitToRoute ? regionForPoints(all) : position ? regionAround(position) : null;
 
   const lat = position?.lat;
@@ -85,6 +88,16 @@ export function RunMap({
       accessible
       accessibilityLabel={accessibilityLabel}
     >
+      {faded.map((seg, i) => (
+        <Polyline
+          key={`faded-${i}`}
+          coordinates={seg.map(toLatLng)}
+          strokeColor={colors.textFaint}
+          strokeWidth={4}
+          lineCap="round"
+          lineJoin="round"
+        />
+      ))}
       {segments.map((seg, i) => (
         <Polyline
           key={i}

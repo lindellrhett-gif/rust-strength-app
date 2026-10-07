@@ -1,21 +1,24 @@
 import { useMutationState } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card, EmptyState, LoadingView, Screen, StatTile } from '@/components';
+import { RunChart } from '@/components/RunChart';
 import { RunMap } from '@/components/RunMap';
 import { useProfile } from '@/data/profile';
 import { useRun, useSaveRun } from '@/data/runs';
 import { formatClock } from '@/domain/duration';
 import { EFFORT_KEYS, EFFORT_LABEL } from '@/domain/running/bestEfforts';
-import type { RunDetail } from '@/domain/running/detail';
+import { elevationSeries, paceSeries } from '@/domain/running/charts';
+import { parseRunRow, runRowFromSave, type RunDetail } from '@/domain/running/detail';
+import { effortLabel, savedTrack } from '@/domain/running/edit';
 import type { SaveRunInput } from '@/domain/running/save';
 import { cadence } from '@/domain/running/steps';
 import { formatDistance, formatElevation, formatPace, paceSeconds, METERS_PER } from '@/domain/running/units';
 import { mk } from '@/lib/queryClient';
 import { colors } from '@/theme/colors';
-import { spacing, text } from '@/theme/typography';
+import { radius, spacing, text } from '@/theme/typography';
 
 export default function RunSummaryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -34,17 +37,47 @@ export default function RunSummaryScreen() {
     }),
   });
   const save = [...saves].reverse().find((s) => s.variables?.p_id === id);
+  const pendingInput = save?.status === 'pending' ? save.variables : undefined;
+  const pending = useMemo(
+    () => (pendingInput ? parseRunRow(runRowFromSave(pendingInput)) : null),
+    [pendingInput],
+  );
 
-  if (run.data) return <RunSummary run={run.data} onDone={() => router.back()} />;
+  if (run.data) {
+    const runId = run.data.id;
+    return (
+      <>
+        <Stack.Screen
+          options={{
+            headerRight: () => (
+              <Pressable
+                onPress={() => router.push(`/run/edit/${runId}`)}
+                accessibilityRole="button"
+                accessibilityLabel="Edit run"
+                hitSlop={12}
+              >
+                <Text style={styles.headerButton}>Edit</Text>
+              </Pressable>
+            ),
+          }}
+        />
+        <RunSummary run={run.data} onDone={() => router.back()} />
+      </>
+    );
+  }
 
-  if (save && save.status === 'pending') {
-    return save.isPaused ? (
-      <EmptyState
-        title="Saved on your phone"
-        message="You’re offline, so the run will upload automatically when you have signal again."
+  // Still in the offline queue: show it as it will look once it arrives.
+  if (pending) {
+    return (
+      <RunSummary
+        run={pending}
+        onDone={() => router.back()}
+        banner={
+          save?.isPaused
+            ? 'Saved on your phone. It uploads when you’re back online, and you can edit it then.'
+            : 'Saving your run…'
+        }
       />
-    ) : (
-      <LoadingView label="Saving your run…" />
     );
   }
 
@@ -66,10 +99,16 @@ export default function RunSummaryScreen() {
   return <EmptyState title="Run not found" message="It may have been deleted." />;
 }
 
-function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
+function RunSummary({ run, onDone, banner }: { run: RunDetail; onDone: () => void; banner?: string }) {
   const profile = useProfile();
   const unit = run.unit;
   const segments = useMemo(() => (run.route.length >= 2 ? [run.route] : []), [run.route]);
+  const track = useMemo(() => savedTrack(run), [run]);
+  const pace = useMemo(() => paceSeries(track, unit), [track, unit]);
+  const elevation = useMemo(
+    () => (run.hasElevation ? elevationSeries(track, unit) : []),
+    [run.hasElevation, track, unit],
+  );
   const date = new Date(run.performedAt);
   const spm = cadence(run.steps, run.movingSeconds);
   const fastest = run.splits.reduce<number | null>(
@@ -79,6 +118,12 @@ function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
 
   return (
     <Screen scroll contentStyle={styles.content}>
+      {banner ? (
+        <View style={styles.banner} accessibilityRole="alert">
+          <Text style={text.body}>{banner}</Text>
+        </View>
+      ) : null}
+
       <View style={styles.titleBlock}>
         <Text style={text.title} accessibilityRole="header">
           {run.name}
@@ -86,7 +131,9 @@ function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
         <Text style={text.bodyMuted}>
           {date.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })} ·{' '}
           {date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+          {run.effort != null ? ` · Effort ${run.effort}/10, ${effortLabel(run.effort).toLowerCase()}` : ''}
         </Text>
+        {run.note ? <Text style={text.body}>{run.note}</Text> : null}
       </View>
 
       {segments.length > 0 ? (
@@ -111,21 +158,28 @@ function RunSummary({ run, onDone }: { run: RunDetail; onDone: () => void }) {
         {spm != null ? <StatTile value={String(spm)} label="cadence (steps/min)" /> : null}
       </View>
 
+      {pace.length > 0 || elevation.length > 0 ? (
+        <Card>
+          <RunChart points={pace} kind="pace" unit={unit} title="Pace" />
+          <RunChart points={elevation} kind="elevation" unit={unit} title="Elevation" />
+        </Card>
+      ) : null}
+
       {run.splits.length > 0 ? (
         <Card title={unit === 'mi' ? 'Splits per mile' : 'Splits per km'}>
           {run.splits.map((s, i) => {
-            const pace = paceSeconds(s.distanceM, s.seconds, unit);
+            const splitPace = paceSeconds(s.distanceM, s.seconds, unit);
             const isFastest = fastest != null && s.seconds === fastest && s.distanceM >= METERS_PER[unit] * 0.99;
             return (
               <View
                 key={i}
                 style={styles.splitRow}
                 accessible
-                accessibilityLabel={`${unit === 'mi' ? 'Mile' : 'Kilometre'} ${i + 1}${s.distanceM < METERS_PER[unit] * 0.99 ? `, partial ${formatDistance(s.distanceM, unit)}` : ''}, pace ${formatPace(pace, unit)}${isFastest ? ', fastest' : ''}`}
+                accessibilityLabel={`${unit === 'mi' ? 'Mile' : 'Kilometre'} ${i + 1}${s.distanceM < METERS_PER[unit] * 0.99 ? `, partial ${formatDistance(s.distanceM, unit)}` : ''}, pace ${formatPace(splitPace, unit)}${isFastest ? ', fastest' : ''}`}
               >
                 <Text style={[text.body, styles.splitIndex]}>{i + 1}</Text>
                 <Text style={[text.body, styles.splitPace, isFastest && { color: colors.success }]}>
-                  {formatPace(pace, unit)}
+                  {formatPace(splitPace, unit)}
                 </Text>
                 <Text style={text.caption}>
                   {s.distanceM < METERS_PER[unit] * 0.99 ? formatDistance(s.distanceM, unit) : ''}
@@ -165,6 +219,14 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, gap: spacing.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.xl },
   centerText: { textAlign: 'center' },
+  headerButton: { color: colors.primary, fontSize: 17, fontWeight: '600' },
+  banner: {
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.warning,
+    backgroundColor: colors.surface,
+  },
   titleBlock: { gap: spacing.xs },
   map: { height: 240 },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { parseRunRow, type RunDetail } from '@/domain/running/detail';
+import type { CropInput } from '@/domain/running/edit';
 import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -80,6 +81,69 @@ export function useRun(id: string | undefined) {
       if (error) throw error;
       const row = data?.[0];
       return row ? parseRunRow(row) : null;
+    },
+  });
+}
+
+/** Everything a change to one run can show up in. */
+function invalidateRun(client: ReturnType<typeof useQueryClient>, id: string) {
+  client.invalidateQueries({ queryKey: qk.run(id) });
+  client.invalidateQueries({ queryKey: qk.runs });
+  client.invalidateQueries({ queryKey: qk.activities });
+  client.invalidateQueries({ queryKey: qk.activityTotals });
+  client.invalidateQueries({ queryKey: qk.feed });
+}
+
+export interface RunDetailsEdit {
+  id: string;
+  title: string | null;
+  note: string | null;
+  effort: number | null;
+}
+
+/**
+ * Title, notes and effort. Needs a connection: an edit is small and easy to
+ * try again, and it isn't worth queueing behind a run that hasn't uploaded.
+ */
+export function useUpdateRunDetails() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (edit: RunDetailsEdit) => {
+      const { error } = await supabase.rpc('rpc_update_run_details', {
+        p_activity_id: edit.id,
+        p_name: edit.title,
+        p_note: edit.note,
+        p_effort: edit.effort,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_data, edit) => invalidateRun(client, edit.id),
+  });
+}
+
+/** Trims a run's start and end (see cropRun in src/domain/running/edit.ts). */
+export function useCropRun() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: CropInput) => {
+      const { error } = await supabase.rpc('rpc_crop_run', input);
+      if (error) throw error;
+    },
+    onSuccess: (_data, input) => invalidateRun(client, input.p_activity_id),
+  });
+}
+
+/** Deletes a run. Its route, splits and best efforts go with the activity. */
+export function useDeleteRun() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('activities').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_data, id) => {
+      client.removeQueries({ queryKey: qk.run(id) });
+      invalidateRun(client, id);
     },
   });
 }
