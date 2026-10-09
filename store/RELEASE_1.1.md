@@ -12,14 +12,27 @@ releasing it.
   `0021`, `0022`, `0023`. The 1.0 app never calls anything they add, so
   they are safe now, and a development build of 1.1 needs them to save and
   show runs. **Skip `0020`** (see section 4).
+- [ ] **Let EAS sign the new widget extension, once.** The Lock Screen view
+  is a separate app extension (`com.ruststrength.app.dev.widget` for the dev
+  app, `com.ruststrength.app.widget` for the store app), and EAS has to
+  create its identifier and provisioning profile. That needs the App Store
+  Connect API key, the way it did for the first builds: sync the PC clock,
+  set the `EXPO_ASC_*` variables, and answer **Yes** to logging in to Apple
+  (`store/BUILD_CHECKS.md` explains how). If it ever asks for your Apple
+  ID password, press Ctrl+C. Later builds reuse the stored profiles.
 - [ ] **Test on a development build** (`eas build --profile development
-  --platform ios`; answer **No** if it offers to log in to Apple):
+  --platform ios`):
   - [ ] A real outdoor run with the phone locked the whole way.
   - [ ] Auto-pause at a light: the clock holds, then starts as you move off.
   - [ ] Spoken updates with music playing and the phone locked: the music
         gets quieter while it talks, then comes back.
   - [ ] Force-quit the app mid-run, reopen it, and choose Resume, then do it
         again and choose Finish.
+  - [ ] The Lock Screen and Dynamic Island: the clock ticks, distance and
+        pace update every few seconds, "Paused" and "Auto-paused" show at a
+        pause and a light, tapping it opens the recorder, and it disappears
+        when the run is saved or discarded. After a force-quit it should say
+        "Not updating" within about three minutes.
   - [ ] Steps and cadence on the run summary, and Today's steps card.
   - [ ] Airplane mode on before saving, then off: the run appears.
   - [ ] A friend's view: stats only by default; with the map shared, the
@@ -30,8 +43,6 @@ releasing it.
         hour. The README doesn't give a figure until there is a real one.
   - [ ] A quick pass through lifting, the feed, the leaderboard and streaks,
         to check nothing else broke.
-- [ ] **Decide about the Lock Screen live view** (Live Activity). It isn't
-  built and 1.1 doesn't need it; it can ship in a later update.
 - [ ] **Attorney question** (optional, your call): location combined with
   fitness data under Washington's My Health My Data Act. See
   `legal/LEGAL_AUDIT.md` sections 5 and 14. Nothing here has been reviewed by
@@ -64,7 +75,8 @@ releasing it.
   eas submit --platform ios --latest
   ```
 - [ ] Install it from TestFlight and repeat the outdoor run, the locked-phone
-  spoken updates and the crash recovery once on the real build.
+  spoken updates, the Lock Screen view and the crash recovery once on the
+  real build.
 
 ## 3. App Store Connect, on the new 1.1 version
 
@@ -80,6 +92,7 @@ releasing it.
   ```
   Running is here.
   • Record runs with GPS, with the screen locked: live map, distance, pace, splits and steps.
+  • Your time, distance and pace on the Lock Screen and in the Dynamic Island while you run.
   • Auto-pause at lights, and spoken updates every mile or kilometre.
   • A summary for every run, with pace and elevation charts. Edit or trim a run afterwards.
   • Running history in Stats: weekly and monthly distance, a weekly goal, and records from the mile to the marathon.

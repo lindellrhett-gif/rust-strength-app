@@ -135,6 +135,29 @@ register a new iPhone, so add devices by hand at developer.apple.com → Devices
 (the UDID comes from `eas device:create`). If EAS ever asks for the Apple ID
 password, stop: that path is what locked the account before.
 
+## The Lock Screen widget extension (from 1.1)
+
+From 1.1 the app ships a second signed bundle: the widget extension in
+`targets/widget` that draws a run on the Lock Screen and in the Dynamic
+Island. Its bundle identifier is the app's plus `.widget`
+(`com.ruststrength.app.widget`, and `com.ruststrength.app.dev.widget` for the
+dev app). It needs no capabilities ticked.
+
+The first build of each app after it was added has to create that
+identifier and a provisioning profile for it, so it must sign in with the API
+key (the section above). Apple rejects the key's token if the PC clock runs
+ahead, so sync it first (Settings → Time & language → Date & time → **Sync
+now**). Set the five `EXPO_ASC_*` / `EXPO_APPLE_*` variables in the
+PowerShell window, using the key path, key ID and issuer ID from
+`submit.production.ios` in `eas.json`, then build and answer **Yes** to
+logging in to Apple. EAS should say it is using the App Store Connect API
+key; if it asks for an Apple ID password instead, press Ctrl+C.
+
+If it can't create the identifier, make it by hand at developer.apple.com →
+Identifiers → **+** → App IDs → App, with that explicit bundle ID and no
+capabilities, and build again. Once the profiles exist, later builds can go
+back to answering **No**.
+
 ## The order once Apple approves
 
 1. `eas build --platform ios --profile production`

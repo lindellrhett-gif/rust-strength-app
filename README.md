@@ -136,6 +136,11 @@ appear in the Calendar, the friends feed, Stats and the streak.
   Maps. It keeps recording with the screen locked, survives the app being
   closed mid-run (reopening offers Resume, Finish or Discard), and counts
   steps and cadence from the phone's motion sensors.
+- **Lock Screen and Dynamic Island:** the time, distance and pace stay in
+  view with the phone locked (an iOS Live Activity, drawn by a SwiftUI widget
+  extension). iOS ticks the clock itself, so the app only sends an update when
+  something else changes, and if the app is closed mid-run the activity says
+  it has stopped updating instead of counting on.
 - **Auto-pause** goes by the phone's own speed reading, so the clock holds
   the moment you stop at a light and starts again as you move off. Losing
   signal in a tunnel doesn't pause it.
@@ -161,12 +166,14 @@ appear in the Calendar, the friends feed, Stats and the streak.
 | [`__tests__/runningAutoPause.test.ts`](__tests__/runningAutoPause.test.ts) | Simulated runs replayed second by second, as the screen sees them |
 | [`supabase/migrations/0021_run_sharing.sql`](supabase/migrations/0021_run_sharing.sql) | Server-side trimming of shared routes with privacy zones (PostGIS) |
 | [`supabase/tests/sharing.test.mjs`](supabase/tests/sharing.test.mjs) | Proving a shared outline never comes within a privacy zone |
+| [`targets/widget/`](targets/widget), [`modules/run-activity/`](modules/run-activity) | The Live Activity in Swift: the widget that draws it and the small native module that starts and updates it |
 
 **Permissions.** Location "While Using the App" when a run starts (never
 "Always"), with background location updates while recording; Motion &
 Fitness for steps. The Info.plist strings live in `app.json` (the
-`expo-location` and `expo-sensors` plugins), and `UIBackgroundModes` is
-`location` and `audio`.
+`expo-location` and `expo-sensors` plugins), `UIBackgroundModes` is
+`location` and `audio`, and `NSSupportsLiveActivities` turns on the Lock
+Screen view, which needs no permission (people can turn it off in Settings).
 
 **Battery.** GPS at its most accurate setting is the main cost, and it runs
 only between Start and Finish. I haven't measured the drain per hour on a
@@ -294,6 +301,8 @@ supabase/
   migrations/        Schema, RLS policies and SQL functions (0001 to 0023)
   tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
+modules/run-activity/  Local native module (Swift) for the run's Live Activity
+targets/widget/      Widget extension (SwiftUI) that draws it, added at prebuild
 __tests__/           Jest specs
 scripts/             Legal site, icon and screenshot generators
 ```

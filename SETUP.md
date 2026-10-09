@@ -106,7 +106,17 @@ eas build --profile development --platform ios
 ```
 
 Install it from the link EAS prints, then start the bundler with
-`npx expo start --dev-client`. Make a new development build whenever a
+`npx expo start --dev-client`.
+
+The app has a second piece of native code besides the app itself: the widget
+extension in `targets/widget` that draws a run on the Lock Screen and in the
+Dynamic Island. `@bacons/apple-targets` adds it to the Xcode project at
+prebuild, and EAS signs it as its own app extension, with the app's bundle
+identifier plus `.widget`. The first build after adding it needs EAS to
+create that extension's identifier and provisioning profile, which means
+signing in to Apple for that one build (see `store/BUILD_CHECKS.md`). Its
+Swift can't be built on Windows; `eas build --platform ios --profile
+ios-check` compiles everything without any Apple sign-in. Make a new development build whenever a
 native module is added or changed (anything that edits `app.json` plugins or
 adds a package with native code); JavaScript changes don't need one. A build
 made before a native module existed still opens, and that feature is simply

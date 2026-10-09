@@ -505,7 +505,11 @@ site still shows version 1.4.4, which matches the released app.
    and adds a short outdoor running safety paragraph.
 6. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` is in
    `app.json`. Fitness was already declared.
-7. **Fixed while checking:** the privacy zone screen labelled a radius as
+7. **Lock Screen.** While a run records, a Live Activity shows its time,
+   distance and pace on the Lock Screen and in the Dynamic Island, visible to
+   anyone holding the phone. It is created on the phone with no push token,
+   and the policy says so and how to turn it off.
+8. **Fixed while checking:** the privacy zone screen labelled a radius as
    "Size across", which would have made a zone hide half the distance the
    user expected. It now says "Radius", as does the server's error message.
 

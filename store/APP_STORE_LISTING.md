@@ -165,7 +165,10 @@ zone at their location), and is used only between Start and Save. The location b
 with the screen locked, and the blue location indicator shows while it does.
 The audio background mode is used only to speak distance and pace updates
 during a run with the screen locked, which the user can turn off in Running
-settings. Motion & Fitness is requested to count steps. A run can also be
+settings. While a run records, a Live Activity shows its time, distance and
+pace on the Lock Screen and in the Dynamic Island; it is started and updated
+by the app on the device (no push notifications) and ends when the run is
+saved or discarded. Motion & Fitness is requested to count steps. A run can also be
 entered by hand with no location. Friends see a run's map only if the user
 turns it on for that run, and the server trims its start and end first.
 ```
