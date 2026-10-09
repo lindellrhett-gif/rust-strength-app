@@ -1,0 +1,18 @@
+Pod::Spec.new do |s|
+  s.name           = 'RunActivity'
+  s.version        = '1.0.0'
+  s.summary        = 'The Live Activity that shows a run on the Lock Screen'
+  s.description    = 'Starts, updates and ends the Live Activity that shows a run in progress on the Lock Screen and in the Dynamic Island.'
+  s.author         = 'Rhett Lindell'
+  s.homepage       = 'https://lindellrhett-gif.github.io/rust-strength/'
+  s.platforms      = { :ios => '16.4' }
+  s.swift_version  = '5.9'
+  s.source         = { git: '' }
+  s.static_framework = true
+
+  s.dependency 'ExpoModulesCore'
+  s.frameworks = 'ActivityKit'
+
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
+  s.source_files = "**/*.{h,m,swift}"
+end

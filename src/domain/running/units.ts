@@ -49,14 +49,17 @@ export function paceSeconds(
   return (seconds / metres) * METERS_PER[unit];
 }
 
+/** "8:05", or "--:--" when there is no pace yet. */
+export function formatPaceValue(secondsPerUnit: number | null): string {
+  if (secondsPerUnit == null || !Number.isFinite(secondsPerUnit) || secondsPerUnit <= 0) return '--:--';
+  // Slower than 99 minutes a mile is standing still, not a pace.
+  if (secondsPerUnit >= 99 * 60) return '--:--';
+  return formatClock(Math.round(secondsPerUnit));
+}
+
 /** "8:05 /mi", or "--:-- /mi" when there is no pace yet. */
 export function formatPace(secondsPerUnit: number | null, unit: RunDistanceUnit): string {
-  if (secondsPerUnit == null || !Number.isFinite(secondsPerUnit) || secondsPerUnit <= 0) {
-    return `--:-- /${unit}`;
-  }
-  // Slower than 99 minutes a mile is standing still, not a pace.
-  if (secondsPerUnit >= 99 * 60) return `--:-- /${unit}`;
-  return `${formatClock(Math.round(secondsPerUnit))} /${unit}`;
+  return `${formatPaceValue(secondsPerUnit)} /${unit}`;
 }
 
 /** Elevation in feet for miles, metres for kilometres: "412 ft". */

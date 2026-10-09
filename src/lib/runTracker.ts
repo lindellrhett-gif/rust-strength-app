@@ -13,9 +13,8 @@
  * before any screen renders. app/_layout.tsx imports this file for that.
  *
  * Battery: the most accurate setting, with every fix delivered (about one a
- * second). GPS is the main cost of a run (roughly 8-12% of battery per hour on
- * a recent iPhone), and accurate splits and records are the point of the
- * feature. A distance filter would barely save power, since the GPS stays on
+ * second). GPS is the main cost of a run (not yet measured on a real run),
+ * and accurate splits and records are the point of the feature. A distance filter would barely save power, since the GPS stays on
  * either way, and it would hide stops: with no fixes coming in, standing still
  * looks the same as losing signal. Tracking runs only between Start and
  * Finish; nothing is tracked otherwise.
@@ -26,6 +25,7 @@ import * as TaskManager from 'expo-task-manager';
 import { locationAccess, type LocationAccess } from '@/domain/running/permission';
 import type { IncomingFix } from '@/domain/running/activeRunStore';
 
+import { endRunActivity, initRunActivity, startRunActivity, syncRunActivity } from './runActivity';
 import { maybeAnnounce } from './runCues';
 import { runStore } from './runStore';
 
@@ -56,13 +56,26 @@ TaskManager.defineTask<{ locations?: Location.LocationObject[] }>(RUN_LOCATION_T
   await runStore.append(data.locations.map(toIncomingFix));
   try {
     maybeAnnounce(runStore.current());
+    syncRunActivity(runStore.current());
   } catch {
-    // A missed announcement must never cost a fix.
+    // A missed announcement or Lock Screen update must never cost a fix.
   }
 });
 
+// The Lock Screen activity follows the run from launch on, like the task.
+initRunActivity();
+
+/**
+ * Starts GPS for the run in the store, and shows it on the Lock Screen.
+ * Always called from the open app: iOS starts background location, and Live
+ * Activities, only from the foreground. Safe to call again mid-run.
+ */
 export async function startRunTracking(): Promise<void> {
-  if (await Location.hasStartedLocationUpdatesAsync(RUN_LOCATION_TASK)) return;
+  if (!(await Location.hasStartedLocationUpdatesAsync(RUN_LOCATION_TASK))) await startLocation();
+  void startRunActivity();
+}
+
+async function startLocation(): Promise<void> {
   await Location.startLocationUpdatesAsync(RUN_LOCATION_TASK, {
     accuracy: Location.Accuracy.BestForNavigation,
     activityType: Location.ActivityType.Fitness,
@@ -77,6 +90,7 @@ export async function startRunTracking(): Promise<void> {
 }
 
 export async function stopRunTracking(): Promise<void> {
+  void endRunActivity();
   try {
     if (await Location.hasStartedLocationUpdatesAsync(RUN_LOCATION_TASK)) {
       await Location.stopLocationUpdatesAsync(RUN_LOCATION_TASK);

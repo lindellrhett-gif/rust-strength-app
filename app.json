@@ -13,6 +13,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
+      "appleTeamId": "V7YLBXSTX2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -22,7 +23,8 @@
               "NSExceptionAllowsInsecureHTTPLoads": true
             }
           }
-        }
+        },
+        "NSSupportsLiveActivities": true
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -132,7 +134,8 @@
           "recordAudioAndroid": false,
           "enableBackgroundPlayback": true
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "tsconfigPaths": true

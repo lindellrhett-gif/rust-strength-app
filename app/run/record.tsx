@@ -34,7 +34,7 @@ import {
 import { UNSAVABLE_MESSAGE } from '@/domain/running/finish';
 import { cadence } from '@/domain/running/steps';
 import { liveStatsAt, prepareLive } from '@/domain/running/summarize';
-import { runUnitFor, toKilograms, toUnit, type RunDistanceUnit } from '@/domain/running/units';
+import { formatPaceValue, runUnitFor, toKilograms, toUnit, type RunDistanceUnit } from '@/domain/running/units';
 import { discardActiveRun, finishActiveRun } from '@/lib/activeRun';
 import { newId } from '@/lib/ids';
 import { getLocationAccess, requestLocationAccess, startRunTracking } from '@/lib/runTracker';
@@ -56,10 +56,7 @@ const GO_ANNOUNCE_WINDOW_MS = 2000;
 
 const announce = (message: string) => AccessibilityInfo.announceForAccessibility(message);
 
-const paceText = (secondsPerUnit: number | null) =>
-  secondsPerUnit == null || !Number.isFinite(secondsPerUnit) || secondsPerUnit >= 99 * 60
-    ? '--:--'
-    : formatClock(Math.round(secondsPerUnit));
+const paceText = formatPaceValue;
 
 async function dispatch(event: RecorderEvent): Promise<void> {
   const current = runStore.current();
