@@ -18,6 +18,7 @@ import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useWorkouts } from '@/data/workouts';
 import type { Workout } from '@/lib/database.types';
 import { elapsedSeconds, formatDurationShort } from '@/domain/duration';
+import { canPlanOn } from '@/domain/planning';
 import { buildTimeline, entriesOn, type TimelineEntry } from '@/domain/timeline';
 import { formatDate, formatTime, toLocalDateString, todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
@@ -98,6 +99,7 @@ export default function CalendarScreen() {
   const dayWorkouts = workoutsByDate.get(selected) ?? [];
   const dayPlans = (planned.data ?? []).filter((p) => p.scheduled_for === selected);
   const isPast = selected < today;
+  const plannable = canPlanOn(selected, today);
   const dayEntries = entriesOn(timeline, selected);
   const selectedRest = (restDays.data ?? []).find((r) => r.rest_date === selected) ?? null;
 
@@ -109,6 +111,7 @@ export default function CalendarScreen() {
   const chosenTemplate = (templates.data ?? []).find((t) => t.id === planTemplateId) ?? null;
 
   const addPlan = () => {
+    if (!canPlanOn(selected, todayLocal())) return;
     createPlan.mutate(
       {
         scheduledFor: selected,
@@ -252,7 +255,7 @@ export default function CalendarScreen() {
             </Pressable>
           ))}
 
-          {adding ? (
+          {adding && plannable ? (
             <View style={styles.addBox}>
               <Field
                 label="What are you training?"
@@ -307,11 +310,9 @@ export default function CalendarScreen() {
             </View>
           ) : (
             <>
-              <Button
-                label={isPast ? '＋ Plan a session on this day' : '＋ Plan a session'}
-                variant="secondary"
-                onPress={() => setAdding(true)}
-              />
+              {plannable ? (
+                <Button label="＋ Plan a session" variant="secondary" onPress={() => setAdding(true)} />
+              ) : null}
               <Button
                 label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
                 variant={selectedRest ? 'danger' : 'ghost'}
