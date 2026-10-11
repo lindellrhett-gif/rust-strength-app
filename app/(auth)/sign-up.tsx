@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { Checkbox } from '@/components/Checkbox';
-import { confirmErrorMessage } from '@/domain/emailConfirm';
+import { EXISTING_ACCOUNT_MESSAGE, confirmErrorMessage } from '@/domain/emailConfirm';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
@@ -16,6 +16,8 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  // The email already has an account: offer the way in instead of a new one.
+  const [existing, setExisting] = useState(false);
   const [busy, setBusy] = useState(false);
   // Two separate confirmations: an age gate (13+) and acceptance of the
   // documents. Both are recorded on the profile when the account is created.
@@ -26,6 +28,7 @@ export default function SignUp() {
   const submit = async () => {
     setError(null);
     setNotice(null);
+    setExisting(false);
     if (password.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
@@ -46,7 +49,9 @@ export default function SignUp() {
       needsConfirmation = result.needsConfirmation;
       setSubmitted(true);
     } catch (e) {
-      setError(confirmErrorMessage(e));
+      const message = confirmErrorMessage(e);
+      setError(message);
+      setExisting(message === EXISTING_ACCOUNT_MESSAGE);
       setBusy(false);
       return;
     }
@@ -94,6 +99,24 @@ export default function SignUp() {
             autoComplete="new-password"
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
+          {existing ? (
+            <View style={styles.existing}>
+              <Button
+                label="Sign in"
+                variant="secondary"
+                onPress={() => router.replace('/(auth)/sign-in')}
+                style={styles.flex}
+              />
+              <Button
+                label="Reset password"
+                variant="ghost"
+                onPress={() =>
+                  router.push({ pathname: '/(auth)/forgot-password', params: { email: email.trim() } })
+                }
+                style={styles.flex}
+              />
+            </View>
+          ) : null}
           {notice ? <Text style={styles.notice}>{notice}</Text> : null}
           <Checkbox
             checked={ageOk}
@@ -155,6 +178,8 @@ const styles = StyleSheet.create({
   header: { gap: spacing.xs, marginTop: spacing.xxl, marginBottom: spacing.xl },
   form: { gap: spacing.lg },
   error: { color: '#F26D6D', fontSize: 14 },
+  existing: { flexDirection: 'row', gap: spacing.sm },
+  flex: { flex: 1 },
   notice: { color: '#3ECf8e', fontSize: 14 },
   link: { marginTop: spacing.xl, textAlign: 'center' },
   linkAccent: { color: '#4F8CFF', fontWeight: '700' },

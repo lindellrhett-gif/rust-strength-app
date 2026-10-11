@@ -25,6 +25,22 @@ export function codeSentTo(email: string): string {
   return `We sent a 6-digit code to ${normalizeEmail(email)}. It can take a minute, and it may land in spam.`;
 }
 
+/** Shown when someone signs up with an email that already has an account. */
+export const EXISTING_ACCOUNT_MESSAGE =
+  'An account with this email already exists. Sign in, or reset your password if you have forgotten it.';
+
+/**
+ * Whether a sign-up response means the email already has an account.
+ *
+ * With email confirmation on, Supabase answers a sign-up for an address that
+ * already has a confirmed account as though it worked: no error, no session,
+ * no email sent, and a user with an empty list of identities. Without this
+ * check the app would go on to wait for a code that never comes.
+ */
+export function isExistingAccount(user: { identities?: unknown[] | null } | null | undefined): boolean {
+  return user != null && Array.isArray(user.identities) && user.identities.length === 0;
+}
+
 interface AuthErrorLike {
   code?: string;
   status?: number;
@@ -40,6 +56,10 @@ export function confirmErrorMessage(error: unknown): string {
   // already confirmed has no code left to use — so say both.
   if (e.code === 'otp_expired' || message.includes('token') || message.includes('otp')) {
     return 'That code is wrong or has expired. Send a new one, or sign in if you already confirmed.';
+  }
+  // With email confirmation off, Supabase says so with an error instead.
+  if (e.code === 'user_already_exists' || message.includes('already registered')) {
+    return EXISTING_ACCOUNT_MESSAGE;
   }
   if (message.includes('already') && message.includes('confirm')) {
     return 'This email is already confirmed. Sign in instead.';
