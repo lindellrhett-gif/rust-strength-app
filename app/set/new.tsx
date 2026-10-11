@@ -31,7 +31,7 @@ import {
   formatHold,
   formatSetSummary,
 } from '@/domain/loadType';
-import { lastTopSet } from '@/domain/lastSession';
+import { lastSession, type LastSession } from '@/domain/lastSession';
 import { historyForMachine } from '@/domain/machines';
 import {
   MAX_REPS,
@@ -237,9 +237,9 @@ export default function NewSet() {
     });
   }, [exerciseId, history.data, loadType, displayAdded]);
 
-  // The best set from the last session of this exercise, as a number to beat.
-  const lastTop = useMemo(
-    () => (history.data ? lastTopSet(history.data, workoutId, loadType) : null),
+  // Every set from the last session of this exercise, the best one picked out.
+  const last = useMemo(
+    () => (history.data ? lastSession(history.data, workoutId, loadType) : null),
     [history.data, workoutId, loadType],
   );
 
@@ -515,14 +515,7 @@ export default function NewSet() {
                 No history for this exercise yet. Log this set and the next suggestion will use it.
               </Text>
             )}
-            {!history.isLoading && lastTop ? (
-              <Text style={[text.caption, styles.lastTime]}>
-                Last time ({sessionDay(lastTop.performedAt)}): top set{' '}
-                <Text style={styles.lastTimeSet}>{formatSetSummary(lastTop.set, unit)}</Text>
-                {' · '}
-                {lastTop.workingSets} set{lastTop.workingSets === 1 ? '' : 's'}
-              </Text>
-            ) : null}
+            {!history.isLoading && last ? <LastTime last={last} unit={unit} /> : null}
           </Card>
         ) : null}
 
@@ -724,6 +717,35 @@ export default function NewSet() {
   );
 }
 
+/** The last session's sets, one a line: W for a warm-up, the top set in bold. */
+function LastTime({ last, unit }: { last: LastSession; unit: string }) {
+  const rows = last.sets.map((s, i) => {
+    // Working sets are numbered from 1; warm-ups don't count.
+    const working = last.sets.slice(0, i + 1).filter((x) => !x.isWarmup).length;
+    const summary = formatSetSummary(s, unit);
+    return {
+      key: i,
+      mark: s.isWarmup ? 'W' : String(working),
+      text: s.rpe != null ? `${summary}  RPE ${s.rpe}` : summary,
+      top: i === last.topIndex,
+      spoken: `${s.isWarmup ? 'Warm-up' : `Set ${working}`}, ${summary}${i === last.topIndex ? ', top set' : ''}`,
+    };
+  });
+  const day = sessionDay(last.performedAt);
+  return (
+    <View style={styles.lastTime} accessible accessibilityLabel={`Last time, ${day}: ${rows.map((r) => r.spoken).join('; ')}`}>
+      <Text style={text.caption}>Last time ({day})</Text>
+      {rows.map((r) => (
+        <View key={r.key} style={styles.lastRow}>
+          <Text style={styles.lastMark}>{r.mark}</Text>
+          <Text style={[text.caption, r.top && styles.lastTimeSet]}>{r.text}</Text>
+          {r.top ? <Text style={styles.lastTop}>TOP</Text> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 /** "today", "yesterday" or "Sep 12, 2026", for the last-time line. */
 function sessionDay(when: string | number | Date): string {
   const day = toLocalDateString(when);
@@ -803,7 +825,10 @@ const styles = StyleSheet.create({
   selectorPressed: { backgroundColor: colors.border },
   suggestBig: { color: colors.primary, fontSize: 28, fontWeight: '800' },
   under: { marginTop: spacing.sm },
-  lastTime: { marginTop: spacing.sm },
+  lastTime: { marginTop: spacing.sm, gap: 2 },
+  lastRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  lastMark: { width: 16, color: colors.textFaint, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  lastTop: { color: colors.primary, fontSize: 11, fontWeight: '800' },
   rangeNote: { marginTop: -spacing.sm },
   lastTimeSet: { color: colors.text, fontWeight: '700' },
   prompt: { gap: spacing.sm },

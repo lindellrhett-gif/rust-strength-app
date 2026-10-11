@@ -1,6 +1,6 @@
 /**
- * "Last time" — the best set from the previous session of an exercise, shown
- * while logging so there is a number to beat.
+ * "Last time": every set from the previous session of an exercise, shown
+ * while logging, with the best one picked out as the number to beat.
  */
 
 import type { LoadType } from './loadType';
@@ -48,21 +48,50 @@ export function compareSets(a: SessionSet, b: SessionSet, loadType: LoadType): n
   return a.weight - b.weight || a.reps - b.reps;
 }
 
+export interface LastSession {
+  /** Every set of the exercise in that session, warm-ups included, in the order done. */
+  sets: SessionSet[];
+  /** Where the top working set is in `sets`. */
+  topIndex: number;
+  /** When that session was, from its newest set. */
+  performedAt: string | number | Date;
+}
+
 /**
- * The top working set from the most recent session before `currentWorkoutId`
- * that included this exercise, or null when there is none.
+ * The most recent session before `currentWorkoutId` with a working set of
+ * this exercise, or null when there is none. A session of only warm-ups
+ * doesn't count, but the warm-ups of the session that does are listed.
  */
+export function lastSession(
+  history: SessionSet[],
+  currentWorkoutId: string | null | undefined,
+  loadType: LoadType,
+): LastSession | null {
+  const earlier = history.filter((s) => s.workoutId !== currentWorkoutId);
+  const working = earlier.filter((s) => !s.isWarmup);
+  if (working.length === 0) return null;
+
+  const newest = working.reduce((a, b) => (toTime(b.performedAt) > toTime(a.performedAt) ? b : a));
+  const sets = earlier
+    .filter((s) => s.workoutId === newest.workoutId)
+    .sort((a, b) => toTime(a.performedAt) - toTime(b.performedAt));
+
+  let topIndex = -1;
+  sets.forEach((s, i) => {
+    if (!s.isWarmup && (topIndex < 0 || compareSets(s, sets[topIndex], loadType) > 0)) topIndex = i;
+  });
+
+  return { sets, topIndex, performedAt: sets[sets.length - 1].performedAt };
+}
+
+/** Just the top working set of the last session, with how many working sets it had. */
 export function lastTopSet(
   history: SessionSet[],
   currentWorkoutId: string | null | undefined,
   loadType: LoadType,
 ): LastTopSet | null {
-  const earlier = history.filter((s) => !s.isWarmup && s.workoutId !== currentWorkoutId);
-  if (earlier.length === 0) return null;
-
-  const newest = earlier.reduce((a, b) => (toTime(b.performedAt) > toTime(a.performedAt) ? b : a));
-  const session = earlier.filter((s) => s.workoutId === newest.workoutId);
-  const top = session.reduce((best, s) => (compareSets(s, best, loadType) > 0 ? s : best));
-
-  return { set: top, performedAt: newest.performedAt, workingSets: session.length };
+  const last = lastSession(history, currentWorkoutId, loadType);
+  if (!last) return null;
+  const working = last.sets.filter((s) => !s.isWarmup);
+  return { set: last.sets[last.topIndex], performedAt: working[working.length - 1].performedAt, workingSets: working.length };
 }
