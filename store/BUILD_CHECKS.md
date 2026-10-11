@@ -147,11 +147,12 @@ The first build of each app after it was added has to create that
 identifier and a provisioning profile for it, so it must sign in with the API
 key (the section above). Apple rejects the key's token if the PC clock runs
 ahead, so sync it first (Settings → Time & language → Date & time → **Sync
-now**). Set the five `EXPO_ASC_*` / `EXPO_APPLE_*` variables in the
-PowerShell window, using the key path, key ID and issuer ID from
-`submit.production.ios` in `eas.json`, then build and answer **Yes** to
-logging in to Apple. EAS should say it is using the App Store Connect API
-key; if it asks for an Apple ID password instead, press Ctrl+C.
+now**), then run `& .\scripts\eas-build-asc.ps1 development` (or
+`production`). The script sets the key's variables from `eas.json` and runs
+the build; EAS signs in with the key by itself. It must be run in a real
+terminal: in `--non-interactive` mode EAS refuses to create profiles. Press
+Enter to reuse the existing profile and to accept the devices it lists. If
+it ever asks for an Apple ID password, press Ctrl+C.
 
 If it can't create the identifier, make it by hand at developer.apple.com →
 Identifiers → **+** → App IDs → App, with that explicit bundle ID and no

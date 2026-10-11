@@ -7,19 +7,18 @@ releasing it.
 
 ## 1. Any time before the release build
 
-- [ ] **Run the database migrations on the live project.** In the Supabase
-  SQL editor, paste and run each file in order: `0017`, `0018`, `0019`,
-  `0021`, `0022`, `0023`. The 1.0 app never calls anything they add, so
-  they are safe now, and a development build of 1.1 needs them to save and
-  show runs. **Skip `0020`** (see section 4).
+- [x] **Run the database migrations on the live project:** `0017`, `0018`,
+  `0019`, `0021`, `0022`, `0023` (done October 10, 2026). The 1.0 app never
+  calls anything they add, and a development build of 1.1 needs them to
+  save and show runs. **`0020` is still to run** (see section 4).
 - [ ] **Let EAS sign the new widget extension, once.** The Lock Screen view
   is a separate app extension (`com.ruststrength.app.dev.widget` for the dev
   app, `com.ruststrength.app.widget` for the store app), and EAS has to
   create its identifier and provisioning profile. That needs the App Store
-  Connect API key, the way it did for the first builds: sync the PC clock,
-  set the `EXPO_ASC_*` variables, and answer **Yes** to logging in to Apple
-  (`store/BUILD_CHECKS.md` explains how). If it ever asks for your Apple
-  ID password, press Ctrl+C. Later builds reuse the stored profiles.
+  Connect API key: sync the PC clock, then run
+  `& .\scripts\eas-build-asc.ps1 development` in a terminal (and
+  `production` for the store build). If it ever asks for your Apple ID
+  password, press Ctrl+C. Later builds reuse the stored profiles.
 - [ ] **Test on a development build** (`eas build --profile development
   --platform ios`):
   - [ ] A real outdoor run with the phone locked the whole way.

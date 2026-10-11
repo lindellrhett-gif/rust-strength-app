@@ -52,9 +52,9 @@ available.
 
 ### On the live project
 
-A new project takes all of them. The live project already has `0001` to
-`0016`, and the rest go in at different times, because the released 1.0 app
-keeps using the same database:
+A new project takes all of them. The live project has everything up to
+`0023` except `0020` (as of October 10, 2026), because the released 1.0 app
+keeps using the same database and the two go in at different times:
 
 | Migration | When to run it on the live project |
 |---|---|
