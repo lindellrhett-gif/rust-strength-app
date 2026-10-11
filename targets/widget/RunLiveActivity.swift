@@ -37,7 +37,7 @@ struct RunLiveActivity: Widget {
         }
       } compactLeading: {
         Image(systemName: "figure.run")
-          .foregroundStyle(Palette.tint(for: context.state, isStale: context.isStale))
+          .foregroundStyle(runTint(context.state, isStale: context.isStale))
       } compactTrailing: {
         RunClock(state: context.state, isStale: context.isStale)
           .font(.body.weight(.semibold).monospacedDigit())
@@ -46,7 +46,7 @@ struct RunLiveActivity: Widget {
           .frame(maxWidth: 64, alignment: .trailing)
       } minimal: {
         Image(systemName: "figure.run")
-          .foregroundStyle(Palette.tint(for: context.state, isStale: context.isStale))
+          .foregroundStyle(runTint(context.state, isStale: context.isStale))
       }
       .widgetURL(URL(string: context.attributes.deepLink))
       .keylineTint(Palette.accent)
@@ -62,7 +62,7 @@ private struct LockScreenView: View {
     VStack(alignment: .leading, spacing: 10) {
       HStack(spacing: 6) {
         Image(systemName: "figure.run")
-          .foregroundStyle(Palette.tint(for: state, isStale: isStale))
+          .foregroundStyle(runTint(state, isStale: isStale))
         Text("Run")
           .font(.subheadline.weight(.semibold))
           .foregroundStyle(Palette.text)
@@ -130,7 +130,7 @@ private struct StatusLabel: View {
   var body: some View {
     Text(text)
       .font(.caption.weight(.semibold))
-      .foregroundStyle(Palette.tint(for: state, isStale: isStale))
+      .foregroundStyle(runTint(state, isStale: isStale))
       .lineLimit(1)
   }
 
@@ -145,28 +145,9 @@ private struct StatusLabel: View {
   }
 }
 
-/// The app's colours (src/theme/colors.ts).
-private enum Palette {
-  static let surface = Color(hex: 0x14181D)
-  static let text = Color(hex: 0xF2F5F8)
-  static let muted = Color(hex: 0x9AA7B4)
-  static let accent = Color(hex: 0x4F8CFF)
-  static let warning = Color(hex: 0xF5B14C)
-
-  static func tint(for state: RunActivityAttributes.ContentState, isStale: Bool) -> Color {
-    if isStale || state.status == "starting" { return muted }
-    return state.status == "recording" ? accent : warning
-  }
-}
-
-private extension Color {
-  init(hex: UInt32) {
-    self.init(
-      .sRGB,
-      red: Double((hex >> 16) & 0xFF) / 255,
-      green: Double((hex >> 8) & 0xFF) / 255,
-      blue: Double(hex & 0xFF) / 255,
-      opacity: 1
-    )
-  }
+/// Blue while recording, amber when paused or stopped, grey before the start
+/// or once updates have stopped.
+private func runTint(_ state: RunActivityAttributes.ContentState, isStale: Bool) -> Color {
+  if isStale || state.status == "starting" { return Palette.muted }
+  return state.status == "recording" ? Palette.accent : Palette.warning
 }

@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
-  s.name           = 'RunActivity'
+  s.name           = 'LiveActivities'
   s.version        = '1.0.0'
-  s.summary        = 'The Live Activity that shows a run on the Lock Screen'
-  s.description    = 'Starts, updates and ends the Live Activity that shows a run in progress on the Lock Screen and in the Dynamic Island.'
+  s.summary        = 'The Live Activities that show a run and the rest timer on the Lock Screen'
+  s.description    = 'Starts, updates and ends the Live Activities that show a run in progress, and the rest between sets, on the Lock Screen and in the Dynamic Island.'
   s.author         = 'Rhett Lindell'
   s.homepage       = 'https://lindellrhett-gif.github.io/rust-strength/'
   s.platforms      = { :ios => '16.4' }

@@ -3,7 +3,7 @@ import Foundation
 
 /// What a run's Live Activity carries.
 ///
-/// The app (modules/run-activity) and the widget that draws the activity
+/// The app (modules/live-activities) and the widget that draws the activity
 /// (targets/widget) each have a copy of this file, and iOS matches the two by
 /// this type's name, so the copies must stay identical. A Jest test
 /// (__tests__/runningLiveActivity.test.ts) fails if they differ.

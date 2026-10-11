@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -32,6 +32,7 @@ import {
   formatSetSummary,
 } from '@/domain/loadType';
 import { lastSession, type LastSession } from '@/domain/lastSession';
+import { loggedSetDetail, upcomingSetDetail } from '@/domain/restActivity';
 import { historyForMachine } from '@/domain/machines';
 import {
   MAX_REPS,
@@ -257,6 +258,29 @@ export default function NewSet() {
 
   const assistError = loadType === 'assisted' ? assistProblem(bodyWeight, displayAssist) : null;
 
+  // While resting, the Lock Screen shows the set this screen is lined up for:
+  // the next one of this exercise, or of another exercise opened mid-rest.
+  const { setNext } = restTimer;
+  const resting = restTimer.running || restTimer.finished;
+  const leaving = useRef(false);
+  const upcoming = exercise
+    ? upcomingSetDetail({
+        loadType,
+        unit,
+        weight: displayWeight,
+        assist: displayAssist,
+        added: displayAdded,
+        reps: displayReps,
+        holdSeconds: displayHold,
+        repLow,
+        repHigh,
+      })
+    : null;
+  useEffect(() => {
+    if (!resting || !exercise || !upcoming || leaving.current) return;
+    setNext({ exercise: exercise.name, kind: 'next', detail: upcoming });
+  }, [resting, exercise, upcoming, setNext]);
+
   const resetInputs = () => {
     setWeightTouched(false);
     setAssistTouched(false);
@@ -357,6 +381,15 @@ export default function NewSet() {
     // the screen. Warmups are excluded — nobody rests two minutes after a bar.
     if (profile.data?.rest_auto !== false && !isWarmup) {
       restTimer.start(profile.data?.rest_seconds);
+      // Until the next suggestion is worked out (if this screen stays open),
+      // the Lock Screen shows the set just done.
+      if (exercise) {
+        setNext({
+          exercise: exercise.name,
+          kind: 'last',
+          detail: loggedSetDetail({ ...load, reps: loadType === 'timed' ? 1 : displayReps }, unit),
+        });
+      }
     }
 
     if (thenAddAnother) {
@@ -368,6 +401,7 @@ export default function NewSet() {
       // the set, so there is nothing to wait for either way.
       void history.refetch();
     } else {
+      leaving.current = true;
       router.back();
     }
   };

@@ -113,7 +113,7 @@ describe('when to send an update', () => {
  */
 it('the app and the widget share one definition of the activity', () => {
   const root = path.join(__dirname, '..');
-  const app = fs.readFileSync(path.join(root, 'modules', 'run-activity', 'ios', 'RunActivityAttributes.swift'), 'utf8');
+  const app = fs.readFileSync(path.join(root, 'modules', 'live-activities', 'ios', 'RunActivityAttributes.swift'), 'utf8');
   const widget = fs.readFileSync(path.join(root, 'targets', 'widget', 'RunActivityAttributes.swift'), 'utf8');
   expect(widget).toBe(app);
 });

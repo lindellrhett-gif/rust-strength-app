@@ -1,6 +1,6 @@
 /**
  * The run on the Lock Screen and in the Dynamic Island: an iOS Live Activity,
- * through the local native module in modules/run-activity, drawn by the
+ * through the local native module in modules/live-activities, drawn by the
  * widget extension in targets/widget.
  *
  * It starts when GPS tracking starts, which is always from the open app (the
