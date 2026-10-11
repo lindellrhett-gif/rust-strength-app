@@ -349,6 +349,13 @@ with no users this is theoretical; revisit if it grows.
 
 **No multi-factor authentication.** Reasonable for a training log.
 
+**Sign-up says when an email already has an account (from 1.1).** That is
+clearer for someone who forgot they signed up, but it also lets anyone find
+out whether a given email address uses the app, which Supabase's own sign-up
+response is designed to hide. A deliberate choice for usability; Supabase's
+rate limits on sign-up apply. Revisit if that ever matters more than the
+convenience.
+
 **The offline cache is protected by the operating system, not by you.** iOS file
 protection and the device passcode are the defence. For workout data that is
 proportionate. It would not be for anything more sensitive.
@@ -506,9 +513,10 @@ site still shows version 1.4.4, which matches the released app.
 6. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` is in
    `app.json`. Fitness was already declared.
 7. **Lock Screen.** While a run records, a Live Activity shows its time,
-   distance and pace on the Lock Screen and in the Dynamic Island, visible to
-   anyone holding the phone. It is created on the phone with no push token,
-   and the policy says so and how to turn it off.
+   distance and pace on the Lock Screen and in the Dynamic Island, and while
+   the rest timer runs, the time left and the next set (exercise and
+   weight), all visible to anyone holding the phone. They are created on the
+   phone with no push token, and the policy says so and how to turn them off.
 8. **Fixed while checking:** the privacy zone screen labelled a radius as
    "Size across", which would have made a zone hide half the distance the
    user expected. It now says "Radius", as does the server's error message.

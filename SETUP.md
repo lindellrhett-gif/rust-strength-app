@@ -109,8 +109,8 @@ Install it from the link EAS prints, then start the bundler with
 `npx expo start --dev-client`.
 
 The app has a second piece of native code besides the app itself: the widget
-extension in `targets/widget` that draws a run on the Lock Screen and in the
-Dynamic Island. `@bacons/apple-targets` adds it to the Xcode project at
+extension in `targets/widget` that draws a run, and the rest timer, on the
+Lock Screen and in the Dynamic Island. `@bacons/apple-targets` adds it to the Xcode project at
 prebuild, and EAS signs it as its own app extension, with the app's bundle
 identifier plus `.widget`. The first build after adding it needs EAS to
 create that extension's identifier and provisioning profile, which means

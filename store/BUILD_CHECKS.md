@@ -138,8 +138,8 @@ password, stop: that path is what locked the account before.
 ## The Lock Screen widget extension (from 1.1)
 
 From 1.1 the app ships a second signed bundle: the widget extension in
-`targets/widget` that draws a run on the Lock Screen and in the Dynamic
-Island. Its bundle identifier is the app's plus `.widget`
+`targets/widget` that draws a run, and the rest timer, on the Lock Screen and
+in the Dynamic Island. Its bundle identifier is the app's plus `.widget`
 (`com.ruststrength.app.widget`, and `com.ruststrength.app.dev.widget` for the
 dev app). It needs no capabilities ticked.
 

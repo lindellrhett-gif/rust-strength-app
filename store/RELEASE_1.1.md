@@ -32,6 +32,16 @@ releasing it.
         pause and a light, tapping it opens the recorder, and it disappears
         when the run is saved or discarded. After a force-quit it should say
         "Not updating" within about three minutes.
+  - [ ] The rest timer on the Lock Screen: log a set, lock the phone, and
+        the countdown and next set show; when the time is up it says
+        "Rest's up" by itself; "+15s" and skipping in the app update it; it
+        goes when the workout is finished or cancelled.
+  - [ ] Signing up with an email that already has an account says so and
+        offers Sign in and Reset password.
+  - [ ] A past day on the Calendar has no Plan a session button.
+  - [ ] Logging a set lists every set from last time, top set in bold.
+  - [ ] Searching exercises with a typo ("bech press", "dumbell") still
+        finds them.
   - [ ] Steps and cadence on the run summary, and Today's steps card.
   - [ ] Airplane mode on before saving, then off: the run appears.
   - [ ] A friend's view: stats only by default; with the map shared, the
@@ -92,6 +102,7 @@ releasing it.
   Running is here.
   • Record runs with GPS, with the screen locked: live map, distance, pace, splits and steps.
   • Your time, distance and pace on the Lock Screen and in the Dynamic Island while you run.
+  • The rest timer and your next set on the Lock Screen and in the Dynamic Island.
   • Auto-pause at lights, and spoken updates every mile or kilometre.
   • A summary for every run, with pace and elevation charts. Edit or trim a run afterwards.
   • Running history in Stats: weekly and monthly distance, a weekly goal, and records from the mile to the marathon.
@@ -99,6 +110,10 @@ releasing it.
   • Share runs with friends. Maps are off unless you turn them on, and the start and end are always hidden.
   • Enter treadmill runs by hand.
   • Every activity now counts toward your streak.
+  • Logging a set shows every set from last time, not just the best one.
+  • Exercise search forgives typos.
+  • Signing up with an email that already has an account now says so.
+  • You can no longer plan a session on a day that has passed.
   ```
 - [ ] **Screenshots:** consider adding one of the recorder and one of a run
   summary (`npm run screenshots` resizes them).

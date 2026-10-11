@@ -98,7 +98,8 @@ npm test
   (like an assisted pull-up machine), and **timed holds** with a built-in
   countdown timer and suggested hold times.
 - **Rest timer** that starts when you save a set, with a notification when rest
-  is over, even with the phone locked.
+  is over, even with the phone locked. From 1.1 it also counts down on the
+  Lock Screen and in the Dynamic Island with your next set.
 - **Presets** with a rep range per exercise, and a **workout generator** that
   builds a session from your equipment and what you have not trained this week.
 - **Review screen** after each workout to fix the name, the length, or any
@@ -166,7 +167,7 @@ appear in the Calendar, the friends feed, Stats and the streak.
 | [`__tests__/runningAutoPause.test.ts`](__tests__/runningAutoPause.test.ts) | Simulated runs replayed second by second, as the screen sees them |
 | [`supabase/migrations/0021_run_sharing.sql`](supabase/migrations/0021_run_sharing.sql) | Server-side trimming of shared routes with privacy zones (PostGIS) |
 | [`supabase/tests/sharing.test.mjs`](supabase/tests/sharing.test.mjs) | Proving a shared outline never comes within a privacy zone |
-| [`targets/widget/`](targets/widget), [`modules/run-activity/`](modules/run-activity) | The Live Activity in Swift: the widget that draws it and the small native module that starts and updates it |
+| [`targets/widget/`](targets/widget), [`modules/live-activities/`](modules/live-activities) | The Live Activities in Swift (a run, and the rest timer): the widget that draws them and the small native module that starts and updates them |
 
 **Permissions.** Location "While Using the App" when a run starts (never
 "Always"), with background location updates while recording; Motion &
@@ -301,7 +302,7 @@ supabase/
   migrations/        Schema, RLS policies and SQL functions (0001 to 0023)
   tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
-modules/run-activity/  Local native module (Swift) for the run's Live Activity
+modules/live-activities/  Local native module (Swift) for the Live Activities
 targets/widget/      Widget extension (SwiftUI) that draws it, added at prebuild
 __tests__/           Jest specs
 scripts/             Legal site, icon and screenshot generators
