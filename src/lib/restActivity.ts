@@ -17,6 +17,8 @@ import { Platform } from 'react-native';
 
 import type { RestActivityState } from '@/domain/restActivity';
 
+import { noteLockScreenProblem } from './lockScreen';
+
 interface RestActivityNative {
   start(state: RestActivityState): Promise<boolean>;
   end(): Promise<void>;
@@ -35,7 +37,7 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 // One native call at a time, so an update can never land after the end.
 let queue: Promise<unknown> = Promise.resolve();
 function serial(fn: () => Promise<unknown>): void {
-  queue = queue.then(fn, fn).catch(() => undefined);
+  queue = queue.then(fn, fn).catch((e) => noteLockScreenProblem('Rest', e));
 }
 
 function flush(): void {
@@ -48,6 +50,7 @@ function flush(): void {
   lastSent = key;
   serial(async () => {
     showing = await native.start(state);
+    if (!showing) noteLockScreenProblem('Rest', 'Live Activities are turned off for this app');
   });
 }
 

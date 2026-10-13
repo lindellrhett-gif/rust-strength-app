@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Card, Screen } from '@/components';
 import {
@@ -9,6 +9,8 @@ import {
   useUpdateRunPreferences,
   type RunPreferences,
 } from '@/data/runs';
+import { lastLockScreenProblem, lockScreenAvailability } from '@/lib/lockScreen';
+import { useAppActive } from '@/lib/useAppActive';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
@@ -27,6 +29,10 @@ export default function RunSettingsScreen() {
     );
 
   const zoneCount = zones.data?.length ?? 0;
+  // Read again on coming back from Settings, where it may have been switched on.
+  useAppActive();
+  const lockScreen = lockScreenAvailability();
+  const problem = __DEV__ ? lastLockScreenProblem() : null;
 
   return (
     <Screen scroll edges={['left', 'right']} contentStyle={styles.content}>
@@ -43,6 +49,27 @@ export default function RunSettingsScreen() {
           value={prefs.audioCues}
           onChange={(v) => set({ audioCues: v })}
         />
+      </Card>
+
+      <Card title="Lock Screen">
+        <Text style={text.bodyMuted}>
+          {lockScreen === 'on'
+            ? 'A run, and the rest timer between sets, show on the Lock Screen and in the Dynamic Island while they are going.'
+            : lockScreen === 'off'
+              ? 'Turned off for this app. Turn on Live Activities in Settings to see your run and rest timer on the Lock Screen.'
+              : 'This version of the app can’t show your run or rest timer on the Lock Screen. Update the app to get it.'}
+        </Text>
+        {problem ? <Text style={text.caption}>Last problem: {problem}</Text> : null}
+        {lockScreen !== 'missing' ? (
+          <Pressable
+            style={styles.linkRow}
+            onPress={() => Linking.openSettings().catch(() => undefined)}
+            accessibilityRole="button"
+          >
+            <Text style={text.body}>{lockScreen === 'off' ? 'Turn on in Settings' : 'Open Settings'}</Text>
+            <Text style={styles.chev}>›</Text>
+          </Pressable>
+        ) : null}
       </Card>
 
       <Card title="Sharing new runs">

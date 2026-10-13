@@ -29,6 +29,7 @@ import {
 } from '@/domain/running/liveActivity';
 import { liveStatsAt, prepareLive } from '@/domain/running/summarize';
 
+import { noteLockScreenProblem } from './lockScreen';
 import { runStore } from './runStore';
 
 interface RunActivityNative {
@@ -50,7 +51,7 @@ let lastStatus: string | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 function serial(fn: () => Promise<unknown>): Promise<void> {
   const next = queue.then(fn, fn);
-  queue = next.catch(() => undefined);
+  queue = next.catch((e) => noteLockScreenProblem('Run', e));
   return next.then(
     () => undefined,
     () => undefined,
@@ -76,7 +77,10 @@ export function startRunActivity(): Promise<void> {
     const state = stateFor(run, now);
     if (!state) return;
     showing = await native.start(state, Linking.createURL('/run/record'), RUN_ACTIVITY_TIMING.staleAfterMs);
-    if (!showing) return;
+    if (!showing) {
+      noteLockScreenProblem('Run', 'Live Activities are turned off for this app');
+      return;
+    }
     lastSent = state;
     lastSentAt = now;
     lastCheck = now;
