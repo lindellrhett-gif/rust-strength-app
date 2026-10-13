@@ -122,6 +122,13 @@ adds a package with native code); JavaScript changes don't need one. A build
 made before a native module existed still opens, and that feature is simply
 left out.
 
+A development build loads its JavaScript from your PC each time it opens,
+so it can't reopen away from Wi-Fi, and on a slow PC the first load can take
+minutes. For outdoor testing, `eas build --profile dev-standalone --platform
+ios` makes the same "Rust Strength Dev" app with the JavaScript built in: no
+PC needed, closer to the store app, but no live reload. Installing either one
+replaces the other; both stay available from their EAS build pages.
+
 To test a run without leaving the house, the recorder's auto-pause and GPS
 cleaning are covered by simulated runs in `__tests__/fixtures/gpx/`
 (regenerate them with `node scripts/make-gpx-fixtures.js`).
