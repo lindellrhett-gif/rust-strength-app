@@ -39,6 +39,11 @@ export function lockScreenAvailability(): LockScreenAvailability {
   }
 }
 
+/** Which of the two views this build has, for telling an old build from a broken one. */
+export function lockScreenParts(): { run: boolean; rest: boolean } {
+  return { run: run != null, rest: rest != null };
+}
+
 export function lastLockScreenProblem(): string | null {
   return lastProblem;
 }

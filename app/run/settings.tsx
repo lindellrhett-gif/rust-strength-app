@@ -9,7 +9,7 @@ import {
   useUpdateRunPreferences,
   type RunPreferences,
 } from '@/data/runs';
-import { lastLockScreenProblem, lockScreenAvailability } from '@/lib/lockScreen';
+import { lastLockScreenProblem, lockScreenAvailability, lockScreenParts } from '@/lib/lockScreen';
 import { useAppActive } from '@/lib/useAppActive';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -33,6 +33,7 @@ export default function RunSettingsScreen() {
   useAppActive();
   const lockScreen = lockScreenAvailability();
   const problem = __DEV__ ? lastLockScreenProblem() : null;
+  const parts = lockScreenParts();
 
   return (
     <Screen scroll edges={['left', 'right']} contentStyle={styles.content}>
@@ -59,6 +60,11 @@ export default function RunSettingsScreen() {
               ? 'Turned off for this app. Turn on Live Activities in Settings to see your run and rest timer on the Lock Screen.'
               : 'This version of the app can’t show your run or rest timer on the Lock Screen. Update the app to get it.'}
         </Text>
+        {__DEV__ && lockScreen === 'missing' ? (
+          <Text style={text.caption}>
+            In this build: run view {parts.run ? 'yes' : 'no'}, rest timer view {parts.rest ? 'yes' : 'no'}.
+          </Text>
+        ) : null}
         {problem ? <Text style={text.caption}>Last problem: {problem}</Text> : null}
         {lockScreen !== 'missing' ? (
           <Pressable
