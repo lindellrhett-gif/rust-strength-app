@@ -105,7 +105,8 @@ export default function CalendarScreen() {
 
   const toggleRestDay = () => {
     if (selectedRest) deleteRestDay.mutate(selectedRest.id);
-    else setRestDay.mutate({ date: selected });
+    // A rest day keeps a streak going, so one can't be added after the fact.
+    else if (canPlanOn(selected, todayLocal())) setRestDay.mutate({ date: selected });
   };
 
   const chosenTemplate = (templates.data ?? []).find((t) => t.id === planTemplateId) ?? null;
@@ -313,15 +314,18 @@ export default function CalendarScreen() {
               {plannable ? (
                 <Button label="＋ Plan a session" variant="secondary" onPress={() => setAdding(true)} />
               ) : null}
-              <Button
-                label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
-                variant={selectedRest ? 'danger' : 'ghost'}
-                onPress={toggleRestDay}
-                loading={setRestDay.isPending || deleteRestDay.isPending}
-              />
+              {selectedRest || plannable ? (
+                <Button
+                  label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
+                  variant={selectedRest ? 'danger' : 'ghost'}
+                  onPress={toggleRestDay}
+                  loading={setRestDay.isPending || deleteRestDay.isPending}
+                />
+              ) : null}
               <Text style={text.caption}>
-                A rest day keeps your streak going instead of breaking it. Plan one ahead or mark
-                one after the fact.
+                {plannable
+                  ? 'A rest day keeps your streak going instead of breaking it. Mark today, or plan one ahead.'
+                  : 'Rest days and sessions can only be planned for today or a day ahead.'}
               </Text>
             </>
           )}

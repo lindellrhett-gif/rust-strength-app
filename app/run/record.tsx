@@ -8,6 +8,7 @@ import {
   Linking,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   Vibration,
   View,
@@ -95,6 +96,10 @@ export default function RecordRunScreen() {
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState(false);
   const [steps, setSteps] = useState<number | null>(null);
+  // Whether friends see this run's map: asked on this screen every time,
+  // starting from the run's default (off unless changed in Running settings).
+  const [mapChoice, setShareMapChoice] = useState<boolean | null>(null);
+  const shareMap = mapChoice ?? run?.meta.mapVisibility === 'friends';
   // A saved route to follow: chosen before the start, then kept with the run.
   const [chosenRoute, setChosenRoute] = useState<string | null>(params.routeId ?? null);
   const [pickingRoute, setPickingRoute] = useState(false);
@@ -299,7 +304,7 @@ export default function RecordRunScreen() {
     const alreadyFinished = runStore.current()?.meta.recorder.status === 'finished';
     setBusy(true);
     try {
-      const outcome = await finishActiveRun(Date.now());
+      const outcome = await finishActiveRun(Date.now(), { mapVisibility: shareMap ? 'friends' : 'private' });
       if (!outcome) return;
       if (outcome.kind !== 'ready') {
         Alert.alert('Too short to save', UNSAVABLE_MESSAGE[outcome.kind], [
@@ -442,6 +447,25 @@ export default function RecordRunScreen() {
           </Text>
           {status === 'idle' ? <Text style={styles.routeChange}>{guide.data ? 'Change' : '›'}</Text> : null}
         </Pressable>
+      ) : null}
+
+      {run && (status === 'recording' || status === 'paused' || status === 'finished') ? (
+        <View style={styles.mapChoice}>
+          <View style={styles.flex}>
+            <Text style={text.body}>Show map to friends</Text>
+            <Text style={text.caption}>
+              {shareMap
+                ? 'Friends see an outline, never the first or last 200 m or your privacy zones.'
+                : 'Friends see distance, time and pace only.'}
+            </Text>
+          </View>
+          <Switch
+            value={shareMap}
+            onValueChange={setShareMapChoice}
+            accessibilityLabel="Show map to friends"
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
       ) : null}
 
       <View style={styles.controls}>
@@ -588,6 +612,13 @@ const styles = StyleSheet.create({
   statValue: { fontSize: 30, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
   steps: { textAlign: 'center', fontVariant: ['tabular-nums'] },
   controls: { padding: spacing.lg, gap: spacing.sm },
+  mapChoice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+  },
   routeRow: {
     flexDirection: 'row',
     alignItems: 'center',

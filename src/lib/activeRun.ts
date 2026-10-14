@@ -25,7 +25,10 @@ export type FinishOutcome =
  * returns the save for the caller to send through the offline queue. A run
  * too short to keep is left exactly as it was, so the runner can carry on.
  */
-export async function finishActiveRun(finishAt: number): Promise<FinishOutcome | null> {
+export async function finishActiveRun(
+  finishAt: number,
+  opts: { mapVisibility?: 'private' | 'friends' } = {},
+): Promise<FinishOutcome | null> {
   const run = runStore.current();
   if (!run) return null;
   const runId = run.meta.runId;
@@ -45,7 +48,8 @@ export async function finishActiveRun(finishAt: number): Promise<FinishOutcome |
       runId,
       startedAt: recorder.startedAt ?? end,
       unit: run.meta.unit,
-      mapVisibility: run.meta.mapVisibility,
+      // The choice made on the recording screen, else the one the run started with.
+      mapVisibility: opts.mapVisibility ?? run.meta.mapVisibility,
       steps,
       routeId: run.meta.routeId ?? null,
     }),

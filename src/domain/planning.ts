@@ -1,7 +1,8 @@
 /**
- * Planning sessions on the Calendar. A plan is for today or a day still to
- * come; a day that has passed can have a workout or activity logged on it,
- * or be marked as a rest day, but not be planned.
+ * Planning sessions and rest days on the Calendar: for today or a day still to
+ * come. A day that has passed can have a workout or activity logged on it,
+ * but not a plan or a rest day (a rest day keeps a streak alive, so adding one
+ * afterwards would rescue a streak that was really broken).
  *
  * Dates are local YYYY-MM-DD strings, which sort the same way as the days.
  */
