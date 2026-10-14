@@ -25,10 +25,11 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
 - **Runs you record (optional).** If you record a run, the app uses your phone's precise location while the run is recording, including with the screen locked, to measure your distance and pace and to draw your route. We store the route (the points along it, with the altitude and time at each), your distance, moving and total time, splits, best efforts and estimated calories, and any title, notes and effort rating you add. Location is used only between Start and Finish; nothing is tracked at any other time. You can also enter a run by hand, with no location at all.
-- **Steps (optional).** If you allow Motion & Fitness access, the app reads step counts from your iPhone's motion sensors. A recorded run's step total is stored with the run. Today's step count is shown on your phone and is never sent to us.
+- **Steps (optional).** If you allow Motion & Fitness access, the app reads step counts from your iPhone's motion sensors. A recorded run's step total is stored with the run. Your daily step counts stay on your phone unless you turn on "Share daily steps" (Profile, under Sharing with friends, off by default): then, whenever you open the app, it uploads one total per day for the past week, for the steps leaderboard and the Steps trophy. Turning it off deletes the totals already uploaded.
 - **Privacy zones (optional).** Places you add, such as home, as a point and a size, so that maps you share hide the start and end of runs there. Only you can see them.
 - **Saved routes (optional).** Routes you save from your own runs to run again, with the names you give them.
 - **Running settings.** Auto-pause, spoken updates, your weekly distance goal, and whether new runs and their maps are shared by default.
+- **Trophies shown by your name (optional).** Up to two trophies you choose to show next to your name.
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
 - **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
 - **Reports you file.** If you report another user, we store who you reported, the reason, and anything you type.
@@ -48,7 +49,7 @@ The app can ask for three device permissions, each only when you use the feature
 
 - **Notifications**, only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us.
 - **Location**, "While Using the App", when you start recording a run, or if you choose to place a privacy zone where you are standing. The app never asks for "Always".
-- **Motion & Fitness**, when you start a run or choose to show today's steps.
+- **Motion & Fitness**, when you start a run, choose to show today's steps, or turn on Share daily steps.
 
 While a run records, and while the rest timer runs between sets, the app shows it on your Lock Screen and in the Dynamic Island (a run's time, distance and pace; the rest left and your next set), where anyone holding your phone can see it. This needs no permission, is done on your phone, and nothing about it is sent to us. You can turn it off under Live Activities in your phone's settings for the app.
 
@@ -79,10 +80,10 @@ We do not use your information for advertising, profiling, or automated decision
 The social features are **opt-in**. Until you choose a username and add a friend, nobody can see anything.
 
 - **Anyone signed in** can search usernames and display names — but only for accounts that have chosen their own handle. Nothing else is visible.
-- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, how many friends you have, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
-- **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency and activity time. It uses only the figures listed above, and only you and your accepted friends appear on it.
+- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, total distance run, how many friends you have, how many reactions your posts have received, the trophies you chose to show by your name, your daily step totals if you share them, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
+- **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency, activity time, distance run and, for people who share them, daily steps. It uses only the figures listed above, and only you and your accepted friends appear on it.
 - **Accepted friends also see a summary of each session in the feed** (see below).
-- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts, the full route of any run, or the individual sets inside a workout. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
+- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts (unless you share daily steps), the full route of any run, or the individual sets inside a workout. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
 
 ### The friend feed
 
@@ -102,7 +103,7 @@ When you finish a workout or log an activity, a summary of it appears in the fee
 Each run has its own sharing switches, and Running settings sets the default for new runs:
 
 - **Share to friends' feed.** On by default. Turn it off and the run is visible only to you.
-- **Show the map to friends.** **Off** by default: friends see your distance, time and pace, not where you ran. If you turn it on, friends see a simplified outline of the route with the first and last 200 metres always removed, and any part of the start or end inside one of your privacy zones removed too. The trimming happens on our server, so the full route never reaches anyone else's phone. A route that passes through a privacy zone in the middle is still shown there: zones hide where a run starts and ends, not where it goes.
+- **Show the map to friends.** You choose this on the recording screen for every run, and it starts **off** unless you change the default in Running settings. Off, friends see your distance, time and pace, not where you ran. You always see the outline of your own runs. If you turn it on, friends see a simplified outline of the route with the first and last 200 metres always removed, and any part of the start or end inside one of your privacy zones removed too. The trimming happens on our server, so the full route never reaches anyone else's phone. A route that passes through a privacy zone in the middle is still shown there: zones hide where a run starts and ends, not where it goes.
 
 Friends can react to a post. You see how many of each reaction a post received, but **not who left them**.
 
@@ -140,7 +141,7 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 

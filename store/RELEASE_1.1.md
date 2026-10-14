@@ -11,6 +11,10 @@ releasing it.
   `0019`, `0021`, `0022`, `0023` (done October 10, 2026). The 1.0 app never
   calls anything they add, and a development build of 1.1 needs them to
   save and show runs. **`0020` is still to run** (see section 4).
+- [ ] **Run `0024_steps_trophies_leaderboards.sql` on the live project.**
+  Additive like the others: it only adds columns to what 1.0 reads (by
+  name), and the dev build needs it for the new trophies, leaderboards,
+  daily steps and featured trophies. **Not `0025`** (see section 4).
 - [ ] **Let EAS sign the new widget extension, once.** The Lock Screen view
   is a separate app extension (`com.ruststrength.app.dev.widget` for the dev
   app, `com.ruststrength.app.widget` for the store app), and EAS has to
@@ -42,6 +46,17 @@ releasing it.
   - [ ] Logging a set lists every set from last time, top set in bold.
   - [ ] Searching exercises with a typo ("bech press", "dumbell") still
         finds them.
+  - [ ] Finishing a run: the "Show map to friends" switch is there, off;
+        your own feed shows the outline either way, a friend's only with it
+        on.
+  - [ ] Profile > Share daily steps: asks for Motion & Fitness, you appear
+        on the Steps board, and turning it off takes you off again.
+  - [ ] The Run distance and Steps leaderboards, and the new Distance Run,
+        Steps, Friends and Reactions trophies.
+  - [ ] A trophy's Show by my name: it appears by your name on your
+        profile and in a friend's feed and profile view; a third replaces
+        the oldest.
+  - [ ] The Calendar offers no "Mark as rest day" on past days.
   - [ ] Steps and cadence on the run summary, and Today's steps card.
   - [ ] Airplane mode on before saving, then off: the run appears.
   - [ ] A friend's view: stats only by default; with the map shared, the
@@ -113,7 +128,10 @@ releasing it.
   • Logging a set shows every set from last time, not just the best one.
   • Exercise search forgives typos.
   • Signing up with an email that already has an account now says so.
-  • You can no longer plan a session on a day that has passed.
+  • You can no longer plan a session or a rest day on a day that has passed.
+  • New leaderboards for distance run and steps, and new trophies for running, steps, friends and reactions.
+  • Show your two favourite trophies next to your name.
+  • Choose whether friends see each run's map when you finish it.
   ```
 - [ ] **Screenshots:** consider adding one of the recorder and one of a run
   summary (`npm run screenshots` resizes them).
@@ -128,6 +146,8 @@ Do these as soon as 1.1 is live in the App Store, in this order:
   this, friends would see a streak that counts activities while the 1.0 app
   still counts workouts only. People who haven't updated yet will see their
   own streak and their friends' disagree until they do.
+- [ ] **Run `0025_rest_days_not_in_past.sql`**, which stops rest days being
+  added for past days. Anyone still on 1.0 then gets an error if they try.
 - [ ] **Publish the legal documents.** With `rust-strength-site` checked out
   next to this repo, run `npm run legal`, then commit and push the site
   repo. The public Privacy Policy then matches the app (version 1.5.0).

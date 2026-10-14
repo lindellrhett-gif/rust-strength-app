@@ -169,7 +169,9 @@ settings. While a run records, a Live Activity shows its time, distance and
 pace on the Lock Screen and in the Dynamic Island; it is started and updated
 by the app on the device (no push notifications) and ends when the run is
 saved or discarded. The rest timer between sets is shown the same way, with
-the next set, while it runs. Motion & Fitness is requested to count steps. A run can also be
+the next set, while it runs. Motion & Fitness is requested to count steps;
+daily step totals leave the device only if the user turns on "Share daily
+steps" (Profile, off by default), for a friends-only steps leaderboard. A run can also be
 entered by hand with no location. Friends see a run's map only if the user
 turns it on for that run, and the server trims its start and end first.
 ```

@@ -111,13 +111,15 @@ npm test
 - Streaks, 30-day consistency, volume, time trained, and personal records.
   Planned rest days keep a streak alive without adding to it.
 - A progress chart per exercise, and a body chart of what you trained this week.
-- Levels, trophies, and badges.
+- Levels, trophies, and badges. From 1.1, trophies for running, steps, friends
+  and reactions, and two of your choice shown by your name.
 
 **Friends**
 - Friend requests by username, and a **feed** of friends' finished sessions
   with reactions.
 - A **leaderboard** ranking you and your friends by streak, weight lifted,
-  workout time, consistency, and activity time, over a chosen period.
+  workout time, consistency, and activity time, over a chosen period (from
+  1.1 also distance run and, for people who share them, daily steps).
 - Blocking, reporting, and a switch to stop sharing your workouts.
 
 **Reliability and privacy**

@@ -517,7 +517,20 @@ site still shows version 1.4.4, which matches the released app.
    the rest timer runs, the time left and the next set (exercise and
    weight), all visible to anyone holding the phone. They are created on the
    phone with no push token, and the policy says so and how to turn them off.
-8. **Fixed while checking:** the privacy zone screen labelled a radius as
+8. **Daily steps (opt-in) and what friends see.** "Share daily steps" is
+   off by default; while on, one total per day for the past week is
+   uploaded (`daily_steps`, migration 0024), shown to accepted friends on
+   the steps leaderboard and in their stats, and deleted when it's turned
+   off. Friends now also see total distance run, reactions received, and up
+   to two trophies chosen to show by your name. The policy covers all of it.
+   The run map is now asked on the recording screen for every run, starting
+   off, and your own runs always show their outline to you.
+9. **Featured trophies are trusted as saved.** Trophies are worked out on
+   the phone, so the server can only check the shape of what's shown by a
+   name, not that it was earned. Someone using the API directly could show a
+   trophy they don't hold to their friends. Low stakes in a friends-only
+   app; noted rather than solved.
+10. **Fixed while checking:** the privacy zone screen labelled a radius as
    "Size across", which would have made a zone hide half the distance the
    user expected. It now says "Radius", as does the server's error message.
 
