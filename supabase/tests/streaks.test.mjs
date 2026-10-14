@@ -2,6 +2,10 @@
 import { check, createUser, done, freshDb } from './harness.mjs';
 
 const db = await freshDb();
+// These checks are about counting, on a fixed date that is now in the past,
+// so the rest day below is set up directly, past the release-day guard (0025,
+// which has its own test).
+await db.exec('alter table rest_days disable trigger rest_days_not_in_past');
 const alice = await createUser(db, 'alice@example.com');
 const today = '2026-10-07';
 const at = (date) => `${date}T15:00:00Z`;
