@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, EmptyState, LoadingView, StatTile } from '@/components';
 import { AchievementStrip } from '@/components/AchievementGrid';
 import { BadgeShelf } from '@/components/BadgeShelf';
+import { FeaturedTrophies } from '@/components/FeaturedTrophies';
 import { LevelCard } from '@/components/LevelCard';
 import { ReportUserModal } from '@/components/ReportUserModal';
 import { useGrantedBadges } from '@/data/badges';
@@ -111,7 +112,12 @@ export default function FriendProfile() {
       <Stack.Screen options={{ title: `@${s.username}` }} />
       <ScrollView contentContainerStyle={styles.content}>
         <View>
-          <Text style={text.hero}>@{s.username}</Text>
+          <View style={styles.nameRow}>
+            <Text style={[text.hero, styles.name]} numberOfLines={1}>
+              @{s.username}
+            </Text>
+            <FeaturedTrophies keys={s.featuredTrophies} size={30} />
+          </View>
           <Text style={text.bodyMuted}>
             {s.displayName ?? 'Lifter'} · {earnedCount(achievements)} trophies
           </Text>
@@ -203,6 +209,8 @@ export default function FriendProfile() {
 }
 
 const styles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  name: { flexShrink: 1 },
   safetyRow: { flexDirection: 'row', gap: spacing.lg },
   safetyBtn: { paddingVertical: spacing.xs },
   reportText: { color: colors.warning, fontWeight: '700' },

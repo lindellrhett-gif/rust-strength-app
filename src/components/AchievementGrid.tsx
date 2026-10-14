@@ -2,13 +2,27 @@ import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Button } from './Button';
 import { TrophyIcon } from './TrophyIcon';
-import { TIER_COLOR, TIER_LABEL, type TieredAchievement } from '@/domain/achievements';
+import { MAX_FEATURED, TIER_COLOR, TIER_LABEL, type TieredAchievement } from '@/domain/achievements';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
-export function AchievementGrid({ achievements }: { achievements: TieredAchievement[] }) {
-  const [open, setOpen] = useState<TieredAchievement | null>(null);
+interface FeaturedProps {
+  /** Ids of the trophies shown by your name. */
+  featuredIds?: string[];
+  /** Shows a trophy by your name, or stops. Without it the grid is read-only. */
+  onToggleFeatured?: (a: TieredAchievement) => void;
+}
+
+export function AchievementGrid({
+  achievements,
+  featuredIds = [],
+  onToggleFeatured,
+}: { achievements: TieredAchievement[] } & FeaturedProps) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  // Looked up each render, so the sheet reflects a toggle straight away.
+  const open = achievements.find((a) => a.id === openId) ?? null;
 
   return (
     <>
@@ -16,13 +30,14 @@ export function AchievementGrid({ achievements }: { achievements: TieredAchievem
         {achievements.map((a) => (
           <Pressable
             key={a.id}
-            onPress={() => setOpen(a)}
+            onPress={() => setOpenId(a.id)}
             style={({ pressed }) => [
               styles.tile,
               a.tier ? { borderColor: TIER_COLOR[a.tier] } : styles.locked,
               pressed && styles.tilePressed,
             ]}
           >
+            {featuredIds.includes(a.id) ? <Text style={styles.shown}>BY YOUR NAME</Text> : null}
             <TrophyIcon glyph={a.glyph} tier={a.tier} size={46} />
 
             <Text style={styles.name} numberOfLines={1}>
@@ -61,7 +76,13 @@ export function AchievementGrid({ achievements }: { achievements: TieredAchievem
         ))}
       </View>
 
-      <TrophyDetail achievement={open} onClose={() => setOpen(null)} />
+      <TrophyDetail
+        achievement={open}
+        onClose={() => setOpenId(null)}
+        featured={open ? featuredIds.includes(open.id) : false}
+        featuredCount={featuredIds.length}
+        onToggleFeatured={onToggleFeatured}
+      />
     </>
   );
 }
@@ -70,9 +91,15 @@ export function AchievementGrid({ achievements }: { achievements: TieredAchievem
 function TrophyDetail({
   achievement: a,
   onClose,
+  featured,
+  featuredCount,
+  onToggleFeatured,
 }: {
   achievement: TieredAchievement | null;
   onClose: () => void;
+  featured: boolean;
+  featuredCount: number;
+  onToggleFeatured?: (a: TieredAchievement) => void;
 }) {
   return (
     <Modal visible={!!a} transparent animationType="slide" onRequestClose={onClose}>
@@ -120,6 +147,27 @@ function TrophyDetail({
                   </View>
                 ))}
               </ScrollView>
+
+              {onToggleFeatured ? (
+                <View style={styles.feature}>
+                  {a.earned ? (
+                    <Button
+                      label={featured ? 'Stop showing by my name' : 'Show by my name'}
+                      variant={featured ? 'ghost' : 'secondary'}
+                      onPress={() => onToggleFeatured(a)}
+                    />
+                  ) : null}
+                  <Text style={text.caption}>
+                    {!a.earned
+                      ? 'Reach Wood to show this trophy by your name.'
+                      : featured
+                        ? 'Shown next to your name in the feed and on your profile.'
+                        : featuredCount >= MAX_FEATURED
+                          ? `You can show ${MAX_FEATURED}; this replaces the one shown longest.`
+                          : `Show up to ${MAX_FEATURED} next to your name in the feed and on your profile.`}
+                  </Text>
+                </View>
+              ) : null}
 
               <Pressable onPress={onClose} style={styles.close}>
                 <Text style={styles.closeText}>Close</Text>
@@ -173,6 +221,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   tilePressed: { backgroundColor: colors.border },
+  shown: { color: colors.primary, fontSize: 9, fontWeight: '800', letterSpacing: 0.5 },
+  feature: { gap: spacing.xs, marginTop: spacing.md },
   locked: { opacity: 0.6 },
   name: { color: colors.text, fontSize: 13, fontWeight: '800', marginTop: 2 },
   tierLabel: { color: colors.textFaint, fontSize: 11, fontWeight: '700' },

@@ -62,9 +62,12 @@ export interface FeedRow {
   myReaction: ReactionId | null;
   /**
    * A shared run's outline as an encoded polyline: already trimmed and
-   * simplified on the server. Null unless the runner shared the map.
+   * simplified on the server. Null unless the runner shared the map, or
+   * it's your own run.
    */
   routePreview?: string | null;
+  /** "trophy:tier" keys the author shows by their name. */
+  featuredTrophies?: string[];
 }
 
 export interface FeedStat {
@@ -96,6 +99,8 @@ export interface FeedPost {
   myReaction: ReactionId | null;
   /** A shared run's outline, or null. */
   route: LatLon[] | null;
+  /** "trophy:tier" keys the author shows by their name. */
+  featuredTrophies: string[];
 }
 
 const MAX_EXERCISE_CHIPS = 4;
@@ -208,6 +213,7 @@ export function buildFeed(rows: FeedRow[], unit: 'lb' | 'kg'): FeedPost[] {
     totalReactions: totalReactions(row.reactionCounts),
     myReaction: row.myReaction,
     route: routeFrom(row.routePreview),
+    featuredTrophies: row.featuredTrophies ?? [],
   }));
 }
 

@@ -59,6 +59,7 @@ export function useFriendFeed() {
         reactionCounts: normaliseCounts(r.reaction_counts),
         myReaction: r.my_reaction && isReactionId(r.my_reaction) ? r.my_reaction : null,
         routePreview: r.route_preview ?? null,
+        featuredTrophies: r.featured_trophies ?? [],
       }));
 
       return buildFeed(rows, unit);

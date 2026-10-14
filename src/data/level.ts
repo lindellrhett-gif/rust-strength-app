@@ -38,6 +38,12 @@ export interface LevelSnapshot {
   achievements: TieredAchievement[];
   /** False while the underlying totals are still loading. */
   ready: boolean;
+  /**
+   * True once every number the trophies rest on has actually arrived, not
+   * just stopped loading. Only then is it safe to act on which trophies are
+   * held, like dropping a featured one that no longer is.
+   */
+  trophiesSettled: boolean;
 }
 
 /**
@@ -143,5 +149,13 @@ export function useMyLevel(): LevelSnapshot {
     // they land would flash level 1 and, on the summary screen, could fire a
     // bogus level-up.
     ready: !totals.isLoading && !prs.isLoading && !profile.isLoading && !trophyTotals.isLoading,
+    trophiesSettled:
+      totals.isSuccess &&
+      prs.isSuccess &&
+      profile.isSuccess &&
+      trophyTotals.isSuccess &&
+      friendships.isSuccess &&
+      activity.isSuccess &&
+      dates.data !== undefined,
   };
 }
