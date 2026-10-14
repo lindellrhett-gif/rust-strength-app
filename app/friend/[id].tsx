@@ -60,6 +60,10 @@ export default function FriendProfile() {
       // A friend's numbers are stored in their own unit; we render in ours,
       // which is the same assumption the rest of this screen already makes.
       unit,
+      runDistanceM: stats.data.runDistanceM,
+      stepsTotal: stats.data.stepsTotal,
+      friendCount: stats.data.friendCount,
+      reactionsReceived: stats.data.reactionsReceived,
     });
   }, [stats.data, prs.data, unit]);
 

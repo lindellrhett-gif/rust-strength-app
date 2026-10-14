@@ -77,9 +77,13 @@ export type TrophyGlyph =
   | 'flask'
   | 'crown'
   | 'bolt'
-  | 'shield';
+  | 'shield'
+  // Running, steps and friends trophies.
+  | 'route'
+  | 'steps'
+  | 'people';
 
-export type TrophyFamily = 'lift' | 'calisthenics' | 'milestone' | 'consistency';
+export type TrophyFamily = 'lift' | 'calisthenics' | 'milestone' | 'consistency' | 'running' | 'social';
 
 export interface TierStep {
   tier: Tier;
@@ -113,6 +117,14 @@ export interface AchievementInput {
   activityCount: number;
   /** Distinct activity kinds tried, for the variety trophy. */
   activityKinds: number;
+  /** Metres run, ever, including runs logged by hand. */
+  runDistanceM: number;
+  /** Daily steps shared, ever; null while sharing daily steps is off. */
+  stepsTotal: number | null;
+  /** Accepted friends. */
+  friendCount: number;
+  /** Reactions friends have left on your posts. */
+  reactionsReceived: number;
 }
 
 export interface TieredAchievement {
@@ -259,6 +271,15 @@ const ACTIVITY_COUNT_STEPS = ladder([1, 5, 10, 25, 50, 100, 250, 500, 1000]);
 const ACTIVITY_KIND_STEPS = ladder([1, 2, 3, 4, 6, 8, 10, 13, 16]);
 
 const REP_STEPS = ladder([100, 500, 1_000, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000]);
+// Running, in metres. The first four are the race distances people know.
+const RUN_DISTANCE_STEPS = ladder(
+  [5_000, 21_097.5, 42_195, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000],
+  ['a 5K', 'a half marathon', 'a marathon', 'an ultramarathon'],
+);
+const STEP_STEPS = ladder([10_000, 50_000, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000]);
+const FRIEND_STEPS = ladder([1, 3, 5, 10, 15, 25, 50, 75, 100]);
+const REACTION_STEPS = ladder([1, 10, 25, 50, 100, 250, 500, 1_000, 2_500]);
+const METRES_PER_MILE = 1609.344;
 
 // --- Formatting -------------------------------------------------------------
 
@@ -473,9 +494,141 @@ export function evaluateAchievements(input: AchievementInput): TieredAchievement
       formatValue: (n) => comma(n),
       formatThreshold: compactNumber,
     }),
+    build({
+      id: 'distance-run',
+      family: 'running',
+      name: 'Distance Run',
+      glyph: 'route',
+      steps: RUN_DISTANCE_STEPS,
+      value: input.runDistanceM,
+      formatValue: (m) => (m > 0 ? distanceLabel(m, input.unit) : '—'),
+      formatThreshold: (m) => distanceLabel(m, input.unit),
+    }),
+    build({
+      id: 'steps',
+      family: 'running',
+      name: 'Steps',
+      glyph: 'steps',
+      steps: STEP_STEPS,
+      value: input.stepsTotal ?? 0,
+      formatValue: (n) => (input.stepsTotal == null ? 'Not shared' : compactNumber(n)),
+      formatThreshold: compactNumber,
+    }),
+    build({
+      id: 'friends',
+      family: 'social',
+      name: 'Friends',
+      glyph: 'people',
+      steps: FRIEND_STEPS,
+      value: input.friendCount,
+      formatValue: (n) => comma(n),
+      formatThreshold: (n) => comma(n),
+    }),
+    build({
+      id: 'reactions',
+      family: 'social',
+      name: 'Reactions',
+      glyph: 'clap',
+      steps: REACTION_STEPS,
+      value: input.reactionsReceived,
+      formatValue: (n) => comma(n),
+      formatThreshold: compactNumber,
+    }),
   );
 
   return out;
+}
+
+/** Distance in miles for lb lifters and kilometres for kg ones: "13.1 mi", "500 km". */
+function distanceLabel(metres: number, unit: 'lb' | 'kg'): string {
+  const miles = unit === 'lb';
+  const n = metres / (miles ? METRES_PER_MILE : 1000);
+  return `${n >= 100 ? comma(n) : Number(n.toFixed(1))} ${miles ? 'mi' : 'km'}`;
+}
+
+// --- Featured trophies ------------------------------------------------------
+
+/** How many trophies can be shown by your name. */
+export const MAX_FEATURED = 2;
+
+/** What's saved for a featured trophy: its id and the tier it was shown at. */
+export function featuredKey(a: TieredAchievement): string | null {
+  return a.tier ? `${a.id}:${a.tier}` : null;
+}
+
+export interface FeaturedTrophy {
+  id: string;
+  tier: Tier;
+  name: string;
+  glyph: TrophyGlyph;
+}
+
+const EMPTY_INPUT: AchievementInput = {
+  totalWorkouts: 0,
+  totalVolume: 0,
+  totalReps: 0,
+  totalSets: 0,
+  totalSeconds: 0,
+  currentStreak: 0,
+  bestStreak: 0,
+  groupsThisWeek: 0,
+  groupsTotal: 0,
+  bestWeightByExercise: {},
+  bestRepsByExercise: {},
+  unit: 'lb',
+  activitySeconds: 0,
+  activityCount: 0,
+  activityKinds: 0,
+  runDistanceM: 0,
+  stepsTotal: 0,
+  friendCount: 0,
+  reactionsReceived: 0,
+};
+
+let catalog: Map<string, { name: string; glyph: TrophyGlyph }> | null = null;
+
+/** Every trophy's name and glyph, by id. */
+function trophyCatalog(): Map<string, { name: string; glyph: TrophyGlyph }> {
+  if (!catalog) catalog = new Map(evaluateAchievements(EMPTY_INPUT).map((a) => [a.id, { name: a.name, glyph: a.glyph }]));
+  return catalog;
+}
+
+/** Saved keys back into trophies to draw. Anything unknown is skipped. */
+export function parseFeatured(keys: readonly string[] | null | undefined): FeaturedTrophy[] {
+  const out: FeaturedTrophy[] = [];
+  for (const key of keys ?? []) {
+    const [id, tier] = key.split(':');
+    const known = trophyCatalog().get(id);
+    if (!known || !(TIERS as readonly string[]).includes(tier)) continue;
+    out.push({ id, tier: tier as Tier, ...known });
+    if (out.length === MAX_FEATURED) break;
+  }
+  return out;
+}
+
+/**
+ * Showing a trophy by your name, or stopping. With two already shown, the
+ * one shown longest makes way.
+ */
+export function toggleFeatured(current: readonly string[], a: TieredAchievement): string[] {
+  const ids = current.map((k) => k.split(':')[0]);
+  if (ids.includes(a.id)) return current.filter((k) => k.split(':')[0] !== a.id);
+  const key = featuredKey(a);
+  if (!key) return [...current];
+  return [...current, key].slice(-MAX_FEATURED);
+}
+
+/**
+ * Your featured trophies at the tiers you hold now, so one shown at Silver
+ * moves up when you reach Gold. Ones no longer earned are dropped.
+ */
+export function refreshFeatured(current: readonly string[], list: TieredAchievement[]): string[] {
+  const byId = new Map(list.map((a) => [a.id, a]));
+  return current
+    .map((k) => byId.get(k.split(':')[0]))
+    .filter((a): a is TieredAchievement => !!a && a.earned)
+    .map((a) => featuredKey(a)!)
+    .slice(0, MAX_FEATURED);
 }
 
 /** Trophies at Wood or above. */

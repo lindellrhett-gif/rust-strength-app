@@ -40,6 +40,8 @@ export type Database = {
           rest_seconds: number;
           rest_auto: boolean;
           level_seen: number;
+          share_steps: boolean;
+          featured_trophies: string[];
         };
         Insert: {
           user_id: string;
@@ -68,7 +70,14 @@ export type Database = {
           rest_seconds?: number;
           rest_auto?: boolean;
           level_seen?: number;
+          featured_trophies?: string[];
         };
+        Relationships: [];
+      };
+      daily_steps: {
+        Row: { user_id: string; day: string; steps: number; updated_at: string };
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       gyms: {
@@ -648,6 +657,12 @@ export type Database = {
           moving_times: number[] | null;
         }[];
       };
+      rpc_sync_daily_steps: { Args: { p_days: Json }; Returns: number };
+      rpc_set_share_steps: { Args: { p_on: boolean }; Returns: undefined };
+      rpc_my_trophy_totals: {
+        Args: Record<string, never>;
+        Returns: { run_distance_m: number; steps_total: number; reactions_received: number }[];
+      };
       rpc_running_summary: {
         Args: { p_start: string; p_end: string };
         Returns: {
@@ -752,6 +767,10 @@ export type Database = {
           current_streak: number;
           best_streak: number;
           consistency_30: number;
+          run_distance_m: number;
+          steps_total: number | null;
+          reactions_received: number;
+          featured_trophies: string[];
         }[];
       };
       rpc_friend_leaderboard: {
@@ -767,6 +786,8 @@ export type Database = {
           activity_seconds: number;
           current_streak: number;
           consistency_30: number;
+          run_distance_m: number;
+          steps: number | null;
         }[];
       };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
@@ -795,6 +816,7 @@ export type Database = {
           reaction_counts: Record<string, number>;
           my_reaction: string | null;
           route_preview: string | null;
+          featured_trophies: string[];
         }[];
       };
       rpc_block_user: { Args: { target: string }; Returns: undefined };

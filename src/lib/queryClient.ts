@@ -105,4 +105,6 @@ export const qk = {
   savedRoutes: ['saved-routes'] as const,
   savedRoute: (id: string) => ['saved-routes', id] as const,
   runPreferences: ['run-preferences'] as const,
+  // Under 'activities', so logging or deleting one refreshes it too.
+  trophyTotals: ['activities', 'trophy-totals'] as const,
 };

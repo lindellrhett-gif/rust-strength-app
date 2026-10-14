@@ -11,6 +11,8 @@ export const LEADERBOARD_METRICS = [
   'workoutTime',
   'consistency',
   'activityTime',
+  'runDistance',
+  'steps',
 ] as const;
 export type LeaderboardMetric = (typeof LEADERBOARD_METRICS)[number];
 
@@ -20,6 +22,8 @@ export const METRIC_LABEL: Record<LeaderboardMetric, string> = {
   workoutTime: 'Workout time',
   consistency: 'Consistency',
   activityTime: 'Activity time',
+  runDistance: 'Run distance',
+  steps: 'Steps',
 };
 
 /** Streak and consistency describe right now; the totals can be windowed. */
@@ -29,6 +33,8 @@ export const METRIC_HAS_PERIOD: Record<LeaderboardMetric, boolean> = {
   workoutTime: true,
   consistency: false,
   activityTime: true,
+  runDistance: true,
+  steps: true,
 };
 
 /** The window consistency is measured over, in days. */
@@ -51,6 +57,7 @@ export function periodSince(period: LeaderboardPeriod, nowMs: number): Date | nu
 }
 
 const LB_PER_KG = 2.20462;
+const METRES_PER_MILE = 1609.344;
 
 export interface LeaderboardPerson {
   userId: string;
@@ -66,6 +73,10 @@ export interface LeaderboardPerson {
   currentStreak: number;
   /** Share of the last 30 days trained or rested, 0..100. */
   consistency: number;
+  /** Metres run in the period, including runs logged by hand. */
+  runDistanceM: number;
+  /** Daily steps in the period, or null for someone who doesn't share them. */
+  steps: number | null;
 }
 
 export interface LeaderboardRow {
@@ -81,11 +92,12 @@ export function convertVolume(volume: number, from: 'lb' | 'kg', to: 'lb' | 'kg'
   return from === 'kg' ? volume * LB_PER_KG : volume / LB_PER_KG;
 }
 
+/** Null leaves the person off this board: steps, for someone who doesn't share them. */
 export function metricValue(
   person: LeaderboardPerson,
   metric: LeaderboardMetric,
   viewerUnit: 'lb' | 'kg',
-): number {
+): number | null {
   switch (metric) {
     case 'streak':
       return person.currentStreak;
@@ -97,6 +109,10 @@ export function metricValue(
       return person.consistency;
     case 'activityTime':
       return person.activitySeconds;
+    case 'runDistance':
+      return Math.round(person.runDistanceM);
+    case 'steps':
+      return person.steps;
   }
 }
 
@@ -111,6 +127,7 @@ export function rankLeaderboard(
 ): LeaderboardRow[] {
   const scored = people
     .map((person) => ({ person, value: metricValue(person, metric, viewerUnit) }))
+    .filter((s): s is { person: LeaderboardPerson; value: number } => s.value != null)
     .sort((a, b) => b.value - a.value || a.person.username.localeCompare(b.person.username));
 
   const rows: LeaderboardRow[] = [];
@@ -132,6 +149,14 @@ export function formatMetric(value: number, metric: LeaderboardMetric, unit: 'lb
     case 'workoutTime':
     case 'activityTime':
       return value <= 0 ? '0m' : formatDurationShort(value);
+    case 'runDistance': {
+      // Distance follows the weight unit, as everywhere in the app.
+      const miles = unit === 'lb';
+      const n = value / (miles ? METRES_PER_MILE : 1000);
+      return `${n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(1)} ${miles ? 'mi' : 'km'}`;
+    }
+    case 'steps':
+      return compactNumber(value);
   }
 }
 
@@ -148,6 +173,10 @@ export function metricNote(metric: LeaderboardMetric, period: LeaderboardPeriod)
       return `Time in finished workouts, ${periodPhrase(period)}.`;
     case 'activityTime':
       return `Time in logged activities, ${periodPhrase(period)}.`;
+    case 'runDistance':
+      return `Distance run, ${periodPhrase(period)}, including runs logged by hand.`;
+    case 'steps':
+      return `Daily steps, ${periodPhrase(period)}. Only people who share their daily steps appear.`;
   }
 }
 

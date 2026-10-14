@@ -200,6 +200,32 @@ const GLYPHS: Record<TrophyGlyph, React.ReactNode> = {
       <Path d="M8.5 12 L11 14.5 L15.5 9.5" />
     </>
   ),
+  // A winding route from a start dot to a finish flag.
+  route: (
+    <>
+      <Circle cx="5" cy="19" r="1.6" />
+      <Path d="M6.6 19 C11 19 8 12.5 12 12.5 C16 12.5 13.5 6 17.5 6" />
+      <Path d="M18 9 V2.5 L21.5 4 L18 5.5" />
+    </>
+  ),
+  // Two footprints, one ahead of the other.
+  steps: (
+    <>
+      <Path d="M5 16 A2.6 4 0 1 0 10.2 16 A2.6 4 0 1 0 5 16" />
+      <Path d="M5.6 21.3 H9.6" />
+      <Path d="M13.8 8 A2.6 4 0 1 0 19 8 A2.6 4 0 1 0 13.8 8" />
+      <Path d="M14.4 13.3 H18.4" />
+    </>
+  ),
+  // Two people, one a little behind the other.
+  people: (
+    <>
+      <Circle cx="9" cy="8" r="3" />
+      <Path d="M3 20 C3 15.8 5.7 14 9 14 C12.3 14 15 15.8 15 20" />
+      <Path d="M15 5.4 A2.6 2.6 0 1 1 15.8 10.6" />
+      <Path d="M17 14.2 C19.4 14.6 21 16.4 21 20" />
+    </>
+  ),
 };
 
 interface TrophyIconProps {
