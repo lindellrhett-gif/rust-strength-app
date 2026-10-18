@@ -10,13 +10,16 @@
 
   Usage:  & .\scripts\eas-build-asc.ps1 development
           & .\scripts\eas-build-asc.ps1 production
+          & .\scripts\eas-build-asc.ps1 production -Submit
 
-  Answer Yes to logging in to Apple. If it ever asks for an Apple ID
-  password instead, press Ctrl+C.
+  -Submit sends a production build to App Store Connect (TestFlight) once it
+  finishes, using the same key. Answer Yes to logging in to Apple. If it ever
+  asks for an Apple ID password instead, press Ctrl+C.
 #>
 param(
   [ValidateSet('development', 'production')]
-  [string]$BuildProfile = 'development'
+  [string]$BuildProfile = 'development',
+  [switch]$Submit
 )
 
 $root = Split-Path -Parent $PSScriptRoot
@@ -34,4 +37,11 @@ $env:EXPO_ASC_ISSUER_ID = $ios.ascApiKeyIssuerId
 $env:EXPO_APPLE_TEAM_ID = (Get-Content (Join-Path $root 'app.json') -Raw | ConvertFrom-Json).expo.ios.appleTeamId
 $env:EXPO_APPLE_TEAM_TYPE = 'INDIVIDUAL'
 
-eas build --profile $BuildProfile --platform ios
+if ($Submit -and $BuildProfile -ne 'production') {
+  Write-Error 'Only production builds can be sent to TestFlight.'
+  exit 1
+}
+
+$easArgs = @('build', '--profile', $BuildProfile, '--platform', 'ios')
+if ($Submit) { $easArgs += '--auto-submit' }
+eas @easArgs

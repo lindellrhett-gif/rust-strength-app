@@ -11,7 +11,7 @@ releasing it.
   `0019`, `0021`, `0022`, `0023` (done October 10, 2026). The 1.0 app never
   calls anything they add, and a development build of 1.1 needs them to
   save and show runs. **`0020` is still to run** (see section 4).
-- [ ] **Run `0024_steps_trophies_leaderboards.sql` on the live project.**
+- [x] **Run `0024_steps_trophies_leaderboards.sql` on the live project.**
   Additive like the others: it only adds columns to what 1.0 reads (by
   name), and the dev build needs it for the new trophies, leaderboards,
   daily steps and featured trophies. **Not `0025`** (see section 4).
@@ -22,7 +22,23 @@ releasing it.
   Connect API key: sync the PC clock, then run
   `& .\scripts\eas-build-asc.ps1 development` in a terminal (and
   `production` for the store build). If it ever asks for your Apple ID
-  password, press Ctrl+C. Later builds reuse the stored profiles.
+  password, press Ctrl+C. Later builds reuse the stored profiles. The dev
+  app is done; the first production build (below) does the store app.
+- [ ] **Test a TestFlight build before the release build.** It is the real
+  store app with the code built in, so it runs outdoors with no PC, and it
+  uses the live database like the dev build. Installing it replaces the App
+  Store version on your phone (same app, same account; reinstall from the
+  App Store to go back). Build and send it to App Store Connect with:
+
+  ```powershell
+  & .\scripts\eas-build-asc.ps1 production -Submit
+  ```
+
+  Once Apple has processed it, add yourself under TestFlight > Internal
+  Testing in App Store Connect; internal builds need no review. Keep 1.1
+  builds out of the external tester group until the Privacy Policy that
+  covers location and steps is published (section 4), since testers there
+  would be sharing both.
 - [ ] **Test on a development build** (`eas build --profile development
   --platform ios`):
   - [ ] A real outdoor run with the phone locked the whole way.
@@ -76,8 +92,8 @@ releasing it.
 
 - [ ] Merge `feature/running` into `main` (a pull request is easiest to
   review).
-- [ ] In `app.json`, set `"version"` to `"1.1.0"`. The build number counts up
-  by itself (EAS remote versioning).
+- [x] In `app.json`, set `"version"` to `"1.1.0"` (done for the TestFlight
+  build). The build number counts up by itself (EAS remote versioning).
 - [ ] In `src/legal/config.ts`, set `lastUpdated` to today's date, then run
   `npm run legal` with `SITE_DIR` pointing at a folder that doesn't exist,
   so the date is right in the app without publishing the site yet:
