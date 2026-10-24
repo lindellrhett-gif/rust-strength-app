@@ -11,7 +11,7 @@
 
 export const LEGAL = {
   /** Trading/legal name of whoever publishes the app. */
-  entity: 'Rhett Lindell',
+  entity: 'Bluestem Software LLC',
 
   /** Monitored inbox for privacy requests and support. */
   contactEmail: 'ruststrengthsupport@gmail.com',
