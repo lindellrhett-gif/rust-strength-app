@@ -70,10 +70,11 @@ The App itself — its code, design, text, icons and branding — belongs to us 
 
 ## 9. Rust Strength Pro
 
-The App's core features are free. Rust Strength Pro is an optional subscription that adds extra features, which the App lists before you buy.
+The App's core features are free. Rust Strength Pro is an optional upgrade that adds extra features, which the App lists before you buy. It is sold as a monthly or yearly subscription, or as a one-time Lifetime purchase.
 
-- **Price and billing.** Pro is sold monthly or yearly at the price shown in the App before you confirm. Payment is taken through your Apple ID by Apple, not by us, and is subject to Apple's terms.
-- **Automatic renewal.** Pro renews automatically at the end of each period, at the then-current price, unless you cancel at least 24 hours before the period ends. Apple charges the renewal within the 24 hours before the period ends.
+- **Price and billing.** The price is shown in the App before you confirm. Payment is taken through your Apple ID by Apple, not by us, and is subject to Apple's terms.
+- **Automatic renewal (monthly and yearly).** A subscription renews automatically at the end of each period, at the then-current price, unless you cancel at least 24 hours before the period ends. Apple charges the renewal within the 24 hours before the period ends.
+- **Lifetime.** A single payment that unlocks Pro for as long as we offer Pro in the App. It does not renew and there is nothing to cancel. "Lifetime" means the life of the Pro service, not your lifetime: if we stop offering the App or Pro, Lifetime access ends with it.
 - **Free trials.** If a free trial is offered, you are charged when it ends unless you cancel before then. Any unused part of a free trial ends when you buy a subscription.
 - **Cancelling.** You can cancel at any time in your device's settings (Settings > your name > Subscriptions). Pro then stays active until the end of the period you have paid for. Deleting the App or your account does not cancel your subscription.
 - **Refunds.** Purchases are handled by Apple, so refund requests go to Apple under its policies. We cannot issue refunds ourselves.

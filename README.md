@@ -127,10 +127,10 @@ npm test
   run's route is trimmed at the start and end as on friends' maps.
 
 **Rust Strength Pro** (built, not on sale)
-- Optional monthly or yearly subscription through RevenueCat for features
-  still to come (nutrition, an AI coach). Everything above stays free.
-  Switched off until a paid feature exists; see
-  [store/SUBSCRIPTIONS.md](store/SUBSCRIPTIONS.md).
+- Optional monthly or yearly subscription, or a one-time Lifetime purchase,
+  through RevenueCat (its paywall and Customer Center) for features still to
+  come (nutrition, an AI coach). Everything above stays free. Switched off
+  until a paid feature exists; see [store/SUBSCRIPTIONS.md](store/SUBSCRIPTIONS.md).
 
 **Reliability and privacy**
 - **Works offline.** Sets logged with no signal are queued and sync when the
