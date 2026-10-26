@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card } from '@/components';
@@ -12,7 +12,7 @@ import { RestTimerBar } from '@/components/RestTimerBar';
 import { RpeSelector } from '@/components/RpeSelector';
 import { SelectSheet, type Option } from '@/components/SelectSheet';
 import { keyboardAware } from '@/components/keyboard';
-import { useCreateExercise, useExercises } from '@/data/exercises';
+import { useConvertToAssisted, useCreateExercise, useExercises } from '@/data/exercises';
 import { useCreateMachine, useMachines } from '@/data/machines';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import {
@@ -30,6 +30,7 @@ import {
   exerciseSublabel,
   formatHold,
   formatSetSummary,
+  looksAssisted,
 } from '@/domain/loadType';
 import { lastSession, type LastSession } from '@/domain/lastSession';
 import { loggedSetDetail, upcomingSetDetail } from '@/domain/restActivity';
@@ -45,6 +46,7 @@ import {
 import { roundToIncrement } from '@/domain/rounding';
 import { formatDate, todayLocal, toLocalDateString } from '@/lib/dates';
 import { trimWeight } from '@/lib/format';
+import { useAuth } from '@/providers/AuthProvider';
 import { useRestTimer } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -63,6 +65,7 @@ export default function NewSet() {
   const slots = useWorkoutExercises(workoutId);
   const machineSets = useMachineSetHistory();
   const createExercise = useCreateExercise();
+  const { userId } = useAuth();
   const createMachine = useCreateMachine();
   const addSet = useAddSet();
   const restTimer = useRestTimer();
@@ -96,6 +99,11 @@ export default function NewSet() {
 
   const exercise = exercises.data?.find((e) => e.id === exerciseId) ?? null;
   const loadType = asLoadType(exercise?.load_type);
+  // One of the user's own exercises, named like an assisted machine but set
+  // up as Weights: the assistance typed is read as weight lifted, so a hard
+  // set brings it down. Offer to fix the type and the sets already logged.
+  const offerAssisted =
+    loadType === 'weighted' && exercise != null && exercise.user_id === userId && looksAssisted(exercise.name);
   const history = useExerciseHistory(exerciseId ?? undefined);
 
   // Default to the machine this exercise was last done on, so its own history
@@ -258,6 +266,10 @@ export default function NewSet() {
 
   const assistError = loadType === 'assisted' ? assistProblem(bodyWeight, displayAssist) : null;
 
+  const setsToConvert = (history.data ?? []).filter(
+    (s) => s.assistWeight == null && s.addedWeight == null && s.durationSeconds == null,
+  ).length;
+
   // While resting, the Lock Screen shows the set this screen is lined up for:
   // the next one of this exercise, or of another exercise opened mid-rest.
   const { setNext } = restTimer;
@@ -289,6 +301,7 @@ export default function NewSet() {
     setHoldTouched(false);
     setHold(0);
   };
+
 
   const pickExercise = (id: string) => {
     setExerciseId(id);
@@ -451,6 +464,17 @@ export default function NewSet() {
             value={machine?.label ?? 'Choose machine (optional)'}
             placeholder={!machine}
             onPress={() => setShowMachinePicker(true)}
+          />
+        ) : null}
+
+        {offerAssisted && exercise ? (
+          <AssistedOffer
+            exerciseId={exercise.id}
+            exerciseName={exercise.name}
+            bodyWeight={bodyWeight}
+            unit={unit}
+            setsToConvert={setsToConvert}
+            onConverted={resetInputs}
           />
         ) : null}
 
@@ -824,6 +848,73 @@ function BodyweightPrompt({ unit }: { unit: string }) {
 }
 
 /** The picker's "No machine" option. */
+/**
+ * Shown for the user's own exercise named like an assisted machine but set up
+ * as Weights: switching converts it and the sets already logged on it.
+ */
+function AssistedOffer({
+  exerciseId,
+  exerciseName,
+  bodyWeight,
+  unit,
+  setsToConvert,
+  onConverted,
+}: {
+  exerciseId: string;
+  exerciseName: string;
+  bodyWeight: number | null;
+  unit: string;
+  setsToConvert: number;
+  onConverted: () => void;
+}) {
+  const convert = useConvertToAssisted();
+
+  const confirm = () => {
+    if (bodyWeight == null) return;
+    Alert.alert(
+      'Switch to Assisted?',
+      setsToConvert > 0
+        ? `The ${setsToConvert} set${setsToConvert === 1 ? '' : 's'} already logged are converted too: the number entered becomes the assistance, and the weight lifted becomes your bodyweight (${trimWeight(bodyWeight)} ${unit}) minus it.`
+        : 'From now on the number you enter is the assistance.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Switch',
+          onPress: () =>
+            convert.mutate(
+              { exerciseId, bodyWeight },
+              {
+                onSuccess: onConverted,
+                onError: (e) => Alert.alert("Couldn't switch it", e instanceof Error ? e.message : String(e)),
+              },
+            ),
+        },
+      ],
+    );
+  };
+
+  return (
+    <Card title="Assisted machine?">
+      <Text style={text.body}>
+        {exerciseName} is set up as Weights, so the number you enter is read as weight lifted. After
+        a hard set it suggests a lower number, which on an assisted machine means less help.
+      </Text>
+      <Text style={text.caption}>
+        Switch it to Assisted and the number is the assistance instead, so a hard set suggests
+        more.
+        {bodyWeight == null ? ' Add your bodyweight in Profile first: the weight lifted is worked out from it.' : ''}
+      </Text>
+      <Button
+        label="Switch to Assisted"
+        variant="secondary"
+        onPress={confirm}
+        disabled={bodyWeight == null}
+        loading={convert.isPending}
+      />
+    </Card>
+  );
+}
+
 const NO_MACHINE = '__none__';
 
 function SelectorRow({

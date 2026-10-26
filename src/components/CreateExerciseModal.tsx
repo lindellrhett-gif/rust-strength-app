@@ -4,7 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from './Button';
 import { Field } from './Field';
-import { LOAD_TYPES, LOAD_TYPE_HINT, LOAD_TYPE_LABEL, type LoadType } from '@/domain/loadType';
+import {
+  LOAD_TYPES,
+  LOAD_TYPE_HINT,
+  LOAD_TYPE_LABEL,
+  guessLoadType,
+  type LoadType,
+} from '@/domain/loadType';
 import { MUSCLE_GROUPS, type MuscleGroup } from '@/domain/stats';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -17,21 +23,17 @@ interface Props {
   onClose: () => void;
 }
 
-/** A starting guess from the name, so "Assisted Dip" arrives already set up. */
-function guessLoadType(name: string): LoadType {
-  const n = name.toLowerCase();
-  if (n.includes('assist')) return 'assisted';
-  if (/plank|\bhold\b|wall sit|dead hang|arm hang|l-sit/.test(n)) return 'timed';
-  if (/push-?up|pull-?up|chin-?up|\bdips?\b|sit-?up|crunch|burpee/.test(n)) {
-    return 'bodyweight';
-  }
-  return 'weighted';
-}
-
 export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit, onClose }: Props) {
   const [name, setName] = useState(initialName);
   const [group, setGroup] = useState<MuscleGroup>('chest');
   const [loadType, setLoadType] = useState<LoadType>('weighted');
+  // The type follows the name ("Assisted…" picks Assisted) until it's picked by hand.
+  const [typePicked, setTypePicked] = useState(false);
+
+  const changeName = (next: string) => {
+    setName(next);
+    if (!typePicked) setLoadType(guessLoadType(next));
+  };
 
   return (
     <Modal
@@ -42,6 +44,7 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
       onShow={() => {
         setName(initialName);
         setLoadType(guessLoadType(initialName));
+        setTypePicked(false);
       }}
     >
       {/* Lifts the sheet above the keyboard instead of letting it cover the field. */}
@@ -51,14 +54,17 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
       >
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>New exercise</Text>
-          <Field label="Name" value={name} onChangeText={setName} autoFocus placeholder="e.g. Incline Machine Press" />
+          <Field label="Name" value={name} onChangeText={changeName} autoFocus placeholder="e.g. Incline Machine Press" />
 
           <Text style={text.label}>TYPE</Text>
           <View style={styles.groups}>
             {LOAD_TYPES.map((t) => (
               <Pressable
                 key={t}
-                onPress={() => setLoadType(t)}
+                onPress={() => {
+                  setLoadType(t);
+                  setTypePicked(true);
+                }}
                 style={[styles.chip, loadType === t && styles.chipActive]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: loadType === t }}

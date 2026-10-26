@@ -164,6 +164,30 @@ describe('recommendNextWeight', () => {
     expect(rec.rationale).toMatch(/harder/);
   });
 
+  it('goes lighter than a missed set even when older sessions were stronger', () => {
+    // Five easy sessions at 225, then 205 for 4 at RPE 10: the average still
+    // says "strong", but the next set must not be heavier than the miss.
+    const strong = [1, 2, 3, 4, 5].map((d) =>
+      set({ weight: 225, reps: 8, rpe: 7, performedAt: `2026-09-0${d}T10:00:00Z` }),
+    );
+    const rec = recommendNextWeight({
+      ...base,
+      history: [...strong, set({ weight: 205, reps: 4, rpe: 10, performedAt: '2026-09-08T10:00:00Z' })],
+    });
+    expect(rec.suggestedWeight!).toBeLessThan(205);
+  });
+
+  it('never goes lighter than a set that felt easy', () => {
+    const weak = [1, 2, 3, 4, 5].map((d) =>
+      set({ weight: 135, reps: 5, rpe: 10, performedAt: `2026-09-0${d}T10:00:00Z` }),
+    );
+    const rec = recommendNextWeight({
+      ...base,
+      history: [...weak, set({ weight: 155, reps: 8, rpe: 6, performedAt: '2026-09-08T10:00:00Z' })],
+    });
+    expect(rec.suggestedWeight!).toBeGreaterThanOrEqual(155);
+  });
+
   it('never jumps more than the step-change cap from the last set', () => {
     const last = 100;
     const rec = recommendNextWeight({
