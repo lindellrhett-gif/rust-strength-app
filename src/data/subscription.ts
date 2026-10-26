@@ -4,13 +4,13 @@ import { useEffect } from 'react';
 import type { Access } from '@/domain/entitlements';
 import { NO_PRO, type ProStatus } from '@/domain/subscription';
 import {
-  buy,
   forget,
-  getPlans,
   getProStatus,
   identify,
   onProStatusChange,
+  openCustomerCenter,
   restore,
+  showPaywall,
   subscriptionsOn,
 } from '@/lib/purchases';
 import { qk } from '@/lib/queryClient';
@@ -44,7 +44,7 @@ export function useSubscriptionIdentity(): void {
   }, [userId, client]);
 }
 
-/** This person's Pro status. Never Pro while subscriptions are off. */
+/** This person's rust_strength_pro status. Never Pro while subscriptions are off. */
 export function useProStatus() {
   const { userId } = useAuth();
   return useQuery({
@@ -64,27 +64,32 @@ export function useAccess(): Access {
   return { subscriptionsOn, pro: status.data?.active === true };
 }
 
-/** The monthly and yearly plans, priced by the App Store. */
-export function usePlans() {
+/**
+ * Shows RevenueCat's paywall (unless the account already has Pro) and
+ * refreshes the status after a purchase or restore.
+ */
+export function useShowPaywall() {
   const { userId } = useAuth();
-  return useQuery({
-    queryKey: qk.plans,
-    enabled: subscriptionsOn && !!userId,
-    queryFn: async () => {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
       await identify(userId!);
-      return getPlans();
+      return showPaywall();
+    },
+    onSuccess: (outcome) => {
+      if (outcome === 'purchased' || outcome === 'restored') {
+        void client.invalidateQueries({ queryKey: qk.proStatus });
+      }
     },
   });
 }
 
-/** Buys a plan. Resolves null when the person backs out of Apple's sheet. */
-export function useBuyPlan() {
+/** Opens RevenueCat's Customer Center, then refreshes the status. */
+export function useCustomerCenter() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (planId: string) => buy(planId),
-    onSuccess: (status) => {
-      if (status) client.setQueryData(qk.proStatus, status);
-    },
+    mutationFn: () => openCustomerCenter(),
+    onSettled: () => client.invalidateQueries({ queryKey: qk.proStatus }),
   });
 }
 

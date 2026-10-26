@@ -4,14 +4,12 @@ import {
   PRO_ENTITLEMENT,
   PRO_FEATURE_LIST,
   hasSellableFeatures,
-  introLabel,
-  priceLine,
+  keyKind,
+  paywallOutcome,
   proStatusFrom,
-  renewalTerms,
   statusLine,
-  yearlySavings,
+  subscriptionsEnabled,
   type EntitlementLike,
-  type Plan,
 } from '../src/domain/subscription';
 
 describe('hasFeature', () => {
@@ -29,7 +27,7 @@ describe('hasFeature', () => {
     expect(hasFeature('coach', { subscriptionsOn: true, pro: true })).toBe(true);
   });
 
-  it('lists every paid feature on the paywall', () => {
+  it('describes every paid feature', () => {
     expect(PRO_FEATURE_LIST.map((f) => f.feature).sort()).toEqual([...PRO_FEATURES].sort());
   });
 });
@@ -47,85 +45,91 @@ describe('proStatusFrom', () => {
     willRenew: true,
     periodType: 'NORMAL',
     expirationDate: '2027-10-03T12:00:00Z',
-    productIdentifier: 'pro_yearly',
+    productIdentifier: 'yearly',
     ...over,
   });
 
-  it('reads an active Pro entitlement', () => {
-    expect(proStatusFrom({ entitlements: { active: { [PRO_ENTITLEMENT]: pro() } } })).toEqual({
+  it('reads the rust_strength_pro entitlement', () => {
+    expect(PRO_ENTITLEMENT).toBe('rust_strength_pro');
+    expect(proStatusFrom({ entitlements: { active: { rust_strength_pro: pro() } } })).toEqual({
       active: true,
+      lifetime: false,
       willRenew: true,
       trial: false,
       expiresAt: '2027-10-03T12:00:00Z',
-      productId: 'pro_yearly',
+      productId: 'yearly',
     });
   });
 
+  it('knows a lifetime purchase never expires', () => {
+    const s = proStatusFrom({
+      entitlements: { active: { rust_strength_pro: pro({ expirationDate: null, willRenew: false, productIdentifier: 'lifetime' }) } },
+    });
+    expect(s.active && s.lifetime).toBe(true);
+  });
+
   it('spots a free trial', () => {
-    expect(proStatusFrom({ entitlements: { active: { pro: pro({ periodType: 'TRIAL' }) } } }).trial).toBe(true);
+    expect(proStatusFrom({ entitlements: { active: { rust_strength_pro: pro({ periodType: 'TRIAL' }) } } }).trial).toBe(true);
   });
 
   it('is not Pro without the entitlement, or before RevenueCat answers', () => {
     expect(proStatusFrom({ entitlements: { active: {} } })).toEqual(NO_PRO);
-    expect(proStatusFrom({ entitlements: { active: { other: pro() } } })).toEqual(NO_PRO);
+    expect(proStatusFrom({ entitlements: { active: { pro: pro() } } })).toEqual(NO_PRO);
     expect(proStatusFrom(null)).toEqual(NO_PRO);
   });
 });
 
 describe('statusLine', () => {
   const date = (iso: string) => iso.slice(0, 10);
-  const base = { ...NO_PRO, active: true, expiresAt: '2027-10-03T00:00:00Z', productId: 'p' };
+  const base = { ...NO_PRO, active: true, expiresAt: '2027-10-03T00:00:00Z', productId: 'yearly' };
 
-  it('says when it renews, ends, or that the trial converts', () => {
+  it('says when it renews or ends, that a trial converts, or that it is for life', () => {
     expect(statusLine({ ...base, willRenew: true }, date)).toBe('Pro · renews 2027-10-03');
     expect(statusLine({ ...base, willRenew: false }, date)).toBe('Pro · ends 2027-10-03');
     expect(statusLine({ ...base, willRenew: true, trial: true }, date)).toBe('Free trial · then renews 2027-10-03');
+    expect(statusLine({ ...base, lifetime: true, expiresAt: null, productId: 'lifetime' }, date)).toBe('Pro · lifetime');
     expect(statusLine(NO_PRO, date)).toBe('Not subscribed');
   });
 });
 
-describe('yearlySavings', () => {
-  it('rounds the saving down so it never overstates it', () => {
-    // $5.99 x 12 = $71.88; $49.99 saves 30.45%.
-    expect(yearlySavings(5.99, 49.99)).toBe(30);
-  });
-
-  it('claims nothing when yearly is no cheaper, or a price is missing', () => {
-    expect(yearlySavings(5, 60)).toBeNull();
-    expect(yearlySavings(5, 61)).toBeNull();
-    expect(yearlySavings(0, 50)).toBeNull();
+describe('paywallOutcome', () => {
+  it("maps RevenueCat's paywall results", () => {
+    expect(paywallOutcome('PURCHASED')).toBe('purchased');
+    expect(paywallOutcome('RESTORED')).toBe('restored');
+    expect(paywallOutcome('NOT_PRESENTED')).toBe('not-needed');
+    expect(paywallOutcome('ERROR')).toBe('error');
+    expect(paywallOutcome('CANCELLED')).toBe('cancelled');
+    expect(paywallOutcome('SOMETHING_NEW')).toBe('cancelled');
   });
 });
 
-describe('introLabel', () => {
-  const offer = { price: 0, priceString: '$0.00', periodUnit: 'WEEK', periodNumberOfUnits: 1, cycles: 1 };
+describe('subscriptionsEnabled', () => {
+  const base = { ios: true, switchOn: true, key: 'test_abc', devBuild: true, sellable: false };
 
-  it('describes free trials and paid intro prices', () => {
-    expect(introLabel(offer)).toBe('1-week free trial');
-    expect(introLabel({ ...offer, periodUnit: 'DAY', periodNumberOfUnits: 7 })).toBe('7-day free trial');
-    expect(introLabel({ ...offer, price: 0.99, priceString: '$0.99', periodUnit: 'MONTH', cycles: 3 })).toBe(
-      '$0.99 a month for 3 months',
-    );
-    expect(
-      introLabel({ ...offer, price: 2.99, priceString: '$2.99', periodUnit: 'MONTH', periodNumberOfUnits: 3 }),
-    ).toBe('$2.99 for 3 months');
-    expect(introLabel(null)).toBeNull();
-  });
-});
-
-describe('renewal terms', () => {
-  const yearly: Plan = { id: '$rc_annual', period: 'year', price: 49.99, priceString: '$49.99', intro: null };
-
-  it('states the price, renewal, payment and how to cancel', () => {
-    expect(priceLine(yearly)).toBe('$49.99 a year');
-    const terms = renewalTerms(yearly);
-    expect(terms).toMatch(/renews automatically at \$49\.99 a year until you cancel/);
-    expect(terms).toMatch(/charged to your Apple ID when you confirm/);
-    expect(terms).toMatch(/24 hours before/);
+  it('tells the keys apart', () => {
+    expect(keyKind('test_abc')).toBe('test-store');
+    expect(keyKind('appl_abc')).toBe('app-store');
+    expect(keyKind('goog_abc')).toBe('other');
+    expect(keyKind(null)).toBe('none');
   });
 
-  it('says payment comes after a free trial', () => {
-    const trial = { ...yearly, intro: { price: 0, priceString: '$0.00', periodUnit: 'WEEK', periodNumberOfUnits: 1, cycles: 1 } };
-    expect(renewalTerms(trial)).toMatch(/when the free trial ends/);
+  it('lets a development build try the Test Store before anything is on sale', () => {
+    expect(subscriptionsEnabled(base)).toBe(true);
+  });
+
+  it('never uses a Test Store key in a release build, which RevenueCat would crash', () => {
+    expect(subscriptionsEnabled({ ...base, devBuild: false })).toBe(false);
+    expect(subscriptionsEnabled({ ...base, devBuild: false, sellable: true })).toBe(false);
+  });
+
+  it('turns on with the App Store key only once there is something to sell', () => {
+    expect(subscriptionsEnabled({ ...base, key: 'appl_abc', devBuild: false })).toBe(false);
+    expect(subscriptionsEnabled({ ...base, key: 'appl_abc', devBuild: false, sellable: true })).toBe(true);
+  });
+
+  it('stays off without the switch, a key, or on Android', () => {
+    expect(subscriptionsEnabled({ ...base, switchOn: false })).toBe(false);
+    expect(subscriptionsEnabled({ ...base, key: null })).toBe(false);
+    expect(subscriptionsEnabled({ ...base, ios: false })).toBe(false);
   });
 });

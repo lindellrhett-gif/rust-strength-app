@@ -5,7 +5,7 @@
  */
 
 /** The entitlement Pro's products grant (src/domain/subscription.ts). */
-export const PRO_ENTITLEMENT = 'pro';
+export const PRO_ENTITLEMENT = 'rust_strength_pro';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -43,11 +43,18 @@ interface V1Subscription {
   billing_issues_detected_at?: string | null;
 }
 
+/** A one-time purchase, such as Lifetime. */
+interface V1NonSubscription {
+  store?: string;
+  purchase_date?: string;
+}
+
 /** The part of GET /v1/subscribers/{id} that matters here. */
 export interface V1Subscriber {
   subscriber?: {
     entitlements?: Record<string, V1Entitlement | undefined>;
     subscriptions?: Record<string, V1Subscription | undefined>;
+    non_subscriptions?: Record<string, V1NonSubscription[] | undefined>;
   };
 }
 
@@ -71,20 +78,22 @@ function later(a: string | null | undefined, b: string | null | undefined): stri
 /**
  * Pro is active while the entitlement hasn't expired, counting Apple's
  * billing grace period, during which the person keeps access while Apple
- * retries a failed payment.
+ * retries a failed payment. A Lifetime purchase has no expiry at all; a
+ * refunded one simply drops out of the entitlements.
  */
 export function rowFromSubscriber(userId: string, data: V1Subscriber, now: Date): SubscriptionRow {
   const ent = data.subscriber?.entitlements?.[PRO_ENTITLEMENT];
   const productId = ent?.product_identifier ?? null;
   const sub = productId ? data.subscriber?.subscriptions?.[productId] : undefined;
+  const oneTime = productId ? data.subscriber?.non_subscriptions?.[productId]?.at(-1) : undefined;
   const expiresAt = ent ? later(ent.expires_date, ent.grace_period_expires_date) : null;
   const active = !!ent && (expiresAt == null || new Date(expiresAt) > now);
   return {
     user_id: userId,
     pro_active: active,
     product_id: productId,
-    period_type: sub?.period_type ? sub.period_type.toUpperCase() : null,
-    store: sub?.store ?? null,
+    period_type: sub?.period_type ? sub.period_type.toUpperCase() : oneTime ? 'LIFETIME' : null,
+    store: sub?.store ?? oneTime?.store ?? null,
     expires_at: expiresAt,
     will_renew: sub ? sub.unsubscribe_detected_at == null && sub.billing_issues_detected_at == null : null,
     updated_at: now.toISOString(),

@@ -1,28 +1,31 @@
 /**
- * Rust Strength Pro: what the subscription unlocks, and how its status and
- * plans read in the app. Pure, no I/O: RevenueCat itself is wrapped in
- * src/lib/purchases.ts, and these functions take plain shapes that match it.
+ * Rust Strength Pro: what it unlocks, and how its status reads in the app.
+ * Pure, no I/O: RevenueCat itself is wrapped in src/lib/purchases.ts, and
+ * these functions take plain shapes that match it.
  *
  * Decided with Rhett (October 2026): only new features are paid. Everything
- * in 1.0 and 1.1 (lifting, running, friends, trophies) stays free. Plans are
- * monthly and yearly; prices and any free trial are set in App Store Connect,
- * and the app shows whatever the store returns.
+ * in 1.0 and 1.1 (lifting, running, friends, trophies) stays free. Pro is
+ * sold monthly, yearly, or once for life; prices and any free trial are set
+ * in App Store Connect, and the paywall itself is designed in RevenueCat.
  */
 
 import type { Feature } from './entitlements';
 
-/** The RevenueCat entitlement that Pro's products grant. */
-export const PRO_ENTITLEMENT = 'pro';
+/** The RevenueCat entitlement that every Pro product grants. */
+export const PRO_ENTITLEMENT = 'rust_strength_pro';
+
+/** RevenueCat product identifiers, as set up in its product catalog. */
+export const PRO_PRODUCTS = { monthly: 'monthly', yearly: 'yearly', lifetime: 'lifetime' } as const;
 
 export interface ProFeature {
   feature: Feature;
   title: string;
   detail: string;
   /**
-   * Whether the feature exists in this build. The paywall lists only these,
-   * and with none of them there is nothing to sell, so subscriptions stay off
-   * (App Review rejects a subscription to features that aren't there yet).
-   * Update the wording when a feature ships, then set this to true.
+   * Whether the feature exists in this build. With none available there is
+   * nothing to sell, so subscriptions stay off with a real App Store key (App
+   * Review rejects a subscription to features that aren't there yet). Update
+   * the wording when a feature ships, then set this to true.
    */
   available: boolean;
 }
@@ -55,6 +58,7 @@ export interface EntitlementLike {
   willRenew: boolean;
   /** "NORMAL", "TRIAL" or "INTRO". */
   periodType: string;
+  /** Null for a lifetime purchase, which never expires. */
   expirationDate: string | null;
   productIdentifier: string;
 }
@@ -65,20 +69,30 @@ export interface CustomerInfoLike {
 
 export interface ProStatus {
   active: boolean;
+  /** Bought once, for life: no renewal, nothing to manage. */
+  lifetime: boolean;
   willRenew: boolean;
   trial: boolean;
-  /** When the current period ends; null for a purchase that never expires. */
+  /** When the current period ends; null for lifetime. */
   expiresAt: string | null;
   productId: string | null;
 }
 
-export const NO_PRO: ProStatus = { active: false, willRenew: false, trial: false, expiresAt: null, productId: null };
+export const NO_PRO: ProStatus = {
+  active: false,
+  lifetime: false,
+  willRenew: false,
+  trial: false,
+  expiresAt: null,
+  productId: null,
+};
 
 export function proStatusFrom(info: CustomerInfoLike | null | undefined): ProStatus {
   const e = info?.entitlements.active[PRO_ENTITLEMENT];
   if (!e || !e.isActive) return NO_PRO;
   return {
     active: true,
+    lifetime: e.expirationDate == null,
     willRenew: e.willRenew,
     trial: e.periodType.toUpperCase() === 'TRIAL',
     expiresAt: e.expirationDate,
@@ -86,87 +100,72 @@ export function proStatusFrom(info: CustomerInfoLike | null | undefined): ProSta
   };
 }
 
-/** One line for Profile: "Pro · renews Oct 3, 2027", "Free trial · ends Nov 2". */
+/** One line for Profile: "Pro · renews Oct 3, 2027", "Pro · lifetime". */
 export function statusLine(status: ProStatus, formatDate: (iso: string) => string): string {
   if (!status.active) return 'Not subscribed';
+  if (status.lifetime || !status.expiresAt) return 'Pro · lifetime';
   const label = status.trial ? 'Free trial' : 'Pro';
-  if (!status.expiresAt) return label;
   const verb = status.willRenew ? (status.trial ? 'then renews' : 'renews') : 'ends';
   return `${label} · ${verb} ${formatDate(status.expiresAt)}`;
 }
 
-// --- Plans -----------------------------------------------------------------
+// --- Paywall ---------------------------------------------------------------
 
-export type PlanPeriod = 'month' | 'year';
+/** How a paywall ended, in the app's terms. */
+export type PaywallOutcome = 'purchased' | 'restored' | 'cancelled' | 'not-needed' | 'error';
 
-export interface IntroOffer {
-  /** 0 for a free trial. */
-  price: number;
-  priceString: string;
-  /** DAY, WEEK, MONTH or YEAR. */
-  periodUnit: string;
-  periodNumberOfUnits: number;
-  /** How many periods the offer lasts. */
-  cycles: number;
-}
-
-export interface Plan {
-  /** The RevenueCat package identifier, used to buy it. */
-  id: string;
-  period: PlanPeriod;
-  price: number;
-  priceString: string;
-  intro: IntroOffer | null;
-}
-
-/**
- * Whole percent saved by paying yearly instead of twelve months, rounded
- * down so the claim is never more than the truth. Null when there's no saving.
- */
-export function yearlySavings(monthlyPrice: number, yearlyPrice: number): number | null {
-  if (!(monthlyPrice > 0) || !(yearlyPrice > 0)) return null;
-  const percent = Math.floor((1 - yearlyPrice / (monthlyPrice * 12)) * 100);
-  return percent >= 1 ? percent : null;
-}
-
-function unitWord(unit: string, n: number): string {
-  const word = { DAY: 'day', WEEK: 'week', MONTH: 'month', YEAR: 'year' }[unit.toUpperCase()] ?? 'period';
-  return n === 1 ? word : `${word}s`;
-}
-
-/**
- * "1-week free trial", "$0.99 a month for 3 months" (paid each period), "$2.99
- * for 3 months" (paid once), or null without an offer.
- */
-export function introLabel(intro: IntroOffer | null): string | null {
-  if (!intro) return null;
-  const cycles = Math.max(1, intro.cycles);
-  const length = intro.periodNumberOfUnits * cycles;
-  const span = `${length} ${unitWord(intro.periodUnit, length)}`;
-  if (intro.price === 0) return `${length}-${unitWord(intro.periodUnit, 1)} free trial`;
-  if (cycles > 1 && intro.periodNumberOfUnits === 1) {
-    return `${intro.priceString} a ${unitWord(intro.periodUnit, 1)} for ${span}`;
+/** RevenueCat's PAYWALL_RESULT values, mapped. Unknown values count as cancelled. */
+export function paywallOutcome(result: string): PaywallOutcome {
+  switch (result) {
+    case 'PURCHASED':
+      return 'purchased';
+    case 'RESTORED':
+      return 'restored';
+    case 'NOT_PRESENTED':
+      return 'not-needed';
+    case 'ERROR':
+      return 'error';
+    default:
+      return 'cancelled';
   }
-  return `${intro.priceString} for ${span}`;
 }
 
-/** "$59.99 a year". */
-export function priceLine(plan: Plan): string {
-  return `${plan.priceString} a ${plan.period}`;
+// --- Keys ------------------------------------------------------------------
+
+/**
+ * Which RevenueCat key the build has. A Test Store key (test_) sells
+ * pretend products with no App Store involved, for development; RevenueCat's
+ * SDK deliberately crashes a release build that uses one (TestFlight counts),
+ * so it is only ever used in a development build.
+ */
+export type KeyKind = 'none' | 'test-store' | 'app-store' | 'other';
+
+export function keyKind(key: string | null | undefined): KeyKind {
+  if (!key) return 'none';
+  if (key.startsWith('test_')) return 'test-store';
+  if (key.startsWith('appl_')) return 'app-store';
+  return 'other';
 }
 
 /**
- * The renewal terms Apple requires near the purchase button: the price and
- * period, that it renews until cancelled, how to cancel, and when payment is
- * taken, including after a free trial.
+ * Whether subscriptions are on: the launch switch, a key this build can use,
+ * and either something real to sell (App Store key) or a development build
+ * on the Test Store, where the paywall can be tried before any feature exists.
  */
-export function renewalTerms(plan: Plan): string {
-  const trial = plan.intro?.price === 0;
-  return [
-    `Rust Strength Pro renews automatically at ${priceLine(plan)} until you cancel.`,
-    trial
-      ? 'Payment is charged to your Apple ID when the free trial ends, unless you cancel before then.'
-      : 'Payment is charged to your Apple ID when you confirm the purchase.',
-    'Cancel any time, at least 24 hours before the current period ends, in Settings > your name > Subscriptions.',
-  ].join(' ');
+export function subscriptionsEnabled(input: {
+  ios: boolean;
+  switchOn: boolean;
+  key: string | null | undefined;
+  devBuild: boolean;
+  sellable: boolean;
+}): boolean {
+  if (!input.ios || !input.switchOn) return false;
+  switch (keyKind(input.key)) {
+    case 'test-store':
+      return input.devBuild;
+    case 'app-store':
+      return input.sellable;
+    default:
+      return false;
+  }
 }

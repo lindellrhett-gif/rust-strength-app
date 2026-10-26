@@ -108,5 +108,4 @@ export const qk = {
   // Under 'activities', so logging or deleting one refreshes it too.
   trophyTotals: ['activities', 'trophy-totals'] as const,
   proStatus: ['subscription', 'status'] as const,
-  plans: ['subscription', 'plans'] as const,
 };

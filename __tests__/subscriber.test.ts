@@ -36,10 +36,10 @@ describe('rowFromSubscriber', () => {
   const subscriber = (over: Partial<NonNullable<V1Subscriber['subscriber']>> = {}): V1Subscriber => ({
     subscriber: {
       entitlements: {
-        pro: { expires_date: '2027-10-26T12:00:00Z', grace_period_expires_date: null, product_identifier: 'pro_yearly' },
+        rust_strength_pro: { expires_date: '2027-10-26T12:00:00Z', grace_period_expires_date: null, product_identifier: 'yearly' },
       },
       subscriptions: {
-        pro_yearly: { period_type: 'normal', store: 'app_store', unsubscribe_detected_at: null, billing_issues_detected_at: null },
+        yearly: { period_type: 'normal', store: 'app_store', unsubscribe_detected_at: null, billing_issues_detected_at: null },
       },
       ...over,
     },
@@ -49,7 +49,7 @@ describe('rowFromSubscriber', () => {
     expect(rowFromSubscriber(ALICE, subscriber(), NOW)).toEqual({
       user_id: ALICE,
       pro_active: true,
-      product_id: 'pro_yearly',
+      product_id: 'yearly',
       period_type: 'NORMAL',
       store: 'app_store',
       expires_at: '2027-10-26T12:00:00Z',
@@ -60,8 +60,8 @@ describe('rowFromSubscriber', () => {
 
   it('is not Pro once expired, and notices a cancellation', () => {
     const lapsed = subscriber({
-      entitlements: { pro: { expires_date: '2026-10-01T00:00:00Z', product_identifier: 'pro_yearly' } },
-      subscriptions: { pro_yearly: { period_type: 'normal', unsubscribe_detected_at: '2026-09-20T00:00:00Z' } },
+      entitlements: { rust_strength_pro: { expires_date: '2026-10-01T00:00:00Z', product_identifier: 'yearly' } },
+      subscriptions: { yearly: { period_type: 'normal', unsubscribe_detected_at: '2026-09-20T00:00:00Z' } },
     });
     const row = rowFromSubscriber(ALICE, lapsed, NOW);
     expect(row.pro_active).toBe(false);
@@ -71,13 +71,13 @@ describe('rowFromSubscriber', () => {
   it('keeps Pro through Apple’s billing grace period', () => {
     const grace = subscriber({
       entitlements: {
-        pro: {
+        rust_strength_pro: {
           expires_date: '2026-10-20T00:00:00Z',
           grace_period_expires_date: '2026-11-05T00:00:00Z',
-          product_identifier: 'pro_yearly',
+          product_identifier: 'yearly',
         },
       },
-      subscriptions: { pro_yearly: { period_type: 'normal', billing_issues_detected_at: '2026-10-20T00:00:00Z' } },
+      subscriptions: { yearly: { period_type: 'normal', billing_issues_detected_at: '2026-10-20T00:00:00Z' } },
     });
     const row = rowFromSubscriber(ALICE, grace, NOW);
     expect(row.pro_active).toBe(true);
@@ -85,9 +85,36 @@ describe('rowFromSubscriber', () => {
     expect(row.will_renew).toBe(false);
   });
 
+  it('mirrors a lifetime purchase as Pro with no expiry', () => {
+    const lifetime: V1Subscriber = {
+      subscriber: {
+        entitlements: { rust_strength_pro: { expires_date: null, product_identifier: 'lifetime' } },
+        subscriptions: {},
+        non_subscriptions: { lifetime: [{ store: 'app_store', purchase_date: '2026-10-25T00:00:00Z' }] },
+      },
+    };
+    expect(rowFromSubscriber(ALICE, lifetime, NOW)).toMatchObject({
+      pro_active: true,
+      product_id: 'lifetime',
+      period_type: 'LIFETIME',
+      store: 'app_store',
+      expires_at: null,
+      will_renew: null,
+    });
+  });
+
+  it('ignores an entitlement under any other name', () => {
+    const other = rowFromSubscriber(
+      ALICE,
+      { subscriber: { entitlements: { pro: { expires_date: null, product_identifier: 'yearly' } } } },
+      NOW,
+    );
+    expect(other.pro_active).toBe(false);
+  });
+
   it('marks trials, and someone who never subscribed', () => {
     const trial = subscriber({
-      subscriptions: { pro_yearly: { period_type: 'trial', store: 'app_store' } },
+      subscriptions: { yearly: { period_type: 'trial', store: 'app_store' } },
     });
     expect(rowFromSubscriber(ALICE, trial, NOW).period_type).toBe('TRIAL');
     const never = rowFromSubscriber(BOB, { subscriber: { entitlements: {}, subscriptions: {} } }, NOW);

@@ -3,51 +3,82 @@
  * here; the rules about what Pro unlocks are in src/domain/subscription.ts and
  * src/domain/entitlements.ts.
  *
- * Subscriptions are on only when all three hold:
- *   - the build has the public RevenueCat key (EXPO_PUBLIC_REVENUECAT_IOS_KEY),
- *   - the launch switch is on (EXPO_PUBLIC_SUBSCRIPTIONS=on),
- *   - a paid feature exists to sell (hasSellableFeatures).
- * Until then the SDK is never configured, so nothing at all is sent to
- * RevenueCat. Once on, the person's account id (a random UUID) is the
- * RevenueCat customer id, so purchases follow the account across devices.
+ * Subscriptions are on only with the launch switch (EXPO_PUBLIC_SUBSCRIPTIONS
+ * =on) and a key this build can use (EXPO_PUBLIC_REVENUECAT_IOS_KEY):
+ *   - a Test Store key (test_) in a development build, to try the paywall
+ *     with pretend products before anything is on sale. RevenueCat crashes
+ *     any release build that has one, so here it is ignored outside
+ *     development, and scripts/check-build-env.js refuses to build with it;
+ *   - an App Store key (appl_), once a paid feature exists to sell.
+ * Until then the SDK is never started, so nothing at all reaches RevenueCat.
+ * Once on, the account id (a random UUID) is the RevenueCat customer id, so
+ * purchases follow the account across devices.
  *
- * The SDK loads on first use, like the share card modules, so a build made
- * before it was added reports that it needs updating instead of crashing.
+ * The paywall is RevenueCat's own, designed in its dashboard; subscribers
+ * manage their plan in RevenueCat's Customer Center. Both SDKs load on first
+ * use, so an older build without them reports that it needs updating.
  */
 import { Platform } from 'react-native';
 import type { CustomerInfo } from 'react-native-purchases';
 
-import { hasSellableFeatures, type Plan, type ProStatus, proStatusFrom } from '@/domain/subscription';
+import {
+  PRO_ENTITLEMENT,
+  hasSellableFeatures,
+  paywallOutcome,
+  proStatusFrom,
+  subscriptionsEnabled,
+  type PaywallOutcome,
+  type ProStatus,
+} from '@/domain/subscription';
 
 import { env } from './env';
 
 type PurchasesModule = typeof import('react-native-purchases');
+type PurchasesUiModule = typeof import('react-native-purchases-ui');
 
-export const subscriptionsOn =
-  Platform.OS === 'ios' && env.subscriptionsSwitch && !!env.revenueCatIosKey && hasSellableFeatures();
+export const subscriptionsOn = subscriptionsEnabled({
+  ios: Platform.OS === 'ios',
+  switchOn: env.subscriptionsSwitch,
+  key: env.revenueCatIosKey,
+  devBuild: __DEV__,
+  sellable: hasSellableFeatures(),
+});
+
+const UPDATE_APP = 'Update the app to subscribe.';
 
 let sdk: Promise<PurchasesModule> | null = null;
+let ui: Promise<PurchasesUiModule> | null = null;
 let configuredFor: string | null = null;
 
 function load(): Promise<PurchasesModule> {
   if (!subscriptionsOn) return Promise.reject(new Error('Subscriptions aren’t available yet.'));
   sdk ??= import('react-native-purchases').catch(() => {
     sdk = null;
-    throw new Error('Update the app to subscribe.');
+    throw new Error(UPDATE_APP);
   });
   return sdk;
 }
 
+function loadUi(): Promise<PurchasesUiModule> {
+  if (!subscriptionsOn) return Promise.reject(new Error('Subscriptions aren’t available yet.'));
+  ui ??= import('react-native-purchases-ui').catch(() => {
+    ui = null;
+    throw new Error(UPDATE_APP);
+  });
+  return ui;
+}
+
 /**
- * Points RevenueCat at this account: configures the SDK the first time, then
- * switches customers on sign-in as someone else. Does nothing while off.
+ * Points RevenueCat at this account: configures the SDK the first time (once
+ * per app run), then switches customers on sign-in as someone else.
  */
 export async function identify(userId: string): Promise<void> {
   if (!subscriptionsOn || configuredFor === userId) return;
-  const { default: Purchases } = await load();
+  const { default: Purchases, LOG_LEVEL } = await load();
   if (await Purchases.isConfigured()) {
     await Purchases.logIn(userId);
   } else {
+    if (__DEV__) await Purchases.setLogLevel(LOG_LEVEL.DEBUG);
     Purchases.configure({ apiKey: env.revenueCatIosKey!, appUserID: userId });
   }
   configuredFor = userId;
@@ -63,6 +94,7 @@ export async function forget(): Promise<void> {
   await Purchases.logOut().catch(() => undefined);
 }
 
+/** Whether this account has rust_strength_pro, straight from RevenueCat. */
 export async function getProStatus(): Promise<ProStatus> {
   const { default: Purchases } = await load();
   return proStatusFrom(await Purchases.getCustomerInfo());
@@ -78,52 +110,32 @@ export async function onProStatusChange(listener: (status: ProStatus) => void): 
   };
 }
 
-/** The monthly and yearly plans of the current offering, as the store prices them. */
-export async function getPlans(): Promise<Plan[]> {
-  const { default: Purchases } = await load();
-  const offering = (await Purchases.getOfferings()).current;
-  if (!offering) return [];
-  const plans: Plan[] = [];
-  for (const [pkg, period] of [
-    [offering.monthly, 'month'],
-    [offering.annual, 'year'],
-  ] as const) {
-    if (!pkg) continue;
-    const intro = pkg.product.introPrice;
-    plans.push({
-      id: pkg.identifier,
-      period,
-      price: pkg.product.price,
-      priceString: pkg.product.priceString,
-      intro: intro
-        ? {
-            price: intro.price,
-            priceString: intro.priceString,
-            periodUnit: intro.periodUnit,
-            periodNumberOfUnits: intro.periodNumberOfUnits,
-            cycles: intro.cycles,
-          }
-        : null,
-    });
-  }
-  return plans;
+/**
+ * Shows RevenueCat's paywall for the current offering, unless this account
+ * already has Pro. It handles buying, restoring, the Terms and Privacy links
+ * and Apple's renewal wording, all set up in the RevenueCat dashboard.
+ */
+export async function showPaywall(): Promise<PaywallOutcome> {
+  const { default: RevenueCatUI } = await loadUi();
+  const result = await RevenueCatUI.presentPaywallIfNeeded({
+    requiredEntitlementIdentifier: PRO_ENTITLEMENT,
+    displayCloseButton: true,
+  });
+  return paywallOutcome(String(result));
 }
 
 /**
- * Buys a plan through Apple. Resolves with the new status, or null when the
- * person cancelled Apple's sheet (not an error).
+ * RevenueCat's Customer Center: change or cancel the plan, restore, ask for
+ * a refund, contact support. It needs a RevenueCat plan that includes it;
+ * without one, this falls back to Apple's own subscription settings.
  */
-export async function buy(planId: string): Promise<ProStatus | null> {
-  const { default: Purchases } = await load();
-  const offering = (await Purchases.getOfferings()).current;
-  const pkg = offering?.availablePackages.find((p) => p.identifier === planId);
-  if (!pkg) throw new Error('That plan isn’t available right now. Try again in a moment.');
+export async function openCustomerCenter(): Promise<void> {
   try {
-    const { customerInfo } = await Purchases.purchasePackage(pkg);
-    return proStatusFrom(customerInfo);
-  } catch (e) {
-    if (isCancelled(e, Purchases)) return null;
-    throw e;
+    const { default: RevenueCatUI } = await loadUi();
+    await RevenueCatUI.presentCustomerCenter();
+  } catch {
+    const { default: Purchases } = await load();
+    await Purchases.showManageSubscriptions();
   }
 }
 
@@ -131,16 +143,4 @@ export async function buy(planId: string): Promise<ProStatus | null> {
 export async function restore(): Promise<ProStatus> {
   const { default: Purchases } = await load();
   return proStatusFrom(await Purchases.restorePurchases());
-}
-
-/** Opens Apple's own subscription management sheet. */
-export async function manageSubscription(): Promise<void> {
-  const { default: Purchases } = await load();
-  await Purchases.showManageSubscriptions();
-}
-
-function isCancelled(e: unknown, Purchases: PurchasesModule['default']): boolean {
-  if (typeof e !== 'object' || e == null) return false;
-  const err = e as { code?: unknown; userCancelled?: unknown };
-  return err.userCancelled === true || err.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR;
 }
