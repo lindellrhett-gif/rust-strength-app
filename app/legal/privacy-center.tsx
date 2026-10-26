@@ -12,6 +12,7 @@ import {
   useUnblockUser,
 } from '@/data/privacy';
 import { LEGAL } from '@/legal/config';
+import { subscriptionsOn } from '@/lib/purchases';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -35,7 +36,7 @@ export default function PrivacyCenter() {
       const json = await exportData.mutateAsync();
       // Share sheet lets the user send it to Files, Mail, anywhere they like.
       await Share.share({
-        title: 'My Gym App data',
+        title: `My ${LEGAL.appName} data`,
         message: json,
       });
     } catch (e) {
@@ -46,7 +47,10 @@ export default function PrivacyCenter() {
   const doDelete = () => {
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account and every workout, activity, preset and stat in it. It cannot be undone and we cannot restore it.',
+      'This permanently deletes your account and every workout, activity, preset and stat in it. It cannot be undone and we cannot restore it.' +
+        (subscriptionsOn
+          ? '\n\nIt doesn’t cancel a Rust Strength Pro subscription: Apple keeps charging until you cancel it in Settings > your name > Subscriptions.'
+          : ''),
       [
         { text: 'Keep my account', style: 'cancel' },
         {

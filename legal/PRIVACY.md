@@ -24,6 +24,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
 - **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
 - **Reports you file.** If you report another user, we store who you reported, the reason, and anything you type.
+- **Your subscription (only if you subscribe to Rust Strength Pro).** Apple takes the payment; we never see your card details or Apple ID. Through our subscription provider, RevenueCat, we learn which plan you bought, when, its price and currency, Apple's transaction identifiers, whether it is a free trial, whether it will renew or was refunded, and when it ends. We keep whether you have Pro, which plan, and when it renews or ends, to unlock Pro's features.
 
 ### Created automatically
 
@@ -121,10 +122,11 @@ We use these service providers:
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
 | Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
+| RevenueCat | Runs Rust Strength Pro: checks purchases with Apple and tells the app whether you have Pro | Your random account identifier, the purchase details described in Section 1, and technical information about the app and your device needed to process purchases (such as the app version, operating system, and your App Store country and currency). Not your training, runs or any other app data. The app connects your account to RevenueCat when you sign in, so it can tell whether you have Pro |
 
-Supabase and Google process this on our behalf under their own security and privacy terms; Apple handles map requests under Apple's privacy policy. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+Supabase, Google and RevenueCat process this on our behalf under their own security and privacy terms; Apple handles map requests and payments under Apple's privacy policy. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
 
-We use **no** analytics, advertising, crash-reporting, or tracking services.
+We use **no** advertising, crash-reporting or tracking services, and no analytics beyond the subscription figures RevenueCat shows us, such as how many people subscribe or cancel.
 
 ## 6. Where information is stored
 
@@ -140,7 +142,9 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, reports you filed, and our record of your subscription. Deleting a workout or activity also removes the reactions other people left on it. We also ask RevenueCat to delete its record of you. Apple keeps its own record of your purchases under its privacy policy. **It cannot be undone and we cannot restore it.**
+
+**Deleting your account does not cancel a Rust Strength Pro subscription.** Cancel it in your device's settings (Settings > your name > Subscriptions) first, or Apple will keep charging you.
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 

@@ -153,6 +153,10 @@ function RootNavigator() {
         name="share/run/[id]"
         options={{ headerShown: true, presentation: 'modal', title: 'Share run' }}
       />
+      <Stack.Screen
+        name="paywall"
+        options={{ headerShown: true, presentation: 'modal', title: 'Rust Strength Pro' }}
+      />
     </Stack>
   );
 }

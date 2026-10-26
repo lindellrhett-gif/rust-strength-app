@@ -8,6 +8,7 @@ import { BadgeShelf } from '@/components/BadgeShelf';
 import { FeaturedTrophies } from '@/components/FeaturedTrophies';
 import { LevelCard } from '@/components/LevelCard';
 import { NumberStepper } from '@/components/NumberStepper';
+import { ProCard } from '@/components/ProCard';
 import { RestAlertToggle } from '@/components/RestAlertToggle';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
@@ -31,6 +32,7 @@ import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { hasFeature } from '@/domain/entitlements';
 import { todayLocal } from '@/lib/dates';
 import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
+import { subscriptionsOn } from '@/lib/purchases';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -389,6 +391,8 @@ export default function ProfileScreen() {
           </Pressable>
         </Card>
       ) : null}
+
+      {subscriptionsOn ? <ProCard /> : null}
 
       <Card title="Privacy & legal">
         <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>
