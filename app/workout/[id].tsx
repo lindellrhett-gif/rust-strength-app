@@ -188,7 +188,24 @@ export default function WorkoutScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ title: inProgress ? 'Active workout' : 'Workout' }} />
+      <Stack.Screen
+        options={{
+          title: inProgress ? 'Active workout' : 'Workout',
+          headerRight:
+            !inProgress && hasSets
+              ? () => (
+                  <Pressable
+                    onPress={() => router.push(`/share/workout/${id}`)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Share workout card"
+                    hitSlop={12}
+                  >
+                    <Text style={styles.headerButton}>Share</Text>
+                  </Pressable>
+                )
+              : undefined,
+        }}
+      />
 
       <View style={styles.summary}>
         <WorkoutTimer
@@ -536,4 +553,5 @@ const styles = StyleSheet.create({
   },
   footerRow: { flexDirection: 'row', gap: spacing.sm },
   footerBtn: { flex: 1 },
+  headerButton: { color: colors.primary, fontSize: 17, fontWeight: '600' },
 });

@@ -121,6 +121,10 @@ npm test
   workout time, consistency, and activity time, over a chosen period (from
   1.1 also distance run and, for people who share them, daily steps).
 - Blocking, reporting, and a switch to stop sharing your workouts.
+- **Share cards** (from 1.1): after a workout or a run, an image with the
+  numbers, records, muscles worked or the route's shape, ready for Instagram,
+  Messages or Photos. It's drawn on the phone and nothing is uploaded; a
+  run's route is trimmed at the start and end as on friends' maps.
 
 **Reliability and privacy**
 - **Works offline.** Sets logged with no signal are queued and sync when the

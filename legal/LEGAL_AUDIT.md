@@ -502,7 +502,8 @@ site still shows version 1.4.4, which matches the released app.
 2. **Steps.** The policy says a recorded run's step total is saved with the
    run (`activities.steps`, migration 0017) and today's count never leaves
    the phone (`src/lib/steps.ts` sends nothing).
-3. **Permissions.** The policy lists all three: notifications, location
+3. **Permissions.** The policy lists them all (three then; Photos, add
+   only, was added with share cards, item 11): notifications, location
    ("While Using the App" only, checked: the code calls only
    `requestForegroundPermissionsAsync`) and Motion & Fitness.
 4. **Apple Maps** is listed as a service provider, since map tiles for the
@@ -533,6 +534,20 @@ site still shows version 1.4.4, which matches the released app.
 10. **Fixed while checking:** the privacy zone screen labelled a radius as
    "Size across", which would have made a zone hide half the distance the
    user expected. It now says "Radius", as does the server's error message.
+11. **Share cards and Photos.** After a workout or run the user can make an
+   image card and share it (system share sheet) or save it to Photos. The
+   image is drawn and captured on the phone (`src/lib/shareImage.ts`) and
+   nothing is uploaded. Saving asks for add-only Photos access
+   (`requestPermissionsAsync(true)`); the app never requests read access,
+   but `NSPhotoLibraryUsageDescription` is set as well because the photo
+   library module links read APIs and App Store processing can reject a
+   build without it. A run card's route is trimmed on the phone by the same
+   rule as `run_shared_route`, with a 10 m margin on privacy zones
+   (`sharedOutline` in `src/domain/shareCard.ts`), and can be turned off.
+   The promo line on the cards says "Available on the App Store" with no
+   Apple badge artwork, and the volume comparisons name no brands. The
+   policy's permissions list (now four) and a new "Share cards" section
+   cover this. No new data is collected, so the privacy labels don't change.
 
 Version 1.5.0 is a minor bump, so every signed-in user is asked to accept
 again when they first open 1.1.

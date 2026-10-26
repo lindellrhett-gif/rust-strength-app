@@ -45,11 +45,12 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 We do not collect your real name, phone number, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information. We collect your location only while you are recording a run, as described above.
 
-The app can ask for three device permissions, each only when you use the feature that needs it, and each can be turned off in your phone's settings at any time:
+The app can ask for four device permissions, each only when you use the feature that needs it, and each can be turned off in your phone's settings at any time:
 
 - **Notifications**, only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us.
 - **Location**, "While Using the App", when you start recording a run, or if you choose to place a privacy zone where you are standing. The app never asks for "Always".
 - **Motion & Fitness**, when you start a run, choose to show today's steps, or turn on Share daily steps.
+- **Photos, add only**, the first time you tap Save to Photos on a share card (see Section 4). The app can add the card to your library; it cannot see, read or upload any of your photos.
 
 While a run records, and while the rest timer runs between sets, the app shows it on your Lock Screen and in the Dynamic Island (a run's time, distance and pace; the rest left and your next set), where anyone holding your phone can see it. This needs no permission, is done on your phone, and nothing about it is sent to us. You can turn it off under Live Activities in your phone's settings for the app.
 
@@ -110,6 +111,13 @@ Friends can react to a post. You see how many of each reaction a post received, 
 **You can switch this off.** In Profile, under "Sharing with friends", turn off "Show my sessions in the feed" and your sessions stop appearing for everyone immediately. The rest of the friends features keep working.
 
 You can remove a friend or block someone at any time. Blocking removes any existing friendship and hides you from each other in search.
+
+### Share cards
+
+After a workout or a run you can make an image card to share, for example to Instagram, Messages or your Photos. **The card is made on your phone and nothing about it is sent to us.** It is shared only if you tap Share or Save to Photos, and only to the app or person you pick. Once you share it, what happens to it is up to you and the service you sent it to, under that service's own terms.
+
+- A **workout card** shows the session's name, date and length, total weight lifted, sets, reps, how many exercises, your personal records, the muscle groups worked, and each exercise's number of sets and best set.
+- A **run card** shows the run's name, date, distance, time, pace, climb, splits and best efforts. If you leave "Show the route" on, it also shows the route's shape, with no map, trimmed at least as much as for friends (the first and last 200 metres, and any part of the start or end inside your privacy zones, are removed). The trimming happens on your phone before the image is made.
 
 ## 5. Who we share with
 

@@ -7,6 +7,8 @@
  * shapes those rows into what the screen renders.
  */
 
+import { elapsedSeconds } from './duration';
+
 export interface SummaryExerciseRow {
   exerciseId: string;
   exerciseName: string;
@@ -108,6 +110,65 @@ export function buildSummary(
     records: extractRecords(rows),
     empty: totals.totalSets === 0,
   };
+}
+
+/** The columns of a logged set the summary reads. */
+export interface SessionSet {
+  exercise_id: string;
+  is_warmup: boolean;
+  weight: number;
+  reps: number;
+  duration_seconds: number | null;
+}
+
+/**
+ * The summary of a session from its sets and the server's per-exercise rows.
+ * An unfinished session is measured up to `now`, so it still reads sensibly.
+ */
+export function summarizeSession(
+  startedAt: string | null,
+  endedAt: string | null,
+  sets: readonly SessionSet[],
+  rows: SummaryExerciseRow[],
+  now: Date = new Date(),
+): WorkoutSummary {
+  const working = sets.filter((s) => !s.is_warmup);
+  return buildSummary(
+    startedAt ? elapsedSeconds(startedAt, endedAt ?? now) : 0,
+    {
+      totalVolume: working.reduce((n, s) => n + s.weight * s.reps, 0),
+      totalReps: working.reduce((n, s) => n + s.reps, 0),
+      totalSets: working.length,
+    },
+    rows,
+  );
+}
+
+/**
+ * The longest hold per exercise. A plank's weight and reps would read
+ * "0 lb × 1", so its time is shown instead.
+ */
+export function longestHolds(sets: readonly SessionSet[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const s of sets) {
+    if (s.is_warmup || s.duration_seconds == null) continue;
+    out[s.exercise_id] = Math.max(out[s.exercise_id] ?? 0, s.duration_seconds);
+  }
+  return out;
+}
+
+/** Working sets per muscle group, for the body figure. Unknown exercises are skipped. */
+export function setsByMuscle<G extends string>(
+  sets: readonly SessionSet[],
+  groupOf: (exerciseId: string) => G | undefined,
+): Partial<Record<G, number>> {
+  const out: Partial<Record<G, number>> = {};
+  for (const s of sets) {
+    if (s.is_warmup) continue;
+    const group = groupOf(s.exercise_id);
+    if (group) out[group] = (out[group] ?? 0) + 1;
+  }
+  return out;
 }
 
 /** A short line for the top of the screen, tuned to how the session went. */

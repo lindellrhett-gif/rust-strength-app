@@ -145,6 +145,14 @@ function RootNavigator() {
         name="run/manual"
         options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
       />
+      <Stack.Screen
+        name="share/workout/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Share workout' }}
+      />
+      <Stack.Screen
+        name="share/run/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Share run' }}
+      />
     </Stack>
   );
 }

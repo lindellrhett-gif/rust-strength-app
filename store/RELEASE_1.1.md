@@ -74,6 +74,18 @@ releasing it.
         the oldest.
   - [ ] The Calendar offers no "Mark as rest day" on past days.
   - [ ] Steps and cadence on the run summary, and Today's steps card.
+  - [ ] **Share cards** (needs a build made after October 25, 2026: they
+        add three native modules). After a workout, "Share workout card" on
+        the summary (and "Share" at the top of any past workout); after a
+        run, "Share run card". Check the card looks right, Share opens the
+        share sheet with Instagram in it, and Save to Photos asks for
+        permission once, then the image is in Photos at full size. On a run
+        card, the route starts and ends away from home, and "Show the
+        route" off removes it.
+  - [ ] **Assisted machines:** an assisted exercise you created as Weights
+        offers "Switch to Assisted" on the set screen; after switching, its
+        old sets show as assistance and a hard set suggests more assistance,
+        not less.
   - [ ] Airplane mode on before saving, then off: the run appears.
   - [ ] A friend's view: stats only by default; with the map shared, the
         outline starts and ends away from home (add a privacy zone first).
@@ -148,6 +160,8 @@ releasing it.
   • New leaderboards for distance run and steps, and new trophies for running, steps, friends and reactions.
   • Show your two favourite trophies next to your name.
   • Choose whether friends see each run's map when you finish it.
+  • Share a card after every workout or run, to Instagram, Messages or Photos.
+  • Assisted machines: suggestions now add assistance after a hard set, and an assisted exercise set up as Weights can be switched over.
   ```
 - [ ] **Screenshots:** consider adding one of the recorder and one of a run
   summary (`npm run screenshots` resizes them).

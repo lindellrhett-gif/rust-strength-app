@@ -69,6 +69,11 @@ export default function RunSummaryScreen() {
           onDone={() => router.back()}
           sharing={
             <>
+              <Button
+                label="Share run card"
+                variant="secondary"
+                onPress={() => router.push(`/share/run/${runId}`)}
+              />
               <RunRoute run={run.data} onOpenRoute={(routeId) => router.push(`/run/route/${routeId}`)} />
               <RunSharing run={run.data} onPrivacyZones={() => router.push('/run/privacy-zones')} />
             </>

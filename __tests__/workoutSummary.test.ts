@@ -1,9 +1,47 @@
 import {
   extractRecords,
   buildSummary,
+  longestHolds,
+  setsByMuscle,
+  summarizeSession,
   summaryHeadline,
+  type SessionSet,
   type SummaryExerciseRow,
 } from '@/domain/workoutSummary';
+
+describe('session helpers', () => {
+  const sets: SessionSet[] = [
+    { exercise_id: 'bench', is_warmup: true, weight: 95, reps: 10, duration_seconds: null },
+    { exercise_id: 'bench', is_warmup: false, weight: 185, reps: 5, duration_seconds: null },
+    { exercise_id: 'bench', is_warmup: false, weight: 185, reps: 4, duration_seconds: null },
+    { exercise_id: 'plank', is_warmup: false, weight: 0, reps: 1, duration_seconds: 60 },
+    { exercise_id: 'plank', is_warmup: false, weight: 0, reps: 1, duration_seconds: 75 },
+    { exercise_id: 'mystery', is_warmup: false, weight: 50, reps: 10, duration_seconds: null },
+  ];
+
+  it('totals working sets only and measures the session', () => {
+    const s = summarizeSession('2026-10-25T17:00:00Z', '2026-10-25T18:05:30Z', sets, []);
+    expect(s.totalSets).toBe(5);
+    expect(s.totalReps).toBe(21);
+    expect(s.totalVolume).toBe(185 * 9 + 500);
+    expect(s.durationSeconds).toBe(3930);
+  });
+
+  it('measures an unfinished session up to now', () => {
+    const now = new Date('2026-10-25T17:30:00Z');
+    expect(summarizeSession('2026-10-25T17:00:00Z', null, [], [], now).durationSeconds).toBe(1800);
+    expect(summarizeSession(null, null, [], [], now).durationSeconds).toBe(0);
+  });
+
+  it('keeps the longest hold per exercise', () => {
+    expect(longestHolds(sets)).toEqual({ plank: 75 });
+  });
+
+  it('counts working sets per muscle group, skipping unknown exercises', () => {
+    const groups: Record<string, string> = { bench: 'chest', plank: 'core' };
+    expect(setsByMuscle(sets, (id) => groups[id])).toEqual({ chest: 2, core: 2 });
+  });
+});
 
 function row(partial: Partial<SummaryExerciseRow> = {}): SummaryExerciseRow {
   return {

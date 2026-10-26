@@ -135,6 +135,15 @@
           "enableBackgroundPlayback": true
         }
       ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Rust Strength only adds your workout and run cards to Photos when you tap Save to Photos. It doesn't browse or upload your photos.",
+          "savePhotosPermission": "Rust Strength saves your workout and run cards to Photos when you tap Save to Photos. It can add pictures but never see the ones already there.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
+        }
+      ],
       "@bacons/apple-targets"
     ],
     "experiments": {

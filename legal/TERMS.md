@@ -2,7 +2,7 @@
 
 **Last updated: October 7, 2026**
 
-These Terms are an agreement between you and Rhett Lindell ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
+These Terms are an agreement between you and Bluestem Software LLC ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 
 ## 1. Not medical or fitness advice
 
@@ -102,7 +102,7 @@ Some jurisdictions do not allow limiting liability for personal injury or gross 
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless Rhett Lindell from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
+You agree to indemnify and hold harmless Bluestem Software LLC from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
 
 ## 15. Governing law and disputes
 
@@ -126,5 +126,5 @@ If any provision is unenforceable, the rest stays in force. Our not enforcing a 
 
 ## 19. Contact
 
-Rhett Lindell
+Bluestem Software LLC
 ruststrengthsupport@gmail.com
