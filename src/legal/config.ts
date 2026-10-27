@@ -48,7 +48,7 @@ export const LEGAL = {
   version: '1.5.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'October 7, 2026',
+  lastUpdated: 'October 26, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

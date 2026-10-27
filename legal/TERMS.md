@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last updated: October 7, 2026**
+**Last updated: October 26, 2026**
 
 These Terms are an agreement between you and Bluestem Software LLC ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 

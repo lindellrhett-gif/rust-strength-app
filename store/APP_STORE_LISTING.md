@@ -21,77 +21,92 @@ Rust Strength
 
 ## Subtitle (30 max)
 
+From 1.1 (changeable only with a new version):
+
 ```
-Know what weight to lift next
+Know what to lift, track runs
 ```
 
-`29 characters`
+`29 characters`. It keeps the main selling point and adds running. Other
+options: `Lifting log with GPS running` (28). 1.0 used
+`Know what weight to lift next` (29).
 
 ## Promotional text (170 max — editable later without review)
 
+From 1.1:
+
 ```
-Log a set with reps and how hard it felt. Rust Strength estimates your one-rep max and tells you what to load next, rounded to what the machine can actually be set to.
+New: GPS running. Record runs with your screen locked, see your pace and rest timer on the Lock Screen, and share a card after every workout or run.
 ```
 
-`166 characters`
+`148 characters`. 1.0 used: "Log a set with reps and how hard it felt. Rust
+Strength estimates your one-rep max and tells you what to load next, rounded
+to what the machine can actually be set to." (166)
 
 ## Keywords (100 max, comma-separated, no spaces)
 
+From 1.1:
+
 ```
-workout,gym,lifting,tracker,rpe,1rm,barbell,dumbbell,log,progress,routine,split,volume,pr,rest
+workout,gym,lifting,tracker,running,gps,pace,rpe,1rm,steps,cardio,5k,barbell,log,progress,pr,rest
 ```
 
-`94 characters`
+`97 characters`
 
 Words already in the Name and Subtitle are indexed automatically, so
-"strength", "weight" and "next" are deliberately left out to avoid wasting
-space.
+"strength", "lift", "track" and "runs" are left out to avoid wasting space.
+1.0 used `workout,gym,lifting,tracker,rpe,1rm,barbell,dumbbell,log,progress,routine,split,volume,pr,rest`.
 
 ## Description (4000 max)
 
+From 1.1:
+
 ```
-Rust Strength answers the question every lifter has mid-workout: how much should I put on the bar for the next set?
+Rust Strength answers the question every lifter has mid-workout: how much should I put on the bar for the next set? And now it records your runs too.
 
-Log a set with the weight, the reps, and how hard it felt on the RPE scale. Rust Strength works out an estimated one-rep max from that, then suggests a weight for your next set aimed at reaching failure inside the rep range you chose. Every suggestion is rounded to a weight the machine in front of you can actually be set to, because a recommendation of 147 lb is useless on a stack that moves in tens.
+Log a set with the weight, the reps, and how hard it felt on the RPE scale. Rust Strength estimates your one-rep max from that, then suggests a weight for your next set aimed at reaching failure inside the rep range you chose. Every suggestion is rounded to a weight the machine in front of you can actually be set to, and each machine keeps its own history, so a hotel gym doesn't throw off what it knows about your home gym.
 
-BUILT FOR TRAINING IN DIFFERENT GYMS
+LIFTING
 
-Machines are not consistent. A chest press at one gym does not feel like a chest press at another, and plate-loaded, selectorised and cable setups all label weight differently. Rust Strength records which machine each set was performed on and rounds to that machine's own increment, so a session in a hotel gym does not corrupt what it knows about your home gym.
+Weight suggestions after every set, with a plain-English reason for each one.
+Every set from last time shown while you log, top set in bold.
+Over 200 exercises built in, or add your own. Search forgives typos.
+Bodyweight, assisted and timed exercises: more reps, less assistance, or a longer hold to beat.
+Presets, and a generator that builds a session from the equipment you have and the muscles you haven't trained this week.
+A rest timer that starts when you save a set, counting down on your Lock Screen and in the Dynamic Island with your next set.
 
-WHAT YOU GET
+RUNNING
 
-Autoregulated weight suggestions after every set, with a plain-English reason for each one.
-Estimated one-rep max per exercise, updated as you train.
-Over 200 exercises built in, or add your own.
-Bodyweight exercises suggest more reps, with optional added weight. Assisted pull-ups and dips suggest less assistance as you get stronger.
-Timed holds like planks and wall sits, with a built-in hold timer and a suggested time to beat.
-Your top set from last time, shown while you log, so there is always a number to beat.
-Sets grouped by exercise, so five sets of bench read as one block.
-Workout presets — save "Push Day 1" once and start it pre-loaded with every exercise.
-A workout generator that builds a session from the equipment you actually have, prioritising the muscles you have not trained this week.
-A live workout timer, plus totals for time, volume, reps and sets.
-Activity tracking for runs, cardio machines, classes and more than 40 sports and activities from pickleball to skiing, timed live or entered by hand.
-A calendar for planning sessions ahead, logging rest days, and reviewing what you have done.
-A body chart showing which muscle groups you have and have not trained this week.
-A rest timer between sets, set to whatever length you want, that starts on its own when you save a set and can alert you when rest is over, even with your phone locked.
-Tiered trophies across nine ranks, from Wood to Legend, for the main lifts, calisthenics, and lifetime weight moved.
-XP and levels earned from the training you log, unlocking badges as you climb.
-A feed of your friends' recent sessions that you can react to, and profiles showing their streaks, levels and progress.
-A friends leaderboard for current streak, weight lifted, workout time, consistency and activity time.
+Record runs with GPS, with your phone locked: live map, distance, pace, splits and steps.
+Your time, distance and pace on the Lock Screen and in the Dynamic Island.
+Auto-pause at lights, and optional spoken updates every mile or kilometre.
+A summary for every run with pace and elevation charts. Edit the title or trim the start and end afterwards.
+Weekly and monthly distance, a weekly goal, and your fastest mile, 5K, 10K, half marathon and marathon.
+Save a route, run it again and compare your attempts.
+Enter treadmill runs by hand.
+
+PROGRESS AND FRIENDS
+
+Streaks, consistency, volume, time trained and personal records. Every activity counts toward your streak, and planned rest days keep it alive.
+A body chart of the muscle groups you trained this week, and a progress chart for every exercise.
+Tiered trophies from Wood to Legend for lifts, running, steps and more, plus XP, levels and badges. Show two favourites next to your name.
+A feed of friends' sessions and runs that you can react to, and a leaderboard for streaks, weight lifted, workout time, distance run and more.
+Share a card after any workout or run, to Instagram, Messages or Photos.
+Track 40+ other activities, from pickleball to skiing.
 
 DESIGNED TO ASK FOR LITTLE
 
-No ads. No analytics. No tracking. No third-party advertising SDKs. Rust Strength asks for an email address and a password so your training syncs to your devices, and collects nothing it does not need to run. Your bodyweight is optional. Friends see a summary of a session, never the individual sets, and you can switch feed sharing off entirely. You can export everything you have logged, and delete your account and all its data from inside the app at any time.
+No ads. No analytics. No tracking. Rust Strength asks for an email address and a password so your training syncs, and collects nothing it doesn't need. Location is used only for runs you record and privacy zones you set. Friends see a summary of a session, never the individual sets, and a run's map only if you share it, with the start and end always hidden. Steps are shared only if you turn that on. Export everything you've logged, or delete your account and all its data, from inside the app at any time.
 
 IMPORTANT
 
-Rust Strength is a training log, not medical or professional coaching advice. It suggests weights from the numbers you give it and knows nothing about your health, injuries, or experience. Warm up, use your own judgement, and stop if something hurts. Talk to a doctor before starting a new training programme.
+Rust Strength is a training log, not medical or professional coaching advice. It suggests weights from the numbers you give it and knows nothing about your health, injuries or experience. Warm up, use your own judgement, and stop if something hurts. Be aware of your surroundings when you run. Talk to a doctor before starting a new training programme.
 
 Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/privacy.html
 Terms of Service: https://lindellrhett-gif.github.io/rust-strength/terms.html
 ```
 
-`3,697 characters of 4,000`
+`3,424 characters of 4,000`
 
 ## URLs
 

@@ -107,14 +107,14 @@ releasing it.
   review).
 - [x] In `app.json`, set `"version"` to `"1.1.0"` (done for the TestFlight
   build). The build number counts up by itself (EAS remote versioning).
-- [ ] In `src/legal/config.ts`, set `lastUpdated` to today's date, then run
+- [x] In `src/legal/config.ts`, set `lastUpdated` to today's date (October 26, 2026), then run
   `npm run legal` with `SITE_DIR` pointing at a folder that doesn't exist,
   so the date is right in the app without publishing the site yet:
 
   ```powershell
   $env:SITE_DIR="C:\nowhere"; npm run legal; Remove-Item Env:SITE_DIR
   ```
-- [ ] Update the README's "At a glance" and "Tech stack" numbers (lines of
+- [x] Update the README's "At a glance" and "Tech stack" numbers (lines of
   code, migrations, test counts) from the merged code.
 - [ ] Run all the checks: `npm test`, `npm run lint`, `npm run typecheck`,
   `npm run test:db`, `npx expo export --platform ios`.
