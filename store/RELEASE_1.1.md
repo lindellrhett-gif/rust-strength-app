@@ -168,7 +168,7 @@ releasing it.
   summary (`npm run screenshots` resizes them).
 - [ ] **Description and keywords:** consider mentioning running. Keep any
   claim to what the app actually does.
-- [ ] **Publish the legal documents before submitting.** The reviewer checks
+- [x] **Publish the legal documents before submitting** (done October 26, 2026). The reviewer checks
   the Privacy Policy link, and the live one (1.4.x) still says no location
   is collected. With `rust-strength-site` checked out next to this repo, run
   `npm run legal`, then commit and push the site repo. The public policy
