@@ -15,7 +15,8 @@ releasing it.
   Additive like the others: it only adds columns to what 1.0 reads (by
   name), and the dev build needs it for the new trophies, leaderboards,
   daily steps and featured trophies. **Not `0025`** (see section 4).
-- [ ] **Let EAS sign the new widget extension, once.** The Lock Screen view
+- [x] **Let EAS sign the new widget extension, once** (done October 18, 2026;
+  the widget and the app now share one distribution certificate). The Lock Screen view
   is a separate app extension (`com.ruststrength.app.dev.widget` for the dev
   app, `com.ruststrength.app.widget` for the store app), and EAS has to
   create its identifier and provisioning profile. That needs the App Store
@@ -167,10 +168,20 @@ releasing it.
   summary (`npm run screenshots` resizes them).
 - [ ] **Description and keywords:** consider mentioning running. Keep any
   claim to what the app actually does.
+- [ ] **Publish the legal documents before submitting.** The reviewer checks
+  the Privacy Policy link, and the live one (1.4.x) still says no location
+  is collected. With `rust-strength-site` checked out next to this repo, run
+  `npm run legal`, then commit and push the site repo. The public policy
+  then matches the app (version 1.5.0). Publishing asks nobody to accept
+  anything: the prompt comes from the version built into the app, so it
+  appears once when people first open 1.1.
+- [ ] **Submit for review with "Manually release this version"** selected,
+  so you choose the moment it goes live and can run the release-day steps
+  straight after.
 
 ## 4. Release day
 
-Do these as soon as 1.1 is live in the App Store, in this order:
+Do these as soon as you release 1.1 in App Store Connect, in this order:
 
 - [ ] **Run `0020_streaks_count_activities.sql`** on the live project. Before
   this, friends would see a streak that counts activities while the 1.0 app
@@ -178,9 +189,5 @@ Do these as soon as 1.1 is live in the App Store, in this order:
   own streak and their friends' disagree until they do.
 - [ ] **Run `0025_rest_days_not_in_past.sql`**, which stops rest days being
   added for past days. Anyone still on 1.0 then gets an error if they try.
-- [ ] **Publish the legal documents.** With `rust-strength-site` checked out
-  next to this repo, run `npm run legal`, then commit and push the site
-  repo. The public Privacy Policy then matches the app (version 1.5.0).
-  Everyone who opens 1.1 is asked to accept the new version once.
 - [ ] Tag the release: `git tag v1.1.0`, then `git push origin v1.1.0`.
 - [ ] Tell your beta testers what's new.
