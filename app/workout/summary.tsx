@@ -12,9 +12,9 @@ import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useSetsForWorkout } from '@/data/sets';
 import { useSaveWorkoutAsTemplate } from '@/data/templates';
 import { useWorkout, useWorkoutSummary } from '@/data/workouts';
-import { elapsedSeconds, formatDurationShort } from '@/domain/duration';
+import { formatDurationShort } from '@/domain/duration';
 import { formatHold } from '@/domain/loadType';
-import { buildSummary, summaryHeadline } from '@/domain/workoutSummary';
+import { longestHolds, summarizeSession, summaryHeadline } from '@/domain/workoutSummary';
 import { sessionXp } from '@/domain/xp';
 import { compact, trimWeight } from '@/lib/format';
 import { colors } from '@/theme/colors';
@@ -34,16 +34,8 @@ export default function WorkoutSummaryScreen() {
 
   const [showSave, setShowSave] = useState(false);
 
-  // Timed exercises: the longest hold per exercise. The summary's weight and
-  // reps would read "0 lb × 1" for a plank, so its time is shown instead.
-  const longestHold = useMemo(() => {
-    const out: Record<string, number> = {};
-    for (const s of sets.data ?? []) {
-      if (s.is_warmup || s.duration_seconds == null) continue;
-      out[s.exercise_id] = Math.max(out[s.exercise_id] ?? 0, s.duration_seconds);
-    }
-    return out;
-  }, [sets.data]);
+  // Timed exercises show their longest hold instead of "0 lb × 1".
+  const longestHold = useMemo(() => longestHolds(sets.data ?? []), [sets.data]);
   /**
    * The level being celebrated, captured once. Holding it in state matters:
    * writing `level_seen` makes the "is this new?" test false again, and without
@@ -53,22 +45,17 @@ export default function WorkoutSummaryScreen() {
 
   const unit = profile.data?.unit ?? 'lb';
 
-  const summary = useMemo(() => {
-    const working = (sets.data ?? []).filter((s) => !s.is_warmup);
-    return buildSummary(
-      // ended_at is set by the time we get here, but fall back to "now" so a
-      // summary opened on a still-open session shows a sane number.
-      workout.data
-        ? elapsedSeconds(workout.data.started_at, workout.data.ended_at ?? new Date())
-        : 0,
-      {
-        totalVolume: working.reduce((n, s) => n + s.weight * s.reps, 0),
-        totalReps: working.reduce((n, s) => n + s.reps, 0),
-        totalSets: working.length,
-      },
-      rows.data ?? [],
-    );
-  }, [workout.data, sets.data, rows.data]);
+  // ended_at is set by the time we get here; an open session is measured to now.
+  const summary = useMemo(
+    () =>
+      summarizeSession(
+        workout.data?.started_at ?? null,
+        workout.data?.ended_at ?? null,
+        sets.data ?? [],
+        rows.data ?? [],
+      ),
+    [workout.data, sets.data, rows.data],
+  );
 
   const xpEarned = useMemo(
     () =>
@@ -203,6 +190,12 @@ export default function WorkoutSummaryScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
+        <Button
+          label="Share workout card"
+          variant="secondary"
+          onPress={() => router.push(`/share/workout/${id}`)}
+          disabled={summary.empty}
+        />
         <Button
           label="Save as preset"
           variant="secondary"

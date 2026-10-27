@@ -102,9 +102,9 @@ const SHAPES: Record<MuscleGroup, React.ReactNode> = {
  * arms hang to mid-thigh — a wrist at hip height is the landmark that makes
  * arms read as the right length.
  */
-function Silhouette() {
+function Silhouette({ outline = OUTLINE, body = BODY_FILL }: { outline?: string; body?: string }) {
   return (
-    <G stroke={OUTLINE} strokeWidth={1.5} fill={BODY_FILL} strokeLinejoin="round">
+    <G stroke={outline} strokeWidth={1.5} fill={body} strokeLinejoin="round">
       <Ellipse cx="50" cy="17" rx="8.5" ry="12.5" />
       <Path d="M46 27 L46 44 L54 44 L54 27 Z" />
 
@@ -125,17 +125,38 @@ function Silhouette() {
   );
 }
 
-function Figure({ regions, side }: { regions: RegionState[]; side: 'front' | 'back' }) {
+export interface FigurePalette {
+  levels: Record<CoverageLevel, string>;
+  outline: string;
+  body: string;
+}
+
+const APP_PALETTE: FigurePalette = { levels: LEVEL_FILL, outline: OUTLINE, body: BODY_FILL };
+
+/** One figure, front or back, shaded by `regions`. Shared with the share cards. */
+export function BodyFigure({
+  regions,
+  side,
+  width = 98,
+  palette = APP_PALETTE,
+  label = true,
+}: {
+  regions: RegionState[];
+  side: 'front' | 'back';
+  width?: number;
+  palette?: FigurePalette;
+  label?: boolean;
+}) {
   const shown = regions.filter((r) => r.side === side);
   return (
     <View style={styles.figure}>
-      <Svg width={98} height={208} viewBox="0 0 100 212">
-        <Silhouette />
+      <Svg width={width} height={(width * 212) / 100} viewBox="0 0 100 212">
+        <Silhouette outline={palette.outline} body={palette.body} />
         {shown.map((r) => (
           <G
             key={r.group}
-            fill={LEVEL_FILL[r.level]}
-            stroke={OUTLINE}
+            fill={palette.levels[r.level]}
+            stroke={palette.outline}
             strokeWidth={1}
             strokeLinejoin="round"
             opacity={r.level === 'none' ? 0.85 : 1}
@@ -144,7 +165,7 @@ function Figure({ regions, side }: { regions: RegionState[]; side: 'front' | 'ba
           </G>
         ))}
       </Svg>
-      <Text style={styles.figureLabel}>{side === 'front' ? 'FRONT' : 'BACK'}</Text>
+      {label ? <Text style={styles.figureLabel}>{side === 'front' ? 'FRONT' : 'BACK'}</Text> : null}
     </View>
   );
 }
@@ -160,8 +181,8 @@ export function BodyChart({
   return (
     <View style={styles.wrap}>
       <View style={styles.figures}>
-        <Figure regions={regions} side="front" />
-        <Figure regions={regions} side="back" />
+        <BodyFigure regions={regions} side="front" />
+        <BodyFigure regions={regions} side="back" />
 
         <View style={styles.legend}>
           <Text style={text.label}>THIS WEEK</Text>

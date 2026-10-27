@@ -349,6 +349,13 @@ with no users this is theoretical; revisit if it grows.
 
 **No multi-factor authentication.** Reasonable for a training log.
 
+**Sign-up says when an email already has an account (from 1.1).** That is
+clearer for someone who forgot they signed up, but it also lets anyone find
+out whether a given email address uses the app, which Supabase's own sign-up
+response is designed to hide. A deliberate choice for usability; Supabase's
+rate limits on sign-up apply. Revisit if that ever matters more than the
+convenience.
+
 **The offline cache is protected by the operating system, not by you.** iOS file
 protection and the device passcode are the defence. For workout data that is
 proportionate. It would not be for anything more sensitive.
@@ -472,3 +479,89 @@ None of these can be settled from the code.
    further, or exclude that state.
 6. **How fast you commit to answering reports.** The runbook says daily. That is
    a promise you are making to Apple and to your users.
+
+---
+
+## 14. Pending: the running update (not released yet)
+
+The running feature is being built on the `feature/running` branch, and the
+released app contains none of it. Sections 1 to 13 describe the released app.
+
+### Done on the branch (legal version 1.5.0)
+
+The documents on the branch now describe the running update. They are **not
+published**: they were rebuilt with the site sync turned off, so the public
+site still shows version 1.4.4, which matches the released app.
+
+1. **Precise location.** The Privacy Policy no longer says no location is
+   collected. It describes recording a route only between Start and Finish
+   (`runs.route`, migration 0015), what is stored with each run, privacy
+   zones, saved routes, running settings, the per-run feed and map choices,
+   the server-side trimming (`run_shared_route`, migration 0021), the run in
+   progress kept on the phone, export (migration 0023) and deletion.
+2. **Steps.** The policy says a recorded run's step total is saved with the
+   run (`activities.steps`, migration 0017) and today's count never leaves
+   the phone (`src/lib/steps.ts` sends nothing).
+3. **Permissions.** The policy lists them all (three then; Photos, add
+   only, was added with share cards, item 11): notifications, location
+   ("While Using the App" only, checked: the code calls only
+   `requestForegroundPermissionsAsync`) and Motion & Fitness.
+4. **Apple Maps** is listed as a service provider, since map tiles for the
+   area on screen are fetched from Apple. Routes are drawn on the phone and
+   are not sent to Apple by the app.
+5. **Terms.** Section 1 now says run figures are GPS and sensor estimates,
+   and adds a short outdoor running safety paragraph.
+6. **Privacy manifest.** `NSPrivacyCollectedDataTypePreciseLocation` is in
+   `app.json`. Fitness was already declared.
+7. **Lock Screen.** While a run records, a Live Activity shows its time,
+   distance and pace on the Lock Screen and in the Dynamic Island, and while
+   the rest timer runs, the time left and the next set (exercise and
+   weight), all visible to anyone holding the phone. They are created on the
+   phone with no push token, and the policy says so and how to turn them off.
+8. **Daily steps (opt-in) and what friends see.** "Share daily steps" is
+   off by default; while on, one total per day for the past week is
+   uploaded (`daily_steps`, migration 0024), shown to accepted friends on
+   the steps leaderboard and in their stats, and deleted when it's turned
+   off. Friends now also see total distance run, reactions received, and up
+   to two trophies chosen to show by your name. The policy covers all of it.
+   The run map is now asked on the recording screen for every run, starting
+   off, and your own runs always show their outline to you.
+9. **Featured trophies are trusted as saved.** Trophies are worked out on
+   the phone, so the server can only check the shape of what's shown by a
+   name, not that it was earned. Someone using the API directly could show a
+   trophy they don't hold to their friends. Low stakes in a friends-only
+   app; noted rather than solved.
+10. **Fixed while checking:** the privacy zone screen labelled a radius as
+   "Size across", which would have made a zone hide half the distance the
+   user expected. It now says "Radius", as does the server's error message.
+11. **Share cards and Photos.** After a workout or run the user can make an
+   image card and share it (system share sheet) or save it to Photos. The
+   image is drawn and captured on the phone (`src/lib/shareImage.ts`) and
+   nothing is uploaded. Saving asks for add-only Photos access
+   (`requestPermissionsAsync(true)`); the app never requests read access,
+   but `NSPhotoLibraryUsageDescription` is set as well because the photo
+   library module links read APIs and App Store processing can reject a
+   build without it. A run card's route is trimmed on the phone by the same
+   rule as `run_shared_route`, with a 10 m margin on privacy zones
+   (`sharedOutline` in `src/domain/shareCard.ts`), and can be turned off.
+   The promo line on the cards says "Available on the App Store" with no
+   Apple badge artwork, and the volume comparisons name no brands. The
+   policy's permissions list (now four) and a new "Share cards" section
+   cover this. No new data is collected, so the privacy labels don't change.
+
+Version 1.5.0 is a minor bump, so every signed-in user is asked to accept
+again when they first open 1.1.
+
+### Still to do at release
+
+1. **Publish the documents** with `npm run legal` (with the site repo checked
+   out next to this one), then push `rust-strength-site`. Do this when 1.1 is
+   released, not before, or the public policy describes features users don't
+   have. `lastUpdated` in `src/legal/config.ts` is set just before the
+   production build, so the app and the site show the same date.
+2. **App Store privacy labels.** Add **Precise Location** (linked to the user,
+   used for app functionality, not tracking). Steps already fall under the
+   **Fitness** label.
+3. **Attorney.** Location combined with fitness data adds to the Washington My
+   Health My Data question in section 5. This has not been reviewed, and is not
+   claimed to be compliant.

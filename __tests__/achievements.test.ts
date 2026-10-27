@@ -5,6 +5,11 @@ import {
   totalTiersAvailable,
   topAchievements,
   consistency,
+  parseFeatured,
+  refreshFeatured,
+  toggleFeatured,
+  featuredKey,
+  MAX_FEATURED,
   TIERS,
   LB_PER_KG,
   type AchievementInput,
@@ -28,6 +33,10 @@ function input(partial: Partial<AchievementInput> = {}): AchievementInput {
     activitySeconds: 0,
     activityCount: 0,
     activityKinds: 0,
+    runDistanceM: 0,
+    stepsTotal: 0,
+    friendCount: 0,
+    reactionsReceived: 0,
     ...partial,
   };
 }
@@ -295,5 +304,62 @@ describe('consistency', () => {
 
   it('does not double-count a day that was both trained and rested', () => {
     expect(consistency(['2026-09-06'], '2026-09-06', 30, ['2026-09-06'])).toBeCloseTo(1 / 30, 5);
+  });
+});
+
+describe('running, steps and social trophies', () => {
+  it('ranks distance run on the race distances first, in your unit', () => {
+    const run = byId(evaluateAchievements(input({ runDistanceM: 42_195 })), 'distance-run');
+    expect(run.tier).toBe('silver');
+    expect(run.steps[1].note).toBe('a half marathon');
+    expect(run.next?.label).toBe('62.1 mi');
+    const km = byId(evaluateAchievements(input({ runDistanceM: 42_195, unit: 'kg' })), 'distance-run');
+    expect(km.valueLabel).toBe('42.2 km');
+  });
+
+  it('counts steps only while daily steps are shared', () => {
+    expect(byId(evaluateAchievements(input({ stepsTotal: 120_000 })), 'steps').tier).toBe('silver');
+    const off = byId(evaluateAchievements(input({ stepsTotal: null })), 'steps');
+    expect(off.tier).toBeNull();
+    expect(off.valueLabel).toBe('Not shared');
+  });
+
+  it('counts friends and the reactions on your posts', () => {
+    const list = evaluateAchievements(input({ friendCount: 10, reactionsReceived: 1 }));
+    expect(byId(list, 'friends').tier).toBe('gold');
+    expect(byId(list, 'reactions').tier).toBe('wood');
+  });
+});
+
+describe('trophies by your name', () => {
+  const list = evaluateAchievements(input({ friendCount: 5, reactionsReceived: 30, runDistanceM: 6000 }));
+  const friends = byId(list, 'friends');
+  const reactions = byId(list, 'reactions');
+  const run = byId(list, 'distance-run');
+
+  it('saves a trophy with the tier it was earned at', () => {
+    expect(featuredKey(friends)).toBe('friends:silver');
+    expect(featuredKey(byId(list, 'lift-bench'))).toBeNull();
+  });
+
+  it('shows up to two, the oldest making way for a third, and toggles off', () => {
+    let keys = toggleFeatured([], friends);
+    keys = toggleFeatured(keys, reactions);
+    expect(keys).toEqual(['friends:silver', 'reactions:silver']);
+    keys = toggleFeatured(keys, run);
+    expect(keys).toEqual(['reactions:silver', 'distance-run:wood']);
+    expect(keys).toHaveLength(MAX_FEATURED);
+    expect(toggleFeatured(keys, reactions)).toEqual(['distance-run:wood']);
+  });
+
+  it('reads saved keys back, skipping anything it doesn’t know', () => {
+    expect(parseFeatured(['friends:silver', 'mystery:gold', 'lift-bench:mythic']).map((f) => [f.name, f.tier, f.glyph])).toEqual([
+      ['Friends', 'silver', 'people'],
+    ]);
+    expect(parseFeatured(null)).toEqual([]);
+  });
+
+  it('moves a shown trophy up as you climb, and drops one no longer held', () => {
+    expect(refreshFeatured(['friends:wood', 'lift-bench:gold'], list)).toEqual(['friends:silver']);
   });
 });

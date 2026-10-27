@@ -3,8 +3,11 @@ import { Redirect, Tabs } from 'expo-router';
 import { useState } from 'react';
 
 import { ConsentScreen } from '@/components/ConsentScreen';
+import { RunRecovery } from '@/components/RunRecovery';
 import { useProfile } from '@/data/profile';
+import { useDailyStepsSync } from '@/data/trophies';
 import { needsConsent } from '@/domain/consent';
+import { hasFeature } from '@/domain/entitlements';
 import { TAB_TITLES } from '@/domain/tabs';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -14,6 +17,8 @@ import { colors } from '@/theme/colors';
 export default function TabsLayout() {
   const { session } = useAuth();
   const profile = useProfile();
+  // Shared daily steps stay up to date while sharing is on.
+  useDailyStepsSync();
   // The version agreed to on the consent screen during this session, if any.
   const [acceptedVersion, setAcceptedVersion] = useState<string | null>(null);
   if (!session) return <Redirect href="/(auth)/sign-in" />;
@@ -34,6 +39,7 @@ export default function TabsLayout() {
   // once someone is actually signed in, never over the sign-in screen.
   return (
     <OnboardingProvider>
+      {hasFeature('running') ? <RunRecovery /> : null}
       <Tabs
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },

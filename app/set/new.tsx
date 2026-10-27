@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card } from '@/components';
@@ -12,7 +12,7 @@ import { RestTimerBar } from '@/components/RestTimerBar';
 import { RpeSelector } from '@/components/RpeSelector';
 import { SelectSheet, type Option } from '@/components/SelectSheet';
 import { keyboardAware } from '@/components/keyboard';
-import { useCreateExercise, useExercises } from '@/data/exercises';
+import { useConvertToAssisted, useCreateExercise, useExercises } from '@/data/exercises';
 import { useCreateMachine, useMachines } from '@/data/machines';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import {
@@ -30,8 +30,10 @@ import {
   exerciseSublabel,
   formatHold,
   formatSetSummary,
+  looksAssisted,
 } from '@/domain/loadType';
-import { lastTopSet } from '@/domain/lastSession';
+import { lastSession, type LastSession } from '@/domain/lastSession';
+import { loggedSetDetail, upcomingSetDetail } from '@/domain/restActivity';
 import { historyForMachine } from '@/domain/machines';
 import {
   MAX_REPS,
@@ -44,6 +46,7 @@ import {
 import { roundToIncrement } from '@/domain/rounding';
 import { formatDate, todayLocal, toLocalDateString } from '@/lib/dates';
 import { trimWeight } from '@/lib/format';
+import { useAuth } from '@/providers/AuthProvider';
 import { useRestTimer } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -62,6 +65,7 @@ export default function NewSet() {
   const slots = useWorkoutExercises(workoutId);
   const machineSets = useMachineSetHistory();
   const createExercise = useCreateExercise();
+  const { userId } = useAuth();
   const createMachine = useCreateMachine();
   const addSet = useAddSet();
   const restTimer = useRestTimer();
@@ -95,6 +99,11 @@ export default function NewSet() {
 
   const exercise = exercises.data?.find((e) => e.id === exerciseId) ?? null;
   const loadType = asLoadType(exercise?.load_type);
+  // One of the user's own exercises, named like an assisted machine but set
+  // up as Weights: the assistance typed is read as weight lifted, so a hard
+  // set brings it down. Offer to fix the type and the sets already logged.
+  const offerAssisted =
+    loadType === 'weighted' && exercise != null && exercise.user_id === userId && looksAssisted(exercise.name);
   const history = useExerciseHistory(exerciseId ?? undefined);
 
   // Default to the machine this exercise was last done on, so its own history
@@ -237,9 +246,9 @@ export default function NewSet() {
     });
   }, [exerciseId, history.data, loadType, displayAdded]);
 
-  // The best set from the last session of this exercise, as a number to beat.
-  const lastTop = useMemo(
-    () => (history.data ? lastTopSet(history.data, workoutId, loadType) : null),
+  // Every set from the last session of this exercise, the best one picked out.
+  const last = useMemo(
+    () => (history.data ? lastSession(history.data, workoutId, loadType) : null),
     [history.data, workoutId, loadType],
   );
 
@@ -257,6 +266,33 @@ export default function NewSet() {
 
   const assistError = loadType === 'assisted' ? assistProblem(bodyWeight, displayAssist) : null;
 
+  const setsToConvert = (history.data ?? []).filter(
+    (s) => s.assistWeight == null && s.addedWeight == null && s.durationSeconds == null,
+  ).length;
+
+  // While resting, the Lock Screen shows the set this screen is lined up for:
+  // the next one of this exercise, or of another exercise opened mid-rest.
+  const { setNext } = restTimer;
+  const resting = restTimer.running || restTimer.finished;
+  const leaving = useRef(false);
+  const upcoming = exercise
+    ? upcomingSetDetail({
+        loadType,
+        unit,
+        weight: displayWeight,
+        assist: displayAssist,
+        added: displayAdded,
+        reps: displayReps,
+        holdSeconds: displayHold,
+        repLow,
+        repHigh,
+      })
+    : null;
+  useEffect(() => {
+    if (!resting || !exercise || !upcoming || leaving.current) return;
+    setNext({ exercise: exercise.name, kind: 'next', detail: upcoming });
+  }, [resting, exercise, upcoming, setNext]);
+
   const resetInputs = () => {
     setWeightTouched(false);
     setAssistTouched(false);
@@ -265,6 +301,7 @@ export default function NewSet() {
     setHoldTouched(false);
     setHold(0);
   };
+
 
   const pickExercise = (id: string) => {
     setExerciseId(id);
@@ -357,6 +394,15 @@ export default function NewSet() {
     // the screen. Warmups are excluded — nobody rests two minutes after a bar.
     if (profile.data?.rest_auto !== false && !isWarmup) {
       restTimer.start(profile.data?.rest_seconds);
+      // Until the next suggestion is worked out (if this screen stays open),
+      // the Lock Screen shows the set just done.
+      if (exercise) {
+        setNext({
+          exercise: exercise.name,
+          kind: 'last',
+          detail: loggedSetDetail({ ...load, reps: loadType === 'timed' ? 1 : displayReps }, unit),
+        });
+      }
     }
 
     if (thenAddAnother) {
@@ -368,6 +414,7 @@ export default function NewSet() {
       // the set, so there is nothing to wait for either way.
       void history.refetch();
     } else {
+      leaving.current = true;
       router.back();
     }
   };
@@ -417,6 +464,17 @@ export default function NewSet() {
             value={machine?.label ?? 'Choose machine (optional)'}
             placeholder={!machine}
             onPress={() => setShowMachinePicker(true)}
+          />
+        ) : null}
+
+        {offerAssisted && exercise ? (
+          <AssistedOffer
+            exerciseId={exercise.id}
+            exerciseName={exercise.name}
+            bodyWeight={bodyWeight}
+            unit={unit}
+            setsToConvert={setsToConvert}
+            onConverted={resetInputs}
           />
         ) : null}
 
@@ -515,14 +573,7 @@ export default function NewSet() {
                 No history for this exercise yet. Log this set and the next suggestion will use it.
               </Text>
             )}
-            {!history.isLoading && lastTop ? (
-              <Text style={[text.caption, styles.lastTime]}>
-                Last time ({sessionDay(lastTop.performedAt)}): top set{' '}
-                <Text style={styles.lastTimeSet}>{formatSetSummary(lastTop.set, unit)}</Text>
-                {' · '}
-                {lastTop.workingSets} set{lastTop.workingSets === 1 ? '' : 's'}
-              </Text>
-            ) : null}
+            {!history.isLoading && last ? <LastTime last={last} unit={unit} /> : null}
           </Card>
         ) : null}
 
@@ -724,6 +775,35 @@ export default function NewSet() {
   );
 }
 
+/** The last session's sets, one a line: W for a warm-up, the top set in bold. */
+function LastTime({ last, unit }: { last: LastSession; unit: string }) {
+  const rows = last.sets.map((s, i) => {
+    // Working sets are numbered from 1; warm-ups don't count.
+    const working = last.sets.slice(0, i + 1).filter((x) => !x.isWarmup).length;
+    const summary = formatSetSummary(s, unit);
+    return {
+      key: i,
+      mark: s.isWarmup ? 'W' : String(working),
+      text: s.rpe != null ? `${summary}  RPE ${s.rpe}` : summary,
+      top: i === last.topIndex,
+      spoken: `${s.isWarmup ? 'Warm-up' : `Set ${working}`}, ${summary}${i === last.topIndex ? ', top set' : ''}`,
+    };
+  });
+  const day = sessionDay(last.performedAt);
+  return (
+    <View style={styles.lastTime} accessible accessibilityLabel={`Last time, ${day}: ${rows.map((r) => r.spoken).join('; ')}`}>
+      <Text style={text.caption}>Last time ({day})</Text>
+      {rows.map((r) => (
+        <View key={r.key} style={styles.lastRow}>
+          <Text style={styles.lastMark}>{r.mark}</Text>
+          <Text style={[text.caption, r.top && styles.lastTimeSet]}>{r.text}</Text>
+          {r.top ? <Text style={styles.lastTop}>TOP</Text> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 /** "today", "yesterday" or "Sep 12, 2026", for the last-time line. */
 function sessionDay(when: string | number | Date): string {
   const day = toLocalDateString(when);
@@ -768,6 +848,73 @@ function BodyweightPrompt({ unit }: { unit: string }) {
 }
 
 /** The picker's "No machine" option. */
+/**
+ * Shown for the user's own exercise named like an assisted machine but set up
+ * as Weights: switching converts it and the sets already logged on it.
+ */
+function AssistedOffer({
+  exerciseId,
+  exerciseName,
+  bodyWeight,
+  unit,
+  setsToConvert,
+  onConverted,
+}: {
+  exerciseId: string;
+  exerciseName: string;
+  bodyWeight: number | null;
+  unit: string;
+  setsToConvert: number;
+  onConverted: () => void;
+}) {
+  const convert = useConvertToAssisted();
+
+  const confirm = () => {
+    if (bodyWeight == null) return;
+    Alert.alert(
+      'Switch to Assisted?',
+      setsToConvert > 0
+        ? `The ${setsToConvert} set${setsToConvert === 1 ? '' : 's'} already logged are converted too: the number entered becomes the assistance, and the weight lifted becomes your bodyweight (${trimWeight(bodyWeight)} ${unit}) minus it.`
+        : 'From now on the number you enter is the assistance.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Switch',
+          onPress: () =>
+            convert.mutate(
+              { exerciseId, bodyWeight },
+              {
+                onSuccess: onConverted,
+                onError: (e) => Alert.alert("Couldn't switch it", e instanceof Error ? e.message : String(e)),
+              },
+            ),
+        },
+      ],
+    );
+  };
+
+  return (
+    <Card title="Assisted machine?">
+      <Text style={text.body}>
+        {exerciseName} is set up as Weights, so the number you enter is read as weight lifted. After
+        a hard set it suggests a lower number, which on an assisted machine means less help.
+      </Text>
+      <Text style={text.caption}>
+        Switch it to Assisted and the number is the assistance instead, so a hard set suggests
+        more.
+        {bodyWeight == null ? ' Add your bodyweight in Profile first: the weight lifted is worked out from it.' : ''}
+      </Text>
+      <Button
+        label="Switch to Assisted"
+        variant="secondary"
+        onPress={confirm}
+        disabled={bodyWeight == null}
+        loading={convert.isPending}
+      />
+    </Card>
+  );
+}
+
 const NO_MACHINE = '__none__';
 
 function SelectorRow({
@@ -803,7 +950,10 @@ const styles = StyleSheet.create({
   selectorPressed: { backgroundColor: colors.border },
   suggestBig: { color: colors.primary, fontSize: 28, fontWeight: '800' },
   under: { marginTop: spacing.sm },
-  lastTime: { marginTop: spacing.sm },
+  lastTime: { marginTop: spacing.sm, gap: 2 },
+  lastRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  lastMark: { width: 16, color: colors.textFaint, fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  lastTop: { color: colors.primary, fontSize: 11, fontWeight: '800' },
   rangeNote: { marginTop: -spacing.sm },
   lastTimeSet: { color: colors.text, fontWeight: '700' },
   prompt: { gap: spacing.sm },

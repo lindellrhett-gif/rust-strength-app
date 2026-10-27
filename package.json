@@ -9,15 +9,18 @@
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:db": "node --test --test-concurrency=1 \"supabase/tests/*.test.mjs\"",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
+    "db:bundle": "node scripts/build-dev-sql.js",
     "legal": "node scripts/build-legal.js",
     "icons": "node scripts/make-icons.js",
     "screenshots": "node scripts/screenshots.js",
     "eas-build-post-install": "node scripts/check-build-env.js"
   },
   "dependencies": {
+    "@bacons/apple-targets": "5.0.0",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "12.0.1",
@@ -26,28 +29,41 @@
     "@tanstack/react-query": "^5.59.0",
     "@tanstack/react-query-persist-client": "^5.102.8",
     "expo": "~57.0.24",
+    "expo-asset": "~57.0.18",
+    "expo-audio": "~57.0.5",
     "expo-constants": "~57.0.17",
     "expo-crypto": "~57.0.3",
+    "expo-dev-client": "~57.0.19",
     "expo-font": "~57.0.4",
     "expo-keep-awake": "~57.0.2",
     "expo-linking": "~57.0.10",
+    "expo-location": "~57.0.20",
+    "expo-media-library": "~57.0.5",
     "expo-notifications": "~57.0.20",
     "expo-router": "~57.0.22",
+    "expo-sensors": "~57.0.3",
+    "expo-sharing": "~57.0.21",
+    "expo-speech": "~57.0.3",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
+    "expo-task-manager": "~57.0.21",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.53.0",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-maps": "1.27.2",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
     "react-native-url-polyfill": "^2.0.0",
+    "react-native-view-shot": "5.1.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",
+    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite-postgis": "^0.2.8",
     "@types/jest": "^29.5.13",
     "@types/node": "^26.4.1",
     "@types/react": "~19.2.4",
@@ -59,5 +75,22 @@
     "ts-jest": "^29.2.5",
     "typescript": "~6.0.3"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "install": {
+      "exclude": [
+        "expo",
+        "expo-asset",
+        "expo-constants",
+        "expo-linking",
+        "expo-notifications",
+        "expo-router"
+      ]
+    },
+    "autolinking": {
+      "exclude": [
+        "@bacons/apple-targets"
+      ]
+    }
+  }
 }

@@ -10,6 +10,7 @@ import {
 
 import { keyboardAware } from './keyboard';
 import { ModalScreen } from './ModalScreen';
+import { search } from '@/domain/search';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -41,14 +42,8 @@ export function SelectSheet({
 }: SelectSheetProps) {
   const [query, setQuery] = useState('');
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return options;
-    return options.filter(
-      (o) =>
-        o.label.toLowerCase().includes(q) || o.sublabel?.toLowerCase().includes(q),
-    );
-  }, [options, query]);
+  // Forgives a letter or two, so "bech press" still finds Bench Press.
+  const filtered = useMemo(() => search(options, query), [options, query]);
 
   return (
     <ModalScreen visible={visible} onRequestClose={onClose}>

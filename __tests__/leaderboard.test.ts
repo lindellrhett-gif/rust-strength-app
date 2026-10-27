@@ -22,17 +22,21 @@ const person = (over: Partial<LeaderboardPerson>): LeaderboardPerson => ({
   activitySeconds: 0,
   currentStreak: 0,
   consistency: 0,
+  runDistanceM: 0,
+  steps: null,
   ...over,
 });
 
 describe('leaderboard', () => {
-  it('offers the five boards asked for', () => {
+  it('offers the seven boards asked for', () => {
     expect([...LEADERBOARD_METRICS]).toEqual([
       'streak',
       'volume',
       'workoutTime',
       'consistency',
       'activityTime',
+      'runDistance',
+      'steps',
     ]);
     for (const m of LEADERBOARD_METRICS) expect(METRIC_LABEL[m].length).toBeGreaterThan(0);
   });
@@ -169,5 +173,30 @@ describe('server-side friend figures (migration 0014)', () => {
     expect(sql).toMatch(
       /grant execute on function rpc_friend_leaderboard\(timestamptz, date\) to authenticated/,
     );
+  });
+});
+
+describe('run distance and steps boards', () => {
+  it('ranks run distance, shown in miles or kilometres by the viewer’s unit', () => {
+    const rows = rankLeaderboard(
+      [person({ username: 'a', runDistanceM: 5000 }), person({ username: 'b', runDistanceM: 21097.5 })],
+      'runDistance',
+      'lb',
+    );
+    expect(rows.map((r) => r.person.username)).toEqual(['b', 'a']);
+    expect(formatMetric(rows[0].value, 'runDistance', 'lb')).toBe('13.1 mi');
+    expect(formatMetric(rows[0].value, 'runDistance', 'kg')).toBe('21.1 km');
+    expect(formatMetric(500_000, 'runDistance', 'kg')).toBe('500 km');
+  });
+
+  it('leaves people who don’t share their steps off the steps board', () => {
+    const rows = rankLeaderboard(
+      [person({ username: 'a', steps: 42_000 }), person({ username: 'b', steps: null }), person({ username: 'c', steps: 0 })],
+      'steps',
+      'lb',
+    );
+    expect(rows.map((r) => r.person.username)).toEqual(['a', 'c']);
+    expect(formatMetric(42_000, 'steps', 'lb')).toBe('42k');
+    expect(metricNote('steps', 'week')).toMatch(/share their daily steps/);
   });
 });

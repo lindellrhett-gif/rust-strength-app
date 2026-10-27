@@ -1,8 +1,8 @@
 # Terms of Service
 
-**Last updated: September 18, 2026**
+**Last updated: October 26, 2026**
 
-These Terms are an agreement between you and Rhett Lindell ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
+These Terms are an agreement between you and Bluestem Software LLC ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 
 ## 1. Not medical or fitness advice
 
@@ -13,9 +13,12 @@ Rust Strength is a logging and calculation tool. It is **not** a medical device,
 - The weight suggestions are produced by a **mathematical formula** applied to numbers you type in. They are estimates, not a prescription.
 - The estimated one-rep max is an **estimate**, not a measurement, and not a safe target.
 - Generated workouts are **general suggestions** built from your equipment and history, not a program designed for you by a professional.
+- Distance, pace, elevation, steps and calories from a recorded run are **estimates** from your phone's GPS and motion sensors, which can be wrong, especially near tall buildings, under trees or in tunnels.
 - Trophies and streaks are for motivation. Nothing in the App is a recommendation to train through pain, injury, or exhaustion.
 
 **Lifting weights carries a real risk of serious injury.** You are solely responsible for deciding what is safe for you. Consult a qualified physician or trainer before starting or changing a training program, particularly if you have any medical condition or injury. Do not attempt a weight because the App suggested it. Use appropriate form, equipment, and spotters.
+
+**Running outdoors has its own risks.** Watch where you are going, not your phone, and obey traffic laws. Maps and saved routes do not tell you whether a route is safe, legal or open to the public.
 
 ## 2. Eligibility
 
@@ -99,7 +102,7 @@ Some jurisdictions do not allow limiting liability for personal injury or gross 
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless Rhett Lindell from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
+You agree to indemnify and hold harmless Bluestem Software LLC from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
 
 ## 15. Governing law and disputes
 
@@ -123,5 +126,5 @@ If any provision is unenforceable, the rest stays in force. Our not enforcing a 
 
 ## 19. Contact
 
-Rhett Lindell
+Bluestem Software LLC
 ruststrengthsupport@gmail.com

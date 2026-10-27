@@ -224,6 +224,8 @@ export interface ActivityRecord {
   distanceUnit: DistanceUnit | null;
   steps: number | null;
   calories: number | null;
+  /** A recorded or entered run with a detail page (route, splits). */
+  hasRunDetail?: boolean;
 }
 
 /** What to call an activity in a list: its custom name, else the kind. */

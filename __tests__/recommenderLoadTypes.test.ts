@@ -49,6 +49,22 @@ describe('recommendAssisted', () => {
     expect(easy.suggestedAssist!).toBeLessThan(hard.suggestedAssist!);
   });
 
+  it('asks for more assistance after a set that was too hard, even after stronger sessions', () => {
+    // Easy sets at 30 lb of assistance, then a bad day at 40: four reps at
+    // RPE 10, short of the 6-rep floor. The average still remembers the
+    // strong sessions, but the next set must be easier than the one missed.
+    const strong = [1, 2, 3, 4, 5].map((n) => set(150, 8, 7, n));
+    const r = recommendAssisted({ ...input, history: [...strong, set(140, 4, 10, 7)] });
+    expect(r.suggestedAssist!).toBeGreaterThan(40);
+    expect(r.rationale).toMatch(/harder than target/);
+  });
+
+  it('never asks for more assistance after a set that felt easy', () => {
+    const weak = [1, 2, 3, 4, 5].map((n) => set(120, 5, 10, n));
+    const r = recommendAssisted({ ...input, history: [...weak, set(140, 8, 6, 7)] });
+    expect(r.suggestedAssist!).toBeLessThanOrEqual(40);
+  });
+
   it('rounds toward more assistance on the first working set', () => {
     const first = recommendAssisted({ ...input, increment: 10, isFirstWorkingSet: true });
     const later = recommendAssisted({ ...input, increment: 10, isFirstWorkingSet: false });

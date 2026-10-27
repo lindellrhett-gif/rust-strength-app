@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import type { ActivityDraft, ActivityRecord } from '@/domain/activities';
+import { exerciseCaloriesForDay, type ExerciseDay } from '@/domain/exercise';
+import { toLocalDateString } from '@/lib/dates';
 import { useAuth } from '@/providers/AuthProvider';
 
 export function useActivities(limit = 100) {
@@ -13,11 +16,13 @@ export function useActivities(limit = 100) {
     queryFn: async (): Promise<ActivityRecord[]> => {
       const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('*, runs(activity_id)')
         .order('performed_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
-      return (data ?? []).map((a) => ({
+      // The run detail, if any, arrives as one row (or a list of one, from older PostgREST).
+      type Row = (typeof data)[number] & { runs?: unknown };
+      return ((data ?? []) as Row[]).map((a) => ({
         id: a.id,
         kind: a.kind,
         name: a.name,
@@ -27,6 +32,7 @@ export function useActivities(limit = 100) {
         distanceUnit: a.distance_unit,
         steps: a.steps,
         calories: a.calories,
+        hasRunDetail: Array.isArray(a.runs) ? a.runs.length > 0 : a.runs != null,
       }));
     },
   });
@@ -81,6 +87,8 @@ export function useLogActivity() {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
       client.invalidateQueries({ queryKey: qk.feed });
+      // A run logged by hand belongs in the running history too.
+      client.invalidateQueries({ queryKey: qk.runs });
     },
   });
 }
@@ -96,6 +104,20 @@ export function useDeleteActivity() {
       client.invalidateQueries({ queryKey: qk.activities });
       client.invalidateQueries({ queryKey: qk.activityTotals });
       client.invalidateQueries({ queryKey: qk.feed });
+      // A run logged by hand belongs in the running history too.
+      client.invalidateQueries({ queryKey: qk.runs });
     },
   });
+}
+
+/**
+ * Calories burned exercising on a local date (src/domain/exercise.ts): the
+ * hook the nutrition diary will read. Nothing uses it yet.
+ */
+export function useExerciseCalories(date: string): ExerciseDay | null {
+  const activities = useActivities();
+  return useMemo(
+    () => (activities.data ? exerciseCaloriesForDay(activities.data, date, (iso) => toLocalDateString(iso)) : null),
+    [activities.data, date],
+  );
 }

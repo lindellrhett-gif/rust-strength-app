@@ -18,6 +18,7 @@ import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useWorkouts } from '@/data/workouts';
 import type { Workout } from '@/lib/database.types';
 import { elapsedSeconds, formatDurationShort } from '@/domain/duration';
+import { canPlanOn } from '@/domain/planning';
 import { buildTimeline, entriesOn, type TimelineEntry } from '@/domain/timeline';
 import { formatDate, formatTime, toLocalDateString, todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
@@ -98,17 +99,20 @@ export default function CalendarScreen() {
   const dayWorkouts = workoutsByDate.get(selected) ?? [];
   const dayPlans = (planned.data ?? []).filter((p) => p.scheduled_for === selected);
   const isPast = selected < today;
+  const plannable = canPlanOn(selected, today);
   const dayEntries = entriesOn(timeline, selected);
   const selectedRest = (restDays.data ?? []).find((r) => r.rest_date === selected) ?? null;
 
   const toggleRestDay = () => {
     if (selectedRest) deleteRestDay.mutate(selectedRest.id);
-    else setRestDay.mutate({ date: selected });
+    // A rest day keeps a streak going, so one can't be added after the fact.
+    else if (canPlanOn(selected, todayLocal())) setRestDay.mutate({ date: selected });
   };
 
   const chosenTemplate = (templates.data ?? []).find((t) => t.id === planTemplateId) ?? null;
 
   const addPlan = () => {
+    if (!canPlanOn(selected, todayLocal())) return;
     createPlan.mutate(
       {
         scheduledFor: selected,
@@ -189,7 +193,13 @@ export default function CalendarScreen() {
           {dayEntries
             .filter((e) => e.kind !== 'workout')
             .map((e) => (
-              <View key={e.id} style={styles.row}>
+              <Pressable
+                key={e.id}
+                style={({ pressed }) => [styles.row, pressed && e.runId != null && styles.rowPressed]}
+                onPress={() => e.runId && router.push(`/run/${e.runId}`)}
+                disabled={!e.runId}
+                accessibilityRole={e.runId ? 'button' : undefined}
+              >
                 <View
                   style={[
                     styles.kindBar,
@@ -207,7 +217,8 @@ export default function CalendarScreen() {
                       .join(' · ')}
                   </Text>
                 </View>
-              </View>
+                {e.runId ? <Text style={styles.chev}>›</Text> : null}
+              </Pressable>
             ))}
 
           {dayPlans.map((p) => (
@@ -245,7 +256,7 @@ export default function CalendarScreen() {
             </Pressable>
           ))}
 
-          {adding ? (
+          {adding && plannable ? (
             <View style={styles.addBox}>
               <Field
                 label="What are you training?"
@@ -300,20 +311,21 @@ export default function CalendarScreen() {
             </View>
           ) : (
             <>
-              <Button
-                label={isPast ? '＋ Plan a session on this day' : '＋ Plan a session'}
-                variant="secondary"
-                onPress={() => setAdding(true)}
-              />
-              <Button
-                label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
-                variant={selectedRest ? 'danger' : 'ghost'}
-                onPress={toggleRestDay}
-                loading={setRestDay.isPending || deleteRestDay.isPending}
-              />
+              {plannable ? (
+                <Button label="＋ Plan a session" variant="secondary" onPress={() => setAdding(true)} />
+              ) : null}
+              {selectedRest || plannable ? (
+                <Button
+                  label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
+                  variant={selectedRest ? 'danger' : 'ghost'}
+                  onPress={toggleRestDay}
+                  loading={setRestDay.isPending || deleteRestDay.isPending}
+                />
+              ) : null}
               <Text style={text.caption}>
-                A rest day keeps your streak going instead of breaking it. Plan one ahead or mark
-                one after the fact.
+                {plannable
+                  ? 'A rest day keeps your streak going instead of breaking it. Mark today, or plan one ahead.'
+                  : 'Rest days and sessions can only be planned for today or a day ahead.'}
               </Text>
             </>
           )}
@@ -359,15 +371,19 @@ function TimelineRow({
   return (
     <Pressable
       style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-      onPress={() => entry.workoutId && router.push(`/workout/${entry.workoutId}`)}
-      disabled={!entry.workoutId}
+      onPress={() =>
+        entry.workoutId
+          ? router.push(`/workout/${entry.workoutId}`)
+          : entry.runId && router.push(`/run/${entry.runId}`)
+      }
+      disabled={!entry.workoutId && !entry.runId}
     >
       <View style={[styles.kindBar, { backgroundColor: tint }]} />
       <View style={styles.rowMain}>
         <Text style={text.body}>{entry.title}</Text>
         <Text style={text.caption}>{sub}</Text>
       </View>
-      {entry.workoutId ? <Text style={styles.chev}>›</Text> : null}
+      {entry.workoutId || entry.runId ? <Text style={styles.chev}>›</Text> : null}
     </Pressable>
   );
 }

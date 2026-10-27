@@ -8,7 +8,26 @@ import {
   bodyweightLoad,
   exerciseSublabel,
   formatSetLoad,
+  guessLoadType,
+  looksAssisted,
 } from '../src/domain/loadType';
+
+describe('guessing the type from a name', () => {
+  it('spots assisted machines', () => {
+    expect(looksAssisted('Assisted Pull-Up Machine')).toBe(true);
+    expect(looksAssisted('pull up assist')).toBe(true);
+    expect(looksAssisted('Gravitron')).toBe(true);
+    expect(looksAssisted('Lat Pulldown')).toBe(false);
+    expect(looksAssisted('Massage gun')).toBe(false);
+  });
+
+  it('guesses each type, and weights when nothing matches', () => {
+    expect(guessLoadType('Assisted Dip')).toBe('assisted');
+    expect(guessLoadType('Weighted Plank')).toBe('timed');
+    expect(guessLoadType('Diamond Push-Up')).toBe('bodyweight');
+    expect(guessLoadType('Incline Machine Press')).toBe('weighted');
+  });
+});
 
 describe('asLoadType', () => {
   it('passes through known types and defaults everything else to weighted', () => {

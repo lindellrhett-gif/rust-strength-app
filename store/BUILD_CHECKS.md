@@ -26,8 +26,8 @@ it does not touch Apple.
 ### Give EAS your Supabase config
 
 `.env` is gitignored, so EAS never receives it. Each build profile reads its
-values from an EAS environment instead (pinned in `eas.json`: `ios-check`,
-`android-check` and `preview` use **preview**; `production` uses
+values from an EAS environment instead (pinned in `eas.json`: `development`,
+`ios-check`, `android-check` and `preview` use **preview**; `production` uses
 **production**). Add both values to both environments, copying them from your
 `.env`:
 
@@ -100,7 +100,64 @@ needs **Push Notifications** ticked at developer.apple.com → Identifiers →
 "doesn't include the aps-environment entitlement".
 
 An App Store Connect API key cannot change capabilities, so tick it by hand. No
-push key or certificate is needed — nothing is ever pushed.
+push key or certificate is needed — nothing is ever pushed. The dev app ID,
+`com.ruststrength.app.dev`, needs it ticked too.
+
+## Dependencies: change the lockfile with npm 10
+
+EAS installs with `npm ci` using **npm 10.9.8**. A lockfile written by a newer
+npm (12 on this PC) can leave out packages npm 10 expects, and the build then
+fails in "Install dependencies" with `Missing: <package> from lock file`. So
+whenever a dependency changes, write the lockfile with EAS's version:
+
+```
+npx npm@10.9.8 install
+npx npm@10.9.8 ci --include=dev
+```
+
+The second command is exactly what EAS runs; if it passes here, it passes there.
+
+Five Expo patch updates are held back in `package.json` (`expo.install.exclude`):
+`expo`, `expo-constants`, `expo-linking`, `expo-notifications`, `expo-router`.
+The newer `expo` brings an `expo-modules-core` that wants `react-native-worklets`
+0.10, while `react-native-reanimated` (used by the router) needs 0.12; npm then
+installs two copies of a native module. The held versions are the ones the
+App Store build shipped with. Drop the exclusion once a newer SDK patch lines
+them up again (`npx expo-doctor` will say).
+
+## Building the dev app without the Apple ID
+
+Apple refuses EAS's password login for this account, so dev builds sign in
+with the App Store Connect API key instead. In the PowerShell window you build
+from, first set `EXPO_ASC_API_KEY_PATH`, `EXPO_ASC_KEY_ID`, `EXPO_ASC_ISSUER_ID`,
+`EXPO_APPLE_TEAM_ID` and `EXPO_APPLE_TEAM_TYPE=INDIVIDUAL`. The key cannot
+register a new iPhone, so add devices by hand at developer.apple.com → Devices
+(the UDID comes from `eas device:create`). If EAS ever asks for the Apple ID
+password, stop: that path is what locked the account before.
+
+## The Lock Screen widget extension (from 1.1)
+
+From 1.1 the app ships a second signed bundle: the widget extension in
+`targets/widget` that draws a run, and the rest timer, on the Lock Screen and
+in the Dynamic Island. Its bundle identifier is the app's plus `.widget`
+(`com.ruststrength.app.widget`, and `com.ruststrength.app.dev.widget` for the
+dev app). It needs no capabilities ticked.
+
+The first build of each app after it was added has to create that
+identifier and a provisioning profile for it, so it must sign in with the API
+key (the section above). Apple rejects the key's token if the PC clock runs
+ahead, so sync it first (Settings → Time & language → Date & time → **Sync
+now**), then run `& .\scripts\eas-build-asc.ps1 development` (or
+`production`). The script sets the key's variables from `eas.json` and runs
+the build; EAS signs in with the key by itself. It must be run in a real
+terminal: in `--non-interactive` mode EAS refuses to create profiles. Press
+Enter to reuse the existing profile and to accept the devices it lists. If
+it ever asks for an Apple ID password, press Ctrl+C.
+
+If it can't create the identifier, make it by hand at developer.apple.com →
+Identifiers → **+** → App IDs → App, with that explicit bundle ID and no
+capabilities, and build again. Once the profiles exist, later builds can go
+back to answering **No**.
 
 ## The order once Apple approves
 

@@ -1,6 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
 
+import type { SaveRunInput } from '@/domain/running/save';
 import { mk } from '@/lib/queryClient';
+import { runStore } from '@/lib/runStore';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 
@@ -50,6 +52,22 @@ export async function endWorkoutRow({ id, endedAt }: EndWorkoutInput): Promise<v
 }
 
 /**
+ * Saves a finished run: the activity, its route and its best efforts, in one
+ * call. The id was chosen on the phone when the run started, so a replay of a
+ * save that already landed returns the same run instead of a second copy.
+ *
+ * The recording stays on the phone until this succeeds, then is cleared. If
+ * the app dies with the save still queued, the recording is still there to
+ * save again on the next launch.
+ */
+export async function saveRunRow(input: SaveRunInput): Promise<string> {
+  const { data, error } = await supabase.rpc('rpc_save_run', input);
+  if (error) throw error;
+  await runStore.clear(input.p_id);
+  return data;
+}
+
+/**
  * Must run before the persisted cache is restored, or a queue replayed at
  * startup finds no function to call and the writes are dropped.
  */
@@ -57,4 +75,5 @@ export function registerMutationDefaults(client: QueryClient): void {
   client.setMutationDefaults(mk.addSet, { mutationFn: insertSetRow });
   client.setMutationDefaults(mk.startWorkout, { mutationFn: insertWorkoutRow });
   client.setMutationDefaults(mk.endWorkout, { mutationFn: endWorkoutRow });
+  client.setMutationDefaults(mk.saveRun, { mutationFn: saveRunRow });
 }

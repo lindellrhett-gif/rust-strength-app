@@ -2,6 +2,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Stack } from 'expo-router';
 import { getFocusedRouteNameFromRoute } from 'expo-router/react-navigation';
 import { StatusBar } from 'expo-status-bar';
+import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -18,6 +19,9 @@ import {
   loadRestAlertSetting,
   useRestAlertEnabled,
 } from '@/lib/restNotifications';
+// Defines the GPS task at import time, so iOS can deliver a run's location
+// fixes even when it relaunches the app in the background.
+import '@/lib/runTracker';
 import { AuthProvider, useAuth } from '@/providers/AuthProvider';
 import { RestTimerProvider } from '@/providers/RestTimerProvider';
 import { colors } from '@/theme/colors';
@@ -30,6 +34,11 @@ startNetworkWatcher();
 registerMutationDefaults(queryClient);
 installNotificationHandler();
 loadRestAlertSetting();
+
+// Dev builds only: a test run takes the phone out of Wi-Fi range of the dev
+// server. The app keeps working, and this warning would otherwise sit over
+// the run controls.
+if (__DEV__) LogBox.ignoreLogs([/Disconnected from Metro/]);
 
 /**
  * Expo Router installs an error boundary from a route file's `ErrorBoundary`
@@ -116,6 +125,33 @@ function RootNavigator() {
       <Stack.Screen
         name="set/new"
         options={{ headerShown: true, presentation: 'modal', title: 'Add set' }}
+      />
+      {/* No swipe-to-dismiss: a stray swipe must never abandon a run. */}
+      <Stack.Screen
+        name="run/record"
+        options={{ presentation: 'fullScreenModal', gestureEnabled: false }}
+      />
+      <Stack.Screen name="run/index" options={{ headerShown: true, title: 'Running' }} />
+      <Stack.Screen name="run/[id]" options={{ headerShown: true, title: 'Run' }} />
+      <Stack.Screen
+        name="run/edit/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Edit run' }}
+      />
+      <Stack.Screen name="run/trim/[id]" options={{ headerShown: true, title: 'Trim run' }} />
+      <Stack.Screen name="run/settings" options={{ headerShown: true, title: 'Running settings' }} />
+      <Stack.Screen name="run/privacy-zones" options={{ headerShown: true, title: 'Privacy zones' }} />
+      <Stack.Screen name="run/route/[id]" options={{ headerShown: true, title: 'Route' }} />
+      <Stack.Screen
+        name="run/manual"
+        options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
+      />
+      <Stack.Screen
+        name="share/workout/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Share workout' }}
+      />
+      <Stack.Screen
+        name="share/run/[id]"
+        options={{ headerShown: true, presentation: 'modal', title: 'Share run' }}
       />
     </Stack>
   );

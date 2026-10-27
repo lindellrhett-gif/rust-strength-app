@@ -5,6 +5,7 @@ import {
   lengthProblem,
   normalizeWorkoutName,
   patchForEdit,
+  patchToAssisted,
   setKind,
   workoutLengthSeconds,
   type StoredSet,
@@ -103,5 +104,40 @@ describe('editing a set', () => {
     expect(isChanged(base, { value: 185, reps: 7 })).toBe(true);
     const plank = set({ weight: 0, reps: 1, duration_seconds: 60 });
     expect(isChanged(plank, { value: 60, reps: 5 })).toBe(false);
+  });
+});
+
+describe('patchToAssisted', () => {
+  // Logged as Weights on an assisted machine: the 50 typed was assistance.
+  const typed = set({ weight: 50, reps: 6, rpe: 10 });
+
+  it('moves the typed number to assistance and stores the load moved', () => {
+    const p = patchToAssisted(typed, 174)!;
+    expect(p.assist_weight).toBe(50);
+    expect(p.weight).toBe(124);
+    expect(p.is_bodyweight).toBe(true);
+    expect(p.added_weight).toBeNull();
+    expect(p.e1rm).toBeCloseTo(e1rmFromSet({ weight: 124, reps: 6, rpe: 10 }), 1);
+  });
+
+  it('reads a set logged with the BW button as no assistance', () => {
+    const p = patchToAssisted({ ...set({ weight: 174, reps: 5, rpe: 9 }), is_bodyweight: true }, 174)!;
+    expect(p.assist_weight).toBe(0);
+    expect(p.weight).toBe(174);
+  });
+
+  it('never stores a negative load', () => {
+    expect(patchToAssisted(set({ weight: 200 }), 174)!.weight).toBe(0);
+  });
+
+  it('keeps warm-ups out of records', () => {
+    expect(patchToAssisted(set({ weight: 80, is_warmup: true }), 174)!.e1rm).toBe(0);
+  });
+
+  it('leaves sets logged another way, and refuses without a bodyweight', () => {
+    expect(patchToAssisted(set({ assist_weight: 40, weight: 134 }), 174)).toBeNull();
+    expect(patchToAssisted(set({ added_weight: 25, weight: 199 }), 174)).toBeNull();
+    expect(patchToAssisted(set({ duration_seconds: 60, weight: 0, reps: 1 }), 174)).toBeNull();
+    expect(patchToAssisted(typed, 0)).toBeNull();
   });
 });

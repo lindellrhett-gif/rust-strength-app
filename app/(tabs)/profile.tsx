@@ -1,29 +1,34 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button, Card, Field, LoadingView, Screen } from '@/components';
 import { AchievementGrid } from '@/components/AchievementGrid';
 import { BadgeShelf } from '@/components/BadgeShelf';
+import { FeaturedTrophies } from '@/components/FeaturedTrophies';
 import { LevelCard } from '@/components/LevelCard';
 import { NumberStepper } from '@/components/NumberStepper';
 import { RestAlertToggle } from '@/components/RestAlertToggle';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
-import { useWorkoutDates } from '@/data/stats';
+import { useTrainedDates } from '@/data/stats';
+import { useSetShareSteps } from '@/data/trophies';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { useOnboardingControls } from '@/providers/OnboardingProvider';
 import {
   consistency,
   earnedCount,
+  refreshFeatured,
+  toggleFeatured,
   totalTiersEarned,
   totalTiersAvailable,
 } from '@/domain/achievements';
 import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
 import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
 import { EQUIPMENT_OPTIONS } from '@/domain/generator';
+import { hasFeature } from '@/domain/entitlements';
 import { todayLocal } from '@/lib/dates';
 import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
 import { colors } from '@/theme/colors';
@@ -34,7 +39,7 @@ export default function ProfileScreen() {
   const profile = useProfile();
   const update = useUpdateProfile();
 
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const restDays = useRestDays();
   const today = todayLocal();
   const router = useRouter();
@@ -42,7 +47,21 @@ export default function ProfileScreen() {
 
   // XP, level, badges and trophies all come from one place, so this screen can
   // never disagree with the post-workout screen about what level you are.
-  const { xp, level, badges, achievements } = useMyLevel();
+  const { xp, level, badges, achievements, trophiesSettled } = useMyLevel();
+  const shareSteps = useSetShareSteps();
+
+  // Featured trophies at the tiers held now: one shown at Silver moves up at
+  // Gold, and one no longer held drops off. Saved back once everything the
+  // trophies rest on has arrived, never from half-loaded numbers.
+  const storedFeatured = profile.data?.featured_trophies ?? [];
+  const featured = trophiesSettled ? refreshFeatured(storedFeatured, achievements) : storedFeatured;
+  const featuredKey = featured.join(',');
+  const storedKey = storedFeatured.join(',');
+  const { mutate: saveProfile } = update;
+  useEffect(() => {
+    if (!trophiesSettled || featuredKey === storedKey) return;
+    saveProfile({ featured_trophies: featuredKey ? featuredKey.split(',') : [] });
+  }, [trophiesSettled, featuredKey, storedKey, saveProfile]);
 
   const [handle, setHandle] = useState<string | null>(null);
   const [rest, setRest] = useState<number | null>(null);
@@ -104,7 +123,12 @@ export default function ProfileScreen() {
   return (
     <Screen scroll edges={['left', 'right', 'bottom']}>
       <View>
-        <Text style={text.hero}>@{p.username}</Text>
+        <View style={styles.nameRow}>
+          <Text style={[text.hero, styles.name]} numberOfLines={1}>
+            @{p.username}
+          </Text>
+          <FeaturedTrophies keys={featured} size={30} />
+        </View>
         <Text style={text.bodyMuted}>
           {p.display_name ?? 'Lifter'} · {consistency30}% consistent (30d) ·{' '}
           {earnedCount(achievements)} trophies
@@ -303,12 +327,36 @@ export default function ProfileScreen() {
             trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
+        <View style={styles.activityRow}>
+          <View style={styles.toggleText}>
+            <Text style={text.body}>Share daily steps</Text>
+            <Text style={text.caption}>
+              Puts you on the steps leaderboard and counts toward the Steps trophy. Friends see
+              your step totals, nothing else. Turning this off deletes the totals already shared.
+            </Text>
+          </View>
+          <Switch
+            value={shareSteps.isPending ? !!shareSteps.variables : p.share_steps}
+            onValueChange={(on) =>
+              shareSteps.mutate(on, {
+                onError: (e) =>
+                  Alert.alert('Could not change step sharing', e instanceof Error ? e.message : 'Please try again.'),
+              })
+            }
+            disabled={shareSteps.isPending}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
       </Card>
 
       <Card
         title={`Trophies · ${totalTiersEarned(achievements)} of ${totalTiersAvailable(achievements)} tiers`}
       >
-        <AchievementGrid achievements={achievements} />
+        <AchievementGrid
+          achievements={achievements}
+          featuredIds={featured.map((k) => k.split(':')[0])}
+          onToggleFeatured={(a) => update.mutate({ featured_trophies: toggleFeatured(featured, a) })}
+        />
       </Card>
 
       <Card title="Help">
@@ -325,6 +373,22 @@ export default function ProfileScreen() {
           <Text style={styles.chev}>›</Text>
         </Pressable>
       </Card>
+
+      {hasFeature('running') ? (
+        <Card title="Running">
+          <Pressable
+            style={styles.legalRow}
+            onPress={() => router.push('/run/settings')}
+            accessibilityRole="button"
+          >
+            <View>
+              <Text style={text.body}>Running settings</Text>
+              <Text style={text.caption}>Auto-pause, sharing and privacy zones</Text>
+            </View>
+            <Text style={styles.chev}>›</Text>
+          </Pressable>
+        </Card>
+      ) : null}
 
       <Card title="Privacy & legal">
         <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>
@@ -357,6 +421,8 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  name: { flexShrink: 1 },
   legalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

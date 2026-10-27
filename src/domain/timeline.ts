@@ -40,6 +40,8 @@ export interface TimelineEntry {
   durationSeconds: number;
   /** Present for workouts so the row can navigate to the session. */
   workoutId?: string;
+  /** Present for runs with a detail page, so the row can open the run. */
+  runId?: string;
 }
 
 /** The label for an unnamed lifting session. */
@@ -101,6 +103,7 @@ export function buildTimeline(
       date: localDate(a.performedAt),
       at: a.performedAt,
       durationSeconds: a.durationSeconds,
+      ...(a.hasRunDetail ? { runId: a.id } : {}),
     });
   }
 

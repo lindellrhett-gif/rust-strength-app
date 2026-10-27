@@ -185,11 +185,16 @@ function targetLoad(input: RecommendInput, repRange: [number, number]): Target |
 
   const correction = rpeCorrection(last, repRange[0]);
   // Never jump more than MAX_STEP_CHANGE from the last set.
-  const load = clamp(
+  let load = clamp(
     baseWeight * (1 + correction),
     last.weight * (1 - MAX_STEP_CHANGE),
     last.weight * (1 + MAX_STEP_CHANGE),
   );
+  // Older, stronger sessions can outweigh a bad set in the average. A set that
+  // was too hard still always leads to a lighter load than it (for an assisted
+  // machine, more assistance), and one that felt easy never to a lighter one.
+  if (correction < 0) load = Math.min(load, last.weight * (1 + correction));
+  else if (correction > 0) load = Math.max(load, last.weight);
 
   return { load, estimate, last, correction };
 }

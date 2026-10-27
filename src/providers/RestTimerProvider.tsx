@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { AppState, Vibration } from 'react-native';
 
+import { restActivityState, type NextSet } from '@/domain/restActivity';
 import { restAlertContent, restAlertPlan } from '@/domain/restAlert';
 import {
   DEFAULT_REST_SECONDS,
@@ -17,6 +18,7 @@ import {
   clampRest,
   remainingSeconds,
 } from '@/domain/restTimer';
+import { endLeftoverRestActivity, syncRestActivity } from '@/lib/restActivity';
 import { cancelRestAlert, scheduleRestAlert } from '@/lib/restNotifications';
 
 export interface RestTimerValue {
@@ -35,6 +37,11 @@ export interface RestTimerValue {
   stop: () => void;
   /** Nudge the running timer, e.g. +15s. */
   add: (delta: number) => void;
+  /**
+   * What comes next, for the Lock Screen: the add-set screen says, whenever it
+   * knows. Cleared when the timer stops.
+   */
+  setNext: (next: NextSet | null) => void;
 }
 
 const RestTimerContext = createContext<RestTimerValue | null>(null);
@@ -68,6 +75,9 @@ interface ProviderProps {
  * has opted in, a local notification is also scheduled for the same deadline,
  * so the alert still arrives with the phone locked or the app in the
  * background. It is scheduled on the phone: no server, no push token, no signal.
+ *
+ * While a rest runs it also shows on the Lock Screen and in the Dynamic Island
+ * with the next set (src/lib/restActivity.ts), which needs no permission.
  */
 export function RestTimerProvider({
   children,
@@ -81,6 +91,7 @@ export function RestTimerProvider({
   const [totalSeconds, setTotalSeconds] = useState(preferred);
   const [remaining, setRemaining] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [next, setNextState] = useState<NextSet | null>(null);
   // Stops the buzz repeating on every tick once the deadline has passed.
   const buzzed = useRef(false);
   // Whether this session put an alert in the queue. Cancelling only what we
@@ -107,6 +118,17 @@ export function RestTimerProvider({
       alertPending.current = false;
     }
   }, [endsAt, finished, totalSeconds, alertEnabled, signedIn]);
+
+  // The Lock Screen follows the timer and the next set.
+  useEffect(() => {
+    syncRestActivity(restActivityState({ endsAt, totalSeconds, finished, signedIn }, next));
+  }, [endsAt, totalSeconds, finished, signedIn, next]);
+
+  // A rest left on the Lock Screen when the app last closed has nothing
+  // behind it any more.
+  useEffect(() => {
+    endLeftoverRestActivity();
+  }, []);
 
   useEffect(() => {
     if (endsAt == null) return;
@@ -152,6 +174,17 @@ export function RestTimerProvider({
     setEndsAt(null);
     setRemaining(0);
     setFinished(false);
+    setNextState(null);
+  }, []);
+
+  // Only a real change sets state, so a screen can report the same next set
+  // on every render.
+  const setNext = useCallback((value: NextSet | null) => {
+    setNextState((current) =>
+      current?.exercise === value?.exercise && current?.kind === value?.kind && current?.detail === value?.detail
+        ? current
+        : value,
+    );
   }, []);
 
   /**
@@ -189,8 +222,9 @@ export function RestTimerProvider({
       start,
       stop,
       add,
+      setNext,
     }),
-    [endsAt, finished, remaining, totalSeconds, preferred, start, stop, add],
+    [endsAt, finished, remaining, totalSeconds, preferred, start, stop, add, setNext],
   );
 
   return <RestTimerContext.Provider value={value}>{children}</RestTimerContext.Provider>;

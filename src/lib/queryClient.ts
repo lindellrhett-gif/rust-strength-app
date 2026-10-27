@@ -60,6 +60,8 @@ export const mk = {
   addSet: ['mutation', 'add-set'] as const,
   startWorkout: ['mutation', 'start-workout'] as const,
   endWorkout: ['mutation', 'end-workout'] as const,
+  /** A finished run, often saved right where the signal dropped. */
+  saveRun: ['mutation', 'save-run'] as const,
 };
 
 /** Central place for query keys so invalidation stays consistent. */
@@ -90,9 +92,19 @@ export const qk = {
   workoutExercises: (workoutId: string) => ['workout-exercises', workoutId] as const,
   activities: ['activities'] as const,
   activityTotals: ['activities', 'totals'] as const,
+  activityDates: ['activities', 'dates'] as const,
   restDays: ['rest-days'] as const,
   blockedUsers: ['blocked-users'] as const,
   workoutSummary: (workoutId: string) => ['workout-summary', workoutId] as const,
   feed: ['feed'] as const,
   badges: (userId: string) => ['badges', userId] as const,
+  runs: ['runs'] as const,
+  run: (id: string) => ['runs', id] as const,
+  runHistory: ['runs', '__history'] as const,
+  privacyZones: ['privacy-zones'] as const,
+  savedRoutes: ['saved-routes'] as const,
+  savedRoute: (id: string) => ['saved-routes', id] as const,
+  runPreferences: ['run-preferences'] as const,
+  // Under 'activities', so logging or deleting one refreshes it too.
+  trophyTotals: ['activities', 'trophy-totals'] as const,
 };

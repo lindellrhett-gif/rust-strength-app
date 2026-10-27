@@ -35,6 +35,22 @@ export function asLoadType(value: string | null | undefined): LoadType {
   return (LOAD_TYPES as readonly string[]).includes(value ?? '') ? (value as LoadType) : 'weighted';
 }
 
+/** Whether a name reads like an assisted machine: "Assisted Dip", "Gravitron". */
+export function looksAssisted(name: string): boolean {
+  return /\bassist|\bgravitron/i.test(name);
+}
+
+/** A starting guess from the name, so "Assisted Dip" arrives already set up. */
+export function guessLoadType(name: string): LoadType {
+  const n = name.toLowerCase();
+  if (looksAssisted(n)) return 'assisted';
+  if (/plank|\bhold\b|wall sit|dead hang|arm hang|l-sit/.test(n)) return 'timed';
+  if (/push-?up|pull-?up|chin-?up|\bdips?\b|sit-?up|crunch|burpee/.test(n)) {
+    return 'bodyweight';
+  }
+  return 'weighted';
+}
+
 /**
  * Load moved on an assisted set: bodyweight minus assistance. Never negative —
  * assistance at or above bodyweight means the machine is doing all the work.

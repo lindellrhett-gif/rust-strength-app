@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs';
 
 import {
+  EXISTING_ACCOUNT_MESSAGE,
   RESEND_COOLDOWN_SECONDS,
   codeSentTo,
   confirmCodeProblem,
   confirmErrorMessage,
+  isExistingAccount,
   normalizeCode,
 } from '../src/domain/emailConfirm';
 import { UNCONFIRMED_MESSAGE } from '../src/domain/authErrors';
@@ -65,5 +67,25 @@ describe('the confirmation email template', () => {
 
   it('names no expiry, so changing the setting cannot make it wrong', () => {
     expect(template).not.toMatch(/\d+\s*(hour|minute|day)/i);
+  });
+});
+
+describe('signing up with an email that already has an account', () => {
+  it('spots the stand-in user Supabase returns when confirmation is on', () => {
+    // A confirmed account: no error, no session, and a user with no identities.
+    expect(isExistingAccount({ identities: [] })).toBe(true);
+  });
+
+  it('lets a genuinely new account through', () => {
+    expect(isExistingAccount({ identities: [{ provider: 'email' }] })).toBe(false);
+    // Older responses without the field, and no user at all, are left alone.
+    expect(isExistingAccount({})).toBe(false);
+    expect(isExistingAccount(null)).toBe(false);
+  });
+
+  it('says so, with confirmation off too', () => {
+    expect(confirmErrorMessage({ code: 'user_already_exists' })).toBe(EXISTING_ACCOUNT_MESSAGE);
+    expect(confirmErrorMessage({ message: 'User already registered' })).toBe(EXISTING_ACCOUNT_MESSAGE);
+    expect(EXISTING_ACCOUNT_MESSAGE).toMatch(/Sign in/);
   });
 });

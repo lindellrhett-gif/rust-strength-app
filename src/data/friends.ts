@@ -146,6 +146,14 @@ export interface FriendStats {
   bestStreak: number;
   /** 0..100 over the last 30 days. */
   consistency30: number;
+  /** Metres run, ever. */
+  runDistanceM: number;
+  /** Daily steps shared, ever; null when they don't share them. */
+  stepsTotal: number | null;
+  /** Reactions their posts have had from friends. */
+  reactionsReceived: number;
+  /** "trophy:tier" keys they chose to show by their name. */
+  featuredTrophies: string[];
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -177,6 +185,10 @@ export function useFriendStats(targetUserId: string | undefined) {
         currentStreak: Number(row.current_streak) || 0,
         bestStreak: Number(row.best_streak) || 0,
         consistency30: Number(row.consistency_30) || 0,
+        runDistanceM: Number(row.run_distance_m) || 0,
+        stepsTotal: row.steps_total == null ? null : Number(row.steps_total) || 0,
+        reactionsReceived: Number(row.reactions_received) || 0,
+        featuredTrophies: row.featured_trophies ?? [],
       };
     },
   });
@@ -244,6 +256,8 @@ export function useLeaderboard(period: LeaderboardPeriod) {
         activitySeconds: Number(row.activity_seconds) || 0,
         currentStreak: Number(row.current_streak) || 0,
         consistency: Number(row.consistency_30) || 0,
+        runDistanceM: Number(row.run_distance_m) || 0,
+        steps: row.steps == null ? null : Number(row.steps) || 0,
       }));
     },
   });

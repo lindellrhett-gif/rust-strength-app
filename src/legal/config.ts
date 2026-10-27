@@ -11,7 +11,7 @@
 
 export const LEGAL = {
   /** Trading/legal name of whoever publishes the app. */
-  entity: 'Rhett Lindell',
+  entity: 'Bluestem Software LLC',
 
   /** Monitored inbox for privacy requests and support. */
   contactEmail: 'ruststrengthsupport@gmail.com',
@@ -45,10 +45,10 @@ export const LEGAL = {
    * signed-in user is asked to accept again (see src/domain/consent.ts). A
    * patch — a clarification, a new contact address — asks nobody.
    */
-  version: '1.4.4',
+  version: '1.5.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'September 18, 2026',
+  lastUpdated: 'October 26, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

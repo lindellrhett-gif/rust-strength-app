@@ -36,9 +36,9 @@ AI development, software engineering, or cybersecurity.
 |---|---|
 | **Scope** | A full iOS app, from the database to the App Store submission, built solo |
 | **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026; released October 2, 2026 |
-| **App code** | About 19,600 lines of TypeScript across the screens, components, domain logic and data layer |
-| **Database** | About 3,000 lines of SQL in 14 migrations, including tables, Row Level Security policies and server functions |
-| **Tests** | 519 Jest tests in 36 suites, plus strict TypeScript and ESLint |
+| **App code** | About 28,800 lines of TypeScript across the screens, components, domain logic and data layer, plus about 600 lines of Swift for the Lock Screen Live Activities |
+| **Database** | About 6,100 lines of SQL in 25 migrations, including tables, Row Level Security policies, PostGIS route handling and server functions |
+| **Tests** | 784 Jest tests in 55 suites, 12 database test suites that run every migration in PGlite, plus strict TypeScript and ESLint |
 | **Tools** | Git, EAS Build, TestFlight, and Claude Code for AI-assisted development |
 | **Users** | Beta tested on TestFlight, now [on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) |
 
@@ -98,7 +98,8 @@ npm test
   (like an assisted pull-up machine), and **timed holds** with a built-in
   countdown timer and suggested hold times.
 - **Rest timer** that starts when you save a set, with a notification when rest
-  is over, even with the phone locked.
+  is over, even with the phone locked. From 1.1 it also counts down on the
+  Lock Screen and in the Dynamic Island with your next set.
 - **Presets** with a rep range per exercise, and a **workout generator** that
   builds a session from your equipment and what you have not trained this week.
 - **Review screen** after each workout to fix the name, the length, or any
@@ -110,19 +111,84 @@ npm test
 - Streaks, 30-day consistency, volume, time trained, and personal records.
   Planned rest days keep a streak alive without adding to it.
 - A progress chart per exercise, and a body chart of what you trained this week.
-- Levels, trophies, and badges.
+- Levels, trophies, and badges. From 1.1, trophies for running, steps, friends
+  and reactions, and two of your choice shown by your name.
 
 **Friends**
 - Friend requests by username, and a **feed** of friends' finished sessions
   with reactions.
 - A **leaderboard** ranking you and your friends by streak, weight lifted,
-  workout time, consistency, and activity time, over a chosen period.
+  workout time, consistency, and activity time, over a chosen period (from
+  1.1 also distance run and, for people who share them, daily steps).
 - Blocking, reporting, and a switch to stop sharing your workouts.
+- **Share cards** (from 1.1): after a workout or a run, an image with the
+  numbers, records, muscles worked or the route's shape, ready for Instagram,
+  Messages or Photos. It's drawn on the phone and nothing is uploaded; a
+  run's route is trimmed at the start and end as on friends' maps.
 
 **Reliability and privacy**
 - **Works offline.** Sets logged with no signal are queued and sync when the
   connection returns. Nothing is lost if the app is closed mid-workout.
 - **Download all your data** or **delete your account** from inside the app.
+
+---
+
+## Running (version 1.1, in development)
+
+GPS run tracking, built into the same app: runs are activities, so they
+appear in the Calendar, the friends feed, Stats and the streak.
+
+- **Recording:** a full-screen recorder with a countdown, the time,
+  distance, current and average pace, and the route drawn live on Apple
+  Maps. It keeps recording with the screen locked, survives the app being
+  closed mid-run (reopening offers Resume, Finish or Discard), and counts
+  steps and cadence from the phone's motion sensors.
+- **Lock Screen and Dynamic Island:** the time, distance and pace stay in
+  view with the phone locked (an iOS Live Activity, drawn by a SwiftUI widget
+  extension). iOS ticks the clock itself, so the app only sends an update when
+  something else changes, and if the app is closed mid-run the activity says
+  it has stopped updating instead of counting on.
+- **Auto-pause** goes by the phone's own speed reading, so the clock holds
+  the moment you stop at a light and starts again as you move off. Losing
+  signal in a tunnel doesn't pause it.
+- **Spoken updates** every mile or kilometre, which lower your music while
+  they talk.
+- **Run summary:** map, splits, best efforts inside the run, pace and
+  elevation charts, effort and notes. Runs can be edited, deleted, and
+  trimmed at either end (everything is worked out again from the part
+  kept).
+- **History:** weekly and monthly distance, a weekly goal, records for the
+  mile, 5K, 10K, half and marathon, and a calendar of runs.
+- **Saved routes:** save a run's route, run it again with the route drawn
+  on the map, and compare every attempt.
+- **Sharing:** friends see distance, time and pace by default. The map is
+  shared only if you turn it on for a run, and the server always removes
+  the first and last 200 m and anything inside your privacy zones before
+  anyone else sees it.
+- **Manual entry** for treadmill runs and runs without the phone.
+
+| Where to look | What it shows |
+|---|---|
+| [`src/domain/running/filter.ts`](src/domain/running/filter.ts), [`stops.ts`](src/domain/running/stops.ts) | Cleaning GPS: accuracy, spikes, jitter, and auto-pause from the phone's speed reading |
+| [`__tests__/runningAutoPause.test.ts`](__tests__/runningAutoPause.test.ts) | Simulated runs replayed second by second, as the screen sees them |
+| [`supabase/migrations/0021_run_sharing.sql`](supabase/migrations/0021_run_sharing.sql) | Server-side trimming of shared routes with privacy zones (PostGIS) |
+| [`supabase/tests/sharing.test.mjs`](supabase/tests/sharing.test.mjs) | Proving a shared outline never comes within a privacy zone |
+| [`targets/widget/`](targets/widget), [`modules/live-activities/`](modules/live-activities) | The Live Activities in Swift (a run, and the rest timer): the widget that draws them and the small native module that starts and updates them |
+
+**Permissions.** Location "While Using the App" when a run starts (never
+"Always"), with background location updates while recording; Motion &
+Fitness for steps. The Info.plist strings live in `app.json` (the
+`expo-location` and `expo-sensors` plugins), `UIBackgroundModes` is
+`location` and `audio`, and `NSSupportsLiveActivities` turns on the Lock
+Screen view, which needs no permission (people can turn it off in Settings).
+
+**Battery.** GPS at its most accurate setting is the main cost, and it runs
+only between Start and Finish. I haven't measured the drain per hour on a
+real run yet. Every fix is kept (about one a second), because a distance
+filter saves little power while the GPS is on and would hide stops. With the
+phone locked the recording screen does no work at all; with it on, the track
+is cleaned once per new fix and redrawn every 2 to 5 seconds on runs over an
+hour.
 
 ---
 
@@ -132,10 +198,11 @@ npm test
 |---|---|
 | App | TypeScript, React Native 0.86, React 19, Expo SDK 57, Expo Router |
 | Data and sync | TanStack Query v5 with a persisted offline cache and queued writes, supabase-js |
-| Backend | Supabase: PostgreSQL, Auth, Row Level Security, SQL functions |
+| Backend | Supabase: PostgreSQL with PostGIS, Auth, Row Level Security, SQL functions |
+| Native iOS | Swift and ActivityKit for the Live Activities (a widget extension through @bacons/apple-targets and a local Expo module), expo-location and expo-task-manager for GPS with the screen locked |
 | Forms and validation | React Hook Form, Zod |
-| Graphics | react-native-svg for charts and the body chart |
-| Testing and quality | Jest with ts-jest (36 suites, 519 tests), ESLint, strict TypeScript |
+| Graphics | react-native-svg for charts, the body chart and share cards; react-native-maps (Apple Maps) for routes |
+| Testing and quality | Jest (55 suites, 784 tests), database tests on PGlite (12 suites), ESLint, strict TypeScript |
 | Release | EAS Build and EAS Submit, TestFlight, App Store Connect |
 | Website | Static HTML generated by a Node script and hosted on GitHub Pages |
 
@@ -229,16 +296,21 @@ app/                 Screens, routed by file with Expo Router
   (tabs)/            Today, Calendar, Stats, Friends, Profile
   workout/           Active workout, review, summary
   set/new.tsx        Add-set screen with the live suggestion
+  run/               Recorder, run summary, editing, history hub, routes
 src/
   domain/            Pure, unit-tested logic: recommender, machines, streaks,
                      leaderboard, generator, XP, and more
+    running/         GPS cleaning, auto-pause, splits, best efforts, charts
   data/              TanStack Query hooks over Supabase
   components/        Shared UI, the hold timer, charts
   lib/               Supabase client, session guard, query client
   legal/             Privacy Policy and Terms source
 supabase/
-  migrations/        Schema, RLS policies and SQL functions (0001 to 0014)
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0023)
+  tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
+modules/live-activities/  Local native module (Swift) for the Live Activities
+targets/widget/      Widget extension (SwiftUI) that draws it, added at prebuild
 __tests__/           Jest specs
 scripts/             Legal site, icon and screenshot generators
 ```

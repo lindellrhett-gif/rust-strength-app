@@ -1,8 +1,8 @@
 # Privacy Policy
 
-**Last updated: September 18, 2026**
+**Last updated: October 26, 2026**
 
-Rust Strength is operated by Rhett Lindell ("we", "us"). This policy explains what we collect, why, and what you can do about it.
+Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
 We built this app to collect as little as possible. We do not sell your data, we do not show ads, and we do not use analytics or tracking SDKs.
 
@@ -15,6 +15,12 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Bodyweight (optional).** Used only to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine. You can leave it blank; assisted exercises then ask for it before you log them.
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
+- **Runs you record (optional).** If you record a run, the app uses your phone's precise location while the run is recording, including with the screen locked, to measure your distance and pace and to draw your route. We store the route (the points along it, with the altitude and time at each), your distance, moving and total time, splits, best efforts and estimated calories, and any title, notes and effort rating you add. Location is used only between Start and Finish; nothing is tracked at any other time. You can also enter a run by hand, with no location at all.
+- **Steps (optional).** If you allow Motion & Fitness access, the app reads step counts from your iPhone's motion sensors. A recorded run's step total is stored with the run. Your daily step counts stay on your phone unless you turn on "Share daily steps" (Profile, under Sharing with friends, off by default): then, whenever you open the app, it uploads one total per day for the past week, for the steps leaderboard and the Steps trophy. Turning it off deletes the totals already uploaded.
+- **Privacy zones (optional).** Places you add, such as home, as a point and a size, so that maps you share hide the start and end of runs there. Only you can see them.
+- **Saved routes (optional).** Routes you save from your own runs to run again, with the names you give them.
+- **Running settings.** Auto-pause, spoken updates, your weekly distance goal, and whether new runs and their maps are shared by default.
+- **Trophies shown by your name (optional).** Up to two trophies you choose to show next to your name.
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
 - **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
 - **Reports you file.** If you report another user, we store who you reported, the reason, and anything you type.
@@ -28,15 +34,22 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 ### What we do NOT collect
 
-We do not collect your real name, phone number, precise or approximate location, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information.
+We do not collect your real name, phone number, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information. We collect your location only while you are recording a run, as described above.
 
-The only device permission the app can ask for is **notifications**, and only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us. You can turn it off in the app or in your phone's settings at any time.
+The app can ask for four device permissions, each only when you use the feature that needs it, and each can be turned off in your phone's settings at any time:
+
+- **Notifications**, only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us.
+- **Location**, "While Using the App", when you start recording a run, or if you choose to place a privacy zone where you are standing. The app never asks for "Always".
+- **Motion & Fitness**, when you start a run, choose to show today's steps, or turn on Share daily steps.
+- **Photos, add only**, the first time you tap Save to Photos on a share card (see Section 4). The app can add the card to your library; it cannot see, read or upload any of your photos.
+
+While a run records, and while the rest timer runs between sets, the app shows it on your Lock Screen and in the Dynamic Island (a run's time, distance and pace; the rest left and your next set), where anyone holding your phone can see it. This needs no permission, is done on your phone, and nothing about it is sent to us. You can turn it off under Live Activities in your phone's settings for the app.
 
 ## 2. Health and fitness information
 
-Training data, bodyweight, and calories burned are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive.
+Training data, bodyweight, calories burned and step counts are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive. The routes of runs you record are precise location information, and can show where you live or spend your time. Only you can see a run's full route. Friends see a trimmed outline only if you choose to share a run's map (see Section 4).
 
-We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, and calculating your stats and trophies.
+We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, recording your runs, and calculating your stats and trophies.
 
 **We do not sell it, share it for advertising, or use it for any purpose other than operating the app.** It is visible to another person only where you have chosen to share it (see Section 4).
 
@@ -46,6 +59,7 @@ We use it only to run the features you see: showing your history, estimating you
 - To store and show your training history
 - To calculate estimated one-rep max and suggest weights
 - To calculate stats, streaks, trophies and the weekly body chart
+- To record runs and show your routes, splits, records and running history, to speak your distance and pace during a run, and to count your steps
 - To run the friends feature you opt into, including the feed and reactions
 - To work out your XP, level and badges from the totals above
 - To review reports of abuse
@@ -58,10 +72,10 @@ We do not use your information for advertising, profiling, or automated decision
 The social features are **opt-in**. Until you choose a username and add a friend, nobody can see anything.
 
 - **Anyone signed in** can search usernames and display names — but only for accounts that have chosen their own handle. Nothing else is visible.
-- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, how many friends you have, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
-- **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency and activity time. It uses only the figures listed above, and only you and your accepted friends appear on it.
+- **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, total distance run, how many friends you have, how many reactions your posts have received, the trophies you chose to show by your name, your daily step totals if you share them, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
+- **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency, activity time, distance run and, for people who share them, daily steps. It uses only the figures listed above, and only you and your accepted friends appear on it.
 - **Accepted friends also see a summary of each session in the feed** (see below).
-- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, or the individual sets inside a workout. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
+- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts (unless you share daily steps), the full route of any run, or the individual sets inside a workout. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
 
 ### The friend feed
 
@@ -72,9 +86,16 @@ When you finish a workout or log an activity, a summary of it appears in the fee
 - total weight moved, sets and reps
 - which exercises you did, by name
 - how many personal records you set
-- for an activity, its distance if you recorded one
+- for an activity, its distance if you recorded one, and for a run, its pace
 
 **The individual sets are never shared** — not the weight, reps or RPE of any single set, and not your notes.
+
+### Runs in the feed
+
+Each run has its own sharing switches, and Running settings sets the default for new runs:
+
+- **Share to friends' feed.** On by default. Turn it off and the run is visible only to you.
+- **Show the map to friends.** You choose this on the recording screen for every run, and it starts **off** unless you change the default in Running settings. Off, friends see your distance, time and pace, not where you ran. You always see the outline of your own runs. If you turn it on, friends see a simplified outline of the route with the first and last 200 metres always removed, and any part of the start or end inside one of your privacy zones removed too. The trimming happens on our server, so the full route never reaches anyone else's phone. A route that passes through a privacy zone in the middle is still shown there: zones hide where a run starts and ends, not where it goes.
 
 Friends can react to a post. You see how many of each reaction a post received, but **not who left them**.
 
@@ -82,18 +103,26 @@ Friends can react to a post. You see how many of each reaction a post received, 
 
 You can remove a friend or block someone at any time. Blocking removes any existing friendship and hides you from each other in search.
 
+### Share cards
+
+After a workout or a run you can make an image card to share, for example to Instagram, Messages or your Photos. **The card is made on your phone and nothing about it is sent to us.** It is shared only if you tap Share or Save to Photos, and only to the app or person you pick. Once you share it, what happens to it is up to you and the service you sent it to, under that service's own terms.
+
+- A **workout card** shows the session's name, date and length, total weight lifted, sets, reps, how many exercises, your personal records, the muscle groups worked, and each exercise's number of sets and best set.
+- A **run card** shows the run's name, date, distance, time, pace, climb, splits and best efforts. If you leave "Show the route" on, it also shows the route's shape, with no map, trimmed at least as much as for friends (the first and last 200 metres, and any part of the start or end inside your privacy zones, are removed). The trimming happens on your phone before the image is made.
+
 ## 5. Who we share with
 
 We do not sell your personal information and we do not share it for cross-context behavioural advertising.
 
-We use two service providers:
+We use these service providers:
 
 | Provider | What it does | What it receives |
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
 | Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
+| Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
 
-Each processes this on our behalf under its own security and privacy terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+Supabase and Google process this on our behalf under their own security and privacy terms; Apple handles map requests under Apple's privacy policy. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
 
 We use **no** analytics, advertising, crash-reporting, or tracking services.
 
@@ -101,7 +130,7 @@ We use **no** analytics, advertising, crash-reporting, or tracking services.
 
 **On our provider's servers.** On Supabase's hosted infrastructure, in the United States. Data is transmitted over encrypted connections (HTTPS/TLS) and access is restricted at the database level so that, by default, you can only read and write your own rows.
 
-**On your own phone.** So the app keeps working in a gym with no signal, a copy of your recent training is stored on your device, along with anything you log while offline that has not reached the server yet. That copy lives in the app's private storage, which the operating system keeps separate from other apps and protects with your device passcode. It is deleted when you sign out, when you delete your account, and when you delete the app.
+**On your own phone.** So the app keeps working in a gym with no signal, a copy of your recent training is stored on your device, along with anything you log while offline that has not reached the server yet. A run you are recording, including its location points, is kept on your phone until you save or discard it, so it survives the app closing. That copy lives in the app's private storage, which the operating system keeps separate from other apps and protects with your device passcode. It is deleted when you sign out, when you delete your account, and when you delete the app.
 
 ## 7. How long we keep it
 
@@ -111,7 +140,7 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, and reports you filed. Deleting a workout or activity also removes the reactions other people left on it. **It cannot be undone and we cannot restore it.**
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 
@@ -131,7 +160,7 @@ Rust Strength is not intended for children under 13. You must confirm you are at
 
 ## 11. Security
 
-Passwords are hashed by our authentication provider and never stored in readable form. All traffic uses HTTPS/TLS. Database access is restricted per-user by row-level security. Your session, and the offline copy of your training described in Section 6, are stored in the app's private storage on your own device and are cleared when you sign out.
+Passwords are hashed by our authentication provider and never stored in readable form. All traffic uses HTTPS/TLS. Database access is restricted per-user by row-level security. Your session, the offline copy of your training and any run in progress described in Section 6 are stored in the app's private storage on your own device and are cleared when you sign out.
 
 No system is perfectly secure, and we cannot guarantee absolute security.
 
@@ -141,5 +170,5 @@ If we change this policy materially we will update the date above and ask you to
 
 ## 13. Contact
 
-Rhett Lindell
+Bluestem Software LLC
 ruststrengthsupport@gmail.com

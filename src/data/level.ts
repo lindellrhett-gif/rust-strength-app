@@ -5,6 +5,7 @@ import { useGrantedBadges } from './badges';
 import { useFriendships } from './friends';
 import { useProfile } from './profile';
 import { useRestDays } from './restDays';
+import { useMyTrophyTotals } from './trophies';
 import {
   bestE1rmMap,
   bestRepsMap,
@@ -12,7 +13,7 @@ import {
   useAllTimeTotals,
   useExercisePRs,
   useWeeklyCoverage,
-  useWorkoutDates,
+  useTrainedDates,
 } from './stats';
 import {
   evaluateAchievements,
@@ -37,6 +38,12 @@ export interface LevelSnapshot {
   achievements: TieredAchievement[];
   /** False while the underlying totals are still loading. */
   ready: boolean;
+  /**
+   * True once every number the trophies rest on has actually arrived, not
+   * just stopped loading. Only then is it safe to act on which trophies are
+   * held, like dropping a featured one that no longer is.
+   */
+  trophiesSettled: boolean;
 }
 
 /**
@@ -50,12 +57,13 @@ export interface LevelSnapshot {
 export function useMyLevel(): LevelSnapshot {
   const profile = useProfile();
   const totals = useAllTimeTotals();
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const prs = useExercisePRs();
   const activity = useActivityTotals();
   const restDays = useRestDays();
   const friendships = useFriendships();
   const granted = useGrantedBadges();
+  const trophyTotals = useMyTrophyTotals();
 
   const today = todayLocal();
   const coverage = useWeeklyCoverage(weekStart(today));
@@ -66,6 +74,12 @@ export function useMyLevel(): LevelSnapshot {
   );
 
   const unit = profile.data?.unit ?? 'lb';
+  const sharesSteps = profile.data?.share_steps === true;
+
+  const friendCount = useMemo(
+    () => (friendships.data ?? []).filter((e) => e.status === 'accepted').length,
+    [friendships.data],
+  );
 
   const achievements = useMemo(() => {
     const groupsThisWeek = MUSCLE_GROUPS.filter((g) => (coverage.data?.[g] ?? 0) > 0).length;
@@ -85,13 +99,24 @@ export function useMyLevel(): LevelSnapshot {
       bestWeightByExercise: bestWeightMap(prs.data),
       bestRepsByExercise: bestRepsMap(prs.data),
       unit,
+      runDistanceM: trophyTotals.data?.runDistanceM ?? 0,
+      stepsTotal: sharesSteps ? (trophyTotals.data?.stepsTotal ?? 0) : null,
+      friendCount,
+      reactionsReceived: trophyTotals.data?.reactionsReceived ?? 0,
     });
-  }, [totals.data, dates.data, coverage.data, today, prs.data, unit, activity.data, restDates]);
-
-  const friendCount = useMemo(
-    () => (friendships.data ?? []).filter((e) => e.status === 'accepted').length,
-    [friendships.data],
-  );
+  }, [
+    totals.data,
+    dates.data,
+    coverage.data,
+    today,
+    prs.data,
+    unit,
+    activity.data,
+    restDates,
+    trophyTotals.data,
+    sharesSteps,
+    friendCount,
+  ]);
 
   const xp = useMemo(
     () =>
@@ -123,6 +148,14 @@ export function useMyLevel(): LevelSnapshot {
     // Totals are what the level actually rests on. Reporting "ready" before
     // they land would flash level 1 and, on the summary screen, could fire a
     // bogus level-up.
-    ready: !totals.isLoading && !prs.isLoading && !profile.isLoading,
+    ready: !totals.isLoading && !prs.isLoading && !profile.isLoading && !trophyTotals.isLoading,
+    trophiesSettled:
+      totals.isSuccess &&
+      prs.isSuccess &&
+      profile.isSuccess &&
+      trophyTotals.isSuccess &&
+      friendships.isSuccess &&
+      activity.isSuccess &&
+      dates.data !== undefined,
   };
 }

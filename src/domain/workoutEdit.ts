@@ -138,6 +138,34 @@ export function patchForEdit(s: StoredSet, edit: SetEdit): SetPatch {
   return { ...patch, e1rm };
 }
 
+/**
+ * The columns to write when an exercise logged as Weights turns out to be an
+ * assisted machine. The number typed into Weight was the assistance, so it
+ * moves to `assist_weight` and `weight` becomes the load moved: bodyweight
+ * minus that. A set logged with the BW button was bodyweight, no assistance.
+ *
+ * Today's bodyweight stands in for the bodyweight at the time, which these
+ * rows never recorded. Sets already logged another way are left alone (null).
+ */
+export function patchToAssisted(
+  s: StoredSet & { is_bodyweight?: boolean },
+  bodyWeight: number,
+): (SetPatch & { is_bodyweight: true }) | null {
+  if (setKind(s) !== 'weighted' || !(bodyWeight > 0)) return null;
+  const assist = s.is_bodyweight ? 0 : Math.max(0, round1(s.weight));
+  const weight = s.is_bodyweight ? s.weight : Math.max(0, round1(bodyWeight - assist));
+  const e1rm = s.is_warmup ? 0 : Math.round(e1rmFromSet({ weight, reps: s.reps, rpe: s.rpe }) * 10) / 10;
+  return {
+    weight,
+    reps: s.reps,
+    assist_weight: assist,
+    added_weight: null,
+    duration_seconds: null,
+    e1rm,
+    is_bodyweight: true,
+  };
+}
+
 /** Whether an edit changes anything worth writing. */
 export function isChanged(s: StoredSet, edit: SetEdit): boolean {
   if (Math.abs(editableValue(s) - edit.value) > 0.001) return true;

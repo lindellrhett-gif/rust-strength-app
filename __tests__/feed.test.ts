@@ -1,3 +1,5 @@
+import { encodePolyline } from '@/domain/running/polyline';
+import { outlinePath } from '@/domain/running/display';
 import {
   REACTIONS,
   REACTION_IDS,
@@ -8,6 +10,7 @@ import {
   postStats,
   postTitle,
   relativeTime,
+  routeFrom,
   toggleReaction,
   totalReactions,
   type FeedRow,
@@ -131,6 +134,59 @@ describe('postStats', () => {
       'lb',
     );
     expect(stats.map((s) => s.label)).toEqual(['time', 'km']);
+  });
+});
+
+describe('runs in the feed', () => {
+  it('shows a run’s pace next to its distance', () => {
+    const stats = postStats(
+      row({ subjectType: 'activity', activityKind: 'run', durationSeconds: 1500, distance: 3.1, distanceUnit: 'mi' }),
+      'lb',
+    );
+    expect(stats).toContainEqual({ label: 'per mi', value: '8:04' });
+  });
+
+  it('doesn’t give a pace to activities that aren’t runs', () => {
+    const stats = postStats(
+      row({ subjectType: 'activity', activityKind: 'cycle', durationSeconds: 3600, distance: 20, distanceUnit: 'mi' }),
+      'lb',
+    );
+    expect(stats.some((s) => s.label.startsWith('per'))).toBe(false);
+  });
+
+  it('carries a shared map’s outline, and nothing when the map isn’t shared', () => {
+    const outline = [
+      { lat: 47.92, lon: -97.03 },
+      { lat: 47.925, lon: -97.025 },
+      { lat: 47.93, lon: -97.03 },
+    ];
+    const [shared, unshared] = buildFeed(
+      [
+        row({ subjectId: 'r1', subjectType: 'activity', activityKind: 'run', routePreview: encodePolyline(outline) }),
+        row({ subjectId: 'r2', subjectType: 'activity', activityKind: 'run', routePreview: null }),
+      ],
+      'lb',
+    );
+    expect(shared.route).toHaveLength(3);
+    expect(shared.route![1].lat).toBeCloseTo(47.925, 5);
+    expect(unshared.route).toBeNull();
+  });
+
+  it('ignores an outline it can’t read', () => {
+    expect(routeFrom('_')).toBeNull();
+    expect(routeFrom('')).toBeNull();
+  });
+
+  it('draws the outline in its true shape, filling the box', () => {
+    const square = [
+      { lat: 0, lon: 0 },
+      { lat: 0, lon: 0.01 },
+      { lat: 0.01, lon: 0.01 },
+    ];
+    const path = outlinePath(square, 200, 100, 10)!;
+    // A square at the equator in a wide box: as tall as the box allows, centred across.
+    expect(path).toBe('M60.0,90.0L140.0,90.0L140.0,10.0');
+    expect(outlinePath(square.slice(0, 1), 200, 100)).toBeNull();
   });
 });
 

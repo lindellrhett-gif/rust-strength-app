@@ -1,7 +1,8 @@
 {
   "cli": {
     "version": ">= 5.0.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "remote",
+    "promptToConfigurePushNotifications": false
   },
   "build": {
     "development": {
@@ -10,7 +11,14 @@
       "env": {
         "APP_VARIANT": "development"
       },
-      "environment": "development"
+      "environment": "preview"
+    },
+    "dev-standalone": {
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "development"
+      },
+      "environment": "preview"
     },
     "ios-check": {
       "distribution": "internal",

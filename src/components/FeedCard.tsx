@@ -2,6 +2,8 @@ import { memo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BadgeStrip } from './BadgeShelf';
+import { FeaturedTrophies } from './FeaturedTrophies';
+import { RouteOutline } from './RouteOutline';
 import { GlyphIcon } from './TrophyIcon';
 import { evaluateBadges } from '@/domain/badges';
 import { REACTIONS, relativeTime, type FeedPost, type ReactionId } from '@/domain/feed';
@@ -57,6 +59,7 @@ export const FeedCard = memo(function FeedCard({
               <Text style={styles.name} numberOfLines={1}>
                 {who}
               </Text>
+              <FeaturedTrophies keys={post.featuredTrophies} size={20} />
               <BadgeStrip badges={badges} />
             </View>
             <Text style={text.caption}>{relativeTime(post.occurredAt, nowMs)}</Text>
@@ -72,6 +75,8 @@ export const FeedCard = memo(function FeedCard({
           {post.headline}
         </Text>
       ) : null}
+
+      {post.route ? <RouteOutline points={post.route} /> : null}
 
       {post.stats.length > 0 ? (
         <View style={styles.stats}>

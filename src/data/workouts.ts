@@ -214,7 +214,7 @@ export interface WorkoutReview {
 }
 
 /** Wait (briefly) for writes still queued from the session to reach the server. */
-async function settleQueuedWrites(client: QueryClient, timeoutMs = 10_000): Promise<void> {
+export async function settleQueuedWrites(client: QueryClient, timeoutMs = 10_000): Promise<void> {
   void client.resumePausedMutations();
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

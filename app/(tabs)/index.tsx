@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, LoadingView, StatTile } from '@/components';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { BodyChart } from '@/components/BodyChart';
+import { StepsTodayCard } from '@/components/StepsTodayCard';
 import { GlyphIcon } from '@/components/TrophyIcon';
 import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
@@ -13,14 +14,16 @@ import {
   useAllTimeTotals,
   useTodayTotals,
   useWeeklyCoverage,
-  useWorkoutDates,
+  useTrainedDates,
 } from '@/data/stats';
 import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useOpenWorkout, useStartWorkout } from '@/data/workouts';
 import { formatDurationShort } from '@/domain/duration';
+import { hasFeature } from '@/domain/entitlements';
 import { currentStreak, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { compact } from '@/lib/format';
+import { useRunInProgress } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
@@ -29,13 +32,14 @@ export default function Today() {
   const profile = useProfile();
   const open = useOpenWorkout();
   const today = useTodayTotals();
-  const dates = useWorkoutDates();
+  const dates = useTrainedDates();
   const restDays = useRestDays();
   const thisWeek = weekStart(todayLocal());
   const coverage = useWeeklyCoverage(thisWeek);
   const totals = useAllTimeTotals();
   const planned = usePlannedSessions();
   const startWorkout = useStartWorkout();
+  const runInProgress = useRunInProgress();
 
   const unit = profile.data?.unit ?? 'lb';
   const todayStr = todayLocal();
@@ -94,6 +98,8 @@ export default function Today() {
           <StatTile value={String(totals.data?.totalWorkouts ?? 0)} label="workouts all-time" />
         </View>
 
+        {hasFeature('running') ? <StepsTodayCard /> : null}
+
         {todaysPlans.length > 0 ? (
           <Card title="Planned for today">
             {todaysPlans.map((p) => (
@@ -138,6 +144,13 @@ export default function Today() {
                   style={styles.secondaryBtn}
                 />
               </View>
+              {hasFeature('running') ? (
+                <Button
+                  label={runInProgress ? 'Resume run' : 'Start a run'}
+                  variant="secondary"
+                  onPress={() => router.push('/run/record')}
+                />
+              ) : null}
               <Button
                 label="Log an activity instead"
                 variant="ghost"

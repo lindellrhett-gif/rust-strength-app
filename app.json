@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rust Strength",
     "slug": "rust-strength",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "scheme": "ruststrength",
     "userInterfaceStyle": "dark",
@@ -13,6 +13,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
+      "appleTeamId": "V7YLBXSTX2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -22,7 +23,8 @@
               "NSExceptionAllowsInsecureHTTPLoads": true
             }
           }
-        }
+        },
+        "NSSupportsLiveActivities": true
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -75,6 +77,14 @@
             "NSPrivacyCollectedDataTypePurposes": [
               "NSPrivacyCollectedDataTypePurposeAppFunctionality"
             ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePreciseLocation",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
           }
         ]
       }
@@ -100,7 +110,41 @@
         }
       ],
       "expo-font",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Rust Strength uses your location while you record a run, to measure your distance, pace and route.",
+          "locationAlwaysAndWhenInUsePermission": "Rust Strength uses your location while a run is recording, including with your screen locked, so it keeps measuring distance and pace. Tracking stops as soon as you finish the run.",
+          "locationAlwaysPermission": "Rust Strength uses your location while a run is recording, including with your screen locked, so it keeps measuring distance and pace. Tracking stops as soon as you finish the run.",
+          "motionUsagePermission": "Rust Strength counts your steps with your iPhone's motion sensors, to show today's steps and the steps and cadence of each run you record.",
+          "isIosBackgroundLocationEnabled": true
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Rust Strength counts your steps with your iPhone's motion sensors, to show today's steps and the steps and cadence of each run you record."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": true
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Rust Strength only adds your workout and run cards to Photos when you tap Save to Photos. It doesn't browse or upload your photos.",
+          "savePhotosPermission": "Rust Strength saves your workout and run cards to Photos when you tap Save to Photos. It can add pictures but never see the ones already there.",
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
+        }
+      ],
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "tsconfigPaths": true
