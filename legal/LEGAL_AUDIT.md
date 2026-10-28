@@ -565,3 +565,63 @@ again when they first open 1.1.
 3. **Attorney.** Location combined with fitness data adds to the Washington My
    Health My Data question in section 5. This has not been reviewed, and is not
    claimed to be compliant.
+
+## 15. Pending: Rust Strength Pro (branch `feature/subscriptions`, not released)
+
+Subscriptions through RevenueCat are built but switched off; see
+`store/SUBSCRIPTIONS.md`. The branch's documents are version **1.6.0** and
+must only be merged and published when Pro goes on sale, since they describe
+it as purchasable.
+
+### What the branch's documents now say
+
+1. **Terms section 9** replaces "The App is free" with the subscription
+   terms Apple and auto-renewal practice call for: price shown before
+   purchase, billing through Apple, automatic renewal unless cancelled 24
+   hours before the period ends, free-trial forfeiture, how to cancel,
+   refunds through Apple, price changes, and changes to what Pro includes.
+   It does not promise that free features stay free forever; that is a
+   business commitment, not written into the Terms. It also covers the
+   one-time **Lifetime** purchase: no renewal, and "Lifetime" defined as the
+   life of the Pro service, ending if the App or Pro is discontinued.
+2. **Privacy Policy:** a "Your purchase" item (what we learn, including which
+   of monthly, yearly or Lifetime; never card details); RevenueCat added to
+   the provider table (account id, purchase details, technical app and
+   device data, connected at sign-in once subscriptions are on, plus any
+   answers given in its Customer Center, such as a cancellation reason); the
+   "no analytics" line narrowed to admit
+   RevenueCat's subscription figures; deletion covers our subscription
+   record and a request to RevenueCat; and a bold note that deleting the
+   account doesn't cancel the subscription.
+3. **Minimisation:** the SDK isn't started at all while subscriptions are
+   off, so nothing reaches RevenueCat before launch. Pro status lives on our
+   side only as `public.subscriptions` (owner-readable, written only by the
+   webhook with the service role), and is in the data export.
+4. **Secrets:** only RevenueCat's public SDK key goes in the app. The secret
+   API key and webhook secret live in Supabase Edge Function secrets. The
+   Test Store key used for development is in the local `.env` only, and is
+   kept out of release builds twice over (RevenueCat would crash them).
+5. **The paywall is RevenueCat's,** designed in its dashboard, so the Terms
+   and Privacy links, Restore, and Apple's renewal wording must be set up
+   there (store/SUBSCRIPTIONS.md says how). Check the published paywall
+   before submitting: App Review rejects a subscription screen without them.
+
+### Open questions (yours, or an attorney's)
+
+1. **Seller entity.** The developer account is Individual, so Apple pays and
+   lists Rhett personally, while the documents name Bluestem Software LLC.
+   Converting to an Organization account needs a D-U-N-S number.
+2. **State automatic-renewal laws** (California's among them) and whether
+   Apple's purchase sheet, receipts and cancellation in Settings cover the
+   disclosure, consent and cancellation duties. Not reviewed.
+3. **The RevenueCat line in the provider table** describes its data in
+   general terms ("technical information about the app and your device").
+   Check RevenueCat's current data processing terms before publishing, and
+   accept its DPA if offered.
+4. **App Store labels at launch:** Purchases > Purchase History, linked to
+   the user, App Functionality, not tracking. RevenueCat's own privacy
+   manifest declares purchase history, not linked; it becomes linked here
+   because the RevenueCat customer id is the account id.
+5. **Lifetime wording.** Whether "for as long as we offer Pro" and the
+   discontinuation clause are enough for a one-time "Lifetime" purchase
+   under consumer-protection law. Not reviewed.

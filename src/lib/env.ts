@@ -17,4 +17,12 @@ if (!url || !anonKey) {
 export const env = {
   supabaseUrl: url,
   supabaseAnonKey: anonKey,
+  /**
+   * RevenueCat's public iOS SDK key (it starts appl_). Public by design, like
+   * the anon key: it can only read offerings and make purchases for the
+   * signed-in person. The secret key never goes in the app.
+   */
+  revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || null,
+  /** Subscriptions stay off unless this is "on" (see src/lib/purchases.ts). */
+  subscriptionsSwitch: process.env.EXPO_PUBLIC_SUBSCRIPTIONS === 'on',
 };

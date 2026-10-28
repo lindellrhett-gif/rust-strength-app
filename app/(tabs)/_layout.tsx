@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { ConsentScreen } from '@/components/ConsentScreen';
 import { RunRecovery } from '@/components/RunRecovery';
 import { useProfile } from '@/data/profile';
+import { useSubscriptionIdentity } from '@/data/subscription';
 import { useDailyStepsSync } from '@/data/trophies';
 import { needsConsent } from '@/domain/consent';
 import { hasFeature } from '@/domain/entitlements';
@@ -19,6 +20,8 @@ export default function TabsLayout() {
   const profile = useProfile();
   // Shared daily steps stay up to date while sharing is on.
   useDailyStepsSync();
+  // RevenueCat follows the signed-in account (only once subscriptions are on).
+  useSubscriptionIdentity();
   // The version agreed to on the consent screen during this session, if any.
   const [acceptedVersion, setAcceptedVersion] = useState<string | null>(null);
   if (!session) return <Redirect href="/(auth)/sign-in" />;

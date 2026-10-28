@@ -107,4 +107,5 @@ export const qk = {
   runPreferences: ['run-preferences'] as const,
   // Under 'activities', so logging or deleting one refreshes it too.
   trophyTotals: ['activities', 'trophy-totals'] as const,
+  proStatus: ['subscription', 'status'] as const,
 };
