@@ -15,6 +15,7 @@
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "db:bundle": "node scripts/build-dev-sql.js",
     "legal": "node scripts/build-legal.js",
+    "foods:usda": "node scripts/import-usda.js",
     "icons": "node scripts/make-icons.js",
     "screenshots": "node scripts/screenshots.js",
     "eas-build-post-install": "node scripts/check-build-env.js"

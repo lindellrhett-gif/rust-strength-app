@@ -26,7 +26,8 @@
 --     before it, so past days keep the goal they had.
 --  9. nutrition_settings: one row per person; everything optional.
 -- 10. rpc_search_foods: word-prefix search over the catalog and your own foods.
--- 11. rpc_export_my_data includes all of it, under "nutrition".
+-- 11. import_usda_foods: the catalog loader, for the service role only.
+-- 12. rpc_export_my_data includes all of it, under "nutrition".
 --
 -- Additive only: nothing existing changes shape. Every table has Row Level
 -- Security and goes with the account (on delete cascade).
@@ -428,9 +429,11 @@ revoke all on foods, food_portions, recipe_items, diary_entries, saved_meals, sa
 
 -- ---------------------------------------------------------------------------
 -- rpc_search_foods: every word must start a word in the name or brand
--- ("chick bre" finds "Chicken breast"). Your own foods come first, then the
--- best matches, shorter names before longer ones. Runs as the caller, so RLS
--- limits it to the catalog and your own foods.
+-- ("chick bre" finds "Chicken breast"). Your own foods come first, then
+-- names that start with the first word typed, then shorter names, which in
+-- the USDA catalog are the plain foods: "banana" puts "Banana, raw" ahead of
+-- "SILK Banana-Strawberry soy yogurt". Runs as the caller, so RLS limits it
+-- to the catalog and your own foods.
 -- ---------------------------------------------------------------------------
 create or replace function rpc_search_foods(p_query text, p_limit int default 25)
 returns setof foods
@@ -440,23 +443,20 @@ security invoker
 set search_path = public
 as $$
 declare
-  v_terms text;
+  v_words text[];
   v_query tsquery;
 begin
   if auth.uid() is null then
     raise exception 'Sign in to search foods.' using errcode = '42501';
   end if;
 
-  select string_agg(w || ':*', ' & ')
-  into v_terms
-  from unnest(regexp_split_to_array(
-         lower(regexp_replace(left(coalesce(p_query, ''), 100), '[^[:alnum:]]+', ' ', 'g')), ' ')) w
-  where w <> '';
-
-  if v_terms is null then
+  v_words := array_remove(regexp_split_to_array(
+    lower(regexp_replace(left(coalesce(p_query, ''), 100), '[^[:alnum:]]+', ' ', 'g')), ' '), '');
+  if cardinality(v_words) = 0 then
     return;
   end if;
-  v_query := to_tsquery('english', v_terms);
+  v_query := to_tsquery('english',
+    (select string_agg(w || ':*', ' & ') from unnest(v_words) w));
   -- Only stop words ("the", "and"): nothing to search for.
   if numnode(v_query) = 0 then
     return;
@@ -466,12 +466,77 @@ begin
     select f.*
     from foods f
     where f.search @@ v_query
-    order by (f.owner_id is not null) desc, ts_rank(f.search, v_query) desc, char_length(f.name), f.name
+    order by (f.owner_id is not null) desc,
+             (lower(f.name) like v_words[1] || '%') desc,
+             char_length(f.name),
+             ts_rank(f.search, v_query) desc,
+             f.name
     limit least(greatest(coalesce(p_limit, 25), 1), 50);
 end $$;
 
 revoke execute on function rpc_search_foods(text, int) from public, anon;
 grant  execute on function rpc_search_foods(text, int) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- import_usda_foods: the catalog loader, for scripts/import-usda.js with the
+-- service role only. Takes rows as scripts/usda.js makes them (the foods
+-- columns plus a "portions" list) and upserts by USDA id, replacing each
+-- food's portions. Diary entries keep their own copies, so reloading the
+-- catalog never changes a past day. Catalog foods are never deleted here:
+-- an entry's food_id would quietly become empty.
+-- ---------------------------------------------------------------------------
+create or replace function import_usda_foods(p_foods jsonb)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r    jsonb;
+  f    foods;
+  v_id uuid;
+  v_n  int := 0;
+begin
+  if jsonb_typeof(p_foods) <> 'array' then
+    raise exception 'Expected a list of foods.';
+  end if;
+
+  for r in select value from jsonb_array_elements(p_foods) loop
+    f := jsonb_populate_record(null::foods, r - 'portions' - 'search');
+    if f.source_ref is null or f.source_ref !~ '^[0-9]{1,12}$' then
+      raise exception 'Every USDA food needs its FoodData Central id.';
+    end if;
+
+    insert into foods (
+      source, source_ref, name, basis, kcal, fat_g, sat_fat_g, trans_fat_g, cholesterol_mg, sodium_mg,
+      carbs_g, fiber_g, sugars_g, added_sugars_g, protein_g, vitamin_d_mcg, calcium_mg, iron_mg,
+      potassium_mg, extra
+    ) values (
+      'usda', f.source_ref, f.name, '100g', f.kcal, f.fat_g, f.sat_fat_g, f.trans_fat_g, f.cholesterol_mg,
+      f.sodium_mg, f.carbs_g, f.fiber_g, f.sugars_g, f.added_sugars_g, f.protein_g, f.vitamin_d_mcg,
+      f.calcium_mg, f.iron_mg, f.potassium_mg, coalesce(f.extra, '{}'::jsonb)
+    )
+    on conflict (source_ref) where source = 'usda' do update set
+      name = excluded.name, kcal = excluded.kcal, fat_g = excluded.fat_g, sat_fat_g = excluded.sat_fat_g,
+      trans_fat_g = excluded.trans_fat_g, cholesterol_mg = excluded.cholesterol_mg,
+      sodium_mg = excluded.sodium_mg, carbs_g = excluded.carbs_g, fiber_g = excluded.fiber_g,
+      sugars_g = excluded.sugars_g, added_sugars_g = excluded.added_sugars_g, protein_g = excluded.protein_g,
+      vitamin_d_mcg = excluded.vitamin_d_mcg, calcium_mg = excluded.calcium_mg, iron_mg = excluded.iron_mg,
+      potassium_mg = excluded.potassium_mg, extra = excluded.extra
+    returning id into v_id;
+
+    delete from food_portions where food_id = v_id;
+    insert into food_portions (food_id, label, grams, position)
+    select v_id, p.value ->> 'label', (p.value ->> 'grams')::real, (p.ordinality - 1)::smallint
+    from jsonb_array_elements(coalesce(r -> 'portions', '[]'::jsonb)) with ordinality as p(value, ordinality);
+
+    v_n := v_n + 1;
+  end loop;
+  return v_n;
+end $$;
+
+revoke execute on function import_usda_foods(jsonb) from public, anon, authenticated;
+grant  execute on function import_usda_foods(jsonb) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- "Download my data": as in 0026, plus the food diary under "nutrition".

@@ -30,6 +30,7 @@ const banana = await insert('foods', {
   kcal: 89, carbs_g: 22.8, fiber_g: 2.6, sugars_g: 12.2, protein_g: 1.1, fat_g: 0.3, potassium_mg: 358,
 });
 await insert('food_portions', { food_id: banana.id, label: '1 medium (7" to 7-7/8" long)', grams: 118 });
+await insert('foods', { source: 'usda', source_ref: '172204', name: 'SILK Banana-Strawberry soy yogurt', kcal: 94 });
 
 const ownFood = (owner, extra = {}) => ({
   owner_id: owner, source: 'user', name: 'Protein bar', brand: 'Home', basis: 'serving',
@@ -43,7 +44,7 @@ const entry = (user, extra = {}) => ({
 // --- 1. The shared catalog -----------------------------------------------------
 let alicesBar;
 await asUser(db, alice, async () => {
-  check('signed in, you can read the catalog', (await count(`select count(*) as n from foods where owner_id is null`)) === 2);
+  check('signed in, you can read the catalog', (await count(`select count(*) as n from foods where owner_id is null`)) === 3);
   check('and its portions', (await count(`select count(*) as n from food_portions where food_id = $1`, [banana.id])) === 1);
 
   const shared = await errorOf(() => insert('foods', { ...ownFood(null), source: 'usda' }));
@@ -114,6 +115,10 @@ await asUser(db, alice, async () => {
   const both = await names('chicken');
   check('your own foods come first', both[0] === 'Chicken salad wrap' && both.length === 2, both);
   check('nothing to search for returns nothing', (await names('   ')).length === 0 && (await names('%%')).length === 0);
+  const plain = await names('banana');
+  check('the plain food comes before things that merely contain it',
+    plain.indexOf('Bananas, raw') >= 0 && plain.indexOf('Bananas, raw') < plain.indexOf('SILK Banana-Strawberry soy yogurt'),
+    plain);
   check('only stop words returns nothing, without an error', (await names('the and')).length === 0);
 });
 
@@ -249,7 +254,7 @@ const left = await count(
   [alice],
 );
 check('deleting her account removes all of her nutrition data', left === 0, left);
-check('the catalog stays', (await count(`select count(*) as n from foods where source = 'usda'`)) === 2);
+check('the catalog stays', (await count(`select count(*) as n from foods where source = 'usda'`)) === 3);
 check('and so does bob’s weigh-in', (await count(`select count(*) as n from body_weights where user_id = $1`, [bob])) === 1);
 
 done();
