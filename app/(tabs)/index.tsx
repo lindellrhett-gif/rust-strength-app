@@ -6,6 +6,7 @@ import { Button, Card, LoadingView, StatTile } from '@/components';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { BodyChart } from '@/components/BodyChart';
 import { StepsTodayCard } from '@/components/StepsTodayCard';
+import { NutritionTodayCard } from '@/components/nutrition/NutritionTodayCard';
 import { GlyphIcon } from '@/components/TrophyIcon';
 import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
@@ -99,6 +100,8 @@ export default function Today() {
         </View>
 
         {hasFeature('running') ? <StepsTodayCard /> : null}
+
+        <NutritionTodayCard />
 
         {todaysPlans.length > 0 ? (
           <Card title="Planned for today">

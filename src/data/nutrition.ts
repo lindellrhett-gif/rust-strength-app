@@ -21,6 +21,7 @@ import type { NutritionSettings, WaterLog, WeighIn } from '@/domain/nutrition/se
 import type { NutritionGoal } from '@/domain/nutrition/totals';
 import { toLocalDateString } from '@/lib/dates';
 import { newId } from '@/lib/ids';
+import { lookupBarcode } from '@/lib/openFoodFacts';
 import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -477,6 +478,25 @@ export function useFood(id: string | null | undefined) {
       if (food.error) throw food.error;
       if (portions.error) throw portions.error;
       return food.data ? foodFromRow(food.data, portions.data ?? []) : null;
+    },
+  });
+}
+
+/**
+ * An Open Food Facts product by barcode, looked up from the phone. Kept for
+ * the session once found; a search result is put here before it is opened,
+ * so opening it needs no second request.
+ */
+export function useOffFood(barcode: string | null | undefined) {
+  return useQuery({
+    queryKey: qk.offFood(barcode ?? 'none'),
+    enabled: !!barcode,
+    staleTime: Infinity,
+    queryFn: async (): Promise<Food | null> => {
+      const result = await lookupBarcode(barcode!);
+      if ('food' in result) return result.food;
+      if (result.problem === 'offline' || result.problem === 'unavailable') throw new Error(result.problem);
+      return null;
     },
   });
 }

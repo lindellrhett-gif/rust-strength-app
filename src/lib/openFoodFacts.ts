@@ -6,10 +6,13 @@
  * Nothing is sent but the barcode and the app's name.
  */
 
+import type { Food } from '@/domain/nutrition/foods';
 import {
   barcodeCandidates,
   foodFromOpenFoodFacts,
+  foodsFromSearch,
   offProductUrl,
+  offSearchUrl,
   OFF_USER_AGENT,
   type OffResult,
 } from '@/domain/nutrition/openFoodFacts';
@@ -57,4 +60,28 @@ export async function lookupBarcode(scanned: string): Promise<LookupResult> {
     if (result.problem === 'no_nutrition') sawNoNutrition = true;
   }
   return { problem: sawNoNutrition ? 'no_nutrition' : 'not_found' };
+}
+
+/**
+ * Products matching a text search, or a problem. One request per tap of
+ * "Search Open Food Facts", never per keystroke.
+ */
+export async function searchOpenFoodFacts(
+  query: string,
+): Promise<{ foods: Food[] } | { problem: 'offline' | 'unavailable' }> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(offSearchUrl(query), {
+      headers: { 'User-Agent': OFF_USER_AGENT, Accept: 'application/json' },
+      signal: controller.signal,
+    });
+    if (!res.ok) return { problem: 'unavailable' };
+    return { foods: foodsFromSearch(await res.json()) };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : '';
+    return { problem: /network|abort|failed to fetch/i.test(message) ? 'offline' : 'unavailable' };
+  } finally {
+    clearTimeout(timer);
+  }
 }

@@ -37,6 +37,16 @@ export function offProductUrl(barcode: string): string {
 }
 
 /**
+ * A text search. Open Food Facts allows 10 a minute per IP and asks that it
+ * not be used for search-as-you-type, so the app only runs one when the
+ * person taps "Search Open Food Facts".
+ */
+export function offSearchUrl(query: string, pageSize = 20): string {
+  const q = encodeURIComponent(query.trim().slice(0, 100));
+  return `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${q}&search_simple=1&action=process&json=1&page_size=${pageSize}&fields=${OFF_FIELDS}`;
+}
+
+/**
  * One form for a barcode, so the same product always matches itself: a
  * 12-digit UPC-A becomes the 13-digit EAN with a leading zero, which is how
  * Open Food Facts lists it (737628064502 comes back as 0737628064502).
@@ -159,4 +169,26 @@ export function foodFromOpenFoodFacts(response: unknown, barcode: string): OffRe
       portions: [],
     },
   };
+}
+
+/**
+ * A search response as foods. Products without a name or usable nutrition
+ * are left out: nobody can choose between three "Unnamed product" rows, and
+ * scanning the package still finds them.
+ */
+export function foodsFromSearch(response: unknown): Food[] {
+  const r = response as { products?: unknown } | null;
+  if (!r || !Array.isArray(r.products)) return [];
+  const foods: Food[] = [];
+  const seen = new Set<string>();
+  for (const product of r.products as Record<string, unknown>[]) {
+    if (!product || typeof product !== 'object') continue;
+    if (!text(product.product_name, 200) && !text(product.generic_name, 200)) continue;
+    const code = typeof product.code === 'string' ? product.code : '';
+    const result = foodFromOpenFoodFacts({ status: 1, product }, code);
+    if (!('food' in result) || !result.food.barcode || seen.has(result.food.barcode)) continue;
+    seen.add(result.food.barcode);
+    foods.push(result.food);
+  }
+  return foods;
 }

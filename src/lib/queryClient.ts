@@ -129,4 +129,6 @@ export const qk = {
   nutritionGoals: ['nutrition', 'goals'] as const,
   foodSearch: (query: string) => ['foods', 'search', query] as const,
   food: (id: string) => ['foods', id] as const,
+  /** An Open Food Facts product, by its barcode. */
+  offFood: (barcode: string) => ['foods', 'off', barcode] as const,
 };

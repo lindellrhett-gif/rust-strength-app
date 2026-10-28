@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import * as d from '../src/domain/nutrition/diary';
 import { copyEntries, entryFromFood, quickAddEntry, rescaleEntry, type DiaryEntry } from '../src/domain/nutrition/entries';
 import { defaultUnit, formatAmount, measure, unitsFor, type Food } from '../src/domain/nutrition/foods';
 import {
@@ -22,7 +23,13 @@ import {
   sumNutrients,
   type Nutrients,
 } from '../src/domain/nutrition/nutrients';
-import { barcodeCandidates, canonicalBarcode, foodFromOpenFoodFacts } from '../src/domain/nutrition/openFoodFacts';
+import {
+  barcodeCandidates,
+  canonicalBarcode,
+  foodFromOpenFoodFacts,
+  foodsFromSearch,
+  offSearchUrl,
+} from '../src/domain/nutrition/openFoodFacts';
 import { perServing, recipeItem, totalGrams } from '../src/domain/nutrition/recipes';
 import { calorieBudget, dayTotal, goalFor, mealGoals, mealTotals, progressToward } from '../src/domain/nutrition/totals';
 
@@ -425,5 +432,114 @@ describe('Open Food Facts', () => {
     expect(canonicalBarcode('0737628064502')).toBe('0737628064502');
     expect(canonicalBarcode('96385074')).toBe('96385074');
     expect(canonicalBarcode('abc')).toBeNull();
+  });
+});
+
+describe('the diary screen', () => {
+  const at = (id: string, meal: number, kcal: number, time: string) =>
+    quickAddEntry({ kcal, proteinG: 10, carbsG: 20, fatG: 5 }, place({ id, meal, loggedAt: `2026-10-28T${time}:00Z` })) as DiaryEntry;
+  const goals = [{ startsOn: '2026-10-01', kcal: 2000, proteinG: 150, carbsG: 200, fatG: 67, targets: {}, mealSplit: null }];
+
+  it('groups the day by meal, in the order things were logged', () => {
+    const view = d.diaryDay({
+      day: '2026-10-28',
+      entries: [at('b', 0, 200, '09:00'), at('a', 0, 300, '08:00'), at('c', 2, 600, '19:00')],
+      mealNames: ['Breakfast', 'Lunch', 'Dinner', 'Snacks'],
+      goals,
+      exerciseKcal: 350,
+      addExercise: true,
+    });
+    expect(view.meals.map((m) => [m.name, m.entries.map((e) => e.id), m.total.kcal])).toEqual([
+      ['Breakfast', ['a', 'b'], 500],
+      ['Lunch', [], 0],
+      ['Dinner', ['c'], 600],
+      ['Snacks', [], 0],
+    ]);
+    expect(view.budget).toEqual({ goal: 2000, food: 1100, exercise: 350, remaining: 1250 });
+    expect(view.macros.map((m) => [m.key, m.eaten, m.target])).toEqual([
+      ['carbsG', 60, 200],
+      ['fatG', 15, 67],
+      ['proteinG', 30, 150],
+    ]);
+    expect(view.isEmpty).toBe(false);
+  });
+
+  it('keeps an entry in a meal past the current names, rather than losing it', () => {
+    const view = d.diaryDay({
+      day: '2026-10-28', entries: [at('x', 5, 100, '22:00')], mealNames: ['Breakfast', 'Lunch'],
+      goals: [], exerciseKcal: 0, addExercise: true,
+    });
+    expect(view.meals.map((m) => m.name)).toEqual(['Breakfast', 'Lunch', 'Meal 3', 'Meal 4', 'Meal 5', 'Meal 6']);
+    expect(view.meals[5].entries).toHaveLength(1);
+    expect(view.budget.remaining).toBeNull();
+    expect(view.macros).toEqual([]);
+  });
+
+  it('names meals past the person\'s own names', () => {
+    expect(d.mealNamesFor(['Breakfast', 'Lunch'], 3)).toEqual(['Breakfast', 'Lunch', 'Meal 3', 'Meal 4']);
+    expect(d.mealNamesFor(['Breakfast', 'Lunch'], 0)).toEqual(['Breakfast', 'Lunch']);
+    expect(d.mealNamesFor([], -1)).toEqual(['Meal 1']);
+    expect(d.mealNamesFor(['a'], 9)).toHaveLength(6);
+  });
+
+  it('names days the way people say them', () => {
+    expect(d.dayLabel('2026-10-28', '2026-10-28')).toBe('Today');
+    expect(d.dayLabel('2026-10-27', '2026-10-28')).toBe('Yesterday');
+    expect(d.dayLabel('2026-10-29', '2026-10-28')).toBe('Tomorrow');
+    expect(d.dayLabel('2026-10-20', '2026-10-28')).toBe('Tue, Oct 20');
+    expect(d.dayLabel('2025-12-31', '2026-10-28')).toBe('Wed, Dec 31, 2025');
+  });
+
+  it('formats energy, grams and the carbs line', () => {
+    expect(d.formatEnergy(1840.4, 'kcal')).toBe('1,840');
+    expect(d.formatEnergy(100, 'kj')).toBe('418');
+    expect(d.formatGrams(3.44)).toBe('3.4 g');
+    expect(d.formatGrams(12.6)).toBe('13 g');
+    expect(d.formatGrams(null)).toBe('—');
+    expect(d.carbsShown({ carbsG: 30, fiberG: 8 }, true)).toEqual({ label: 'Net carbs', grams: 22 });
+    expect(d.carbsShown({ carbsG: 30, fiberG: 8 }, false)).toEqual({ label: 'Carbs', grams: 30 });
+    expect(d.remainingLabel({ goal: 2000, food: 2100, exercise: 0, remaining: -100 })).toBe('Over');
+  });
+
+  it('reads an optional number field', () => {
+    expect(d.parseOptionalNumber('')).toBeNull();
+    expect(d.parseOptionalNumber(' 12,5 ')).toBe(12.5);
+    expect(d.parseOptionalNumber('0')).toBe(0);
+    expect(d.parseOptionalNumber('-3')).toBeNaN();
+    expect(d.parseOptionalNumber('lots')).toBeNaN();
+  });
+
+  it('reads amounts as people type them', () => {
+    expect(d.parseAmount('1.5')).toBe(1.5);
+    expect(d.parseAmount('1,5')).toBe(1.5);
+    expect(d.parseAmount('.5')).toBe(0.5);
+    expect(d.parseAmount('1/2')).toBe(0.5);
+    expect(d.parseAmount('1 1/2')).toBe(1.5);
+    expect(d.parseAmount('0')).toBeNull();
+    expect(d.parseAmount('1/0')).toBeNull();
+    expect(d.parseAmount('two')).toBeNull();
+    expect(d.parseAmount('')).toBeNull();
+  });
+});
+
+describe('Open Food Facts search', () => {
+  const search = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'off', 'search-peanut-butter.json'), 'utf8'));
+
+  it('turns a real search into foods, leaving out the product with no name', () => {
+    const foods = foodsFromSearch(search);
+    expect(foods).toHaveLength(4);
+    expect(foods.map((f: Food) => f.brand)).not.toContain('Skippy');
+    expect(foods.every((f: Food) => f.source === 'off' && f.barcode && f.nutrients.kcal > 500)).toBe(true);
+  });
+
+  it('asks for only the fields the diary reads, and trims the query', () => {
+    const url = offSearchUrl('  peanut butter  ');
+    expect(url).toContain('search_terms=peanut%20butter&');
+    expect(url).toContain('fields=code,product_name');
+  });
+
+  it('copes with a response that has no products', () => {
+    expect(foodsFromSearch({})).toEqual([]);
+    expect(foodsFromSearch(null)).toEqual([]);
   });
 });
