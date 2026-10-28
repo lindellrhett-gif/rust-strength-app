@@ -219,7 +219,38 @@ await asUser(db, alice, async () => {
   check('no more than six meals', seven != null && /violates check constraint/.test(seven), seven);
 });
 
-// --- 7. Download my data, then delete the account ------------------------------
+// --- 7. The upserts the app sends (src/data/mutationDefaults.ts, nutrition.ts) --
+// Each conflict target must match a unique key, and RLS must allow both the
+// insert and the update, or the second save of the day fails on the phone.
+await asUser(db, alice, async () => {
+  const upsert = (sql, params) => errorOf(() => db.query(sql, params));
+  const weigh = `insert into body_weights (user_id, measured_on, kg) values ($1, '2026-10-20', $2)
+                 on conflict (user_id, measured_on) do update set kg = excluded.kg`;
+  const first = await upsert(weigh, [alice, 85]);
+  const again = await upsert(weigh, [alice, 84.5]);
+  const kg = (await db.query(`select kg from body_weights where measured_on = '2026-10-20'`)).rows;
+  check('a second weigh-in the same day replaces the first', first === null && again === null && kg.length === 1 && kg[0].kg === 84.5,
+    { first, again, kg });
+
+  const day = `insert into diary_days (user_id, day, note, completed_at) values ($1, '2026-10-28', $2, null)
+               on conflict (user_id, day) do update set note = excluded.note, completed_at = excluded.completed_at`;
+  const note = await upsert(day, [alice, 'Rest day after the long run']);
+  check('a day note saves over the earlier one', note === null
+    && (await db.query(`select note from diary_days where day = '2026-10-28'`)).rows[0]?.note === 'Rest day after the long run', note);
+
+  const settings = `insert into nutrition_settings (user_id, net_carbs) values ($1, true)
+                    on conflict (user_id) do update set net_carbs = excluded.net_carbs`;
+  check('settings save over the existing row', (await upsert(settings, [alice])) === null
+    && (await db.query(`select net_carbs from nutrition_settings`)).rows[0]?.net_carbs === true);
+
+  const goal = `insert into nutrition_goals (user_id, starts_on, kcal) values ($1, '2026-10-15', 1900)
+                on conflict (user_id, starts_on) do update set kcal = excluded.kcal`;
+  check('a goal set twice the same day replaces itself', (await upsert(goal, [alice])) === null
+    && (await count(`select count(*) as n from nutrition_goals where starts_on = '2026-10-15' and kcal = 1900`)) === 1);
+});
+await db.query(`delete from body_weights where user_id = $1 and measured_on = '2026-10-20'`, [alice]);
+
+// --- 8. Download my data, then delete the account ------------------------------
 await asUser(db, alice, async () => {
   const { rows } = await db.query(`select rpc_export_my_data() as data`);
   const data = rows[0].data;
