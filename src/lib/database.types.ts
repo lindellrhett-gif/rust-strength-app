@@ -1111,6 +1111,14 @@ export type Database = {
         Args: { p_foods: Json };
         Returns: number;
       };
+      rpc_save_meal: {
+        Args: { p_id: string; p_name: string; p_items: Json };
+        Returns: string;
+      };
+      rpc_save_recipe: {
+        Args: { p_recipe: Json; p_items: Json };
+        Returns: string;
+      };
     };
     Enums: {
       muscle_group:
@@ -1229,3 +1237,6 @@ export type WaterLogRow = Database['public']['Tables']['water_logs']['Row'];
 export type BodyWeightRow = Database['public']['Tables']['body_weights']['Row'];
 export type NutritionGoalRow = Database['public']['Tables']['nutrition_goals']['Row'];
 export type NutritionSettingsRow = Database['public']['Tables']['nutrition_settings']['Row'];
+export type SavedMealRow = Database['public']['Tables']['saved_meals']['Row'];
+export type SavedMealItemRow = Database['public']['Tables']['saved_meal_items']['Row'];
+export type RecipeItemRow = Database['public']['Tables']['recipe_items']['Row'];

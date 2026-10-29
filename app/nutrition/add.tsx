@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card } from '@/components';
@@ -11,12 +11,15 @@ import { FoodAmountSheet } from '@/components/nutrition/FoodAmountSheet';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
 import {
   MIN_SEARCH_LENGTH,
+  useDeleteSavedMeal,
   useFood,
   useFoodHistory,
   useFoodSearch,
   useLogEntries,
+  useMyFoods,
   useNutritionSettings,
   useOffFood,
+  useSavedMeals,
 } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
@@ -24,6 +27,7 @@ import { energyUnitLabel, formatEnergy, mealNamesFor, SOURCE_LABELS } from '@/do
 import { copyEntries, entryFromFood, MAX_MEALS, type DiaryEntry } from '@/domain/nutrition/entries';
 import { formatAmount, type Food } from '@/domain/nutrition/foods';
 import { frequentFoods, recentFoods } from '@/domain/nutrition/history';
+import { entriesFromSavedMeal, savedMealTotal, type SavedMeal } from '@/domain/nutrition/savedMeals';
 import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
@@ -73,7 +77,10 @@ function AddFood() {
   const history = useFoodHistory();
   const [query, setQuery] = useState('');
   const search = useFoodSearch(query);
-  const [list, setList] = useState<'recent' | 'frequent'>('recent');
+  const [list, setList] = useState<'recent' | 'frequent' | 'mine' | 'meals'>('recent');
+  const myFoods = useMyFoods();
+  const savedMeals = useSavedMeals();
+  const deleteMeal = useDeleteSavedMeal();
   const [added, setAdded] = useState<Set<string>>(new Set());
   const [picked, setPicked] = useState<Picked | null>(null);
   const { log } = useLogEntries();
@@ -97,6 +104,27 @@ function AddFood() {
     log(copyEntries([entry], { day, meal, loggedAt: new Date().toISOString() }, newId));
     setAdded((prev) => new Set(prev).add(entry.id));
   };
+
+  const logMeal = (saved: SavedMeal) => {
+    log(entriesFromSavedMeal(saved, { day, meal, loggedAt: new Date().toISOString() }, newId));
+    setAdded((prev) => new Set(prev).add(saved.id));
+  };
+
+  const confirmDeleteMeal = (saved: SavedMeal) =>
+    Alert.alert(`Delete “${saved.name}”?`, 'Days you’ve already logged it on keep their entries.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          deleteMeal.mutate(saved.id, {
+            onError: (e) => Alert.alert('Couldn’t delete it', e instanceof Error ? e.message : 'Please try again.'),
+          }),
+      },
+    ]);
+
+  /** Your own foods and recipes can be edited from the amount sheet. */
+  const editPicked = food && food.id && food.source !== 'usda' && food.source !== 'off' ? food : null;
 
   const historyRows =
     list === 'recent'
@@ -124,11 +152,24 @@ function AddFood() {
 
         <View style={styles.actions}>
           <Pressable
+            onPress={() => router.replace({ pathname: '/nutrition/scan', params: { day, meal: String(meal) } })}
+            style={styles.action}
+            accessibilityRole="button"
+          >
+            <Text style={styles.actionText}>Scan a barcode</Text>
+          </Pressable>
+          <Pressable
             onPress={() => router.replace({ pathname: '/nutrition/quick', params: { day, meal: String(meal) } })}
             style={styles.action}
             accessibilityRole="button"
           >
             <Text style={styles.actionText}>Quick add</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/nutrition/food-edit')} style={styles.action} accessibilityRole="button">
+            <Text style={styles.actionText}>New food</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push('/nutrition/recipe')} style={styles.action} accessibilityRole="button">
+            <Text style={styles.actionText}>New recipe</Text>
           </Pressable>
         </View>
 
@@ -188,11 +229,58 @@ function AddFood() {
               options={[
                 { key: 'recent', label: 'Recent' },
                 { key: 'frequent', label: 'Frequent' },
+                { key: 'mine', label: 'My foods' },
+                { key: 'meals', label: 'Meals' },
               ]}
               selected={list}
               onSelect={setList}
             />
-            {history.isLoading ? (
+            {list === 'mine' ? (
+              myFoods.isLoading ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : (myFoods.data ?? []).length === 0 ? (
+                <Text style={text.bodyMuted}>Foods and recipes you create show up here.</Text>
+              ) : (
+                (myFoods.data ?? []).map((f) => (
+                  <FoodRow key={f.id ?? f.name} food={f} unit={s.energyUnit} onPress={() => setPicked({ foodId: f.id })} />
+                ))
+              )
+            ) : list === 'meals' ? (
+              savedMeals.isLoading ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : (savedMeals.data ?? []).length === 0 ? (
+                <Text style={text.bodyMuted}>Save a meal from the diary (“Save as a meal”) to log it here in one tap.</Text>
+              ) : (
+                (savedMeals.data ?? []).map((m) => (
+                  <View key={m.id} style={styles.row}>
+                    <Pressable
+                      style={styles.rowText}
+                      onLongPress={() => confirmDeleteMeal(m)}
+                      accessibilityRole="button"
+                      accessibilityHint="Long press to delete"
+                    >
+                      <Text style={text.body} numberOfLines={1}>
+                        {m.name}
+                      </Text>
+                      <Text style={text.caption} numberOfLines={1}>
+                        {m.items.length} food{m.items.length === 1 ? '' : 's'} ·{' '}
+                        {formatEnergy(savedMealTotal(m).kcal, s.energyUnit)} {energyUnitLabel(s.energyUnit)}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => logMeal(m)}
+                      disabled={added.has(m.id)}
+                      hitSlop={8}
+                      style={styles.plus}
+                      accessibilityRole="button"
+                      accessibilityLabel={added.has(m.id) ? `${m.name} added` : `Log ${m.name}`}
+                    >
+                      <Text style={[styles.plusText, added.has(m.id) && styles.plusDone]}>{added.has(m.id) ? '✓' : '+'}</Text>
+                    </Pressable>
+                  </View>
+                ))
+              )
+            ) : history.isLoading ? (
               <ActivityIndicator color={colors.primary} />
             ) : historyRows.length === 0 ? (
               <Text style={text.bodyMuted}>Foods you log show up here, ready to log again.</Text>
@@ -253,6 +341,24 @@ function AddFood() {
           energyUnit={s.energyUnit}
           netCarbs={s.netCarbs}
           onClose={() => setPicked(null)}
+          onEdit={
+            editPicked?.id
+              ? () => {
+                  const id = editPicked.id as string;
+                  setPicked(null);
+                  router.push({ pathname: editPicked.source === 'recipe' ? '/nutrition/recipe' : '/nutrition/food-edit', params: { id } });
+                }
+              : undefined
+          }
+          onSaveCopy={
+            food?.source === 'off' && food.barcode
+              ? () => {
+                  const barcode = food.barcode as string;
+                  setPicked(null);
+                  router.push({ pathname: '/nutrition/food-edit', params: { barcode, from: 'off' } });
+                }
+              : undefined
+          }
           onAdd={({ amount, unitKey, meal: chosenMeal }) => {
             if (!food) return;
             const entry = entryFromFood(food, amount, unitKey, {
@@ -310,9 +416,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
   },
-  actions: { flexDirection: 'row', gap: spacing.sm },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   action: {
-    flex: 1,
+    flexBasis: '47%',
+    flexGrow: 1,
     alignItems: 'center',
     paddingVertical: spacing.md,
     borderRadius: radius.md,

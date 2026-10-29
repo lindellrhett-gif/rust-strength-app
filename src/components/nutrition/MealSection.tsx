@@ -16,6 +16,7 @@ export function MealSection({
   onAdd,
   copyLabel,
   onCopy,
+  onSaveMeal,
 }: {
   meal: DiaryMeal;
   unit: 'kcal' | 'kj';
@@ -24,6 +25,8 @@ export function MealSection({
   /** Shown on an empty meal when the same meal yesterday had food. */
   copyLabel?: string;
   onCopy?: () => void;
+  /** Save this meal's foods to log again in one tap. */
+  onSaveMeal?: () => void;
 }) {
   return (
     <Card>
@@ -64,6 +67,11 @@ export function MealSection({
         {meal.entries.length === 0 && onCopy && copyLabel ? (
           <Pressable onPress={onCopy} hitSlop={8} accessibilityRole="button">
             <Text style={styles.quiet}>{copyLabel}</Text>
+          </Pressable>
+        ) : null}
+        {meal.entries.length > 0 && onSaveMeal ? (
+          <Pressable onPress={onSaveMeal} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Save ${meal.name} as a meal`}>
+            <Text style={styles.quiet}>Save as a meal</Text>
           </Pressable>
         ) : null}
       </View>

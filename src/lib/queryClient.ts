@@ -131,4 +131,9 @@ export const qk = {
   food: (id: string) => ['foods', id] as const,
   /** An Open Food Facts product, by its barcode. */
   offFood: (barcode: string) => ['foods', 'off', barcode] as const,
+  /** Your foods first, then Open Food Facts, for a scanned code. */
+  barcodeFood: (barcode: string) => ['foods', 'barcode', barcode] as const,
+  myFoods: ['foods', 'mine'] as const,
+  recipe: (id: string) => ['foods', 'recipe', id] as const,
+  savedMeals: ['saved-meals'] as const,
 };

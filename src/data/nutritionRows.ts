@@ -13,6 +13,9 @@ import type {
   Json,
   NutritionGoalRow,
   NutritionSettingsRow,
+  RecipeItemRow,
+  SavedMealItemRow,
+  SavedMealRow,
   WaterLogRow,
 } from '@/lib/database.types';
 import type { DiaryEntry, EntrySource } from '@/domain/nutrition/entries';
@@ -32,6 +35,8 @@ import {
   type WeighIn,
 } from '@/domain/nutrition/settings';
 import type { NutritionGoal } from '@/domain/nutrition/totals';
+import type { RecipeItem } from '@/domain/nutrition/recipes';
+import type { SavedMeal, SavedMealItem } from '@/domain/nutrition/savedMeals';
 
 export function foodFromRow(row: FoodRow, portions: readonly FoodPortionRow[] = []): Food {
   return {
@@ -192,4 +197,94 @@ export function waterFromRow(row: WaterLogRow): WaterLog {
 
 export function weighInFromRow(row: BodyWeightRow): WeighIn {
   return { id: row.id, measuredOn: row.measured_on, kg: row.kg };
+}
+
+/** One of your foods (or a recipe) as a row to save. The catalog is never written from the app. */
+export function foodToRow(food: Food, userId: string, extra: Record<string, unknown> = {}) {
+  return {
+    id: food.id ?? undefined,
+    owner_id: userId,
+    source: food.source === 'usda' ? ('user' as const) : food.source,
+    source_ref: food.source === 'off' ? food.barcode : null,
+    barcode: food.barcode,
+    name: food.name,
+    brand: food.brand,
+    basis: food.basis,
+    serving_label: food.servingLabel,
+    serving_g: food.servingG,
+    serving_ml: food.servingMl,
+    servings: null as number | null,
+    extra: extra as Json,
+    ...(nutrientsToRow(food.nutrients) as { kcal: number }),
+  };
+}
+
+function itemFromRow(row: SavedMealItemRow): SavedMealItem {
+  return {
+    foodId: row.food_id,
+    source: row.source as EntrySource,
+    barcode: row.barcode,
+    name: row.name,
+    brand: row.brand,
+    amount: row.amount,
+    unit: row.unit,
+    grams: row.grams,
+    nutrients: nutrientsFromRow(row),
+  };
+}
+
+export function savedMealFromRow(row: SavedMealRow & { items?: SavedMealItemRow[] | null }): SavedMeal {
+  return {
+    id: row.id,
+    name: row.name,
+    items: [...(row.items ?? [])].sort((a, b) => a.position - b.position).map(itemFromRow),
+  };
+}
+
+/** Items as rpc_save_meal takes them. */
+export function savedMealItemsToJson(items: readonly SavedMealItem[]): Json {
+  return items.map((i) => ({
+    food_id: i.foodId,
+    source: i.source,
+    barcode: i.barcode,
+    name: i.name,
+    brand: i.brand,
+    amount: i.amount,
+    unit: i.unit,
+    grams: i.grams,
+    ...nutrientsToRow(i.nutrients),
+  }));
+}
+
+export function recipeItemFromRow(row: RecipeItemRow): RecipeItem {
+  return {
+    foodId: row.food_id,
+    name: row.name,
+    amount: row.amount,
+    unit: row.unit,
+    grams: row.grams,
+    nutrients: nutrientsFromRow(row),
+  };
+}
+
+/** A recipe and its ingredients as rpc_save_recipe takes them. */
+export function recipeToJson(recipe: Food, servings: number, items: readonly RecipeItem[]): { p_recipe: Json; p_items: Json } {
+  return {
+    p_recipe: {
+      id: recipe.id,
+      name: recipe.name,
+      serving_label: recipe.servingLabel ?? '1 serving',
+      serving_g: recipe.servingG,
+      servings,
+      ...nutrientsToRow(recipe.nutrients),
+    },
+    p_items: items.map((i) => ({
+      food_id: i.foodId,
+      name: i.name,
+      amount: i.amount,
+      unit: i.unit,
+      grams: i.grams,
+      ...nutrientsToRow(i.nutrients),
+    })),
+  };
 }

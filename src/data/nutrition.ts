@@ -19,9 +19,11 @@ import type { Food } from '@/domain/nutrition/foods';
 import { canonicalBarcode } from '@/domain/nutrition/openFoodFacts';
 import type { NutritionSettings, WaterLog, WeighIn } from '@/domain/nutrition/settings';
 import type { NutritionGoal } from '@/domain/nutrition/totals';
+import type { RecipeItem } from '@/domain/nutrition/recipes';
+import type { SavedMeal } from '@/domain/nutrition/savedMeals';
 import { toLocalDateString } from '@/lib/dates';
 import { newId } from '@/lib/ids';
-import { lookupBarcode } from '@/lib/openFoodFacts';
+import { lookupBarcode, type LookupResult } from '@/lib/openFoodFacts';
 import { mk, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -42,8 +44,13 @@ import {
   entryPatch,
   entryToRow,
   foodFromRow,
+  foodToRow,
   goalFromRow,
   goalToRow,
+  recipeItemFromRow,
+  recipeToJson,
+  savedMealFromRow,
+  savedMealItemsToJson,
   settingsFromRow,
   settingsToRow,
   waterFromRow,
@@ -514,4 +521,179 @@ export async function ownFoodForBarcode(scanned: string): Promise<Food | null> {
     .limit(1);
   if (error) throw error;
   return data?.[0] ? foodFromRow(data[0]) : null;
+}
+
+// --- Your foods, saved meals and recipes -------------------------------------------
+// These need a connection: creating a food isn't something done mid-set with
+// no signal, and a food has to reach the server before entries can point at it.
+
+/** Your own foods and recipes, by name. */
+export function useMyFoods() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.myFoods,
+    enabled: !!userId,
+    queryFn: async (): Promise<Food[]> => {
+      const { data, error } = await supabase
+        .from('foods')
+        .select('*')
+        .eq('owner_id', userId!)
+        .order('name')
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? []).map((row) => foodFromRow(row));
+    },
+  });
+}
+
+/**
+ * Save one of your foods, new or edited. `extra` notes where it came from
+ * (an Open Food Facts product you corrected, say).
+ */
+export function useSaveFood() {
+  const { userId } = useAuth();
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ food, extra }: { food: Food; extra?: Record<string, unknown> }): Promise<Food> => {
+      const id = food.id ?? newId();
+      const { error } = await supabase.from('foods').upsert(foodToRow({ ...food, id }, userId!, extra), { onConflict: 'id' });
+      if (error) throw error;
+      return { ...food, id };
+    },
+    onSuccess: (food) => {
+      client.setQueryData(qk.food(food.id!), food);
+      void client.invalidateQueries({ queryKey: ['foods'] });
+    },
+  });
+}
+
+/** Delete one of your foods. Entries already logged keep their numbers. */
+export function useDeleteFood() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('foods').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => void client.invalidateQueries({ queryKey: ['foods'] }),
+  });
+}
+
+/**
+ * The food for a scanned barcode: your own copy if you have one (from the
+ * cached list first, so it works offline), else Open Food Facts.
+ */
+export function useBarcodeFood(barcode: string | null) {
+  const client = useQueryClient();
+  const code = barcode ? canonicalBarcode(barcode) : null;
+  return useQuery({
+    queryKey: qk.barcodeFood(code ?? 'none'),
+    enabled: !!code,
+    staleTime: 5 * 60_000,
+    retry: false,
+    queryFn: async (): Promise<LookupResult> => {
+      const cached = client.getQueryData<Food[]>(qk.myFoods)?.find((f) => f.barcode === code);
+      if (cached) return { food: cached };
+      const own = await ownFoodForBarcode(code!).catch(() => null);
+      if (own) return { food: own };
+      return lookupBarcode(code!);
+    },
+  });
+}
+
+export function useSavedMeals() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.savedMeals,
+    enabled: !!userId,
+    queryFn: async (): Promise<SavedMeal[]> => {
+      const { data, error } = await supabase
+        .from('saved_meals')
+        .select('*, items:saved_meal_items(*)')
+        .order('name');
+      if (error) throw error;
+      // The embedded items aren't in the hand-written types (they list no relations).
+      return ((data ?? []) as unknown as Parameters<typeof savedMealFromRow>[0][]).map(savedMealFromRow);
+    },
+  });
+}
+
+/** Save a meal (new, or replacing one with the same id) with its items, in one call. */
+export function useSaveMeal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (meal: SavedMeal) => {
+      const { error } = await supabase.rpc('rpc_save_meal', {
+        p_id: meal.id,
+        p_name: meal.name,
+        p_items: savedMealItemsToJson(meal.items),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => void client.invalidateQueries({ queryKey: qk.savedMeals }),
+  });
+}
+
+export function useDeleteSavedMeal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('saved_meals').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => void client.invalidateQueries({ queryKey: qk.savedMeals }),
+  });
+}
+
+/** A recipe of yours with its ingredients and servings, to edit. */
+export function useRecipe(id: string | null | undefined) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: qk.recipe(id ?? 'none'),
+    enabled: !!userId && !!id,
+    queryFn: async (): Promise<{ food: Food; servings: number; items: RecipeItem[] } | null> => {
+      const [food, items] = await Promise.all([
+        supabase.from('foods').select('*').eq('id', id!).eq('source', 'recipe').maybeSingle(),
+        supabase.from('recipe_items').select('*').eq('recipe_id', id!).order('position'),
+      ]);
+      if (food.error) throw food.error;
+      if (items.error) throw items.error;
+      if (!food.data) return null;
+      return {
+        food: foodFromRow(food.data),
+        servings: food.data.servings ?? 1,
+        items: (items.data ?? []).map(recipeItemFromRow),
+      };
+    },
+  });
+}
+
+export function useSaveRecipe() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ recipe, servings, items }: { recipe: Food; servings: number; items: RecipeItem[] }) => {
+      const { error } = await supabase.rpc('rpc_save_recipe', recipeToJson(recipe, servings, items));
+      if (error) throw error;
+      return recipe;
+    },
+    onSuccess: (recipe) => {
+      if (recipe.id) client.setQueryData(qk.food(recipe.id), recipe);
+      void client.invalidateQueries({ queryKey: ['foods'] });
+    },
+  });
+}
+
+/**
+ * The best catalog or own-food match for an ingredient, with its portions,
+ * or null. Used when importing a recipe, one ingredient at a time.
+ */
+export async function bestFoodMatch(term: string): Promise<Food | null> {
+  if (term.trim().length < MIN_SEARCH_LENGTH) return null;
+  const { data, error } = await supabase.rpc('rpc_search_foods', { p_query: term, p_limit: 1 });
+  if (error) throw error;
+  const row = data?.[0];
+  if (!row) return null;
+  const portions = await supabase.from('food_portions').select('*').eq('food_id', row.id).order('position');
+  if (portions.error) throw portions.error;
+  return foodFromRow(row, portions.data ?? []);
 }

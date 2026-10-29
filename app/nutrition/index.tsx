@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, LoadingView } from '@/components';
@@ -19,12 +19,14 @@ import {
   useNutritionGoals,
   useNutritionSettings,
   useSaveDiaryDay,
+  useSaveMeal,
   useUpdateEntry,
 } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { dayLabel, diaryDay, energyUnitLabel, formatEnergy } from '@/domain/nutrition/diary';
 import { copyEntries, type DiaryEntry } from '@/domain/nutrition/entries';
+import { cleanMealName, itemsFromEntries } from '@/domain/nutrition/savedMeals';
 import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
@@ -75,6 +77,7 @@ function Diary() {
   const { log } = useLogEntries();
   const { update } = useUpdateEntry();
   const { remove } = useDeleteEntry();
+  const saveMeal = useSaveMeal();
   const [editing, setEditing] = useState<DiaryEntry | null>(null);
 
   const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
@@ -94,6 +97,25 @@ function Diary() {
     const source = meal == null ? previousEntries : previousEntries.filter((e) => e.meal === meal);
     log(copyEntries(source, { day, meal, loggedAt: new Date().toISOString() }, newId));
   };
+
+  const saveAsMeal = (entries: DiaryEntry[], suggested: string) =>
+    Alert.prompt(
+      'Save as a meal',
+      'Log these foods again in one tap, from Add food > Meals.',
+      (typed) => {
+        const name = cleanMealName(typed ?? '');
+        if (!name) return;
+        saveMeal.mutate(
+          { id: newId(), name, items: itemsFromEntries(entries) },
+          {
+            onSuccess: () => Alert.alert('Meal saved', `“${name}” is in Add food > Meals.`),
+            onError: (e) => Alert.alert('Couldn’t save the meal', e instanceof Error ? e.message : 'Check your connection and try again.'),
+          },
+        );
+      },
+      'plain-text',
+      suggested,
+    );
 
   const addTo = (meal: number) => router.push({ pathname: '/nutrition/add', params: { day, meal: String(meal) } });
 
@@ -165,6 +187,7 @@ function Diary() {
               onAdd={() => addTo(meal.index)}
               copyLabel={before.length > 0 ? `Copy from ${previousWords}` : undefined}
               onCopy={before.length > 0 ? () => copyFromPreviousDay(meal.index) : undefined}
+              onSaveMeal={() => saveAsMeal(meal.entries, meal.name)}
             />
           );
         })}

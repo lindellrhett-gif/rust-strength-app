@@ -155,6 +155,16 @@ function RootNavigator() {
         options={{ headerShown: true, presentation: 'modal', title: 'Quick add' }}
       />
       <Stack.Screen
+        name="nutrition/food-edit"
+        options={{ headerShown: true, presentation: 'modal', title: 'Food' }}
+      />
+      <Stack.Screen
+        name="nutrition/recipe"
+        options={{ headerShown: true, presentation: 'modal', title: 'Recipe' }}
+      />
+      {/* The camera fills the screen; its own Close button leaves. */}
+      <Stack.Screen name="nutrition/scan" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen
         name="share/workout/[id]"
         options={{ headerShown: true, presentation: 'modal', title: 'Share workout' }}
       />
