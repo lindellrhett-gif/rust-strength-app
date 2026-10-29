@@ -4,9 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Card, LoadingView, Pill, StatTile } from '@/components';
 import { RunningCard } from '@/components/RunningCard';
+import { NutritionStatsCard } from '@/components/nutrition/NutritionStatsCard';
 import { useActivities, useActivityTotals } from '@/data/activities';
 import { useProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
+import { useAccess } from '@/data/subscription';
 import {
   useAllTimeTotals,
   useExercisePRs,
@@ -37,6 +39,7 @@ export default function Stats() {
   const activityTotalsQuery = useActivityTotals();
   const activities = useActivities();
   const restDays = useRestDays();
+  const access = useAccess();
 
   const unit = profile.data?.unit ?? 'lb';
   const restDates = (restDays.data ?? []).map((r) => r.rest_date);
@@ -91,6 +94,7 @@ export default function Stats() {
         </View>
 
         {hasFeature('running') ? <RunningCard /> : null}
+        {hasFeature('nutrition', access) ? <NutritionStatsCard /> : null}
 
         <Card title="Activity time">
           <View style={styles.activityHead}>

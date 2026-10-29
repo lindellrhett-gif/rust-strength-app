@@ -54,6 +54,8 @@ export interface NutritionGoal {
   targets: Partial<Record<NutrientKey, number>>;
   /** Share of the day's calories per meal, in meal order, or null for none. */
   mealSplit: number[] | null;
+  /** How the macros were set; grams are stored either way. */
+  macroMode?: 'percent' | 'grams';
 }
 
 /** The goal in force on `day`: the latest one starting on or before it. */

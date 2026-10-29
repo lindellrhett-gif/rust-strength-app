@@ -14,10 +14,11 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 
+import { kgFrom, type WeightUnit } from '@/domain/nutrition/body';
 import type { DiaryEntry } from '@/domain/nutrition/entries';
 import type { Food } from '@/domain/nutrition/foods';
 import { canonicalBarcode } from '@/domain/nutrition/openFoodFacts';
-import type { NutritionSettings, WaterLog, WeighIn } from '@/domain/nutrition/settings';
+import { DEFAULT_NUTRITION_SETTINGS, latestWeighIn, type NutritionSettings, type WaterLog, type WeighIn } from '@/domain/nutrition/settings';
 import type { NutritionGoal } from '@/domain/nutrition/totals';
 import type { RecipeItem } from '@/domain/nutrition/recipes';
 import type { SavedMeal } from '@/domain/nutrition/savedMeals';
@@ -56,6 +57,7 @@ import {
   waterFromRow,
   weighInFromRow,
 } from './nutritionRows';
+import { useProfile } from './profile';
 
 /** How far back recent and frequent foods look. */
 export const HISTORY_DAYS = 90;
@@ -79,6 +81,10 @@ export function useNutritionSettings() {
   });
 }
 
+/**
+ * Change some settings. The screen shows the change at once; if the write
+ * fails, the settings go back to what they were and the caller says so.
+ */
 export function useSaveNutritionSettings() {
   const { userId } = useAuth();
   const client = useQueryClient();
@@ -92,7 +98,19 @@ export function useSaveNutritionSettings() {
         );
       if (error) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.nutritionSettings }),
+    onMutate: async (changes) => {
+      await client.cancelQueries({ queryKey: qk.nutritionSettings });
+      const before = client.getQueryData<NutritionSettings>(qk.nutritionSettings);
+      client.setQueryData<NutritionSettings>(qk.nutritionSettings, (current) => ({
+        ...(current ?? DEFAULT_NUTRITION_SETTINGS),
+        ...changes,
+      }));
+      return { before };
+    },
+    onError: (_e, _changes, context) => {
+      if (context?.before) client.setQueryData(qk.nutritionSettings, context.before);
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: qk.nutritionSettings }),
   });
 }
 
@@ -419,6 +437,23 @@ export function useSaveWeighIn() {
   );
 
   return { save, error: mutation.error };
+}
+
+/**
+ * The weight the goal calculator starts from, and the unit to show it in:
+ * the latest weigh-in, or else the bodyweight on the profile.
+ */
+export function useCurrentWeight(): { weightUnit: WeightUnit; currentWeightKg: number | null; isLoading: boolean } {
+  const profile = useProfile();
+  const weighIns = useWeighIns();
+  const weightUnit = profile.data?.unit ?? 'lb';
+  const latest = latestWeighIn(weighIns.data ?? []);
+  const fromProfile = profile.data?.body_weight ? kgFrom(profile.data.body_weight, weightUnit) : null;
+  return {
+    weightUnit,
+    currentWeightKg: latest?.kg ?? fromProfile,
+    isLoading: profile.isLoading || weighIns.isLoading,
+  };
 }
 
 export function useDeleteWeighIn() {

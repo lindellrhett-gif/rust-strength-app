@@ -162,6 +162,10 @@ function RootNavigator() {
         name="nutrition/recipe"
         options={{ headerShown: true, presentation: 'modal', title: 'Recipe' }}
       />
+      <Stack.Screen name="nutrition/goals" options={{ headerShown: true, title: 'Goals' }} />
+      <Stack.Screen name="nutrition/weight" options={{ headerShown: true, title: 'Weight' }} />
+      <Stack.Screen name="nutrition/reports" options={{ headerShown: true, title: 'Nutrition reports' }} />
+      <Stack.Screen name="nutrition/settings" options={{ headerShown: true, title: 'Diary settings' }} />
       {/* The camera fills the screen; its own Close button leaves. */}
       <Stack.Screen name="nutrition/scan" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen

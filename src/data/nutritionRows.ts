@@ -166,6 +166,7 @@ export function goalFromRow(row: NutritionGoalRow): NutritionGoal {
     fatG: row.fat_g,
     targets: targetsFromJson(row.targets),
     mealSplit: split,
+    macroMode: row.macro_mode === 'grams' ? 'grams' : 'percent',
   };
 }
 

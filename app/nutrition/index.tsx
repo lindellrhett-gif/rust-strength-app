@@ -9,7 +9,9 @@ import { CalorieSummary } from '@/components/nutrition/CalorieSummary';
 import { EntrySheet } from '@/components/nutrition/EntrySheet';
 import { MacroBars } from '@/components/nutrition/MacroBars';
 import { MealSection } from '@/components/nutrition/MealSection';
+import { NutrientsCard } from '@/components/nutrition/NutrientsCard';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
+import { WaterCard } from '@/components/nutrition/WaterCard';
 import { useExerciseCalories } from '@/data/activities';
 import {
   useDeleteEntry,
@@ -22,6 +24,7 @@ import {
   useSaveMeal,
   useUpdateEntry,
 } from '@/data/nutrition';
+import { useProfile } from '@/data/profile';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { dayLabel, diaryDay, energyUnitLabel, formatEnergy } from '@/domain/nutrition/diary';
@@ -78,6 +81,7 @@ function Diary() {
   const { update } = useUpdateEntry();
   const { remove } = useDeleteEntry();
   const saveMeal = useSaveMeal();
+  const profile = useProfile();
   const [editing, setEditing] = useState<DiaryEntry | null>(null);
 
   const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
@@ -166,6 +170,9 @@ function Diary() {
         <Card>
           <CalorieSummary budget={view.budget} unit={s.energyUnit} />
           <MacroBars total={view.total} progress={view.macros} netCarbs={s.netCarbs} />
+          {view.goal ? null : (
+            <Button label="Set a calorie goal" variant="secondary" onPress={() => router.push('/nutrition/goals')} />
+          )}
         </Card>
 
         {view.isEmpty && previousEntries.length > 0 ? (
@@ -192,6 +199,15 @@ function Diary() {
           );
         })}
 
+        <WaterCard
+          day={day}
+          unit={profile.data?.unit ?? 'lb'}
+          goalMl={s.waterGoalMl}
+          onSetGoal={() => router.push('/nutrition/settings')}
+        />
+
+        <NutrientsCard key={day} total={view.total} goal={view.goal} netCarbs={s.netCarbs} />
+
         {exercise && exercise.entries.length > 0 ? (
           <Card title="Exercise">
             {exercise.entries.map((e) => (
@@ -213,6 +229,25 @@ function Diary() {
         ) : null}
 
         <DayNote key={day} day={day} />
+
+        <Card>
+          {[
+            { label: 'Goals and targets', path: '/nutrition/goals' },
+            { label: 'Weight', path: '/nutrition/weight' },
+            { label: 'Reports', path: '/nutrition/reports' },
+            { label: 'Diary settings', path: '/nutrition/settings' },
+          ].map((link, i) => (
+            <Pressable
+              key={link.path}
+              onPress={() => router.push(link.path)}
+              style={({ pressed }) => [styles.linkRow, i > 0 && styles.linkBorder, pressed && styles.pressed]}
+              accessibilityRole="button"
+            >
+              <Text style={text.body}>{link.label}</Text>
+              <Text style={styles.chev}>›</Text>
+            </Pressable>
+          ))}
+        </Card>
       </ScrollView>
 
       {editing ? (
@@ -308,4 +343,8 @@ const styles = StyleSheet.create({
   completeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   saveNote: { alignSelf: 'flex-end' },
   link: { color: colors.primary, fontWeight: '700' },
+  linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 },
+  linkBorder: { borderTopWidth: 1, borderTopColor: colors.border },
+  pressed: { opacity: 0.6 },
+  chev: { color: colors.textFaint, fontSize: 22, fontWeight: '700' },
 });
