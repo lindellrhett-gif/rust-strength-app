@@ -80,13 +80,14 @@ export default function PrivacyCenter() {
         <Card title="Documents">
           <LinkRow label="Privacy Policy" onPress={() => router.push('/legal/privacy')} />
           <LinkRow label="Terms of Service" onPress={() => router.push('/legal/terms')} />
+          <LinkRow label="Acknowledgements" onPress={() => router.push('/legal/notices')} />
           <Text style={text.caption}>Version {LEGAL.version} · updated {LEGAL.lastUpdated}</Text>
         </Card>
 
         <Card title="Your data">
           <Text style={text.bodyMuted}>
             Download everything we hold about you as a JSON file — your profile, workouts, sets,
-            activities, presets and friends.
+            runs, activities, food diary, presets and friends.
           </Text>
           <Button
             label="Download my data"

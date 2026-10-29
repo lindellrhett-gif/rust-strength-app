@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: October 26, 2026**
+**Last updated: October 29, 2026**
 
 Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -12,7 +12,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 - **Email address and password.** Required to create an account and sign in. We also use your email address to send you a one-time code to confirm it when you sign up, and another if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
 - **Username and display name.** Your account starts with a randomly generated handle (for example `lifter_7f3a91`). It contains nothing about you. You may change it, and only after you choose your own handle do you become findable by other users.
-- **Bodyweight (optional).** Used only to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine. You can leave it blank; assisted exercises then ask for it before you log them.
+- **Bodyweight (optional).** Used to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine, and to estimate the calories a recorded run burns. You can leave it blank; assisted exercises then ask for it before you log them. If you log weigh-ins in the food diary, the latest one becomes your bodyweight.
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
 - **Runs you record (optional).** If you record a run, the app uses your phone's precise location while the run is recording, including with the screen locked, to measure your distance and pace and to draw your route. We store the route (the points along it, with the altitude and time at each), your distance, moving and total time, splits, best efforts and estimated calories, and any title, notes and effort rating you add. Location is used only between Start and Finish; nothing is tracked at any other time. You can also enter a run by hand, with no location at all.
@@ -24,33 +24,38 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Preferences.** Units (lb/kg), your target rep range, and the equipment you usually have available.
 - **Reactions.** If you react to a friend's session in the feed, we store which post you reacted to and which reaction you chose.
 - **Reports you file.** If you report another user, we store who you reported, the reason, and anything you type.
+- **Food diary (only with Rust Strength Pro).** The foods and drinks you log, with the amount, the meal, the day and time, and the calories and nutrients for that amount; the foods, recipes and saved meals you create, including any barcode you add; notes on a day and whether you marked it complete; the water you log; your weigh-ins; your nutrition goals; and your diary settings, such as meal names, calories or kilojoules, and a water goal. When you import a recipe from a link we keep the recipe you save, not the link.
+- **The goal calculator's inputs (optional).** Your height, your birth year, your sex for the equation (you can leave it out), how active your days are, a goal weight and the weekly change you aim for. They are used only to estimate a calorie goal and to decide which goals are offered: weight-loss goals are offered only to adults. You can set a calorie goal of your own instead, which needs only your birth year.
 - **Your purchase (only if you buy Rust Strength Pro).** Apple takes the payment; we never see your card details or Apple ID. Through our subscription provider, RevenueCat, we learn which plan you bought (monthly, yearly or Lifetime), when, its price and currency, Apple's transaction identifiers, whether it is a free trial, whether it will renew or was refunded, and when it ends. We keep whether you have Pro, which plan, and when it renews or ends, to unlock Pro's features.
 
 ### Created automatically
 
 - **Timestamps.** When workouts and activities start and end, so the app can show durations, streaks and history.
 - **A random account identifier.** Used to link your data to your account.
-- **A record of your agreement.** When you accept the Terms and Privacy Policy and confirm your age, we store which version you accepted and when. We store that you confirmed your age, never your date of birth.
+- **A record of your agreement.** When you accept the Terms and Privacy Policy and confirm your age, we store which version you accepted and when. We store that you confirmed your age, never your date of birth. (The food diary's goal calculator asks for a birth year, as described above.)
 - **Server logs.** Our hosting provider records standard technical information, including IP addresses, to operate and secure the service.
 
 ### What we do NOT collect
 
 We do not collect your real name, phone number, photos, videos, contacts, microphone or camera data, advertising identifiers, biometric data, government identifiers, or payment information. We collect your location only while you are recording a run, as described above.
 
-The app can ask for four device permissions, each only when you use the feature that needs it, and each can be turned off in your phone's settings at any time:
+The app can ask for five device permissions, each only when you use the feature that needs it, and each can be turned off in your phone's settings at any time:
 
 - **Notifications**, only if you switch on "Alert when rest is over" in your profile. That alert is scheduled on your phone by your phone. No push token or device identifier is created, and nothing about it is sent to us.
 - **Location**, "While Using the App", when you start recording a run, or if you choose to place a privacy zone where you are standing. The app never asks for "Always".
 - **Motion & Fitness**, when you start a run, choose to show today's steps, or turn on Share daily steps.
 - **Photos, add only**, the first time you tap Save to Photos on a share card (see Section 4). The app can add the card to your library; it cannot see, read or upload any of your photos.
+- **Camera**, the first time you open the barcode scanner in the food diary. The barcode is read on your phone. The camera picture is not recorded, saved or sent anywhere; only the barcode's number is used, to look up the food (see Section 5). You can type a barcode instead.
 
 While a run records, and while the rest timer runs between sets, the app shows it on your Lock Screen and in the Dynamic Island (a run's time, distance and pace; the rest left and your next set), where anyone holding your phone can see it. This needs no permission, is done on your phone, and nothing about it is sent to us. You can turn it off under Live Activities in your phone's settings for the app.
 
 ## 2. Health and fitness information
 
-Training data, bodyweight, calories burned and step counts are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive. The routes of runs you record are precise location information, and can show where you live or spend your time. Only you can see a run's full route. Friends see a trimmed outline only if you choose to share a run's map (see Section 4).
+Training data, bodyweight, calories burned, step counts, and everything in the food diary (what you eat and drink, weigh-ins, nutrition goals and the goal calculator's inputs) are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive. The routes of runs you record are precise location information, and can show where you live or spend your time. Only you can see a run's full route. Friends see a trimmed outline only if you choose to share a run's map (see Section 4).
 
-We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, recording your runs, and calculating your stats and trophies.
+We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, recording your runs, calculating your stats and trophies, and keeping your food diary, its totals, goals and reports.
+
+**Your food diary is private.** Nothing in it is shown to friends, in the feed, on the leaderboard or on share cards. The one link to the rest of the app is that your latest weigh-in becomes your bodyweight, which stays private too.
 
 **We do not sell it, share it for advertising, or use it for any purpose other than operating the app.** It is visible to another person only where you have chosen to share it (see Section 4).
 
@@ -61,6 +66,7 @@ We use it only to run the features you see: showing your history, estimating you
 - To calculate estimated one-rep max and suggest weights
 - To calculate stats, streaks, trophies and the weekly body chart
 - To record runs and show your routes, splits, records and running history, to speak your distance and pace during a run, and to count your steps
+- To keep your food diary: look up foods, add up calories and nutrients, estimate a calorie goal, and show your reports and weight trend
 - To run the friends feature you opt into, including the feed and reactions
 - To work out your XP, level and badges from the totals above
 - To review reports of abuse
@@ -76,7 +82,7 @@ The social features are **opt-in**. Until you choose a username and add a friend
 - **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, total distance run, how many friends you have, how many reactions your posts have received, the trophies you chose to show by your name, your daily step totals if you share them, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
 - **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency, activity time, distance run and, for people who share them, daily steps. It uses only the figures listed above, and only you and your accepted friends appear on it.
 - **Accepted friends also see a summary of each session in the feed** (see below).
-- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts (unless you share daily steps), the full route of any run, or the individual sets inside a workout. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
+- **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts (unless you share daily steps), the full route of any run, the individual sets inside a workout, or anything in your food diary. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
 
 ### The friend feed
 
@@ -122,9 +128,14 @@ We use these service providers:
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
 | Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
+| Open Food Facts, a non-profit food database | Looks up packaged foods for the food diary | When you scan or type a barcode, or search for a packaged food: the barcode or the words you searched, sent straight from your phone. Like any connection this includes your IP address. The request names the app, not you. Not your account, your diary or anything else you have logged |
 | RevenueCat | Runs Rust Strength Pro: shows the plans, checks purchases with Apple, tells the app whether you have Pro, and provides the screen for managing your plan and getting help with a purchase | Your random account identifier, the purchase details described in Section 1, technical information about the app and your device needed to process purchases (such as the app version, operating system, and your App Store country and currency), and anything you choose to answer in its purchase-help screen, such as why you cancelled. Not your training, runs or any other app data. The app connects your account to RevenueCat when you sign in, so it can tell whether you have Pro |
 
-Supabase, Google and RevenueCat process this on our behalf under their own security and privacy terms; Apple handles map requests and payments under Apple's privacy policy. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+Supabase, Google and RevenueCat process this on our behalf under their own security and privacy terms; Apple handles map requests and payments under Apple's privacy policy; Open Food Facts handles lookups under its own terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+
+**Recipe websites.** If you import a recipe from a link, your phone loads that page itself, as a browser would, so the website you chose receives the request and your IP address. The link is not sent to us.
+
+**Food data we hold.** The catalog of everyday foods comes from USDA FoodData Central and is stored on our servers, so searching it sends nothing to the USDA. Searches go to our database to find matching foods and are not saved with your account.
 
 We use **no** advertising, crash-reporting or tracking services, and no analytics beyond the subscription figures RevenueCat shows us, such as how many people subscribe or cancel.
 
@@ -132,7 +143,7 @@ We use **no** advertising, crash-reporting or tracking services, and no analytic
 
 **On our provider's servers.** On Supabase's hosted infrastructure, in the United States. Data is transmitted over encrypted connections (HTTPS/TLS) and access is restricted at the database level so that, by default, you can only read and write your own rows.
 
-**On your own phone.** So the app keeps working in a gym with no signal, a copy of your recent training is stored on your device, along with anything you log while offline that has not reached the server yet. A run you are recording, including its location points, is kept on your phone until you save or discard it, so it survives the app closing. That copy lives in the app's private storage, which the operating system keeps separate from other apps and protects with your device passcode. It is deleted when you sign out, when you delete your account, and when you delete the app.
+**On your own phone.** So the app keeps working in a gym with no signal, a copy of your recent training and food diary is stored on your device, along with anything you log while offline that has not reached the server yet. A run you are recording, including its location points, is kept on your phone until you save or discard it, so it survives the app closing. That copy lives in the app's private storage, which the operating system keeps separate from other apps and protects with your device passcode. It is deleted when you sign out, when you delete your account, and when you delete the app.
 
 ## 7. How long we keep it
 
@@ -142,7 +153,7 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, reports you filed, and our record of your subscription. Deleting a workout or activity also removes the reactions other people left on it. We also ask RevenueCat to delete its record of you. Apple keeps its own record of your purchases under its privacy policy. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, reports you filed, your food diary (entries, foods, recipes, saved meals, day notes, water, weigh-ins, nutrition goals and settings), and our record of your subscription. Deleting a workout or activity also removes the reactions other people left on it. We also ask RevenueCat to delete its record of you. Apple keeps its own record of your purchases under its privacy policy. **It cannot be undone and we cannot restore it.**
 
 **Deleting your account does not cancel a Rust Strength Pro subscription.** Cancel it in your device's settings (Settings > your name > Subscriptions) first, or Apple will keep charging you.
 

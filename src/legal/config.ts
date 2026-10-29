@@ -45,12 +45,13 @@ export const LEGAL = {
    * signed-in user is asked to accept again (see src/domain/consent.ts). A
    * patch — a clarification, a new contact address — asks nobody.
    */
-  // 1.6.0 adds Rust Strength Pro (feature/subscriptions). Merge and publish
-  // it only when subscriptions go on sale; 1.5.0 is the running update.
+  // 1.6.0 adds Rust Strength Pro (feature/subscriptions) and the food diary
+  // it unlocks (feature/nutrition, app 1.2). Publish it only when Pro goes on
+  // sale with 1.2; 1.5.0 is the running update.
   version: '1.6.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'October 26, 2026',
+  lastUpdated: 'October 29, 2026',
 
   /** Launch region. Drives which privacy laws the documents address. */
   region: 'United States',

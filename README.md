@@ -36,9 +36,9 @@ AI development, software engineering, or cybersecurity.
 |---|---|
 | **Scope** | A full iOS app, from the database to the App Store submission, built solo |
 | **Timeline** | First commit September 7, 2026; submitted to the App Store September 27, 2026; released October 2, 2026 |
-| **App code** | About 28,800 lines of TypeScript across the screens, components, domain logic and data layer, plus about 600 lines of Swift for the Lock Screen Live Activities |
-| **Database** | About 6,100 lines of SQL in 25 migrations, including tables, Row Level Security policies, PostGIS route handling and server functions |
-| **Tests** | 784 Jest tests in 55 suites, 12 database test suites that run every migration in PGlite, plus strict TypeScript and ESLint |
+| **App code** | About 37,500 lines of TypeScript across the screens, components, domain logic and data layer, plus about 600 lines of Swift for the Lock Screen Live Activities |
+| **Database** | About 7,000 lines of SQL in 27 migrations, including tables, Row Level Security policies, PostGIS route handling, full-text food search and server functions |
+| **Tests** | 951 Jest tests in 63 suites, 16 database test suites that run every migration in PGlite, plus strict TypeScript and ESLint |
 | **Tools** | Git, EAS Build, TestFlight, and Claude Code for AI-assisted development |
 | **Users** | Beta tested on TestFlight, now [on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) |
 
@@ -56,6 +56,7 @@ If you only open a few files, open these:
 | **Offline-first sync:** writes queued in order and replayed when the connection returns | [`src/data/mutationDefaults.ts`](src/data/mutationDefaults.ts) · [`src/data/workouts.ts`](src/data/workouts.ts) |
 | **Debugging an auth race:** holding data requests until an expired session refreshes | [`src/lib/sessionGuard.ts`](src/lib/sessionGuard.ts) · [`src/lib/supabase.ts`](src/lib/supabase.ts) |
 | **One source for legal text:** the Privacy Policy and Terms generated for the app and the website from the same code | [`scripts/build-legal.js`](scripts/build-legal.js) |
+| **Guardrails as code:** a calorie goal form that offers no weight-loss goal to anyone under 18, tested case by case | [`src/domain/nutrition/goalForm.ts`](src/domain/nutrition/goalForm.ts) · [tests](__tests__/nutritionGoals.test.ts) |
 
 ### Problems I solved
 
@@ -198,6 +199,44 @@ hour.
 
 ---
 
+## Food diary (version 1.2, in development)
+
+A food diary in the same app, and the first paid feature (Rust Strength Pro).
+It's built like the set logger: an entry is saved on the phone first and
+reaches the server when there's a connection.
+
+- **Finding food:** about 13,500 everyday foods from USDA FoodData Central,
+  loaded by a script and searched in Postgres with a word-prefix full-text
+  search that ranks plain foods first ("banana" finds "Bananas, raw" before a
+  banana yogurt); packaged foods by barcode or name from Open Food Facts,
+  looked up from the phone; recent and frequent foods; quick add.
+- **Logging:** amounts in a food's own portions ("1 medium"), grams, ounces,
+  ml or fl oz. Each entry keeps its own copy of the numbers, so changing a
+  food later doesn't rewrite past days. Copy a meal or a day, save meals,
+  create foods from a label, and build recipes or import one from a link
+  (the page's schema.org recipe data, read on the phone).
+- **Barcode scanner:** `expo-camera`, loaded lazily so an older build says to
+  update instead of failing. Your own foods are checked first, offline too.
+- **Goals:** a Mifflin-St Jeor calculator with guardrails (no weight-loss goal
+  under 18, using the lowest age a birth year allows; a warning under the
+  calorie floor; nothing under 800 kcal), macros by percent or grams,
+  nutrient targets with the FDA Daily Values, and a split by meal. Goals are
+  dated, so past days keep the goal they had.
+- **Tracking:** water, weigh-ins with a smoothed trend and a weekly rate (a
+  least-squares slope over four weeks), and reports for 7 days, 30 days and
+  12 weeks.
+- **Private:** every diary table is owner-only under Row Level Security, and
+  nothing in it reaches friends.
+
+| Where to look | What it shows |
+|---|---|
+| [`supabase/migrations/0027_nutrition.sql`](supabase/migrations/0027_nutrition.sql) | Eleven tables with RLS, the catalog search and loader, and saving a meal or recipe with its items in one transaction |
+| [`src/domain/nutrition/`](src/domain/nutrition) | The pure logic: amounts and portions, totals, the goal calculator and form, reports, Open Food Facts and recipe parsing |
+| [`scripts/usda.js`](scripts/usda.js) | Turning USDA FoodData Central downloads into catalog rows |
+| [`supabase/tests/nutrition.test.mjs`](supabase/tests/nutrition.test.mjs) | RLS checked as each user, plus export and account deletion |
+
+---
+
 ## Tech stack
 
 | Layer | Tools |
@@ -205,10 +244,12 @@ hour.
 | App | TypeScript, React Native 0.86, React 19, Expo SDK 57, Expo Router |
 | Data and sync | TanStack Query v5 with a persisted offline cache and queued writes, supabase-js |
 | Backend | Supabase: PostgreSQL with PostGIS, Auth, Row Level Security, SQL functions |
-| Native iOS | Swift and ActivityKit for the Live Activities (a widget extension through @bacons/apple-targets and a local Expo module), expo-location and expo-task-manager for GPS with the screen locked |
+| Native iOS | Swift and ActivityKit for the Live Activities (a widget extension through @bacons/apple-targets and a local Expo module), expo-location and expo-task-manager for GPS with the screen locked, expo-camera for barcodes |
+| Subscriptions | RevenueCat (react-native-purchases), with a Supabase Edge Function webhook mirroring Pro status |
+| Food data | USDA FoodData Central (public domain) in the database; Open Food Facts (ODbL) from the phone |
 | Forms and validation | React Hook Form, Zod |
 | Graphics | react-native-svg for charts, the body chart and share cards; react-native-maps (Apple Maps) for routes |
-| Testing and quality | Jest (55 suites, 784 tests), database tests on PGlite (12 suites), ESLint, strict TypeScript |
+| Testing and quality | Jest (63 suites, 951 tests), database tests on PGlite (16 suites), ESLint, strict TypeScript |
 | Release | EAS Build and EAS Submit, TestFlight, App Store Connect |
 | Website | Static HTML generated by a Node script and hosted on GitHub Pages |
 
@@ -288,7 +329,9 @@ refuses requests for anyone else's data, whatever the app sends.
 The Privacy Policy and Terms are written in [`src/legal/`](src/legal). One
 script ([`scripts/build-legal.js`](scripts/build-legal.js)) generates both the
 in-app screens and the public website from that source, so the two can never
-say different things. The app also includes account deletion inside the app,
+say different things. Another ([`scripts/build-notices.js`](scripts/build-notices.js))
+builds the in-app Acknowledgements from the iOS bundle's source map, so it
+lists exactly the open-source packages that ship, with their licences. The app also includes account deletion inside the app,
 a data export, age confirmation, and a user-content moderation workflow for
 reported users.
 
@@ -303,22 +346,26 @@ app/                 Screens, routed by file with Expo Router
   workout/           Active workout, review, summary
   set/new.tsx        Add-set screen with the live suggestion
   run/               Recorder, run summary, editing, history hub, routes
+  nutrition/         Food diary, add food, scanner, foods, recipes, goals,
+                     weight, reports
 src/
   domain/            Pure, unit-tested logic: recommender, machines, streaks,
                      leaderboard, generator, XP, and more
     running/         GPS cleaning, auto-pause, splits, best efforts, charts
+    nutrition/       Amounts, totals, goals and guardrails, reports, food data
   data/              TanStack Query hooks over Supabase
   components/        Shared UI, the hold timer, charts
   lib/               Supabase client, session guard, query client
   legal/             Privacy Policy and Terms source
 supabase/
-  migrations/        Schema, RLS policies and SQL functions (0001 to 0023)
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0027)
   tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
 modules/live-activities/  Local native module (Swift) for the Live Activities
 targets/widget/      Widget extension (SwiftUI) that draws it, added at prebuild
 __tests__/           Jest specs
-scripts/             Legal site, icon and screenshot generators
+scripts/             Legal site, acknowledgements, food catalog, icon and
+                     screenshot generators
 ```
 
 ## Running it locally

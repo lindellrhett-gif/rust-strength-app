@@ -260,8 +260,8 @@ function GoalForm({
               <Text style={text.caption}>
                 Everyday activity, not workouts.{' '}
                 {settings.addExercise
-                  ? 'Exercise you log is added on the day it happens.'
-                  : 'Exercise you log isn’t added to the budget (a diary setting).'}
+                  ? 'Runs and other activities you log are added on the day they happen.'
+                  : 'Runs and activities you log aren’t added to the budget (a diary setting).'}
               </Text>
 
               <Text style={text.label}>GOAL</Text>

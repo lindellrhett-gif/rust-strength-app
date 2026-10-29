@@ -3,9 +3,10 @@ import { LEGAL } from './config';
 /**
  * Terms of Service.
  *
- * Scoped to what this app actually is: a free, no-purchase, no-ads workout
- * tracker with an opt-in friends feature. Clauses that would not apply (payment
- * terms, refunds, marketplace rules) are deliberately absent.
+ * Scoped to what this app actually is: a no-ads workout tracker with an
+ * opt-in friends feature, free at its core, with Rust Strength Pro (the food
+ * diary) sold through Apple. Clauses that would not apply (our own payment
+ * processing, marketplace rules) are deliberately absent.
  */
 export const TERMS_OF_SERVICE = `# Terms of Service
 
@@ -24,8 +25,12 @@ ${LEGAL.appName} is a logging and calculation tool. It is **not** a medical devi
 - Generated workouts are **general suggestions** built from your equipment and history, not a program designed for you by a professional.
 - Distance, pace, elevation, steps and calories from a recorded run are **estimates** from your phone's GPS and motion sensors, which can be wrong, especially near tall buildings, under trees or in tunnels.
 - Trophies and streaks are for motivation. Nothing in the App is a recommendation to train through pain, injury, or exhaustion.
+- Calories and nutrients in the food diary come from food labels, USDA FoodData Central, Open Food Facts (whose entries are added by its users) and what you type in. They can be wrong or missing. Check the label when it matters to you.
+- The calorie goal is an **estimate** from a standard equation (Mifflin-St Jeor) and the numbers you enter. It is not a diet plan or nutrition advice. Weight-loss goals are offered only to adults, going by the birth year you enter.
 
 **Lifting weights carries a real risk of serious injury.** You are solely responsible for deciding what is safe for you. Consult a qualified physician or trainer before starting or changing a training program, particularly if you have any medical condition or injury. Do not attempt a weight because the App suggested it. Use appropriate form, equipment, and spotters.
+
+**Changing how you eat can affect your health.** Talk to a doctor or registered dietitian before you do, especially if you are pregnant or breastfeeding, have a medical condition, or have had an eating disorder. Do not rely on the food diary to manage a medical condition, such as diabetes or a food allergy.
 
 **Running outdoors has its own risks.** Watch where you are going, not your phone, and obey traffic laws. Maps and saved routes do not tell you whether a route is safe, legal or open to the public.
 
@@ -75,7 +80,7 @@ If you believe content in the App infringes your copyright, email ${LEGAL.contac
 
 ## 8. Our content
 
-The App itself — its code, design, text, icons and branding — belongs to us or our licensors. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
+The App itself — its code, design, text, icons and branding — belongs to us or our licensors. Open-source software in the App, and the food data from USDA FoodData Central and Open Food Facts, are used under their own licences, which the App lists under **Profile → Privacy & legal → Acknowledgements**. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
 
 ## 9. ${LEGAL.appName} Pro
 

@@ -34,8 +34,14 @@ describe('hasFeature', () => {
 
 describe('hasSellableFeatures', () => {
   it('sells nothing until a paid feature exists', () => {
-    expect(hasSellableFeatures()).toBe(false);
+    expect(hasSellableFeatures(PRO_FEATURE_LIST.map((f) => ({ ...f, available: false })))).toBe(false);
     expect(hasSellableFeatures([{ ...PRO_FEATURE_LIST[0], available: true }])).toBe(true);
+  });
+
+  it('has the food diary to sell from 1.2, and not the coach yet', () => {
+    expect(PRO_FEATURE_LIST.find((f) => f.feature === 'nutrition')?.available).toBe(true);
+    expect(PRO_FEATURE_LIST.find((f) => f.feature === 'coach')?.available).toBe(false);
+    expect(hasSellableFeatures()).toBe(true);
   });
 });
 

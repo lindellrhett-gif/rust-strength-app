@@ -220,7 +220,10 @@ function AddFood() {
                   <Text style={styles.link}>Search packaged foods for “{q}”</Text>
                 </Pressable>
               )}
-              <Text style={text.caption}>Open Food Facts is a free database anyone can edit.</Text>
+              <Text style={text.caption}>
+                Open Food Facts is a free database anyone can edit. Contains data from Open Food Facts, available under
+                the Open Database License.
+              </Text>
             </Card>
           </>
         ) : (

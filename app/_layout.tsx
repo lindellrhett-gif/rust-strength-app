@@ -102,6 +102,7 @@ function RootNavigator() {
       <Stack.Screen name="templates/[id]" options={{ headerShown: true, title: 'Preset' }} />
       <Stack.Screen name="legal/privacy" options={{ headerShown: true, title: 'Privacy Policy' }} />
       <Stack.Screen name="legal/terms" options={{ headerShown: true, title: 'Terms of Service' }} />
+      <Stack.Screen name="legal/notices" options={{ headerShown: true, title: 'Acknowledgements' }} />
       <Stack.Screen
         name="legal/privacy-center"
         options={{ headerShown: true, title: 'Privacy & legal' }}

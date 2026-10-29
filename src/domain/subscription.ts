@@ -33,9 +33,9 @@ export interface ProFeature {
 export const PRO_FEATURE_LIST: readonly ProFeature[] = [
   {
     feature: 'nutrition',
-    title: 'Nutrition tracker',
-    detail: 'Log meals and see calories and protein next to your training.',
-    available: false,
+    title: 'Food diary',
+    detail: 'Log meals from a food database or a barcode, and track calories, macros, water and weight.',
+    available: true,
   },
   {
     feature: 'coach',

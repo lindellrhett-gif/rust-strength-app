@@ -154,7 +154,7 @@ function SettingsForm({ settings, unit }: { settings: NutritionSettings; unit: W
         <Card title="Diary">
           <Row
             label="Add exercise to the budget"
-            caption="Workouts, runs and activities you log raise the day’s calories. The burn is an estimate."
+            caption="Runs and other activities you log raise the day’s calories. The burn is an estimate. Lifting sessions have no estimate yet, so they add nothing."
             value={settings.addExercise}
             onChange={(addExercise) => saveNow({ addExercise })}
           />
