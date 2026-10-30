@@ -10,20 +10,23 @@
  * older build without them reports a clear error instead of failing to start.
  */
 import type { RefObject } from 'react';
-import type { View } from 'react-native';
+import { PixelRatio, type View } from 'react-native';
 
 import { CARD_EXPORT } from '@/domain/shareCard';
 
 const UPDATE_APP = 'This version of the app can’t share cards yet. Update the app to get it.';
 
-/** The card as a PNG file in the app's temporary folder. */
+/** The card as a 1080 x 1920 PNG in the app's temporary folder. */
 export async function captureCard(ref: RefObject<View | null>): Promise<string> {
   const { captureRef } = await import('react-native-view-shot');
+  // view-shot reads width and height in points and multiplies them by the
+  // screen's scale, so passing pixels made a 3240 x 5760 image on a 3x phone.
+  const scale = PixelRatio.get();
   return captureRef(ref, {
     format: 'png',
     quality: 1,
-    width: CARD_EXPORT.width,
-    height: CARD_EXPORT.height,
+    width: CARD_EXPORT.width / scale,
+    height: CARD_EXPORT.height / scale,
     result: 'tmpfile',
   });
 }

@@ -8,7 +8,8 @@ one. Over time it learns your gym's machines too, so a PR on one cable stack
 carries over to a differently labeled one.
 
 **Status:** [live on the App Store](https://apps.apple.com/us/app/rust-strength/id6811736131) since October 2, 2026, after beta
-testing on TestFlight · **Role:** solo developer · **Built:** September 2026
+testing on TestFlight; version 1.1, with GPS running, live since October 27,
+2026 · **Role:** solo developer · **Built:** September 2026
 
 <p align="center">
   <img src="media/screenshots/suggestion.png" width="200" alt="Add set screen with a suggested next weight of 230 lb for 4 to 6 reps, the estimated one-rep max, last session's top set, and a rest timer" />
@@ -140,7 +141,7 @@ npm test
 
 ---
 
-## Running (version 1.1, in development)
+## Running (version 1.1, live since October 27, 2026)
 
 GPS run tracking, built into the same app: runs are activities, so they
 appear in the Calendar, the friends feed, Stats and the streak.
