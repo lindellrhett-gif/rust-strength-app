@@ -168,7 +168,7 @@ releasing it.
   summary (`npm run screenshots` resizes them).
 - [ ] **Description and keywords:** consider mentioning running. Keep any
   claim to what the app actually does.
-- [ ] **Publish the legal documents before submitting.** The reviewer checks
+- [x] **Publish the legal documents before submitting** (done October 26, 2026). The reviewer checks
   the Privacy Policy link, and the live one (1.4.x) still says no location
   is collected. With `rust-strength-site` checked out next to this repo, run
   `npm run legal`, then commit and push the site repo. The public policy
@@ -183,11 +183,14 @@ releasing it.
 
 Do these as soon as you release 1.1 in App Store Connect, in this order:
 
-- [ ] **Run `0020_streaks_count_activities.sql`** on the live project. Before
+Released October 27, 2026.
+
+- [x] **Run `0020_streaks_count_activities.sql`** on the live project. Before
   this, friends would see a streak that counts activities while the 1.0 app
   still counts workouts only. People who haven't updated yet will see their
   own streak and their friends' disagree until they do.
-- [ ] **Run `0025_rest_days_not_in_past.sql`**, which stops rest days being
+- [x] **Run `0025_rest_days_not_in_past.sql`**, which stops rest days being
   added for past days. Anyone still on 1.0 then gets an error if they try.
-- [ ] Tag the release: `git tag v1.1.0`, then `git push origin v1.1.0`.
+- [x] Tag the release: `git tag v1.1.0`, then `git push origin v1.1.0`
+  (on `b71ff38`, the commit build 30 was made from).
 - [ ] Tell your beta testers what's new.
