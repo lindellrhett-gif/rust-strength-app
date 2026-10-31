@@ -18,6 +18,48 @@ type MG = Database['public']['Enums']['muscle_group'];
 type EQ = Database['public']['Enums']['equipment_kind'];
 type LT = Database['public']['Enums']['exercise_load_type'];
 
+/** The label nutrients every food and diary row carries (migration 0027). */
+type NutrientCols = {
+  kcal: number;
+  fat_g: number | null;
+  sat_fat_g: number | null;
+  trans_fat_g: number | null;
+  cholesterol_mg: number | null;
+  sodium_mg: number | null;
+  carbs_g: number | null;
+  fiber_g: number | null;
+  sugars_g: number | null;
+  added_sugars_g: number | null;
+  protein_g: number | null;
+  vitamin_d_mcg: number | null;
+  calcium_mg: number | null;
+  iron_mg: number | null;
+  potassium_mg: number | null;
+};
+type NutrientInsert = { kcal: number } & Partial<Omit<NutrientCols, 'kcal'>>;
+type FoodSourceCol = 'usda' | 'off' | 'user' | 'recipe';
+/** A logged food as diary entries and saved-meal items both hold it. */
+type DiaryItemCols = {
+  food_id: string | null;
+  source: FoodSourceCol | 'quick';
+  barcode: string | null;
+  name: string;
+  brand: string | null;
+  amount: number;
+  unit: string;
+  grams: number | null;
+} & NutrientCols;
+type DiaryItemInsert = {
+  food_id?: string | null;
+  source: FoodSourceCol | 'quick';
+  barcode?: string | null;
+  name: string;
+  brand?: string | null;
+  amount: number;
+  unit: string;
+  grams?: number | null;
+} & NutrientInsert;
+
 export type Database = {
   public: {
     Tables: {
@@ -562,6 +604,212 @@ export type Database = {
         Update: { reaction?: 'fire' | 'strong' | 'heavy' | 'respect' };
         Relationships: [];
       };
+      // --- Nutrition (0027) ---------------------------------------------------
+      foods: {
+        Row: {
+          id: string;
+          owner_id: string | null;
+          source: FoodSourceCol;
+          source_ref: string | null;
+          barcode: string | null;
+          name: string;
+          brand: string | null;
+          basis: '100g' | '100ml' | 'serving';
+          serving_label: string | null;
+          serving_g: number | null;
+          serving_ml: number | null;
+          servings: number | null;
+          extra: Json;
+          search: unknown;
+          created_at: string;
+        } & NutrientCols;
+        Insert: {
+          id?: string;
+          owner_id: string;
+          source: Exclude<FoodSourceCol, 'usda'>;
+          source_ref?: string | null;
+          barcode?: string | null;
+          name: string;
+          brand?: string | null;
+          basis?: '100g' | '100ml' | 'serving';
+          serving_label?: string | null;
+          serving_g?: number | null;
+          serving_ml?: number | null;
+          servings?: number | null;
+          extra?: Json;
+          created_at?: string;
+        } & NutrientInsert;
+        Update: {
+          name?: string;
+          brand?: string | null;
+          barcode?: string | null;
+          basis?: '100g' | '100ml' | 'serving';
+          serving_label?: string | null;
+          serving_g?: number | null;
+          serving_ml?: number | null;
+          servings?: number | null;
+          extra?: Json;
+        } & Partial<NutrientCols>;
+        Relationships: [];
+      };
+      food_portions: {
+        Row: { id: string; food_id: string; label: string; grams: number; position: number };
+        Insert: { id?: string; food_id: string; label: string; grams: number; position?: number };
+        Update: { label?: string; grams?: number; position?: number };
+        Relationships: [];
+      };
+      recipe_items: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          position: number;
+          food_id: string | null;
+          name: string;
+          amount: number;
+          unit: string;
+          grams: number | null;
+        } & NutrientCols;
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          position?: number;
+          food_id?: string | null;
+          name: string;
+          amount: number;
+          unit: string;
+          grams?: number | null;
+        } & NutrientInsert;
+        Update: { position?: number; amount?: number; unit?: string; grams?: number | null } & Partial<NutrientCols>;
+        Relationships: [];
+      };
+      diary_entries: {
+        Row: DiaryItemCols & {
+          id: string;
+          user_id: string;
+          day: string;
+          meal: number;
+          logged_at: string;
+          created_at: string;
+        };
+        Insert: DiaryItemInsert & {
+          id: string;
+          user_id: string;
+          day: string;
+          meal: number;
+          logged_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          day?: string;
+          meal?: number;
+          amount?: number;
+          unit?: string;
+          grams?: number | null;
+        } & Partial<NutrientCols>;
+        Relationships: [];
+      };
+      saved_meals: {
+        Row: { id: string; user_id: string; name: string; created_at: string };
+        Insert: { id?: string; user_id: string; name: string; created_at?: string };
+        Update: { name?: string };
+        Relationships: [];
+      };
+      saved_meal_items: {
+        Row: DiaryItemCols & { id: string; saved_meal_id: string; user_id: string; position: number };
+        Insert: DiaryItemInsert & { id?: string; saved_meal_id: string; user_id: string; position?: number };
+        Update: { position?: number; amount?: number; unit?: string; grams?: number | null } & Partial<NutrientCols>;
+        Relationships: [];
+      };
+      diary_days: {
+        Row: { user_id: string; day: string; note: string | null; completed_at: string | null };
+        Insert: { user_id: string; day: string; note?: string | null; completed_at?: string | null };
+        Update: { note?: string | null; completed_at?: string | null };
+        Relationships: [];
+      };
+      water_logs: {
+        Row: { id: string; user_id: string; day: string; ml: number; logged_at: string };
+        Insert: { id: string; user_id: string; day: string; ml: number; logged_at?: string };
+        Update: { ml?: number };
+        Relationships: [];
+      };
+      body_weights: {
+        Row: { id: string; user_id: string; measured_on: string; kg: number; created_at: string };
+        Insert: { id?: string; user_id: string; measured_on: string; kg: number; created_at?: string };
+        Update: { kg?: number };
+        Relationships: [];
+      };
+      nutrition_goals: {
+        Row: {
+          id: string;
+          user_id: string;
+          starts_on: string;
+          kcal: number;
+          protein_g: number | null;
+          carbs_g: number | null;
+          fat_g: number | null;
+          macro_mode: 'percent' | 'grams';
+          targets: Json;
+          meal_split: Json | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          starts_on: string;
+          kcal: number;
+          protein_g?: number | null;
+          carbs_g?: number | null;
+          fat_g?: number | null;
+          macro_mode?: 'percent' | 'grams';
+          targets?: Json;
+          meal_split?: Json | null;
+          created_at?: string;
+        };
+        Update: {
+          kcal?: number;
+          protein_g?: number | null;
+          carbs_g?: number | null;
+          fat_g?: number | null;
+          macro_mode?: 'percent' | 'grams';
+          targets?: Json;
+          meal_split?: Json | null;
+        };
+        Relationships: [];
+      };
+      nutrition_settings: {
+        Row: {
+          user_id: string;
+          meal_names: string[];
+          energy_unit: 'kcal' | 'kj';
+          add_exercise: boolean;
+          net_carbs: boolean;
+          water_goal_ml: number | null;
+          height_cm: number | null;
+          birth_year: number | null;
+          sex_for_calculator: 'female' | 'male' | null;
+          activity_level: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active' | null;
+          goal_weight_kg: number | null;
+          weekly_change_kg: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          meal_names?: string[];
+          energy_unit?: 'kcal' | 'kj';
+          add_exercise?: boolean;
+          net_carbs?: boolean;
+          water_goal_ml?: number | null;
+          height_cm?: number | null;
+          birth_year?: number | null;
+          sex_for_calculator?: 'female' | 'male' | null;
+          activity_level?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active' | null;
+          goal_weight_kg?: number | null;
+          weekly_change_kg?: number | null;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['nutrition_settings']['Insert']>;
+        Relationships: [];
+      };
     };
     Views: {
       v_activity_totals: {
@@ -855,6 +1103,22 @@ export type Database = {
           is_e1rm_pr: boolean;
         }[];
       };
+      rpc_search_foods: {
+        Args: { p_query: string; p_limit?: number };
+        Returns: Database['public']['Tables']['foods']['Row'][];
+      };
+      import_usda_foods: {
+        Args: { p_foods: Json };
+        Returns: number;
+      };
+      rpc_save_meal: {
+        Args: { p_id: string; p_name: string; p_items: Json };
+        Returns: string;
+      };
+      rpc_save_recipe: {
+        Args: { p_recipe: Json; p_items: Json };
+        Returns: string;
+      };
     };
     Enums: {
       muscle_group:
@@ -963,3 +1227,16 @@ export type FeedReaction = Database['public']['Tables']['feed_reactions']['Row']
 
 export type ExercisePrRow = Database['public']['Views']['v_exercise_prs']['Row'];
 export type AllTimeTotalsRow = Database['public']['Views']['v_all_time_totals']['Row'];
+
+export type FoodRow = Database['public']['Tables']['foods']['Row'];
+export type FoodPortionRow = Database['public']['Tables']['food_portions']['Row'];
+export type DiaryEntryRow = Database['public']['Tables']['diary_entries']['Row'];
+export type DiaryEntryInsert = Database['public']['Tables']['diary_entries']['Insert'];
+export type DiaryDayRow = Database['public']['Tables']['diary_days']['Row'];
+export type WaterLogRow = Database['public']['Tables']['water_logs']['Row'];
+export type BodyWeightRow = Database['public']['Tables']['body_weights']['Row'];
+export type NutritionGoalRow = Database['public']['Tables']['nutrition_goals']['Row'];
+export type NutritionSettingsRow = Database['public']['Tables']['nutrition_settings']['Row'];
+export type SavedMealRow = Database['public']['Tables']['saved_meals']['Row'];
+export type SavedMealItemRow = Database['public']['Tables']['saved_meal_items']['Row'];
+export type RecipeItemRow = Database['public']['Tables']['recipe_items']['Row'];

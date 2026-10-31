@@ -85,6 +85,14 @@
             "NSPrivacyCollectedDataTypePurposes": [
               "NSPrivacyCollectedDataTypePurposeAppFunctionality"
             ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePurchaseHistory",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
           }
         ]
       }
@@ -142,6 +150,14 @@
           "savePhotosPermission": "Rust Strength saves your workout and run cards to Photos when you tap Save to Photos. It can add pictures but never see the ones already there.",
           "isAccessMediaLocationEnabled": false,
           "granularPermissions": ["photo"]
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Rust Strength uses the camera to scan the barcode on a packaged food, so you can log it without typing it in. Nothing is recorded or saved.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
         }
       ],
       "@bacons/apple-targets"

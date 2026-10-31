@@ -7,7 +7,9 @@ counted below, so nothing here needs trimming.
 > loss, injury prevention or any health outcome. The app suggests training
 > weights from numbers the user enters; it does not know their health. Keep it
 > that way — unsupported fitness or health claims are both an App Review
-> problem and an FTC advertising problem.
+> problem and an FTC advertising problem. The food diary is described by what
+> it does (logging, totals, goals, reports), never by results: no "lose
+> weight", "get lean" or "burn fat".
 
 ---
 
@@ -31,9 +33,22 @@ Know what to lift, track runs
 options: `Lifting log with GPS running` (28). 1.0 used
 `Know what weight to lift next` (29).
 
+**For 1.2, your call:** keep it, or bring in the food diary with
+`Lifting, runs and food diary` (28) or `Lift, run and log your food` (27).
+The food diary is paid, so leading with it may set an expectation the free
+app doesn't meet; keeping the 1.1 subtitle avoids that.
+
 ## Promotional text (170 max — editable later without review)
 
-From 1.1:
+From 1.2:
+
+```
+New: the food diary, with Rust Strength Pro. Scan a barcode or search thousands of foods, and track calories, macros, water and weight next to your training.
+```
+
+`157 characters`.
+
+1.1 used:
 
 ```
 New: GPS running. Record runs with your screen locked, see your pace and rest timer on the Lock Screen, and share a card after every workout or run.
@@ -45,7 +60,16 @@ to what the machine can actually be set to." (166)
 
 ## Keywords (100 max, comma-separated, no spaces)
 
-From 1.1:
+From 1.2:
+
+```
+workout,gym,lifting,tracker,running,gps,calorie,counter,macro,food,diary,barcode,protein,rpe,1rm,log
+```
+
+`100 characters`. Food terms replace `pace,steps,cardio,5k,barbell,progress,pr,rest`
+from 1.1; put some back if running searches matter more to you.
+
+1.1 used:
 
 ```
 workout,gym,lifting,tracker,running,gps,pace,rpe,1rm,steps,cardio,5k,barbell,log,progress,pr,rest
@@ -59,7 +83,70 @@ Words already in the Name and Subtitle are indexed automatically, so
 
 ## Description (4000 max)
 
-From 1.1:
+From 1.2:
+
+```
+Rust Strength answers the question every lifter has mid-workout: how much should I put on the bar for the next set? It records your runs too, and with Rust Strength Pro it keeps a food diary.
+
+Log a set with the weight, the reps, and how hard it felt on the RPE scale. Rust Strength estimates your one-rep max from that, then suggests a weight for your next set aimed at reaching failure inside the rep range you chose. Every suggestion is rounded to a weight the machine in front of you can actually be set to.
+
+LIFTING
+
+Weight suggestions after every set, with a plain-English reason for each one.
+Every set from last time shown while you log, top set in bold.
+Over 200 exercises built in, or add your own. Search forgives typos.
+Presets, and a generator that builds a session from your equipment.
+A rest timer on your Lock Screen and in the Dynamic Island, with your next set.
+
+RUNNING
+
+Record runs with GPS, with your phone locked: live map, distance, pace, splits and steps.
+Auto-pause at lights, and optional spoken updates every mile or kilometre.
+Pace and elevation charts, weekly distance, and records from the mile to the marathon.
+Save a route and compare your attempts. Enter treadmill runs by hand.
+
+FOOD DIARY (RUST STRENGTH PRO)
+
+Search thousands of everyday foods from USDA FoodData Central, or scan a barcode to look up a packaged food on Open Food Facts.
+Recent and frequent foods, quick add, saved meals, your own foods and recipes, or a recipe imported from a link.
+Calories, carbs, fat and protein for each meal and the day, plus fiber, sodium, sugars, vitamins and minerals.
+A calorie goal from a calculator or your own number, and macro and nutrient targets.
+Runs and activities you log can add their calories to the day.
+Water, weigh-ins with a smoothed trend, and reports over 7 days, 30 days and 12 weeks.
+Your food diary is private. Friends never see it.
+
+PROGRESS AND FRIENDS
+
+Streaks, consistency, volume, time trained and personal records.
+A weekly body chart, and a progress chart for every exercise.
+Trophies from Wood to Legend, plus XP, levels and badges.
+A feed of friends' sessions and runs, and leaderboards for streaks, weight lifted and distance.
+Share a card after any workout or run.
+
+DESIGNED TO ASK FOR LITTLE
+
+No ads. No tracking. No analytics beyond subscription counts. An email address and a password keep your training synced. Location is used only for runs you record and privacy zones you set, and the camera only to read barcodes, on your phone. Friends see a summary of a session, never the individual sets, and a run's map only if you share it, with the start and end hidden. Export everything, or delete your account and all its data, from inside the app.
+
+RUST STRENGTH PRO
+
+Lifting, running, friends and trophies are free. The food diary is part of Rust Strength Pro, sold as a monthly or yearly subscription or a one-time Lifetime purchase. Payment is charged to your Apple ID. A subscription renews automatically unless you cancel it at least 24 hours before the end of the period. Manage or cancel it in your Apple ID's subscription settings.
+
+IMPORTANT
+
+Rust Strength is a training log, not medical or professional coaching advice. It suggests weights from the numbers you give it and knows nothing about your health, injuries or experience. Warm up, use your own judgement, and stop if something hurts. Be aware of your surroundings when you run. Talk to a doctor before starting a new training programme.
+
+Calories and nutrients come from food labels, food databases and what you type in, and can be wrong. The calorie goal is an estimate, not a diet plan or nutrition advice. Talk to a doctor or registered dietitian before changing how you eat. Weight-loss goals are offered only to adults, going by the birth year you enter.
+
+Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/privacy.html
+Terms of Use: https://lindellrhett-gif.github.io/rust-strength/terms.html
+```
+
+`3,942 characters of 4,000`. App Review Guideline 3.1.2 wants a
+subscription app's metadata to link its Terms of Use and Privacy Policy, so
+keep both links. The Rust Strength Pro paragraph says what is paid and how
+renewal works.
+
+1.1 used:
 
 ```
 Rust Strength answers the question every lifter has mid-workout: how much should I put on the bar for the next set? And now it records your runs too.
@@ -135,16 +222,33 @@ only user-written text that reaches another person is the names above.
 Do not be tempted to answer "no" to get a 4+ rating. Misrepresenting
 user-generated content is a rejection, and a removal risk after launch.
 
+**From 1.2:** the questionnaire also asks about medical, treatment and
+wellness topics. The food diary is calorie and nutrient tracking with a
+general-purpose calorie estimate, not medical or treatment information; answer
+each question as Apple words it at the time, and if one plainly covers diet or
+nutrition tracking, answer yes. The 13+ rating should not change, but check the
+result the questionnaire gives.
+
 ## App Review notes
 
 Paste this into "Notes" so the reviewer is not stuck at the sign-up screen:
 
 ```
-Rust Strength is a workout and running tracker. It requires an account so training data syncs across devices. Please use the demo account in the sign-in fields; it has workouts, runs, presets and trophies already logged, so every feature is visible without recording anything.
+Rust Strength is a workout and running tracker with a food diary. It requires an account so training data syncs across devices. Please use the demo account in the sign-in fields; it has workouts, runs, food diary days, presets and trophies already logged, so every feature is visible without recording anything.
 
-There is no paid content, no subscription and no advertising in this build.
+Sign-up is email and password only. There is no advertising. The paid feature, Rust Strength Pro, is described below.
 
-NEW IN 1.1: RUNNING
+NEW IN 1.2: RUST STRENGTH PRO AND THE FOOD DIARY
+- The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, and a non-consumable Lifetime purchase.
+- Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, Today > Food and the food diary say what Pro includes and offer the same plans.
+- [Say whether the demo account has Pro, or that purchases can be tested with a sandbox account.]
+- The food diary is at Today > Food > Open food diary. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
+- The camera is requested only when the user opens the barcode scanner (Add food > Scan); the barcode is read on the device and nothing from the camera is recorded or uploaded. A barcode can also be typed in.
+- Recipe import loads the page the user links to from the device.
+- The calorie goal calculator does not offer weight-loss goals to users under 18 (by the birth year entered), and a goal under the calorie floor is saved only after a warning.
+- Nothing in the food diary is shared with friends.
+
+RUNNING (SINCE 1.1)
 - Today > Start run records a run with GPS. To see finished runs without going outside, open Stats > Running on the demo account, or enter one by hand: Today > Log activity > Run > Enter a run.
 - Location is requested "While Using the App" only, when the user taps Start (or places a privacy zone at their current location), and is used only between Start and Save. The app never requests "Always".
 - Background modes: "location" keeps a run recording with the screen locked (the blue location indicator shows the whole time); "audio" is used only to speak distance and pace updates during a run with the screen locked, which can be turned off in Running settings.
@@ -162,7 +266,7 @@ Account deletion: Profile > Privacy & legal > Delete my account. Password reset:
 NOTIFICATIONS
 The app asks for notification permission only if the user turns on Profile > Rest timer > "Alert when rest is over", a local notification scheduled on the device.
 
-Levels and badges come from the user's own logged training. The Influencer and Beta Tester badges are awarded by the developer and cannot be obtained in the app.
+Levels and badges come from the user's own logged training. The Influencer and Beta Tester badges are awarded by the developer and cannot be obtained in the app, and Rust Strength Pro does not award or unlock any badge.
 ```
 
 Create the demo account before submitting and put its credentials in the
@@ -183,12 +287,13 @@ Select exactly these data types, and nothing else:
 |---|---|---|
 | Contact Info | **Email Address** | Sign-in, and password reset codes |
 | Health & Fitness | **Fitness** | Workouts, sets, weights, reps, RPE, activities, runs, steps, distance, calories |
-| Health & Fitness | **Health** | Bodyweight, which is optional but user-provided health data |
-| User Content | **Other User Content** | Usernames, display names, exercise, machine, preset and activity names, reactions, and reports filed about other users |
+| Health & Fitness | **Health** | Bodyweight, which is optional but user-provided health data. From 1.2 also the food diary (what was eaten and drunk, with calories and nutrients), water, weigh-ins, nutrition goals, and the goal calculator's height, birth year, sex and activity level |
+| User Content | **Other User Content** | Usernames, display names, exercise, machine, preset and activity names, reactions, and reports filed about other users. From 1.2 also the names of your own foods, recipes and saved meals, and day notes |
 | Identifiers | **User ID** | The account ID and username |
 | Location | **Precise Location** | The route of a recorded run, and privacy zones (from version 1.1) |
+| Purchases | **Purchase History** | Which Rust Strength Pro plan was bought, when, and whether it renews (from version 1.2) |
 
-For **every one** of the six, answer:
+For **every one** of the seven, answer:
 
 | Question | Answer |
 |---|---|
@@ -211,13 +316,29 @@ Leave everything else unticked. The ones most likely to tempt a wrong answer:
 - **Customer Support:** no. Support is by email outside the app, not collected
   in it.
 - **Search History:** no. A friend search is sent to the database to look up a
-  username and is not saved there.
+  username and is not saved there. Food searches are the same: the catalog
+  search goes to the database and isn't saved, and a packaged-food search goes
+  from the phone to Open Food Facts to answer it, not to us or a partner of
+  ours.
+- **Photos or Videos:** no. The barcode scanner reads the camera on the phone;
+  no picture is recorded, saved or uploaded.
+- **Sensitive Info:** no. Apple's list (racial or ethnic data, sexual
+  orientation, pregnancy, disability, religious or political views, trade
+  union membership, genetic or biometric data) doesn't include the sex the
+  calorie equation asks for, which is covered by Health above.
+- **Other Financial Info, Payment Info:** no. Apple takes the payment; the app
+  and RevenueCat see which plan was bought, not how it was paid for.
 
 **Privacy Policy URL:** `https://lindellrhett-gif.github.io/rust-strength/privacy.html`
 
 If the app ever adds analytics, crash reporting, advertising, or real push
 notifications, or uses location for anything beyond recording runs, this
 section, the manifest and the policy all change together.
+
+**A judgement call to check:** Apple has no category for age, so the birth year
+and the sex for the equation are filed under Health, as inputs to a health
+estimate, rather than under Other Data Types. Both readings are defensible;
+Health is the one that matches how the policy describes them.
 
 ## Screenshots
 
@@ -239,6 +360,10 @@ Suggested order — lead with the thing no other tracker does:
 4. **Home screen with the body chart.** Caption: "Never skip a muscle group."
 5. **Trophy shelf and level card.** Caption: "Nine ranks. Wood to Legend."
 6. **Friend feed with reactions.** Caption: "See what your friends are lifting."
+
+From 1.2, consider adding the food diary (a day with a goal set and meals
+logged) and the barcode scanner. Caption the diary screenshot "Food diary with
+Rust Strength Pro" so it's clear it is paid.
 
 Log a few real sessions on the demo account first so nothing shows an empty
 state. Empty screenshots convert badly and look unfinished to a reviewer.

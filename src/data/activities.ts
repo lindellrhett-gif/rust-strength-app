@@ -111,8 +111,8 @@ export function useDeleteActivity() {
 }
 
 /**
- * Calories burned exercising on a local date (src/domain/exercise.ts): the
- * hook the nutrition diary will read. Nothing uses it yet.
+ * Calories burned exercising on a local date (src/domain/exercise.ts), for
+ * the food diary's budget.
  */
 export function useExerciseCalories(date: string): ExerciseDay | null {
   const activities = useActivities();

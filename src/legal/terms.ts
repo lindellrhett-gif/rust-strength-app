@@ -3,9 +3,10 @@ import { LEGAL } from './config';
 /**
  * Terms of Service.
  *
- * Scoped to what this app actually is: a free, no-purchase, no-ads workout
- * tracker with an opt-in friends feature. Clauses that would not apply (payment
- * terms, refunds, marketplace rules) are deliberately absent.
+ * Scoped to what this app actually is: a no-ads workout tracker with an
+ * opt-in friends feature, free at its core, with Rust Strength Pro (the food
+ * diary) sold through Apple. Clauses that would not apply (our own payment
+ * processing, marketplace rules) are deliberately absent.
  */
 export const TERMS_OF_SERVICE = `# Terms of Service
 
@@ -24,8 +25,12 @@ ${LEGAL.appName} is a logging and calculation tool. It is **not** a medical devi
 - Generated workouts are **general suggestions** built from your equipment and history, not a program designed for you by a professional.
 - Distance, pace, elevation, steps and calories from a recorded run are **estimates** from your phone's GPS and motion sensors, which can be wrong, especially near tall buildings, under trees or in tunnels.
 - Trophies and streaks are for motivation. Nothing in the App is a recommendation to train through pain, injury, or exhaustion.
+- Calories and nutrients in the food diary come from food labels, USDA FoodData Central, Open Food Facts (whose entries are added by its users) and what you type in. They can be wrong or missing. Check the label when it matters to you.
+- The calorie goal is an **estimate** from a standard equation (Mifflin-St Jeor) and the numbers you enter. It is not a diet plan or nutrition advice. Weight-loss goals are offered only to adults, going by the birth year you enter.
 
 **Lifting weights carries a real risk of serious injury.** You are solely responsible for deciding what is safe for you. Consult a qualified physician or trainer before starting or changing a training program, particularly if you have any medical condition or injury. Do not attempt a weight because the App suggested it. Use appropriate form, equipment, and spotters.
+
+**Changing how you eat can affect your health.** Talk to a doctor or registered dietitian before you do, especially if you are pregnant or breastfeeding, have a medical condition, or have had an eating disorder. Do not rely on the food diary to manage a medical condition, such as diabetes or a food allergy.
 
 **Running outdoors has its own risks.** Watch where you are going, not your phone, and obey traffic laws. Maps and saved routes do not tell you whether a route is safe, legal or open to the public.
 
@@ -75,11 +80,20 @@ If you believe content in the App infringes your copyright, email ${LEGAL.contac
 
 ## 8. Our content
 
-The App itself — its code, design, text, icons and branding — belongs to us or our licensors. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
+The App itself — its code, design, text, icons and branding — belongs to us or our licensors. Open-source software in the App, and the food data from USDA FoodData Central and Open Food Facts, are used under their own licences, which the App lists under **Profile → Privacy & legal → Acknowledgements**. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
 
-## 9. The App is free
+## 9. ${LEGAL.appName} Pro
 
-${LEGAL.appName} is currently free with no purchases or subscriptions. If we introduce paid features, we will tell you the price and terms before you are charged, and any purchase will go through the App Store or Google Play under their rules.
+The App's core features are free. ${LEGAL.appName} Pro is an optional upgrade that adds extra features, which the App lists before you buy. It is sold as a monthly or yearly subscription, or as a one-time Lifetime purchase.
+
+- **Price and billing.** The price is shown in the App before you confirm. Payment is taken through your Apple ID by Apple, not by us, and is subject to Apple's terms.
+- **Automatic renewal (monthly and yearly).** A subscription renews automatically at the end of each period, at the then-current price, unless you cancel at least 24 hours before the period ends. Apple charges the renewal within the 24 hours before the period ends.
+- **Lifetime.** A single payment that unlocks Pro for as long as we offer Pro in the App. It does not renew and there is nothing to cancel. "Lifetime" means the life of the Pro service, not your lifetime: if we stop offering the App or Pro, Lifetime access ends with it.
+- **Free trials.** If a free trial is offered, you are charged when it ends unless you cancel before then. Any unused part of a free trial ends when you buy a subscription.
+- **Cancelling.** You can cancel at any time in your device's settings (Settings > your name > Subscriptions). Pro then stays active until the end of the period you have paid for. Deleting the App or your account does not cancel your subscription.
+- **Refunds.** Purchases are handled by Apple, so refund requests go to Apple under its policies. We cannot issue refunds ourselves.
+- **Price changes.** If the price changes, Apple tells you in advance and, where its rules or the law require, asks you to agree before you are charged the new price.
+- **Changes to Pro.** We may add, change or remove Pro features. If a change materially reduces what Pro includes, we will tell you before it takes effect, and you can cancel.
 
 ## 10. Availability
 

@@ -565,3 +565,169 @@ again when they first open 1.1.
 3. **Attorney.** Location combined with fitness data adds to the Washington My
    Health My Data question in section 5. This has not been reviewed, and is not
    claimed to be compliant.
+
+## 15. Pending: Rust Strength Pro (branch `feature/subscriptions`, not released)
+
+Subscriptions through RevenueCat are built but switched off; see
+`store/SUBSCRIPTIONS.md`. The branch's documents are version **1.6.0** and
+must only be merged and published when Pro goes on sale, since they describe
+it as purchasable.
+
+### What the branch's documents now say
+
+1. **Terms section 9** replaces "The App is free" with the subscription
+   terms Apple and auto-renewal practice call for: price shown before
+   purchase, billing through Apple, automatic renewal unless cancelled 24
+   hours before the period ends, free-trial forfeiture, how to cancel,
+   refunds through Apple, price changes, and changes to what Pro includes.
+   It does not promise that free features stay free forever; that is a
+   business commitment, not written into the Terms. It also covers the
+   one-time **Lifetime** purchase: no renewal, and "Lifetime" defined as the
+   life of the Pro service, ending if the App or Pro is discontinued.
+2. **Privacy Policy:** a "Your purchase" item (what we learn, including which
+   of monthly, yearly or Lifetime; never card details); RevenueCat added to
+   the provider table (account id, purchase details, technical app and
+   device data, connected at sign-in once subscriptions are on, plus any
+   answers given in its Customer Center, such as a cancellation reason); the
+   "no analytics" line narrowed to admit
+   RevenueCat's subscription figures; deletion covers our subscription
+   record and a request to RevenueCat; and a bold note that deleting the
+   account doesn't cancel the subscription.
+3. **Minimisation:** the SDK isn't started at all while subscriptions are
+   off, so nothing reaches RevenueCat before launch. Pro status lives on our
+   side only as `public.subscriptions` (owner-readable, written only by the
+   webhook with the service role), and is in the data export.
+4. **Secrets:** only RevenueCat's public SDK key goes in the app. The secret
+   API key and webhook secret live in Supabase Edge Function secrets. The
+   Test Store key used for development is in the local `.env` only, and is
+   kept out of release builds twice over (RevenueCat would crash them).
+5. **The paywall is RevenueCat's,** designed in its dashboard, so the Terms
+   and Privacy links, Restore, and Apple's renewal wording must be set up
+   there (store/SUBSCRIPTIONS.md says how). Check the published paywall
+   before submitting: App Review rejects a subscription screen without them.
+
+### Open questions (yours, or an attorney's)
+
+1. **Seller entity.** The developer account is Individual, so Apple pays and
+   lists Rhett personally, while the documents name Bluestem Software LLC.
+   Converting to an Organization account needs a D-U-N-S number.
+2. **State automatic-renewal laws** (California's among them) and whether
+   Apple's purchase sheet, receipts and cancellation in Settings cover the
+   disclosure, consent and cancellation duties. Not reviewed.
+3. **The RevenueCat line in the provider table** describes its data in
+   general terms ("technical information about the app and your device").
+   Check RevenueCat's current data processing terms before publishing, and
+   accept its DPA if offered.
+4. **App Store labels at launch:** Purchases > Purchase History, linked to
+   the user, App Functionality, not tracking. RevenueCat's own privacy
+   manifest declares purchase history, not linked; it becomes linked here
+   because the RevenueCat customer id is the account id.
+5. **Lifetime wording.** Whether "for as long as we offer Pro" and the
+   discontinuation clause are enough for a one-time "Lifetime" purchase
+   under consumer-protection law. Not reviewed.
+
+## 16. Pending: the food diary (app 1.2, branch `feature/nutrition`, not released)
+
+The food diary is the paid feature of Rust Strength Pro, so it ships with the
+subscription launch in section 15, under the same documents (version
+**1.6.0**, last updated October 29, 2026). Nothing is published: the
+documents were rebuilt with the site sync off.
+
+### What the documents now say
+
+1. **Privacy Policy, what we collect:** the food diary (entries with amounts,
+   calories and nutrients; your own foods, recipes and saved meals, with any
+   barcode; day notes; water; weigh-ins; nutrition goals and settings), and
+   the goal calculator's inputs (height, birth year, sex for the equation,
+   activity level, goal weight, weekly change). The age line still holds: a
+   birth year is stored only if the calculator is used, never a date of birth.
+   A recipe's link is not stored (checked: `recipeToJson` sends no URL).
+2. **Permissions:** five now. Camera, asked only when the barcode scanner
+   opens; the barcode is read on the phone and the picture is not recorded or
+   sent (checked: the scanner passes only the decoded number on).
+3. **Who receives what:** Open Food Facts is in the provider table: the
+   barcode or the search words, sent from the phone, with its IP address and
+   a User-Agent naming the app and its support address, not the user
+   (`OFF_USER_AGENT`). Recipe sites receive the request when the phone loads a
+   link the user chose. The USDA catalog sits in our database, so searching
+   it sends nothing to the USDA; searches are not saved.
+4. **Private by design:** the policy says nothing in the food diary reaches
+   friends, the feed, the leaderboard or share cards. Checked: every nutrition
+   table is owner-only under RLS (catalog rows readable by any signed-in
+   user), the only definer functions are the service-role catalog loader and
+   the caller's own export, and `supabase/tests/nutrition.test.mjs` covers
+   it. The one link out is that the latest weigh-in becomes the profile
+   bodyweight, which friends already can't see.
+5. **Export and deletion** now list the food diary. Checked: everything is in
+   `rpc_export_my_data` and deleted with the account (same test).
+6. **Terms section 1:** calorie and nutrient figures are estimates from labels
+   and databases; the calorie goal is a Mifflin-St Jeor estimate, not a diet
+   plan or nutrition advice; see a doctor or registered dietitian first,
+   especially in pregnancy, with a medical condition or after an eating
+   disorder; don't rely on it to manage a condition; weight-loss goals are
+   offered only to adults by the birth year entered. Section 8 points to the
+   Acknowledgements for open-source and food data licences.
+7. **Fixed while checking:**
+   - The public account-deletion page said reports you filed are kept for 12
+     months without your identity. They are deleted with the account
+     (`user_reports.reporter_id` is `on delete cascade`, since 0007), as the
+     Privacy Policy says. The page now matches, and also lists runs, the food
+     diary and the Pro subscription record, which it had left out.
+   - The site's page builder printed tables as raw `| … |` text, so the live
+     provider table has never rendered as a table. It does now.
+   - A step 7 caption said workouts add calories to the day; only runs and
+     other activities do (lifting has no estimate). Corrected in the app.
+
+### Store and app changes that go with it
+
+- **Privacy manifest:** `NSPrivacyCollectedDataTypePurchaseHistory` added
+  (linked, App Functionality, not tracking), for Pro. The food diary falls
+  under Health, already declared. The birth year and sex have no Apple
+  category of their own and are filed under Health as calculator inputs; a
+  judgement call, noted in APP_STORE_LISTING.md.
+- **App Privacy answers, listing copy and review notes** updated in
+  `store/APP_STORE_LISTING.md`; release steps in `store/RELEASE_1.2.md`.
+- **Acknowledgements screen** (Profile > Privacy & legal), generated by
+  `npm run notices` from the iOS bundle's source map: 110 packages and native
+  libraries with their copyright notices and licence texts, plus credits for
+  USDA FoodData Central (CC0; USDA asks to be named as the source) and Open
+  Food Facts ("Contains data from Open Food Facts, available under the Open
+  Database License", the wording Open Food Facts gives). This closes the
+  missing licences screen in sections 11 and 12 once released. The Add food
+  screen carries the Open Food Facts line too.
+
+### Open questions (yours, or an attorney's)
+
+1. **Washington's My Health My Data Act.** Section 5 already flagged it for
+   training data; food intake and weight make it plainer. The Act
+   ([RCW 19.373.020](https://app.leg.wa.gov/RCW/default.aspx?cite=19.373.020))
+   requires a regulated entity to maintain a *consumer health data privacy
+   policy* covering five things (the categories collected and why, their
+   sources, what is shared, with which categories of third parties, and how
+   to exercise the Act's rights) and to link it prominently from its
+   homepage. The Washington Attorney General's FAQ says that policy "must be
+   a separate and distinct link" and may hold nothing else. Collection is
+   allowed without separate consent only "to the extent necessary to provide
+   a product or service that the consumer ... has requested"
+   ([RCW 19.373.030](https://app.leg.wa.gov/RCW/default.aspx?cite=19.373.030)).
+   Whether the Act applies to this app, and whether the current policy is
+   enough, is not settled here. The options:
+   - **(a)** ask an attorney before 1.2 goes on sale;
+   - **(b)** publish a separate consumer health data privacy policy page,
+     drafted from what the app does, linked from the site's homepage and
+     from Privacy & legal, and have it reviewed;
+   - **(c)** release with the current policy and accept the risk.
+
+   The Act has a private right of action, which is why this sits at the top.
+2. **Open Food Facts' licence.** The app shows Open Food Facts data and lets
+   someone save a private copy of a product into their own foods. Attribution
+   is given in the app. Whether per-user private copies count as a "public
+   use" of an adapted database under the ODbL's share-alike terms was not
+   reviewed; the reading here is that they don't, since no one else can see
+   them and no shared copy is kept.
+3. **Teenagers and diet tracking.** The app is 13+, and 13 to 17 year olds
+   can use the food diary with the guardrails above. Whether to limit the diary
+   further for minors is a product and policy decision, not a legal finding.
+4. **Data accuracy.** Open Food Facts is user-contributed, and USDA values
+   describe a typical food, not the one on the plate. The app and the Terms
+   say the figures are estimates; nothing more is promised.
