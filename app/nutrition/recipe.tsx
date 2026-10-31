@@ -7,14 +7,13 @@ import { Button, Card, Field, LoadingView } from '@/components';
 import { keyboardAware } from '@/components/keyboard';
 import { IngredientPicker } from '@/components/nutrition/IngredientPicker';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
-import { bestFoodMatch, useDeleteFood, useNutritionSettings, useRecipe, useSaveRecipe } from '@/data/nutrition';
+import { bestFoodMatch, nutritionDefaults, useDeleteFood, useNutritionSettings, useRecipe, useSaveRecipe } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { carbsShown, energyUnitLabel, formatEnergy, formatGrams, parseAmount } from '@/domain/nutrition/diary';
 import { formatAmount, type Food } from '@/domain/nutrition/foods';
 import { measureLine, parseLine, searchTermFor } from '@/domain/nutrition/recipeImport';
 import { MAX_SERVINGS, recipeFood, recipeItem, type RecipeItem } from '@/domain/nutrition/recipes';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { newId } from '@/lib/ids';
 import { fetchRecipe } from '@/lib/recipeImport';
 import { colors } from '@/theme/colors';
@@ -72,7 +71,7 @@ function RecipeLoader() {
 function RecipeEditor({ existing }: { existing: { food: Food; servings: number; items: RecipeItem[] } | null }) {
   const router = useRouter();
   const settings = useNutritionSettings();
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
   const save = useSaveRecipe();
   const remove = useDeleteFood();
 

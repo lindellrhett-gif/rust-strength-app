@@ -27,13 +27,17 @@ None of these can be settled from the code, and some block the rest:
 
 ## 1. Any time before the release build
 
-- [ ] **Bring in 1.1.1 first.** Merge PR #2 into `main`, then merge `main`
-  into `feature/nutrition` and run all the checks again.
-- [ ] **Live database, each with your named OK** (both migrations are additive,
-  so the 1.1 app keeps working):
+- [x] **Bring in 1.1.1 first.** Merge PR #2 into `main`, then merge `main`
+  into `feature/nutrition` and run all the checks again (done October 31,
+  2026, as `5e6c54c`).
+- [ ] **Live database, each with your named OK** (all three migrations are
+  additive, so the 1.1 app keeps working):
   - [ ] `0026_subscriptions.sql`, with the Edge Functions and secrets in
     SUBSCRIPTIONS.md, "Going live with the App Store", step 4.
   - [ ] `0027_nutrition.sql`.
+  - [ ] `0028_signup_unit.sql`: a new account starts in the weight unit the
+    app sends from the phone's region. The 1.1 app sends none and still
+    gets pounds.
   - [ ] **The food catalog.** Download Foundation Foods, SR Legacy and Survey
     Foods (FNDDS) as JSON from https://fdc.nal.usda.gov/download-datasets/
     and unzip them into a folder outside the repo, say `C:\dev\fdc`. Put
@@ -55,7 +59,8 @@ None of these can be settled from the code, and some block the rest:
   Store", steps 1 to 7. In RevenueCat's paywall, describe Pro by what the food
   diary does, the way `PRO_FEATURE_LIST` in `src/domain/subscription.ts` does,
   with no results promised.
-- [ ] **A compile check of the new native module** (`expo-camera`):
+- [ ] **A compile check of the new native modules** (`expo-camera` and
+  `expo-localization`):
 
   ```powershell
   eas build --platform ios --profile ios-check
@@ -87,6 +92,11 @@ None of these can be settled from the code, and some block the rest:
         subscription locks them again.
   - [ ] Profile > Privacy & legal > Acknowledgements opens, and Download my
         data includes the food diary.
+  - [ ] Units from the phone's region (needs 0028): sign up a new account
+        with Settings > General > Language & Region > Measurement System on
+        Metric; it starts in kg, and runs in km. With Region set to
+        Australia, the diary shows kJ until you choose otherwise, and still
+        does after renaming a meal. Put both settings back afterwards.
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build

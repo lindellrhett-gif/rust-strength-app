@@ -12,7 +12,7 @@
 
 ## Open-source software
 
-Rust Strength is built with 110 open-source packages and libraries. Each is used under its licence, reproduced below with the copyright notices its authors give.
+Rust Strength is built with 111 open-source packages and libraries. Each is used under its licence, reproduced below with the copyright notices its authors give.
 
 ### MIT License
 
@@ -64,6 +64,7 @@ Rust Strength is built with 110 open-source packages and libraries. Each is used
 - expo-glass-effect 57.0.3 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-keep-awake 57.0.2 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-linking 57.0.10 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
+- expo-localization 57.0.2 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-location 57.0.20 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-media-library 57.0.5 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-modules-core 57.0.18 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))

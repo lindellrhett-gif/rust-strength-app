@@ -11,6 +11,7 @@ import {
 
 import { EXISTING_ACCOUNT_MESSAGE, isExistingAccount } from '@/domain/emailConfirm';
 import { discardActiveRun, discardRunsNotOwnedBy } from '@/lib/activeRun';
+import { deviceUnits } from '@/lib/deviceUnits';
 import { persister, queryClient } from '@/lib/queryClient';
 import { LEGAL } from '@/legal/config';
 import { supabase } from '@/lib/supabase';
@@ -139,8 +140,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
           options: {
             // Read by the database trigger that creates the profile, which
-            // stamps the consent onto it (migration 0011).
-            data: { terms_version: consent.termsVersion, age_confirmed: consent.ageConfirmed },
+            // stamps the consent onto it (migration 0011) and starts it in
+            // the phone's weight unit (0028).
+            data: {
+              terms_version: consent.termsVersion,
+              age_confirmed: consent.ageConfirmed,
+              unit: deviceUnits().weight,
+            },
             // Without this the confirmation link lands on Supabase's Site URL,
             // which defaulted to a blank localhost page.
             emailRedirectTo: LEGAL.emailConfirmedUrl,

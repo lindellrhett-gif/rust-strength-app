@@ -4,11 +4,10 @@ import { StyleSheet, Text } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { useExerciseCalories } from '@/data/activities';
-import { useDiaryEntries, useNutritionGoals, useNutritionSettings } from '@/data/nutrition';
+import { nutritionDefaults, useDiaryEntries, useNutritionGoals, useNutritionSettings } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { diaryDay } from '@/domain/nutrition/diary';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { todayLocal } from '@/lib/dates';
 import { spacing, text } from '@/theme/typography';
 
@@ -33,7 +32,7 @@ function TodayFood() {
   const goals = useNutritionGoals();
   const entries = useDiaryEntries(today);
   const exercise = useExerciseCalories(today);
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
 
   const view = diaryDay({
     day: today,

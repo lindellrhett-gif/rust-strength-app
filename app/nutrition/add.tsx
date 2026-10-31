@@ -11,6 +11,7 @@ import { FoodAmountSheet } from '@/components/nutrition/FoodAmountSheet';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
 import {
   MIN_SEARCH_LENGTH,
+  nutritionDefaults,
   useDeleteSavedMeal,
   useFood,
   useFoodHistory,
@@ -28,7 +29,6 @@ import { copyEntries, entryFromFood, MAX_MEALS, type DiaryEntry } from '@/domain
 import { formatAmount, type Food } from '@/domain/nutrition/foods';
 import { frequentFoods, recentFoods } from '@/domain/nutrition/history';
 import { entriesFromSavedMeal, savedMealTotal, type SavedMeal } from '@/domain/nutrition/savedMeals';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { newId } from '@/lib/ids';
@@ -73,7 +73,7 @@ function AddFood() {
   const meal = Number.isInteger(mealParam) && mealParam >= 0 && mealParam < MAX_MEALS ? mealParam : 0;
 
   const settings = useNutritionSettings();
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
   const history = useFoodHistory();
   const [query, setQuery] = useState('');
   const search = useFoodSearch(query);

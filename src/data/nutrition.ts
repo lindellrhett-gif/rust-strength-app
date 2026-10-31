@@ -23,6 +23,7 @@ import type { NutritionGoal } from '@/domain/nutrition/totals';
 import type { RecipeItem } from '@/domain/nutrition/recipes';
 import type { SavedMeal } from '@/domain/nutrition/savedMeals';
 import { toLocalDateString } from '@/lib/dates';
+import { deviceUnits } from '@/lib/deviceUnits';
 import { newId } from '@/lib/ids';
 import { lookupBarcode, type LookupResult } from '@/lib/openFoodFacts';
 import { mk, qk } from '@/lib/queryClient';
@@ -68,6 +69,18 @@ const newestFirst = (a: DiaryEntry, b: DiaryEntry) => b.loggedAt.localeCompare(a
 
 // --- Settings and goals -------------------------------------------------------
 
+let defaults: NutritionSettings | undefined;
+
+/**
+ * The settings someone has before saving any: the domain defaults, in the
+ * energy unit of the phone's region (src/domain/units.ts). Always the same
+ * object, so a screen can fall back to it while loading without handing its
+ * hooks a new value every render.
+ */
+export function nutritionDefaults(): NutritionSettings {
+  return (defaults ??= { ...DEFAULT_NUTRITION_SETTINGS, energyUnit: deviceUnits().energy });
+}
+
 export function useNutritionSettings() {
   const { userId } = useAuth();
   return useQuery({
@@ -76,7 +89,7 @@ export function useNutritionSettings() {
     queryFn: async (): Promise<NutritionSettings> => {
       const { data, error } = await supabase.from('nutrition_settings').select('*').maybeSingle();
       if (error) throw error;
-      return settingsFromRow(data);
+      return data ? settingsFromRow(data) : { ...settingsFromRow(null), energyUnit: deviceUnits().energy };
     },
   });
 }
@@ -90,6 +103,19 @@ export function useSaveNutritionSettings() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: async (changes: Partial<NutritionSettings>) => {
+      // The first save creates the row, and a column it leaves out would take
+      // the table's default, 'kcal', turning a kilojoule default into
+      // calories when some other setting is changed. So a missing row is
+      // created first with the energy unit on screen (onMutate has already
+      // put `changes` in). A row that exists is left alone, so a stale screen
+      // can't undo a unit chosen on another phone.
+      const shown = client.getQueryData<NutritionSettings>(qk.nutritionSettings);
+      if (shown) {
+        const { error } = await supabase
+          .from('nutrition_settings')
+          .upsert({ user_id: userId!, energy_unit: shown.energyUnit }, { onConflict: 'user_id', ignoreDuplicates: true });
+        if (error) throw error;
+      }
       const { error } = await supabase
         .from('nutrition_settings')
         .upsert(
@@ -102,7 +128,7 @@ export function useSaveNutritionSettings() {
       await client.cancelQueries({ queryKey: qk.nutritionSettings });
       const before = client.getQueryData<NutritionSettings>(qk.nutritionSettings);
       client.setQueryData<NutritionSettings>(qk.nutritionSettings, (current) => ({
-        ...(current ?? DEFAULT_NUTRITION_SETTINGS),
+        ...(current ?? nutritionDefaults()),
         ...changes,
       }));
       return { before };

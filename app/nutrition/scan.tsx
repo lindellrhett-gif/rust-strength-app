@@ -6,13 +6,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components';
 import { FoodAmountSheet } from '@/components/nutrition/FoodAmountSheet';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
-import { useBarcodeFood, useLogEntries, useNutritionSettings } from '@/data/nutrition';
+import { nutritionDefaults, useBarcodeFood, useLogEntries, useNutritionSettings } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { mealNamesFor } from '@/domain/nutrition/diary';
 import { entryFromFood, MAX_MEALS } from '@/domain/nutrition/entries';
 import { canonicalBarcode } from '@/domain/nutrition/openFoodFacts';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { todayLocal } from '@/lib/dates';
 import { newId } from '@/lib/ids';
 import { colors } from '@/theme/colors';
@@ -53,7 +52,7 @@ function Scanner() {
   const mealParam = Number(params.meal);
   const meal = Number.isInteger(mealParam) && mealParam >= 0 && mealParam < MAX_MEALS ? mealParam : 0;
   const settings = useNutritionSettings();
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
   const { log } = useLogEntries();
 
   const [camera, setCamera] = useState<CameraModule | null>(null);

@@ -14,6 +14,7 @@ import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
 import { WaterCard } from '@/components/nutrition/WaterCard';
 import { useExerciseCalories } from '@/data/activities';
 import {
+  nutritionDefaults,
   useDeleteEntry,
   useDiaryDay,
   useDiaryEntries,
@@ -30,7 +31,6 @@ import { hasFeature } from '@/domain/entitlements';
 import { dayLabel, diaryDay, energyUnitLabel, formatEnergy } from '@/domain/nutrition/diary';
 import { copyEntries, type DiaryEntry } from '@/domain/nutrition/entries';
 import { cleanMealName, itemsFromEntries } from '@/domain/nutrition/savedMeals';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { newId } from '@/lib/ids';
@@ -84,7 +84,7 @@ function Diary() {
   const profile = useProfile();
   const [editing, setEditing] = useState<DiaryEntry | null>(null);
 
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
   if (entries.isLoading && !entries.data) return <LoadingView />;
 
   const view = diaryDay({

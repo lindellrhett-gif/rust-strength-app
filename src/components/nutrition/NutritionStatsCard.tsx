@@ -2,10 +2,9 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
-import { useDiaryRange, useNutritionGoals, useNutritionSettings } from '@/data/nutrition';
+import { nutritionDefaults, useDiaryRange, useNutritionGoals, useNutritionSettings } from '@/data/nutrition';
 import { energyUnitLabel, formatEnergy } from '@/domain/nutrition/diary';
 import { rangeStart, reportDays, reportSummary } from '@/domain/nutrition/reports';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -17,7 +16,7 @@ export function NutritionStatsCard() {
   const from = rangeStart('week', today);
   const entries = useDiaryRange(from, today);
   const goals = useNutritionGoals();
-  const unit = (useNutritionSettings().data ?? DEFAULT_NUTRITION_SETTINGS).energyUnit;
+  const unit = (useNutritionSettings().data ?? nutritionDefaults()).energyUnit;
   const summary = reportSummary(reportDays(entries.data ?? [], goals.data ?? [], from, today));
 
   const words =

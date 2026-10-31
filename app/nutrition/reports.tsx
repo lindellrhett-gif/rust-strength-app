@@ -8,7 +8,7 @@ import { CalorieBars, type CalorieBar } from '@/components/nutrition/CalorieBars
 import { Chips } from '@/components/nutrition/Chips';
 import { NutrientsCard } from '@/components/nutrition/NutrientsCard';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
-import { useDiaryRange, useNutritionGoals, useNutritionSettings, useWeighIns } from '@/data/nutrition';
+import { nutritionDefaults, useDiaryRange, useNutritionGoals, useNutritionSettings, useWeighIns } from '@/data/nutrition';
 import { useProfile } from '@/data/profile';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
@@ -24,7 +24,6 @@ import {
   type ReportRange,
   type ReportSummary,
 } from '@/domain/nutrition/reports';
-import { DEFAULT_NUTRITION_SETTINGS } from '@/domain/nutrition/settings';
 import { goalFor } from '@/domain/nutrition/totals';
 import { todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
@@ -82,7 +81,7 @@ function Reports() {
   const settings = useNutritionSettings();
   const weighIns = useWeighIns();
   const profile = useProfile();
-  const s = settings.data ?? DEFAULT_NUTRITION_SETTINGS;
+  const s = settings.data ?? nutritionDefaults();
   const unit = s.energyUnit;
   const weightUnit = profile.data?.unit ?? 'lb';
 
