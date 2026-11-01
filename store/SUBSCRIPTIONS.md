@@ -108,7 +108,7 @@ an accountant or attorney, before setting up banking.
       Test Store.
 4. **Supabase:**
    1. Apply migration `0026_subscriptions.sql`. It's additive and safe while
-      1.0 and 1.1 are live.
+      1.0 and 1.1 are live. (Done November 1, 2026.)
    2. Under Edge Functions > Secrets, add `REVENUECAT_SECRET_API_KEY`
       (RevenueCat > API keys > a secret v1 key).
    3. Add `REVENUECAT_WEBHOOK_AUTH`: a long random string, prefixed `Bearer `.

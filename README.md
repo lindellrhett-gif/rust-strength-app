@@ -359,7 +359,7 @@ src/
   lib/               Supabase client, session guard, query client
   legal/             Privacy Policy and Terms source
 supabase/
-  migrations/        Schema, RLS policies and SQL functions (0001 to 0027)
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0028)
   tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
 modules/live-activities/  Local native module (Swift) for the Live Activities

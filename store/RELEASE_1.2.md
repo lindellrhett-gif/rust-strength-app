@@ -30,12 +30,14 @@ None of these can be settled from the code, and some block the rest:
 - [x] **Bring in 1.1.1 first.** Merge PR #2 into `main`, then merge `main`
   into `feature/nutrition` and run all the checks again (done October 31,
   2026, as `5e6c54c`).
-- [ ] **Live database, each with your named OK** (all three migrations are
-  additive, so the 1.1 app keeps working):
-  - [ ] `0026_subscriptions.sql`, with the Edge Functions and secrets in
-    SUBSCRIPTIONS.md, "Going live with the App Store", step 4.
-  - [ ] `0027_nutrition.sql`.
-  - [ ] `0028_signup_unit.sql`: a new account starts in the weight unit the
+- [x] **Live database** (all three migrations are additive, so the 1.1 app
+  keeps working). Applied November 1, 2026, with your OK; the live schema
+  matched the test database afterwards:
+  - [x] `0026_subscriptions.sql`. Its Edge Functions and secrets
+    (SUBSCRIPTIONS.md, "Going live with the App Store", step 4) are still to
+    do, with the subscription setup below.
+  - [x] `0027_nutrition.sql`.
+  - [x] `0028_signup_unit.sql`: a new account starts in the weight unit the
     app sends from the phone's region. The 1.1 app sends none and still
     gets pounds.
   - [ ] **The food catalog.** Download Foundation Foods, SR Legacy and Survey
