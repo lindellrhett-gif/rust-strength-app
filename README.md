@@ -322,6 +322,10 @@ refuses requests for anyone else's data, whatever the app sends.
 - Badges have no write policy at all. Only an admin can award one, so nobody can
   grant themselves "Influencer" through the API.
 - Sign-up and password reset use one-time email codes.
+- Sign in with Apple and Google keep only the email address: Apple is never
+  asked for the name, and a database trigger drops the name and picture Google
+  sends before Supabase stores them. Deleting an Apple account revokes the
+  app's Apple tokens without ever storing one ([store/SIGN_IN.md](store/SIGN_IN.md)).
 - The only key in the app is Supabase's public anon key. There is no service
   role key anywhere in the app.
 
@@ -359,7 +363,7 @@ src/
   lib/               Supabase client, session guard, query client
   legal/             Privacy Policy and Terms source
 supabase/
-  migrations/        Schema, RLS policies and SQL functions (0001 to 0028)
+  migrations/        Schema, RLS policies and SQL functions (0001 to 0029)
   tests/             Migrations run in PGlite, with RLS checked as each user
   email-templates/   Code-based sign-up and reset emails
 modules/live-activities/  Local native module (Swift) for the Live Activities

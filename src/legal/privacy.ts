@@ -20,6 +20,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 ### You give us directly
 
 - **Email address and password.** Required to create an account and sign in. We also use your email address to send you a one-time code to confirm it when you sign up, and another if you ask to reset your password, and for nothing else. Your password is never stored by us in readable form — it is hashed by our authentication provider, Supabase, and we never see it.
+- **Or, if you sign in with Apple or Google.** Instead of a password, you can sign in with your Apple ID or Google account. Apple or Google confirms it is you and gives us your email address and an account identifier, which we keep to recognise you next time. Apple lets you hide your real address behind a private relay address that forwards to it. We ask Apple for your email address only, not your name. Google also sends your name and a link to your profile picture; we discard both before they are saved with your account. We never see your Apple or Google password.
 - **Username and display name.** Your account starts with a randomly generated handle (for example \`lifter_7f3a91\`). It contains nothing about you. You may change it, and only after you choose your own handle do you become findable by other users.
 - **Bodyweight (optional).** Used to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine, and to estimate the calories a recorded run burns. You can leave it blank; assisted exercises then ask for it before you log them. If you log weigh-ins in the food diary, the latest one becomes your bodyweight.
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
@@ -136,11 +137,13 @@ We use these service providers:
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
 | Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
+| Apple (Sign in with Apple) | Signs you in, if you choose it | Apple confirms your Apple ID and sends us your email address (or private relay address) and an account identifier. When you delete your account, we ask Apple to end the app's access to your Apple ID |
+| Google (Sign in with Google) | Signs you in, if you choose it | Google confirms your Google account and sends us your email address and an account identifier, along with your name and profile picture link, which we discard |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
 | Open Food Facts, a non-profit food database | Looks up packaged foods for the food diary | When you scan or type a barcode, or search for a packaged food: the barcode or the words you searched, sent straight from your phone. Like any connection this includes your IP address. The request names the app, not you. Not your account, your diary or anything else you have logged |
 | RevenueCat | Runs ${LEGAL.appName} Pro: shows the plans, checks purchases with Apple, tells the app whether you have Pro, and provides the screen for managing your plan and getting help with a purchase | Your random account identifier, the purchase details described in Section 1, technical information about the app and your device needed to process purchases (such as the app version, operating system, and your App Store country and currency), and anything you choose to answer in its purchase-help screen, such as why you cancelled. Not your training, runs or any other app data. The app connects your account to RevenueCat when you sign in, so it can tell whether you have Pro |
 
-Supabase, Google and RevenueCat process this on our behalf under their own security and privacy terms; Apple handles map requests and payments under Apple's privacy policy; Open Food Facts handles lookups under its own terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
+Supabase, Google and RevenueCat process this on our behalf under their own security and privacy terms; Apple handles map requests, payments and Sign in with Apple under Apple's privacy policy; Google handles Sign in with Google under Google's privacy policy; Open Food Facts handles lookups under its own terms. We may also disclose information if legally required, or to investigate abuse or protect someone's safety.
 
 **Recipe websites.** If you import a recipe from a link, your phone loads that page itself, as a browser would, so the website you chose receives the request and your IP address. The link is not sent to us.
 
@@ -162,7 +165,7 @@ We keep your data while your account exists. When you delete your account, your 
 
 You can delete your account from inside the app: **Profile → Privacy & legal → Delete account**.
 
-This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, reports you filed, your food diary (entries, foods, recipes, saved meals, day notes, water, weigh-ins, nutrition goals and settings), and our record of your subscription. Deleting a workout or activity also removes the reactions other people left on it. We also ask RevenueCat to delete its record of you. Apple keeps its own record of your purchases under its privacy policy. **It cannot be undone and we cannot restore it.**
+This permanently deletes your account, profile, workouts, sets, activities, runs and their routes, best efforts, privacy zones, saved routes, running settings, daily step totals, rest days, presets, planned sessions, gyms, machines, custom exercises, friendships, blocks, badges, reactions you left, reports you filed, your food diary (entries, foods, recipes, saved meals, day notes, water, weigh-ins, nutrition goals and settings), and our record of your subscription. Deleting a workout or activity also removes the reactions other people left on it. We also ask RevenueCat to delete its record of you and, if you use Sign in with Apple, ask Apple to end the app's access to your Apple ID (Apple asks you to confirm once more first). Apple keeps its own record of your purchases under its privacy policy. **It cannot be undone and we cannot restore it.**
 
 **Deleting your account does not cancel a ${LEGAL.appName} Pro subscription.** Cancel it in your device's settings (Settings > your name > Subscriptions) first, or Apple will keep charging you.
 
@@ -180,7 +183,7 @@ The in-app export and delete tools satisfy access and deletion immediately. For 
 
 ## 10. Children
 
-${LEGAL.appName} is not intended for children under ${LEGAL.minimumAge}. You must confirm you are at least ${LEGAL.minimumAge} to create an account. We do not knowingly collect information from children under ${LEGAL.minimumAge}. If you believe a child under ${LEGAL.minimumAge} has created an account, email ${LEGAL.contactEmail} and we will delete it.
+${LEGAL.appName} is not intended for children under ${LEGAL.minimumAge}. You must confirm you are at least ${LEGAL.minimumAge} to create an account or, if you sign in with Apple or Google, before you can use the app. We do not knowingly collect information from children under ${LEGAL.minimumAge}. If you believe a child under ${LEGAL.minimumAge} has created an account, email ${LEGAL.contactEmail} and we will delete it.
 
 ## 11. Security
 

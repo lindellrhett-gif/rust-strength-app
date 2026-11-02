@@ -61,8 +61,13 @@ None of these can be settled from the code, and some block the rest:
   Store", steps 1 to 7. In RevenueCat's paywall, describe Pro by what the food
   diary does, the way `PRO_FEATURE_LIST` in `src/domain/subscription.ts` does,
   with no results promised.
-- [ ] **A compile check of the new native modules** (`expo-camera` and
-  `expo-localization`):
+- [ ] **Sign in with Apple and Google:** the setup in [SIGN_IN.md](SIGN_IN.md),
+  steps 1 to 3, which include migration `0029_sign_in_minimum.sql` (with your
+  named OK) and the Apple secrets for `delete-account`. Turn the providers on
+  in Supabase only after `delete-account` is deployed.
+- [ ] **A compile check of the new native modules** (`expo-camera`,
+  `expo-localization`, `expo-apple-authentication` and Google sign-in, so set
+  the Google client ID in EAS first):
 
   ```powershell
   eas build --platform ios --profile ios-check
@@ -99,6 +104,7 @@ None of these can be settled from the code, and some block the rest:
         Metric; it starts in kg, and runs in km. With Region set to
         Australia, the diary shows kJ until you choose otherwise, and still
         does after renaming a meal. Put both settings back afterwards.
+  - [ ] Sign in with Apple and Google: the list in SIGN_IN.md, section 4.
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build
