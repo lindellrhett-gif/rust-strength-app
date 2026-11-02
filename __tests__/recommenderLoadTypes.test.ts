@@ -59,6 +59,12 @@ describe('recommendAssisted', () => {
     expect(r.rationale).toMatch(/harder than target/);
   });
 
+  it('asks for less assistance after a set past the top of the range', () => {
+    const r = recommendAssisted({ ...input, history: [...history, set(140, 11, 10, 7)] });
+    expect(r.suggestedAssist!).toBeLessThan(40);
+    expect(r.rationale).toMatch(/past the top of the range/);
+  });
+
   it('never asks for more assistance after a set that felt easy', () => {
     const weak = [1, 2, 3, 4, 5].map((n) => set(120, 5, 10, n));
     const r = recommendAssisted({ ...input, history: [...weak, set(140, 8, 6, 7)] });

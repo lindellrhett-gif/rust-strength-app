@@ -188,6 +188,57 @@ describe('recommendNextWeight', () => {
     expect(rec.suggestedWeight!).toBeGreaterThanOrEqual(155);
   });
 
+  describe('after a set past the top of the range', () => {
+    const range = { targetRepLow: 8, targetRepHigh: 10, increment: 10 };
+
+    it('goes heavier even when older sets average it out', () => {
+      // 220 for 8 five times, then 220 for 12 at RPE 10. The average alone
+      // gives the new set too little say and came back at 220.
+      const steady = [1, 2, 3, 4, 5].map((d) =>
+        set({ weight: 220, reps: 8, rpe: 10, performedAt: `2026-09-0${d}T10:00:00Z` }),
+      );
+      const rec = recommendNextWeight({
+        ...base,
+        ...range,
+        history: [...steady, set({ weight: 220, reps: 12, rpe: 10, performedAt: '2026-09-08T10:00:00Z' })],
+      });
+      // 220 x 12 is about 237 for 9, the middle of the range.
+      expect(rec.suggestedWeight).toBe(240);
+      expect(rec.rationale).toMatch(/past the top of the range/);
+    });
+
+    it('goes at least one step heavier', () => {
+      // 13 reps count as 12 in the estimate, which prices 100 x 13 at about
+      // 102 for 11: the nearest step is 100 again.
+      const rec = recommendNextWeight({
+        ...base,
+        targetRepLow: 10,
+        targetRepHigh: 12,
+        history: [set({ weight: 100, reps: 13, rpe: 10 })],
+      });
+      expect(rec.suggestedWeight).toBe(105);
+    });
+
+    it('still goes heavier on the first working set of a session', () => {
+      const rec = recommendNextWeight({
+        ...base,
+        ...range,
+        isFirstWorkingSet: true,
+        history: [set({ weight: 220, reps: 12, rpe: 10 })],
+      });
+      expect(rec.suggestedWeight!).toBeGreaterThan(220);
+    });
+
+    it('leaves a set at the top of the range to the average', () => {
+      const rec = recommendNextWeight({
+        ...base,
+        ...range,
+        history: [set({ weight: 220, reps: 10, rpe: 10 })],
+      });
+      expect(rec.rationale).not.toMatch(/past the top/);
+    });
+  });
+
   it('never jumps more than the step-change cap from the last set', () => {
     const last = 100;
     const rec = recommendNextWeight({
