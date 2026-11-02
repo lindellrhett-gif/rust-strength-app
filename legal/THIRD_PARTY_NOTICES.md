@@ -12,7 +12,7 @@
 
 ## Open-source software
 
-Rust Strength is built with 111 open-source packages and libraries. Each is used under its licence, reproduced below with the copyright notices its authors give.
+Rust Strength is built with 113 open-source packages and libraries. Each is used under its licence, reproduced below with the copyright notices its authors give.
 
 ### MIT License
 
@@ -24,6 +24,7 @@ Rust Strength is built with 111 open-source packages and libraries. Each is used
 - @radix-ui/react-slot 1.3.3 (Copyright (c) 2022 WorkOS)
 - @react-native-async-storage/async-storage 2.2.0 (Copyright (c) 2015-present, Facebook, Inc.)
 - @react-native-community/netinfo 12.0.1 (Copyright (c) 2015-present, Facebook, Inc.)
+- @react-native-google-signin/google-signin 16.1.5 (Copyright (c) 2015 Apptailor)
 - @react-native-masked-view/masked-view 0.3.2 (Copyright (c) 2015-present, Facebook, Inc.)
 - @react-native/assets-registry 0.86.3, licence as stated in its package.json
 - @react-native/js-polyfills 0.86.3, licence as stated in its package.json
@@ -54,6 +55,7 @@ Rust Strength is built with 111 open-source packages and libraries. Each is used
 - escape-string-regexp 4.0.0 (Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com))
 - event-target-shim 5.0.1 (Copyright (c) 2015 Toru Nagashima)
 - expo 57.0.24 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
+- expo-apple-authentication 57.0.2 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-application 57.0.3 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-asset 57.0.18 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))
 - expo-audio 57.0.5 (Copyright (c) 2015-present 650 Industries, Inc. (aka Expo))

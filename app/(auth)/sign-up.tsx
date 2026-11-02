@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { Checkbox } from '@/components/Checkbox';
+import { SocialSignIn } from '@/components/SocialSignIn';
 import { EXISTING_ACCOUNT_MESSAGE, confirmErrorMessage } from '@/domain/emailConfirm';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -81,6 +82,9 @@ export default function SignUp() {
           <Text style={text.hero}>Create account</Text>
           <Text style={text.bodyMuted}>Track lifts across any gym, any machine.</Text>
         </View>
+
+        {/* Age and Terms for these are asked right after, on the consent screen. */}
+        <SocialSignIn style={styles.social} />
 
         <View style={styles.form}>
           <Field
@@ -177,6 +181,7 @@ const styles = StyleSheet.create({
   legalDot: { color: '#5E6B78' },
   header: { gap: spacing.xs, marginTop: spacing.xxl, marginBottom: spacing.xl },
   form: { gap: spacing.lg },
+  social: { marginBottom: spacing.lg },
   error: { color: '#F26D6D', fontSize: 14 },
   existing: { flexDirection: 'row', gap: spacing.sm },
   flex: { flex: 1 },

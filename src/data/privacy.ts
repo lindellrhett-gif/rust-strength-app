@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import Constants from 'expo-constants';
 
+import { hasAppleSignIn } from '@/domain/socialAuth';
 import type { Profile } from '@/lib/database.types';
 import { subscriptionsOn } from '@/lib/purchases';
 import { qk } from '@/lib/queryClient';
+import { SignInCancelled, appleAuthorizationCode } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -21,15 +24,36 @@ export function useExportMyData() {
 /**
  * Permanent account deletion. The RPC removes the auth user, which cascades to
  * every table, so there is nothing left to sign back in to. Once
- * subscriptions are on, it goes through the delete-account Edge Function,
- * which removes the RevenueCat customer first and then runs the same RPC.
+ * subscriptions are on, or for an account that uses Sign in with Apple, it
+ * goes through the delete-account Edge Function, which revokes the app's
+ * Apple tokens and removes the RevenueCat customer first, then runs the
+ * same RPC.
+ *
+ * Revoking needs a fresh one-time code from Apple, so an Apple account is
+ * asked to confirm with Apple once more. Backing out there deletes nothing.
  */
 export function useDeleteMyAccount() {
   const client = useQueryClient();
+  const { session } = useAuth();
+  const apple = hasAppleSignIn(session?.user);
   return useMutation({
     mutationFn: async () => {
-      if (subscriptionsOn) {
-        const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+      if (subscriptionsOn || apple) {
+        let body: { appleAuthorizationCode: string; appleClientId: string | undefined } | undefined;
+        if (apple) {
+          try {
+            body = {
+              appleAuthorizationCode: await appleAuthorizationCode(),
+              appleClientId: Constants.expoConfig?.ios?.bundleIdentifier,
+            };
+          } catch (e) {
+            if (e instanceof SignInCancelled) {
+              throw new Error('Nothing was deleted. Confirm with Apple to delete your account.');
+            }
+            throw e;
+          }
+        }
+        const { error } = await supabase.functions.invoke('delete-account', { method: 'POST', body });
         if (error) throw new Error(await functionErrorMessage(error));
       } else {
         const { error } = await supabase.rpc('rpc_delete_my_account');

@@ -33,12 +33,27 @@ const withoutDevServerDiscovery = (config) =>
     return c;
   });
 
+/**
+ * Sign in with Google needs Google's iOS client id, which differs between the
+ * real app and the dev app (each is tied to its bundle id). It comes from the
+ * EAS environment as EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; Google's sheet returns
+ * to the app on that id reversed. A build without one leaves Google out, and
+ * the app then doesn't offer it (src/lib/socialSignIn.ts).
+ */
+function googleSignIn(clientId) {
+  const suffix = '.apps.googleusercontent.com';
+  if (!clientId || !clientId.endsWith(suffix)) return [];
+  const iosUrlScheme = `com.googleusercontent.apps.${clientId.slice(0, -suffix.length)}`;
+  return [['@react-native-google-signin/google-signin', { iosUrlScheme }]];
+}
+
 module.exports = ({ config }) => {
   const isDev = process.env.APP_VARIANT === 'development';
   const base = {
     ...config,
     plugins: [
       ...(config.plugins ?? []),
+      ...googleSignIn(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
       withoutBackgroundFetch,
       ...(isDev ? [] : [withoutDevServerDiscovery]),
     ],

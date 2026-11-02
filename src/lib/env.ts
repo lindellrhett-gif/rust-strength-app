@@ -25,4 +25,11 @@ export const env = {
   revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || null,
   /** Subscriptions stay off unless this is "on" (see src/lib/purchases.ts). */
   subscriptionsSwitch: process.env.EXPO_PUBLIC_SUBSCRIPTIONS === 'on',
+  /**
+   * Google's OAuth client id for this iOS app (it ends
+   * .apps.googleusercontent.com). Public by design: it names the app to
+   * Google and is built into every copy. Without it the app doesn't offer
+   * Sign in with Google (src/lib/socialSignIn.ts).
+   */
+  googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || null,
 };
