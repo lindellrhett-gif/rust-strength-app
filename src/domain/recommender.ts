@@ -168,6 +168,8 @@ interface Target {
   estimate: E1rmEstimate;
   last: LoggedSet;
   correction: number;
+  /** The last set had more reps than the top of the range. */
+  overRange: boolean;
 }
 
 /** The unrounded load for the next set, or null with no working history. */
@@ -181,7 +183,16 @@ function targetLoad(input: RecommendInput, repRange: [number, number]): Target |
   // Invert Epley for the target reps at RPE 10 (no reps in reserve), capped
   // exactly as the estimate was. Otherwise a 10–15 range would be priced with
   // more reps than any set was ever credited with, and come out too light.
-  const baseWeight = estimate.value / (1 + EPLEY_K * Math.min(targetReps, MAX_EFFECTIVE_REPS));
+  const divisor = 1 + EPLEY_K * Math.min(targetReps, MAX_EFFECTIVE_REPS);
+  // A set past the top of the range says the weight is too light, but the
+  // average gives it only EMA_ALPHA of the say against older sessions, so
+  // 220 x 12 in an 8–10 range could come back as 220 again. Price the next
+  // set off that set alone as well, and take whichever is heavier.
+  const overRange = last.reps > repRange[1];
+  const baseWeight = Math.max(
+    estimate.value / divisor,
+    overRange ? e1rmFromSet(last) / divisor : 0,
+  );
 
   const correction = rpeCorrection(last, repRange[0]);
   // Never jump more than MAX_STEP_CHANGE from the last set.
@@ -195,16 +206,21 @@ function targetLoad(input: RecommendInput, repRange: [number, number]): Target |
   // machine, more assistance), and one that felt easy never to a lighter one.
   if (correction < 0) load = Math.min(load, last.weight * (1 + correction));
   else if (correction > 0) load = Math.max(load, last.weight);
+  // A set past the top of the range always leads to at least one step
+  // heavier (for an assisted machine, one step less assistance), even where
+  // that step is bigger than the cap allows.
+  if (overRange) load = Math.max(load, last.weight + input.increment);
 
-  return { load, estimate, last, correction };
+  return { load, estimate, last, correction, overRange };
 }
 
 function rationaleFor(target: Target, input: RecommendInput): string[] {
-  const { estimate, last, correction } = target;
+  const { estimate, last, correction, overRange } = target;
   const parts: string[] = [
     `Based on ${estimate.count} recent set${estimate.count === 1 ? '' : 's'}`,
   ];
-  if (correction > 0) parts.push('last set felt easier than target');
+  if (overRange) parts.push('last set went past the top of the range');
+  else if (correction > 0) parts.push('last set felt easier than target');
   else if (correction < 0) parts.push('last set was harder than target');
   if (
     input.currentMachineId &&

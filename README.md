@@ -273,7 +273,9 @@ tested.
    suggestion.
 3. **Pick the next load.** The formula is run backwards for the target rep
    range, nudged by the last set's RPE, limited to a 15% change from last
-   time, and rounded to what that machine or bar can actually load.
+   time, and rounded to what that machine or bar can actually load. A set
+   with more reps than the top of the range always moves the weight up at
+   least one step, however the average reads.
 
 Timed holds use a separate, simpler model that works in 5-second steps.
 
