@@ -1,7 +1,8 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 
 import { Button, Card } from '@/components';
 import { CreateExerciseModal } from '@/components/CreateExerciseModal';
@@ -90,6 +91,8 @@ export default function NewSet() {
   const [rpe, setRpe] = useState<number | null>(null);
   const [isWarmup, setIsWarmup] = useState(false);
   const [isBodyweight, setIsBodyweight] = useState(false);
+  // The suggestion card opens folded: just the suggested set.
+  const [showDetails, setShowDetails] = useState(false);
 
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [showMachinePicker, setShowMachinePicker] = useState(false);
@@ -447,6 +450,138 @@ export default function NewSet() {
     />
   );
 
+  /**
+   * The suggestion card's two halves: the headline (the suggestion, or why
+   * there isn't one) always shows; the reasoning, the estimate and last
+   * time's sets wait behind "Show details".
+   */
+  function suggestionParts(): { headline: ReactNode; details: ReactNode[] } {
+    const lastTime = !history.isLoading && last ? [<LastTime key="last" last={last} unit={unit} />] : [];
+    const noHistory = (
+      <Text style={text.bodyMuted}>
+        No history for this exercise yet. Log this set and the next suggestion will use it.
+      </Text>
+    );
+    const addedNote =
+      displayAdded > 0 ? (
+        <Text style={text.bodyMuted}>
+          {'  '}+ {trimWeight(displayAdded)} {unit}
+        </Text>
+      ) : null;
+
+    if (history.isLoading) {
+      return { headline: <Text style={text.bodyMuted}>Loading your history…</Text>, details: lastTime };
+    }
+    if (loadType === 'timed') {
+      if (holdRec?.suggestedSeconds == null) {
+        const why = holdRec?.rationale ?? 'Log a hold to get a time target.';
+        return { headline: <Text style={text.bodyMuted}>{why}</Text>, details: lastTime };
+      }
+      return {
+        headline: (
+          <Text style={styles.suggestBig}>
+            {formatHold(holdRec.suggestedSeconds)} hold
+            {addedNote}
+          </Text>
+        ),
+        details: [
+          <Text key="why" style={text.caption}>
+            {holdRec.rationale}
+          </Text>,
+          ...lastTime,
+        ],
+      };
+    }
+    if (loadType === 'assisted') {
+      if (bodyWeight == null) return { headline: <BodyweightPrompt unit={unit} />, details: lastTime };
+      if (assistedRec?.suggestedAssist == null) return { headline: noHistory, details: lastTime };
+      return {
+        headline: (
+          <Text style={styles.suggestBig}>
+            {trimWeight(assistedRec.suggestedAssist)} {unit} assist
+            <Text style={text.bodyMuted}>
+              {'  '}× {assistedRec.repRange[0]}–{assistedRec.repRange[1]}
+            </Text>
+          </Text>
+        ),
+        details: [
+          <Text key="why" style={text.caption}>
+            {assistedRec.rationale}
+          </Text>,
+          <Text key="moving" style={text.caption}>
+            Moving about {trimWeight(assistedRec.suggestedWeight ?? 0)} {unit}. Less assistance
+            means you are getting stronger.
+          </Text>,
+          ...lastTime,
+        ],
+      };
+    }
+    if (loadType === 'bodyweight') {
+      if (repsRec?.suggestedReps == null) {
+        const why = repsRec?.rationale ?? 'Log a set to get a rep target.';
+        return { headline: <Text style={text.bodyMuted}>{why}</Text>, details: lastTime };
+      }
+      return {
+        headline: (
+          <Text style={styles.suggestBig}>
+            {repsRec.suggestedReps} reps
+            {addedNote}
+          </Text>
+        ),
+        details: [
+          <Text key="why" style={text.caption}>
+            {repsRec.rationale}
+          </Text>,
+          <Text key="max" style={text.caption}>
+            Estimated max ≈ {repsRec.estimatedMaxReps} reps · {repsRec.confidence} confidence
+          </Text>,
+          ...lastTime,
+        ],
+      };
+    }
+    if (weightedRec?.suggestedWeight != null) {
+      return {
+        headline: (
+          <Text style={styles.suggestBig}>
+            {trimWeight(weightedRec.suggestedWeight)} {unit}
+            <Text style={text.bodyMuted}>
+              {'  '}× {weightedRec.repRange[0]}–{weightedRec.repRange[1]}
+            </Text>
+          </Text>
+        ),
+        details: [
+          <Text key="why" style={text.caption}>
+            {weightedRec.rationale}
+          </Text>,
+          <Text key="e1rm" style={text.caption}>
+            Working e1RM ≈ {trimWeight(weightedRec.e1rm ?? 0)} {unit} · {weightedRec.confidence}{' '}
+            confidence
+          </Text>,
+          ...machineNotes.map((n) => (
+            <Text key={n} style={text.caption}>
+              {n}
+            </Text>
+          )),
+          ...lastTime,
+        ],
+      };
+    }
+    if (firstTimeOnMachine && machine) {
+      return {
+        headline: (
+          <Text style={text.bodyMuted}>
+            First time doing this on {machine.label}. Pick a weight by feel: after this session the
+            app learns how it compares with {onMachine!.unmatched.map(machineLabel).join(' and ')}{' '}
+            and converts your weights from then on.
+          </Text>
+        ),
+        details: lastTime,
+      };
+    }
+    return { headline: noHistory, details: lastTime };
+  }
+  const suggestion = suggestionParts();
+
   return (
     <SafeAreaView style={styles.safe} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} {...keyboardAware}>
@@ -478,102 +613,26 @@ export default function NewSet() {
           />
         ) : null}
 
-        {/* Recommendation */}
+        {/* Recommendation: the suggestion, with the rest folded under it. */}
         {exerciseId ? (
           <Card title="Suggested next set">
-            {history.isLoading ? (
-              <Text style={text.bodyMuted}>Loading your history…</Text>
-            ) : loadType === 'timed' ? (
-              holdRec?.suggestedSeconds != null ? (
-                <>
-                  <Text style={styles.suggestBig}>
-                    {formatHold(holdRec.suggestedSeconds)} hold
-                    {displayAdded > 0 ? (
-                      <Text style={text.bodyMuted}>
-                        {'  '}+ {trimWeight(displayAdded)} {unit}
-                      </Text>
-                    ) : null}
-                  </Text>
-                  <Text style={text.caption}>{holdRec.rationale}</Text>
-                </>
-              ) : (
-                <Text style={text.bodyMuted}>{holdRec?.rationale ?? 'Log a hold to get a time target.'}</Text>
-              )
-            ) : loadType === 'assisted' ? (
-              bodyWeight == null ? (
-                <BodyweightPrompt unit={unit} />
-              ) : assistedRec?.suggestedAssist != null ? (
-                <>
-                  <Text style={styles.suggestBig}>
-                    {trimWeight(assistedRec.suggestedAssist)} {unit} assist
-                    <Text style={text.bodyMuted}>
-                      {'  '}× {assistedRec.repRange[0]}–{assistedRec.repRange[1]}
-                    </Text>
-                  </Text>
-                  <Text style={text.caption}>{assistedRec.rationale}</Text>
-                  <Text style={text.caption}>
-                    Moving about {trimWeight(assistedRec.suggestedWeight ?? 0)} {unit}. Less
-                    assistance means you are getting stronger.
-                  </Text>
-                </>
-              ) : (
-                <Text style={text.bodyMuted}>
-                  No history for this exercise yet. Log this set and the next suggestion will use
-                  it.
-                </Text>
-              )
-            ) : loadType === 'bodyweight' ? (
-              repsRec?.suggestedReps != null ? (
-                <>
-                  <Text style={styles.suggestBig}>
-                    {repsRec.suggestedReps} reps
-                    {displayAdded > 0 ? (
-                      <Text style={text.bodyMuted}>
-                        {'  '}+ {trimWeight(displayAdded)} {unit}
-                      </Text>
-                    ) : null}
-                  </Text>
-                  <Text style={text.caption}>{repsRec.rationale}</Text>
-                  <Text style={text.caption}>
-                    Estimated max ≈ {repsRec.estimatedMaxReps} reps · {repsRec.confidence}{' '}
-                    confidence
-                  </Text>
-                </>
-              ) : (
-                <Text style={text.bodyMuted}>{repsRec?.rationale ?? 'Log a set to get a rep target.'}</Text>
-              )
-            ) : weightedRec?.suggestedWeight != null ? (
+            {suggestion.headline}
+            {suggestion.details.length > 0 ? (
               <>
-                <Text style={styles.suggestBig}>
-                  {trimWeight(weightedRec.suggestedWeight)} {unit}
-                  <Text style={text.bodyMuted}>
-                    {'  '}× {weightedRec.repRange[0]}–{weightedRec.repRange[1]}
-                  </Text>
-                </Text>
-                <Text style={text.caption}>{weightedRec.rationale}</Text>
-                <Text style={text.caption}>
-                  Working e1RM ≈ {trimWeight(weightedRec.e1rm ?? 0)} {unit} ·{' '}
-                  {weightedRec.confidence} confidence
-                </Text>
-                {machineNotes.map((n) => (
-                  <Text key={n} style={text.caption}>
-                    {n}
-                  </Text>
-                ))}
+                <Pressable
+                  style={styles.detailsToggle}
+                  onPress={() => setShowDetails((open) => !open)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: showDetails }}
+                  accessibilityHint="Last time's sets and how the suggestion was worked out"
+                >
+                  <Text style={styles.detailsToggleText}>{showDetails ? 'Hide details' : 'Show details'}</Text>
+                  <Chevron open={showDetails} />
+                </Pressable>
+                {showDetails ? suggestion.details : null}
               </>
-            ) : firstTimeOnMachine && machine ? (
-              <Text style={text.bodyMuted}>
-                First time doing this on {machine.label}. Pick a weight by feel: after this session
-                the app learns how it compares with{' '}
-                {onMachine!.unmatched.map(machineLabel).join(' and ')} and converts your weights
-                from then on.
-              </Text>
-            ) : (
-              <Text style={text.bodyMuted}>
-                No history for this exercise yet. Log this set and the next suggestion will use it.
-              </Text>
-            )}
-            {!history.isLoading && last ? <LastTime last={last} unit={unit} /> : null}
+            ) : null}
           </Card>
         ) : null}
 
@@ -804,6 +863,22 @@ function LastTime({ last, unit }: { last: LastSession; unit: string }) {
   );
 }
 
+/** The suggestion card's fold arrow: down to open, up to close. */
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <Svg width={12} height={12} viewBox="0 0 12 12">
+      <Path
+        d={open ? 'M2 8l4-4 4 4' : 'M2 4l4 4 4-4'}
+        stroke={colors.primary}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
+
 /** "today", "yesterday" or "Sep 12, 2026", for the last-time line. */
 function sessionDay(when: string | number | Date): string {
   const day = toLocalDateString(when);
@@ -949,6 +1024,8 @@ const styles = StyleSheet.create({
   },
   selectorPressed: { backgroundColor: colors.border },
   suggestBig: { color: colors.primary, fontSize: 28, fontWeight: '800' },
+  detailsToggle: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: spacing.xs },
+  detailsToggleText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
   under: { marginTop: spacing.sm },
   lastTime: { marginTop: spacing.sm, gap: 2 },
   lastRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
