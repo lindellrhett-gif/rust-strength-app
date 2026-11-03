@@ -32,4 +32,6 @@ export const env = {
    * Sign in with Google (src/lib/socialSignIn.ts).
    */
   googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || null,
+  /** The same for the dev app (com.ruststrength.app.dev), which Google treats as another app. */
+  googleIosClientIdDev: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV || null,
 };

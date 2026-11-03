@@ -83,18 +83,27 @@ accounts.
    that shows Supabase's address. If the dashboard insists on a client secret,
    also create a "Web application" client, put its ID first in the list, and
    use its secret.
-5. **EAS:** give each build its client ID. These IDs are public, like the
-   Supabase anon key:
+5. **EAS:** the client IDs go in as settings. They're public, like the
+   Supabase anon key. The development build reads the "preview" settings, as
+   the compile check does, so preview gets both and production gets the real
+   app's:
 
    ```powershell
-   eas env:create --environment development --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value <dev app's client id> --visibility plaintext
+   eas env:create --environment preview --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV --value <dev app's client id> --visibility plaintext
+   ```
+
+   ```powershell
+   eas env:create --environment preview --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value <real app's client id> --visibility plaintext
    ```
 
    ```powershell
    eas env:create --environment production --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value <real app's client id> --visibility plaintext
    ```
 
-   For a dev server on the PC, put the dev app's ID in `.env` too.
+   For the dev server on the PC, add the same two lines to `.env`
+   (`EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV=...` and
+   `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=...`). The app reads its bundle ID from
+   the phone to pick the right one.
 
 ## 3. Going live, in this order
 

@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import Constants from 'expo-constants';
 
 import { hasAppleSignIn } from '@/domain/socialAuth';
 import type { Profile } from '@/lib/database.types';
 import { subscriptionsOn } from '@/lib/purchases';
 import { qk } from '@/lib/queryClient';
-import { SignInCancelled, appleAuthorizationCode } from '@/lib/socialSignIn';
+import { SignInCancelled, appBundleId, appleAuthorizationCode } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -44,7 +43,7 @@ export function useDeleteMyAccount() {
           try {
             body = {
               appleAuthorizationCode: await appleAuthorizationCode(),
-              appleClientId: Constants.expoConfig?.ios?.bundleIdentifier,
+              appleClientId: appBundleId() ?? undefined,
             };
           } catch (e) {
             if (e instanceof SignInCancelled) {

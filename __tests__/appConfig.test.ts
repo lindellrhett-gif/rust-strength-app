@@ -35,8 +35,12 @@ describe('app.config.js', () => {
     expect(googlePlugin(appConfig({ config }).plugins)).toBeUndefined();
   });
 
-  it('still gives the dev app its own bundle id', () => {
+  it('gives the dev app its own bundle id and its own Google client', () => {
     process.env.APP_VARIANT = 'development';
-    expect(appConfig({ config }).ios?.bundleIdentifier).toBe('com.ruststrength.app.dev');
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID = '123456-real.apps.googleusercontent.com';
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV = '123456-dev.apps.googleusercontent.com';
+    const dev = appConfig({ config });
+    expect(dev.ios?.bundleIdentifier).toBe('com.ruststrength.app.dev');
+    expect(googlePlugin(dev.plugins)?.[1].iosUrlScheme).toBe('com.googleusercontent.apps.123456-dev');
   });
 });

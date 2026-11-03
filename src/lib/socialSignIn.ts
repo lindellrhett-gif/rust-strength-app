@@ -6,17 +6,34 @@
  * as in deviceUnits.ts, they are only loaded once the native code is known
  * to be in this build. A build without it simply doesn't offer the button.
  *
- * Google is offered only when the build has a Google iOS client id
- * (EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID); app.config.js adds Google's native
- * setup in the same case. Neither library is told anything but what it needs
- * to sign the person in: Apple is asked for the email address only, never the
- * name.
+ * Google is offered only when the build has a Google iOS client id for this
+ * app (EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, or ..._DEV for the dev app);
+ * app.config.js adds Google's native setup in the same case. Neither library
+ * is told anything but what it needs to sign the person in: Apple is asked
+ * for the email address only, never the name.
  */
 import { requireOptionalNativeModule } from 'expo';
+import { applicationId } from 'expo-application';
+import Constants from 'expo-constants';
 import { CryptoDigestAlgorithm, digestStringAsync, randomUUID } from 'expo-crypto';
 import { Platform, TurboModuleRegistry } from 'react-native';
 
 import { env } from './env';
+
+/**
+ * This app's bundle id, read from the phone: com.ruststrength.app, or
+ * com.ruststrength.app.dev for the dev app. Not from the app config, which in
+ * the dev app comes from the dev server and names the real app.
+ */
+export function appBundleId(): string | null {
+  return applicationId ?? Constants.expoConfig?.ios?.bundleIdentifier ?? null;
+}
+
+/** Google's client id for this app: the real app and the dev app each have their own. */
+function googleClientId(): string | null {
+  const id = appBundleId()?.endsWith('.dev') ? env.googleIosClientIdDev : env.googleIosClientId;
+  return id?.endsWith('.apps.googleusercontent.com') ? id : null;
+}
 
 /** The person closed the sheet; nothing to report. */
 export class SignInCancelled extends Error {
@@ -87,14 +104,15 @@ export async function appleAuthorizationCode(): Promise<string> {
 let googleConfigured = false;
 
 function google(): GoogleModule | null {
-  if (Platform.OS !== 'ios' || !env.googleIosClientId?.endsWith('.apps.googleusercontent.com')) return null;
+  const clientId = googleClientId();
+  if (Platform.OS !== 'ios' || !clientId) return null;
   if (TurboModuleRegistry.get('RNGoogleSignin') == null) return null;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const module = require('@react-native-google-signin/google-signin') as GoogleModule;
   if (!googleConfigured) {
     // No web client: the token is issued to the iOS client, whose id Supabase
     // lists among the Google client ids it accepts.
-    module.GoogleSignin.configure({ iosClientId: env.googleIosClientId });
+    module.GoogleSignin.configure({ iosClientId: clientId });
     googleConfigured = true;
   }
   return module;

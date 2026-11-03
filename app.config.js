@@ -35,10 +35,11 @@ const withoutDevServerDiscovery = (config) =>
 
 /**
  * Sign in with Google needs Google's iOS client id, which differs between the
- * real app and the dev app (each is tied to its bundle id). It comes from the
- * EAS environment as EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; Google's sheet returns
- * to the app on that id reversed. A build without one leaves Google out, and
- * the app then doesn't offer it (src/lib/socialSignIn.ts).
+ * real app and the dev app (each is tied to its bundle id). They come from
+ * the EAS environment as EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID and, for the dev
+ * app, EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV; Google's sheet returns to the
+ * app on that id reversed. A build without one leaves Google out, and the app
+ * then doesn't offer it (src/lib/socialSignIn.ts).
  */
 function googleSignIn(clientId) {
   const suffix = '.apps.googleusercontent.com';
@@ -53,7 +54,9 @@ module.exports = ({ config }) => {
     ...config,
     plugins: [
       ...(config.plugins ?? []),
-      ...googleSignIn(process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID),
+      ...googleSignIn(
+        isDev ? process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV : process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+      ),
       withoutBackgroundFetch,
       ...(isDev ? [] : [withoutDevServerDiscovery]),
     ],
