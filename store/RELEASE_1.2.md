@@ -62,9 +62,9 @@ None of these can be settled from the code, and some block the rest:
   diary does, the way `PRO_FEATURE_LIST` in `src/domain/subscription.ts` does,
   with no results promised.
 - [ ] **Sign in with Apple and Google:** the setup in [SIGN_IN.md](SIGN_IN.md),
-  steps 1 to 3, which include migration `0029_sign_in_minimum.sql` (with your
-  named OK) and the Apple secrets for `delete-account`. Turn the providers on
-  in Supabase only after `delete-account` is deployed.
+  steps 1 to 3, which include migration `0029_sign_in_minimum.sql` (applied
+  November 5, 2026) and the Apple secrets for `delete-account` (deployed the
+  same day). Turn the Apple provider on only once those secrets are in.
 - [ ] **A compile check of the new native modules** (`expo-camera`,
   `expo-localization`, `expo-apple-authentication` and Google sign-in, so set
   the Google client ID in EAS first):

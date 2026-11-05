@@ -109,16 +109,19 @@ accounts.
 
 1. **Migration 0029** on the live database, with your named OK. It's
    additive: email sign-ups carry nothing it removes. It goes first so no
-   Google name is ever stored.
+   Google name is ever stored. (Done November 5, 2026; the live function
+   matched the repo and both triggers were in place afterwards.)
 2. **Edge Function secrets:** under Edge Functions > Secrets, add
    `APPLE_TEAM_ID` (`V7YLBXSTX2`, the team in `app.json`), `APPLE_KEY_ID`, and
    `APPLE_PRIVATE_KEY` (open the `.p8` file in Notepad and paste all of it,
    including the BEGIN and END lines).
 3. **Deploy `delete-account`**, with your named OK (it's also part of the
-   subscription setup in SUBSCRIPTIONS.md).
+   subscription setup in SUBSCRIPTIONS.md). (Done November 5, 2026, from
+   `feature/social-sign-in`. Secrets are read when it runs, so adding them
+   after the deploy is fine. Redeploy it if the function changes.)
 4. **Turn on the Apple and Google providers** in Supabase. Apple must come
-   after step 3: until the function is live, an Apple account can't be
-   deleted.
+   after steps 2 and 3: without the function and its secrets, an Apple
+   account can't be deleted.
 
 ## 4. Test on a development build
 

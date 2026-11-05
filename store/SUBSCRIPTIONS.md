@@ -121,6 +121,9 @@ an accountant or attorney, before setting up banking.
       ```powershell
       npx supabase functions deploy delete-account --project-ref <project id>
       ```
+
+      (`delete-account` was deployed November 5, 2026, for Sign in with
+      Apple. Deploy it again here only if it has changed since.)
 5. **RevenueCat > Integrations > Webhooks:** point a webhook at
    `https://<project id>.supabase.co/functions/v1/revenuecat-webhook`, with the
    authorization header set to exactly `REVENUECAT_WEBHOOK_AUTH`. Send a test
