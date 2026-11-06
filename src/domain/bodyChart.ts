@@ -104,3 +104,34 @@ export function chartSummary(regions: RegionState[]): ChartSummary {
 
   return { trained, total, fraction, headline };
 }
+
+// --- Fitting the chart to the screen ----------------------------------------
+// On Today the chart takes whatever height is left under the buttons, so the
+// screen doesn't scroll. These size the two figures to that space.
+
+/** Each figure is drawn on a 100 × 212 canvas. */
+export const FIGURE_ASPECT = 212 / 100;
+/** The figure width outside Today, and the most a fitted figure may grow to. */
+export const FIGURE_WIDTH = 98;
+export const FIGURE_MAX_WIDTH = 120;
+/** Below this the muscle shapes get too small to tell apart. */
+export const FIGURE_MIN_WIDTH = 60;
+/** The FRONT / BACK label under each figure, with its gap. */
+export const FIGURE_LABEL_HEIGHT = 14;
+/** The legend column beside the figures needs this much width. */
+export const LEGEND_MIN_WIDTH = 104;
+/** The gap between the two figures and the legend. */
+export const FIGURE_GAP = 8;
+
+/**
+ * The widest the figures can be drawn in a space this size: as tall as the
+ * space allows, but leaving the legend its column, and kept between the
+ * minimum and maximum widths.
+ */
+export function fittedFigureWidth(width: number, height: number): number {
+  if (!(width > 0) || !(height > 0)) return FIGURE_WIDTH;
+  const byHeight = (height - FIGURE_LABEL_HEIGHT) / FIGURE_ASPECT;
+  const byWidth = (width - LEGEND_MIN_WIDTH - 2 * FIGURE_GAP) / 2;
+  const fitted = Math.min(FIGURE_MAX_WIDTH, byHeight, byWidth);
+  return Math.floor(Math.max(FIGURE_MIN_WIDTH, fitted));
+}

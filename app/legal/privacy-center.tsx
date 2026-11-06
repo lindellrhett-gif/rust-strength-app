@@ -11,7 +11,10 @@ import {
   useExportMyData,
   useUnblockUser,
 } from '@/data/privacy';
+import { hasAppleSignIn } from '@/domain/socialAuth';
 import { LEGAL } from '@/legal/config';
+import { subscriptionsOn } from '@/lib/purchases';
+import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -24,6 +27,7 @@ export default function PrivacyCenter() {
   const router = useRouter();
   const exportData = useExportMyData();
   const deleteAccount = useDeleteMyAccount();
+  const usesApple = hasAppleSignIn(useAuth().session?.user);
   const blocked = useBlockedUsers();
   const unblock = useUnblockUser();
 
@@ -35,7 +39,7 @@ export default function PrivacyCenter() {
       const json = await exportData.mutateAsync();
       // Share sheet lets the user send it to Files, Mail, anywhere they like.
       await Share.share({
-        title: 'My Gym App data',
+        title: `My ${LEGAL.appName} data`,
         message: json,
       });
     } catch (e) {
@@ -46,7 +50,13 @@ export default function PrivacyCenter() {
   const doDelete = () => {
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account and every workout, activity, preset and stat in it. It cannot be undone and we cannot restore it.',
+      'This permanently deletes your account and every workout, activity, preset and stat in it. It cannot be undone and we cannot restore it.' +
+        (subscriptionsOn
+          ? '\n\nIt doesn’t cancel a Rust Strength Pro subscription: Apple keeps charging until you cancel it in Settings > your name > Subscriptions.'
+          : '') +
+        (usesApple
+          ? '\n\nApple will ask you to confirm once more, so we can disconnect Sign in with Apple from the app.'
+          : ''),
       [
         { text: 'Keep my account', style: 'cancel' },
         {
@@ -76,13 +86,14 @@ export default function PrivacyCenter() {
         <Card title="Documents">
           <LinkRow label="Privacy Policy" onPress={() => router.push('/legal/privacy')} />
           <LinkRow label="Terms of Service" onPress={() => router.push('/legal/terms')} />
+          <LinkRow label="Acknowledgements" onPress={() => router.push('/legal/notices')} />
           <Text style={text.caption}>Version {LEGAL.version} · updated {LEGAL.lastUpdated}</Text>
         </Card>
 
         <Card title="Your data">
           <Text style={text.bodyMuted}>
             Download everything we hold about you as a JSON file — your profile, workouts, sets,
-            activities, presets and friends.
+            runs, activities, food diary, presets and friends.
           </Text>
           <Button
             label="Download my data"

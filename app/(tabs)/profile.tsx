@@ -8,12 +8,16 @@ import { BadgeShelf } from '@/components/BadgeShelf';
 import { FeaturedTrophies } from '@/components/FeaturedTrophies';
 import { LevelCard } from '@/components/LevelCard';
 import { NumberStepper } from '@/components/NumberStepper';
+import { ProCard } from '@/components/ProCard';
 import { RestAlertToggle } from '@/components/RestAlertToggle';
+import { StepGoalSheet } from '@/components/StepGoalSheet';
 import { useMyLevel } from '@/data/level';
 import { useProfile, useUpdateProfile } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
 import { useTrainedDates } from '@/data/stats';
+import { useStepGoal } from '@/data/stepGoal';
 import { useSetShareSteps } from '@/data/trophies';
+import { cleanStepGoal } from '@/domain/todayTiles';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
 import { useOnboardingControls } from '@/providers/OnboardingProvider';
@@ -31,6 +35,7 @@ import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { hasFeature } from '@/domain/entitlements';
 import { todayLocal } from '@/lib/dates';
 import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
+import { subscriptionsOn } from '@/lib/purchases';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -49,6 +54,8 @@ export default function ProfileScreen() {
   // never disagree with the post-workout screen about what level you are.
   const { xp, level, badges, achievements, trophiesSettled } = useMyLevel();
   const shareSteps = useSetShareSteps();
+  const stepGoal = useStepGoal().data ?? cleanStepGoal(null);
+  const [editingStepGoal, setEditingStepGoal] = useState(false);
 
   // Featured trophies at the tiers held now: one shown at Silver moves up at
   // Gold, and one no longer held drops off. Saved back once everything the
@@ -374,6 +381,21 @@ export default function ProfileScreen() {
         </Pressable>
       </Card>
 
+      <Card title="Steps">
+        <Pressable
+          style={styles.legalRow}
+          onPress={() => setEditingStepGoal(true)}
+          accessibilityRole="button"
+        >
+          <View>
+            <Text style={text.body}>Daily step goal</Text>
+            <Text style={text.caption}>{stepGoal.toLocaleString('en-US')} steps a day, shown on Today</Text>
+          </View>
+          <Text style={styles.chev}>›</Text>
+        </Pressable>
+        <StepGoalSheet visible={editingStepGoal} onClose={() => setEditingStepGoal(false)} />
+      </Card>
+
       {hasFeature('running') ? (
         <Card title="Running">
           <Pressable
@@ -389,6 +411,8 @@ export default function ProfileScreen() {
           </Pressable>
         </Card>
       ) : null}
+
+      {subscriptionsOn ? <ProCard /> : null}
 
       <Card title="Privacy & legal">
         <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>

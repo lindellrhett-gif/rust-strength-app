@@ -3,6 +3,12 @@ import {
   buildBodyChart,
   missedGroups,
   chartSummary,
+  fittedFigureWidth,
+  FIGURE_ASPECT,
+  FIGURE_LABEL_HEIGHT,
+  FIGURE_MAX_WIDTH,
+  FIGURE_MIN_WIDTH,
+  FIGURE_WIDTH,
   GROUP_SIDE,
   GROUP_LABEL,
 } from '@/domain/bodyChart';
@@ -95,5 +101,33 @@ describe('chartSummary', () => {
     const s = chartSummary(buildBodyChart(most));
     expect(s.headline).toMatch(/calves/);
     expect(s.headline).not.toMatch(/more/);
+  });
+});
+
+describe('fittedFigureWidth', () => {
+  it('fills the height it is given on a standard phone', () => {
+    // About what a 393-point-wide phone leaves under Today's buttons.
+    const w = fittedFigureWidth(327, 175);
+    expect(w).toBe(Math.floor((175 - FIGURE_LABEL_HEIGHT) / FIGURE_ASPECT));
+    expect(w * FIGURE_ASPECT + FIGURE_LABEL_HEIGHT).toBeLessThanOrEqual(175);
+  });
+
+  it('stops growing at the maximum on a tall phone', () => {
+    expect(fittedFigureWidth(400, 600)).toBe(FIGURE_MAX_WIDTH);
+  });
+
+  it('leaves the legend its column on a narrow phone', () => {
+    // 309 wide: (309 - 104 - 16) / 2 = 94.5
+    expect(fittedFigureWidth(309, 600)).toBe(94);
+  });
+
+  it('never goes below the minimum', () => {
+    expect(fittedFigureWidth(327, 40)).toBe(FIGURE_MIN_WIDTH);
+    expect(fittedFigureWidth(150, 400)).toBe(FIGURE_MIN_WIDTH);
+  });
+
+  it('falls back to the usual width before anything is measured', () => {
+    expect(fittedFigureWidth(0, 0)).toBe(FIGURE_WIDTH);
+    expect(fittedFigureWidth(Number.NaN, 200)).toBe(FIGURE_WIDTH);
   });
 });

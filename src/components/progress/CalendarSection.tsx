@@ -1,0 +1,359 @@
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { Button, Card } from '@/components';
+import { Field } from '@/components/Field';
+import { MonthCalendar } from '@/components/MonthCalendar';
+import {
+  useCreatePlannedSession,
+  useDeletePlannedSession,
+  usePlannedSessions,
+} from '@/data/planned';
+import { useActivities } from '@/data/activities';
+import { useDeleteRestDay, useRestDays, useSetRestDay } from '@/data/restDays';
+import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
+import { useTimeline } from '@/data/timeline';
+import { useWorkouts } from '@/data/workouts';
+import type { Workout } from '@/lib/database.types';
+import { elapsedSeconds, formatDurationShort } from '@/domain/duration';
+import { canPlanOn } from '@/domain/planning';
+import { entriesOn } from '@/domain/timeline';
+import { formatDate, formatTime, toLocalDateString, todayLocal } from '@/lib/dates';
+import { colors } from '@/theme/colors';
+import { radius, spacing, text } from '@/theme/typography';
+
+/**
+ * The calendar half of the Progress tab: the month, and below it the chosen
+ * day with its workouts, activities and plans, where a session or rest day
+ * can be planned. The Progress screen scrolls and refreshes it.
+ */
+export function CalendarSection() {
+  const router = useRouter();
+  const workouts = useWorkouts();
+  const planned = usePlannedSessions();
+  const createPlan = useCreatePlannedSession();
+  const deletePlan = useDeletePlannedSession();
+  const templates = useTemplates();
+  const startFromTemplate = useStartWorkoutFromTemplate();
+  const activities = useActivities();
+  const restDays = useRestDays();
+  const setRestDay = useSetRestDay();
+  const deleteRestDay = useDeleteRestDay();
+
+  const today = todayLocal();
+  const [month, setMonth] = useState(today);
+  const [selected, setSelected] = useState<string>(today);
+  const [planTitle, setPlanTitle] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [planTemplateId, setPlanTemplateId] = useState<string | null>(null);
+
+  const workoutList = workouts.data;
+  const workoutsByDate = useMemo(() => {
+    const map = new Map<string, Workout[]>();
+    for (const w of workoutList ?? []) {
+      if (!w.ended_at) continue;
+      const d = toLocalDateString(w.started_at);
+      const list = map.get(d) ?? [];
+      list.push(w);
+      map.set(d, list);
+    }
+    return map;
+  }, [workoutList]);
+
+  const workoutDates = useMemo(() => new Set(workoutsByDate.keys()), [workoutsByDate]);
+  const plannedDates = useMemo(
+    () => new Set((planned.data ?? []).map((p) => p.scheduled_for)),
+    [planned.data],
+  );
+  const activityDates = useMemo(
+    () => new Set((activities.data ?? []).map((a) => toLocalDateString(a.performedAt))),
+    [activities.data],
+  );
+  const restDates = useMemo(
+    () => new Set((restDays.data ?? []).map((r) => r.rest_date)),
+    [restDays.data],
+  );
+
+  // One feed for lifting, activities and rest days.
+  const { timeline } = useTimeline();
+
+  const shiftMonth = (delta: number) => {
+    const [y, m] = month.split('-').map(Number);
+    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+    setMonth(d.toISOString().slice(0, 10));
+  };
+
+  const dayWorkouts = workoutsByDate.get(selected) ?? [];
+  const dayPlans = (planned.data ?? []).filter((p) => p.scheduled_for === selected);
+  const isPast = selected < today;
+  const plannable = canPlanOn(selected, today);
+  const dayEntries = entriesOn(timeline, selected);
+  const selectedRest = (restDays.data ?? []).find((r) => r.rest_date === selected) ?? null;
+
+  const toggleRestDay = () => {
+    if (selectedRest) deleteRestDay.mutate(selectedRest.id);
+    // A rest day keeps a streak going, so one can't be added after the fact.
+    else if (canPlanOn(selected, todayLocal())) setRestDay.mutate({ date: selected });
+  };
+
+  const chosenTemplate = (templates.data ?? []).find((t) => t.id === planTemplateId) ?? null;
+
+  const addPlan = () => {
+    if (!canPlanOn(selected, todayLocal())) return;
+    createPlan.mutate(
+      {
+        scheduledFor: selected,
+        // Default the label to the preset name so the calendar reads well.
+        title: planTitle || chosenTemplate?.name || 'Workout',
+        templateId: planTemplateId,
+      },
+      {
+        onSuccess: () => {
+          setPlanTitle('');
+          setPlanTemplateId(null);
+          setAdding(false);
+        },
+      },
+    );
+  };
+
+  /** Start a planned session, pre-loading its preset when it has one. */
+  const startPlan = async (templateId: string | null) => {
+    try {
+      if (templateId) {
+        const workoutId = await startFromTemplate.mutateAsync(templateId);
+        router.push(`/workout/${workoutId}`);
+      } else {
+        router.push('/(tabs)');
+      }
+    } catch (e) {
+      Alert.alert('Could not start', e instanceof Error ? e.message : 'Please try again.');
+    }
+  };
+
+  return (
+    <>
+      <Card>
+        <MonthCalendar
+          month={month}
+          workoutDates={workoutDates}
+          plannedDates={plannedDates}
+          activityDates={activityDates}
+          restDates={restDates}
+          selected={selected}
+          today={today}
+          onSelect={setSelected}
+          onPrevMonth={() => shiftMonth(-1)}
+          onNextMonth={() => shiftMonth(1)}
+        />
+      </Card>
+
+      <Card title={formatDate(`${selected}T12:00:00`)}>
+        {dayWorkouts.length === 0 && dayPlans.length === 0 ? (
+          <Text style={text.bodyMuted}>
+            {isPast ? 'No workout logged on this day.' : 'Nothing planned yet.'}
+          </Text>
+        ) : null}
+
+        {dayWorkouts.map((w) => (
+          <Pressable
+            key={w.id}
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onPress={() => router.push(`/workout/${w.id}`)}
+          >
+            <View style={styles.rowMain}>
+              <Text style={text.body}>Workout</Text>
+              <Text style={text.caption}>
+                {formatTime(w.started_at)}
+                {w.ended_at
+                  ? ` · ${formatDurationShort(elapsedSeconds(w.started_at, w.ended_at))}`
+                  : ''}
+              </Text>
+            </View>
+            <Text style={styles.chev}>›</Text>
+          </Pressable>
+        ))}
+
+        {dayEntries
+          .filter((e) => e.kind !== 'workout')
+          .map((e) => (
+            <Pressable
+              key={e.id}
+              style={({ pressed }) => [styles.row, pressed && e.runId != null && styles.rowPressed]}
+              onPress={() => e.runId && router.push(`/run/${e.runId}`)}
+              disabled={!e.runId}
+              accessibilityRole={e.runId ? 'button' : undefined}
+            >
+              <View
+                style={[
+                  styles.kindBar,
+                  { backgroundColor: e.kind === 'activity' ? colors.success : colors.textMuted },
+                ]}
+              />
+              <View style={styles.rowMain}>
+                <Text style={text.body}>{e.title}</Text>
+                <Text style={text.caption}>
+                  {[
+                    e.durationSeconds > 0 ? formatDurationShort(e.durationSeconds) : null,
+                    e.detail || null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Text>
+              </View>
+              {e.runId ? <Text style={styles.chev}>›</Text> : null}
+            </Pressable>
+          ))}
+
+        {dayPlans.map((p) => (
+          <Pressable
+            key={p.id}
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+            onLongPress={() =>
+              Alert.alert('Remove plan?', p.title, [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Remove',
+                  style: 'destructive',
+                  onPress: () => deletePlan.mutate(p.id),
+                },
+              ])
+            }
+          >
+            <View style={styles.rowMain}>
+              <Text style={text.body}>{p.title}</Text>
+              <Text style={text.caption}>
+                {p.template_id
+                  ? `${(templates.data ?? []).find((t) => t.id === p.template_id)?.items.length ?? 0} exercises ready · long-press to remove`
+                  : 'planned · long-press to remove'}
+              </Text>
+            </View>
+            {p.template_id ? (
+              <Pressable onPress={() => startPlan(p.template_id)} hitSlop={8}>
+                <Text style={styles.startPlan}>Start ›</Text>
+              </Pressable>
+            ) : (
+              <View style={styles.plannedTag}>
+                <Text style={styles.plannedTagText}>PLAN</Text>
+              </View>
+            )}
+          </Pressable>
+        ))}
+
+        {adding && plannable ? (
+          <View style={styles.addBox}>
+            <Field
+              label="What are you training?"
+              value={planTitle}
+              onChangeText={setPlanTitle}
+              placeholder={chosenTemplate ? chosenTemplate.name : 'e.g. Push day'}
+              autoFocus
+            />
+
+            <Text style={text.label}>USE A PRESET (OPTIONAL)</Text>
+            <View style={styles.presetRow}>
+              <Pressable
+                onPress={() => setPlanTemplateId(null)}
+                style={[styles.presetChip, planTemplateId === null && styles.presetChipOn]}
+              >
+                <Text
+                  style={[
+                    styles.presetChipText,
+                    planTemplateId === null && styles.presetChipTextOn,
+                  ]}
+                >
+                  None
+                </Text>
+              </Pressable>
+              {(templates.data ?? []).map((t) => (
+                <Pressable
+                  key={t.id}
+                  onPress={() => setPlanTemplateId(t.id)}
+                  style={[styles.presetChip, planTemplateId === t.id && styles.presetChipOn]}
+                >
+                  <Text
+                    style={[
+                      styles.presetChipText,
+                      planTemplateId === t.id && styles.presetChipTextOn,
+                    ]}
+                  >
+                    {t.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            {(templates.data ?? []).length === 0 ? (
+              <Pressable onPress={() => router.push('/templates')}>
+                <Text style={styles.link}>Create a preset to pre-fill your exercises ›</Text>
+              </Pressable>
+            ) : null}
+
+            <View style={styles.addActions}>
+              <Button label="Cancel" variant="ghost" onPress={() => setAdding(false)} />
+              <Button label="Add plan" onPress={addPlan} loading={createPlan.isPending} />
+            </View>
+          </View>
+        ) : (
+          <>
+            {plannable ? (
+              <Button label="＋ Plan a session" variant="secondary" onPress={() => setAdding(true)} />
+            ) : null}
+            {selectedRest || plannable ? (
+              <Button
+                label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
+                variant={selectedRest ? 'danger' : 'ghost'}
+                onPress={toggleRestDay}
+                loading={setRestDay.isPending || deleteRestDay.isPending}
+              />
+            ) : null}
+            <Text style={text.caption}>
+              {plannable
+                ? 'A rest day keeps your streak going instead of breaking it. Mark today, or plan one ahead.'
+                : 'Rest days and sessions can only be planned for today or a day ahead.'}
+            </Text>
+          </>
+        )}
+      </Card>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  kindBar: { width: 3, alignSelf: 'stretch', borderRadius: 2 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  rowPressed: { backgroundColor: colors.surfaceRaised },
+  rowMain: { gap: 2, flexShrink: 1 },
+  chev: { color: colors.textFaint, fontSize: 22, fontWeight: '700' },
+  plannedTag: {
+    borderWidth: 1,
+    borderColor: colors.warning,
+    borderRadius: radius.pill,
+    paddingVertical: 2,
+    paddingHorizontal: spacing.sm,
+  },
+  plannedTagText: { color: colors.warning, fontSize: 11, fontWeight: '800' },
+  startPlan: { color: colors.primary, fontWeight: '800', fontSize: 15 },
+  presetRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  presetChip: {
+    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceRaised,
+  },
+  presetChipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+  presetChipText: { color: colors.textMuted, fontWeight: '600', fontSize: 13 },
+  presetChipTextOn: { color: colors.onPrimary },
+  link: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  addBox: { gap: spacing.md, paddingTop: spacing.md },
+  addActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.sm },
+});

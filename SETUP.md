@@ -35,7 +35,7 @@ refuses to open the app, realign with `npm install expo@latest` and then
 ## 4. Apply the database schema
 
 Run every file in [`supabase/migrations/`](supabase/migrations) in order,
-`0001` through `0025`, with [`supabase/seed.sql`](supabase/seed.sql) right
+`0001` through `0026`, with [`supabase/seed.sql`](supabase/seed.sql) right
 after `0002`.
 
 - **Dashboard:** paste each file into the SQL editor and run it. Run
@@ -61,6 +61,7 @@ using the same database, so they go in at different times:
 | `0017` to `0019`, `0021` to `0024` | Any time before 1.1 ships. They only add things the 1.0 app never calls. A development build of 1.1 needs all of them to save and show runs |
 | `0020_streaks_count_activities.sql` | **Only when 1.1 is released.** It makes every activity count toward the streak, and 1.0 still counts workouts alone, so friends would see a streak the app doesn't |
 | `0025_rest_days_not_in_past.sql` | **Only when 1.1 is released.** It refuses rest days for past days, which 1.0 still offers, so its button would fail for anyone who hasn't updated |
+| `0026_subscriptions.sql` | Any time before Rust Strength Pro goes on sale (branch `feature/subscriptions`; see [store/SUBSCRIPTIONS.md](store/SUBSCRIPTIONS.md)). Additive: nothing in 1.0 or 1.1 touches it |
 
 ### Auth emails
 

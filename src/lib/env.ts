@@ -17,4 +17,21 @@ if (!url || !anonKey) {
 export const env = {
   supabaseUrl: url,
   supabaseAnonKey: anonKey,
+  /**
+   * RevenueCat's public iOS SDK key (it starts appl_). Public by design, like
+   * the anon key: it can only read offerings and make purchases for the
+   * signed-in person. The secret key never goes in the app.
+   */
+  revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY || null,
+  /** Subscriptions stay off unless this is "on" (see src/lib/purchases.ts). */
+  subscriptionsSwitch: process.env.EXPO_PUBLIC_SUBSCRIPTIONS === 'on',
+  /**
+   * Google's OAuth client id for this iOS app (it ends
+   * .apps.googleusercontent.com). Public by design: it names the app to
+   * Google and is built into every copy. Without it the app doesn't offer
+   * Sign in with Google (src/lib/socialSignIn.ts).
+   */
+  googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID || null,
+  /** The same for the dev app (com.ruststrength.app.dev), which Google treats as another app. */
+  googleIosClientIdDev: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID_DEV || null,
 };
