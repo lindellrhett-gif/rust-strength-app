@@ -240,16 +240,16 @@ Sign-up is email and password only. There is no advertising. The paid feature, R
 
 NEW IN 1.2: RUST STRENGTH PRO AND THE FOOD DIARY
 - The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, and a non-consumable Lifetime purchase.
-- Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, Today > Food and the food diary say what Pro includes and offer the same plans.
+- Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, the Food tab says what Pro includes and offers the same plans.
 - [Say whether the demo account has Pro, or that purchases can be tested with a sandbox account.]
-- The food diary is at Today > Food > Open food diary. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
+- The food diary is the Food tab. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
 - The camera is requested only when the user opens the barcode scanner (Add food > Scan); the barcode is read on the device and nothing from the camera is recorded or uploaded. A barcode can also be typed in.
 - Recipe import loads the page the user links to from the device.
 - The calorie goal calculator does not offer weight-loss goals to users under 18 (by the birth year entered), and a goal under the calorie floor is saved only after a warning.
 - Nothing in the food diary is shared with friends.
 
 RUNNING (SINCE 1.1)
-- Today > Start run records a run with GPS. To see finished runs without going outside, open Stats > Running on the demo account, or enter one by hand: Today > Log activity > Run > Enter a run.
+- Today > Start run records a run with GPS. To see finished runs without going outside, open Progress > Running on the demo account, or enter one by hand: Today > Log activity > Run > Enter a run.
 - Location is requested "While Using the App" only, when the user taps Start (or places a privacy zone at their current location), and is used only between Start and Save. The app never requests "Always".
 - Background modes: "location" keeps a run recording with the screen locked (the blue location indicator shows the whole time); "audio" is used only to speak distance and pace updates during a run with the screen locked, which can be turned off in Running settings.
 - Live Activities: while a run records, its time, distance and pace show on the Lock Screen and in the Dynamic Island; between sets, the rest timer and next set show the same way. They are started and updated on the device. The app uses no push notifications.

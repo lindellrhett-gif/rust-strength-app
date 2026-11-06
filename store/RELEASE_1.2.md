@@ -44,8 +44,9 @@ None of these can be settled from the code, and some block the rest:
     Foods (FNDDS) as JSON from https://fdc.nal.usda.gov/download-datasets/
     and unzip them into a folder outside the repo, say `C:\dev\fdc`. Put
     `SUPABASE_SERVICE_ROLE_KEY` in the PC's `.env` for this step only (it is
-    gitignored; never in EAS or the app), then from `C:\dev\gym-app` do a dry
-    run first, which only counts:
+    gitignored; never in EAS or the app), then from the folder with the 1.2
+    code checked out (`C:\dev\gym-app-nutrition`; the script isn't on `main`
+    yet) do a dry run first, which only counts:
 
     ```powershell
     npm run foods:usda -- C:\dev\fdc\foundation.json C:\dev\fdc\sr_legacy.json C:\dev\fdc\survey.json
@@ -91,7 +92,7 @@ None of these can be settled from the code, and some block the rest:
         save. Split by meal shows each meal's share in the diary.
   - [ ] Water, weigh-ins and the trend. After a weigh-in, Profile shows the
         same bodyweight.
-  - [ ] Reports for 7 days, 30 days and 12 weeks, and the Stats card.
+  - [ ] Reports for 7 days, 30 days and 12 weeks, and the food card on Progress.
   - [ ] Settings: rename a meal, add one, remove the last one; net carbs;
         exercise on and off (only runs and activities add calories).
   - [ ] With subscriptions on and a sandbox account: the Today card and the
@@ -105,6 +106,23 @@ None of these can be settled from the code, and some block the rest:
         Australia, the diary shows kJ until you choose otherwise, and still
         does after renaming a meal. Put both settings back afterwards.
   - [ ] Sign in with Apple and Google: the list in SIGN_IN.md, section 4.
+  - [ ] Today's tiles: consistency matches Friends > your profile; steps show
+        out of 10k with a bar, and tapping them changes the goal (also in
+        Profile > Steps); calories left match the Food tab, and say "eaten"
+        with no goal and "over" past it; the streak shows the flame. On a
+        phone where steps are off, the tile says Off and opens Settings.
+  - [ ] Today fits on one screen without scrolling: the tiles, Start
+        workout with Generate, Presets, Start a run and Log activity two to a
+        row, and the body chart filling the rest. With a plan for today or on
+        a small phone it may scroll a little; the chart never overlaps.
+  - [ ] Progress: the calendar and chosen day work as the old Calendar did,
+        Recent workouts lists everything newest first and opens workouts and
+        runs, and the stats below match the old Stats tab. Pull to refresh.
+  - [ ] Food tab: the diary as before, and Add food comes back to it. Paging
+        between days shows no duplicate-key error in the dev server.
+  - [ ] Logging a set: the suggestion shows only the set (say "230 × 6–8")
+        until Show details; a set past the top of the range suggests more
+        weight for the next. In a workout, the six rest presets fit on one row.
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build

@@ -63,17 +63,18 @@ export default function TabsLayout() {
             tabBarIcon: ({ color, size }) => <Ionicons name="barbell" color={color} size={size} />,
           }}
         />
+        {/* Shown with or without Pro: without it, the diary explains Pro instead. */}
         <Tabs.Screen
-          name="calendar"
+          name="food"
           options={{
-            title: TAB_TITLES.calendar,
-            tabBarIcon: ({ color, size }) => <Ionicons name="calendar" color={color} size={size} />,
+            title: TAB_TITLES.food,
+            tabBarIcon: ({ color, size }) => <Ionicons name="nutrition" color={color} size={size} />,
           }}
         />
         <Tabs.Screen
-          name="stats"
+          name="progress"
           options={{
-            title: TAB_TITLES.stats,
+            title: TAB_TITLES.progress,
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="stats-chart" color={color} size={size} />
             ),

@@ -9,7 +9,7 @@ import { todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
-/** The last seven days of food on the Stats tab, and the way into the reports. Shown only with access. */
+/** The last seven days of food on the Progress tab, and the way into the reports. Shown only with access. */
 export function NutritionStatsCard() {
   const router = useRouter();
   const today = todayLocal();

@@ -146,7 +146,7 @@ function RootNavigator() {
         name="run/manual"
         options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
       />
-      <Stack.Screen name="nutrition/index" options={{ headerShown: true, title: 'Food diary' }} />
+      <Stack.Screen name="recent" options={{ headerShown: true, title: 'Recent workouts' }} />
       <Stack.Screen
         name="nutrition/add"
         options={{ headerShown: true, presentation: 'modal', title: 'Add food' }}
