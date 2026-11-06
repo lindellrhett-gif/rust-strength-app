@@ -40,7 +40,10 @@ None of these can be settled from the code, and some block the rest:
   - [x] `0028_signup_unit.sql`: a new account starts in the weight unit the
     app sends from the phone's region. The 1.1 app sends none and still
     gets pounds.
-  - [ ] **The food catalog.** Download Foundation Foods, SR Legacy and Survey
+  - [x] **The food catalog.** Loaded November 6, 2026: 13,598 foods and
+    31,375 portions (Foundation 2026-10-29, SR Legacy 2018-04, FNDDS
+    2024-10-31), 15 MB; the key was taken back out of `.env`. To refresh it
+    with newer USDA releases later, the steps were: download Foundation Foods, SR Legacy and Survey
     Foods (FNDDS) as JSON from https://fdc.nal.usda.gov/download-datasets/
     and unzip them into a folder outside the repo, say `C:\dev\fdc`. Put
     `SUPABASE_SERVICE_ROLE_KEY` in the PC's `.env` for this step only (it is
