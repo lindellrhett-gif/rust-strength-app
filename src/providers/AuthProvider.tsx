@@ -10,10 +10,12 @@ import {
 } from 'react';
 
 import { EXISTING_ACCOUNT_MESSAGE, isExistingAccount } from '@/domain/emailConfirm';
+import { isNewAccount, type SocialProvider } from '@/domain/socialAuth';
 import { discardActiveRun, discardRunsNotOwnedBy } from '@/lib/activeRun';
 import { deviceUnits } from '@/lib/deviceUnits';
 import { persister, queryClient } from '@/lib/queryClient';
 import { LEGAL } from '@/legal/config';
+import { SignInCancelled, appleIdToken, googleIdToken, googleSignOut } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 
 export interface SignUpConsent {
@@ -28,6 +30,12 @@ interface AuthState {
   userId: string | null;
   initializing: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Signs in with Apple or Google, creating the account the first time. A new
+   * account has no consent on record yet, so the consent screen asks for it
+   * before the app opens. Resolves false when the person backed out.
+   */
+  signInWith: (provider: SocialProvider) => Promise<boolean>;
   /**
    * Creates the account with the user's consent attached, so it is recorded
    * even when email confirmation means nobody is signed in yet.
@@ -134,6 +142,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
+      signInWith: async (provider) => {
+        let credentials: { provider: SocialProvider; token: string; nonce?: string };
+        try {
+          credentials =
+            provider === 'apple'
+              ? { provider, ...(await appleIdToken()) }
+              : { provider, token: await googleIdToken() };
+        } catch (e) {
+          if (e instanceof SignInCancelled) return false;
+          throw e;
+        }
+        const { data, error } = await supabase.auth.signInWithIdToken(credentials);
+        if (error) throw error;
+        // The token can't carry the phone's units the way an email sign-up's
+        // request does (0028), so a brand-new profile gets them here. Only a
+        // profile that has never been used: no consent and no chosen handle.
+        // A failure leaves pounds, the old default, and isn't worth an error.
+        if (isNewAccount(data.user)) {
+          await supabase
+            .from('profiles')
+            .update({ unit: deviceUnits().weight })
+            .eq('user_id', data.user.id)
+            .is('terms_version', null)
+            .eq('username_chosen', false);
+        }
+        return true;
+      },
       signUp: async (email, password, consent) => {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -177,6 +212,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // A run still on the phone holds this person's location; it doesn't
         // outlive their session.
         await discardActiveRun().catch(() => undefined);
+        // So the next person to sign in with Google gets the account picker.
+        await googleSignOut();
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       },

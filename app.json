@@ -14,6 +14,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
       "appleTeamId": "V7YLBXSTX2",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -118,6 +119,7 @@
         }
       ],
       "expo-font",
+      "expo-apple-authentication",
       "expo-notifications",
       [
         "expo-location",

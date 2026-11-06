@@ -58,7 +58,7 @@ export function RestTimerBar({ hideWhenIdle = false }: RestTimerBarProps) {
         </View>
         <View style={styles.presets}>
           {REST_PRESETS.map((seconds) => (
-            <Chip key={seconds} label={restLabel(seconds)} onPress={() => timer.start(seconds)} />
+            <Chip key={seconds} label={restLabel(seconds)} onPress={() => timer.start(seconds)} fill />
           ))}
         </View>
       </View>
@@ -89,22 +89,40 @@ export function RestTimerBar({ hideWhenIdle = false }: RestTimerBarProps) {
   );
 }
 
+/**
+ * A pill button. `fill` shares a row equally with its neighbours, which keeps
+ * all six rest presets on one line even on the narrowest phones.
+ */
 function Chip({
   label,
   onPress,
   emphasis,
+  fill,
 }: {
   label: string;
   onPress: () => void;
   emphasis?: boolean;
+  fill?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.chip, emphasis && styles.chipEmphasis, pressed && styles.chipPressed]}
+      style={({ pressed }) => [
+        styles.chip,
+        fill && styles.chipFill,
+        emphasis && styles.chipEmphasis,
+        pressed && styles.chipPressed,
+      ]}
     >
-      <Text style={[styles.chipText, emphasis && styles.chipTextEmphasis]}>{label}</Text>
+      <Text
+        style={[styles.chipText, emphasis && styles.chipTextEmphasis]}
+        numberOfLines={fill ? 1 : undefined}
+        adjustsFontSizeToFit={fill}
+        minimumFontScale={0.75}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -137,7 +155,7 @@ const styles = StyleSheet.create({
   },
   progressFill: { height: 4, backgroundColor: colors.primary },
 
-  presets: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  presets: { flexDirection: 'row', gap: spacing.xs },
   actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
 
   chip: {
@@ -148,6 +166,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surfaceRaised,
   },
+  chipFill: { flex: 1, alignItems: 'center', paddingHorizontal: spacing.xs },
   chipEmphasis: { borderColor: colors.primary },
   chipPressed: { backgroundColor: colors.border },
   chipText: { color: colors.text, fontSize: 13, fontWeight: '700' },

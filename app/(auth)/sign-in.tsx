@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
+import { SocialSignIn } from '@/components/SocialSignIn';
 import { UNCONFIRMED_MESSAGE, isUnconfirmedEmail } from '@/domain/authErrors';
 import { confirmErrorMessage } from '@/domain/emailConfirm';
 import { RESEND_COOLDOWN_SECONDS } from '@/domain/passwordReset';
@@ -75,6 +76,8 @@ export default function SignIn() {
         <Text style={text.hero}>Welcome back</Text>
         <Text style={text.bodyMuted}>Log a set, get your next weight.</Text>
       </View>
+
+      <SocialSignIn />
 
       <View style={styles.form}>
         <Field

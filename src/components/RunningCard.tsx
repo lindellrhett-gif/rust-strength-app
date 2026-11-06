@@ -12,7 +12,7 @@ import { spacing, text } from '@/theme/typography';
 
 import { Card } from './Card';
 
-/** This week's running on the Stats tab, and the way into the running hub. */
+/** This week's running on the Progress tab, and the way into the running hub. */
 export function RunningCard() {
   const router = useRouter();
   const profile = useProfile();

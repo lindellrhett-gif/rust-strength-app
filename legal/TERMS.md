@@ -30,7 +30,7 @@ You must be at least 13 years old. By creating an account you confirm that you a
 
 ## 3. Your account
 
-You are responsible for keeping your password secure and for activity under your account. Give us accurate information and keep it current. Tell us at ruststrengthsupport@gmail.com if you believe your account has been accessed without your permission.
+You are responsible for keeping your password, or the Apple ID or Google account you sign in with, secure, and for activity under your account. Give us accurate information and keep it current. Tell us at ruststrengthsupport@gmail.com if you believe your account has been accessed without your permission.
 
 One account per person. Do not share, sell or transfer your account.
 
