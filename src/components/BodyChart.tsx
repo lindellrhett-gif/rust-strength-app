@@ -1,9 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import Svg, { Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import {
   buildBodyChart,
   chartSummary,
+  fittedFigureWidth,
+  FIGURE_ASPECT,
+  FIGURE_GAP,
+  FIGURE_WIDTH,
+  type ChartSummary,
   type CoverageLevel,
   type RegionState,
 } from '@/domain/bodyChart';
@@ -137,7 +143,7 @@ const APP_PALETTE: FigurePalette = { levels: LEVEL_FILL, outline: OUTLINE, body:
 export function BodyFigure({
   regions,
   side,
-  width = 98,
+  width = FIGURE_WIDTH,
   palette = APP_PALETTE,
   label = true,
 }: {
@@ -150,7 +156,7 @@ export function BodyFigure({
   const shown = regions.filter((r) => r.side === side);
   return (
     <View style={styles.figure}>
-      <Svg width={width} height={(width * 212) / 100} viewBox="0 0 100 212">
+      <Svg width={width} height={width * FIGURE_ASPECT} viewBox="0 0 100 212">
         <Silhouette outline={palette.outline} body={palette.body} />
         {shown.map((r) => (
           <G
@@ -170,54 +176,101 @@ export function BodyFigure({
   );
 }
 
+/**
+ * This week's chart: both figures, the legend and what's still to train.
+ *
+ * With `fill`, the chart grows to the height its parent leaves it (the parent
+ * must let it grow, with flexGrow) and the figures are sized to fit, so Today
+ * fits on one screen. The figures are drawn over that space rather than in
+ * it, so they never push it taller and the chart can shrink again when
+ * something above it appears.
+ */
 export function BodyChart({
   weekCoverage,
+  fill = false,
 }: {
   weekCoverage: Partial<Record<MuscleGroup, number>>;
+  fill?: boolean;
 }) {
   const regions = buildBodyChart(weekCoverage);
   const summary = chartSummary(regions);
+  const [space, setSpace] = useState<{ width: number; height: number } | null>(null);
 
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.figures}>
-        <BodyFigure regions={regions} side="front" />
-        <BodyFigure regions={regions} side="back" />
+  const measure = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    setSpace((was) => (was && was.width === width && was.height === height ? was : { width, height }));
+  };
 
-        <View style={styles.legend}>
-          <Text style={text.label}>THIS WEEK</Text>
-          <Text style={styles.count}>
-            {summary.trained}
-            <Text style={styles.countTotal}>/{summary.total}</Text>
-          </Text>
-          <Text style={text.caption}>muscle groups</Text>
-
-          <View style={styles.legendKeys}>
-            {(
-              [
-                ['none', 'Not yet'],
-                ['light', '1–3 sets'],
-                ['solid', '4–8 sets'],
-                ['heavy', '9+ sets'],
-              ] as [CoverageLevel, string][]
-            ).map(([level, label]) => (
-              <View key={level} style={styles.legendRow}>
-                <View style={[styles.swatch, { backgroundColor: LEVEL_FILL[level] }]} />
-                <Text style={styles.legendText}>{label}</Text>
-              </View>
-            ))}
-          </View>
+  if (!fill) {
+    return (
+      <View style={styles.wrap}>
+        <View style={styles.figures}>
+          <BodyFigure regions={regions} side="front" />
+          <BodyFigure regions={regions} side="back" />
+          <Legend summary={summary} />
         </View>
+        <Text style={[text.caption, styles.headline]}>{summary.headline}</Text>
       </View>
+    );
+  }
 
+  const width = fittedFigureWidth(space?.width ?? 0, space?.height ?? 0);
+  return (
+    <View style={[styles.wrap, styles.grow]}>
+      {/* The legend sets the least height; the figures take what's there. */}
+      <View style={[styles.figures, styles.space]} onLayout={measure}>
+        <View style={[styles.figureBox, { width: 2 * width + FIGURE_GAP }]}>
+          {/* Drawn once measured, so they don't flash at the wrong size. */}
+          {space ? (
+            <View style={[styles.figures, styles.figuresOver]}>
+              <BodyFigure regions={regions} side="front" width={width} />
+              <BodyFigure regions={regions} side="back" width={width} />
+            </View>
+          ) : null}
+        </View>
+        <Legend summary={summary} />
+      </View>
       <Text style={[text.caption, styles.headline]}>{summary.headline}</Text>
+    </View>
+  );
+}
+
+function Legend({ summary }: { summary: ChartSummary }) {
+  return (
+    <View style={styles.legend}>
+      <Text style={text.label}>THIS WEEK</Text>
+      <Text style={styles.count}>
+        {summary.trained}
+        <Text style={styles.countTotal}>/{summary.total}</Text>
+      </Text>
+      <Text style={text.caption}>muscle groups</Text>
+
+      <View style={styles.legendKeys}>
+        {(
+          [
+            ['none', 'Not yet'],
+            ['light', '1–3 sets'],
+            ['solid', '4–8 sets'],
+            ['heavy', '9+ sets'],
+          ] as [CoverageLevel, string][]
+        ).map(([level, label]) => (
+          <View key={level} style={styles.legendRow}>
+            <View style={[styles.swatch, { backgroundColor: LEVEL_FILL[level] }]} />
+            <Text style={styles.legendText}>{label}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
-  figures: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  grow: { flexGrow: 1 },
+  figures: { flexDirection: 'row', alignItems: 'flex-start', gap: FIGURE_GAP },
+  space: { flexGrow: 1, alignItems: 'center' },
+  figureBox: { alignSelf: 'stretch' },
+  figuresOver: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center' },
   figure: { alignItems: 'center', gap: 2 },
   figureLabel: {
     color: colors.textFaint,

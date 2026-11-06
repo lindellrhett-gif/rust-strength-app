@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, LoadingView } from '@/components';
@@ -10,7 +10,6 @@ import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
 import { useProfile } from '@/data/profile';
 import { useWeeklyCoverage, useTrainedDates } from '@/data/stats';
-import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useOpenWorkout, useStartWorkout } from '@/data/workouts';
 import { consistency } from '@/domain/achievements';
 import { hasFeature } from '@/domain/entitlements';
@@ -92,94 +91,58 @@ export default function Today() {
                 size="lg"
                 loading={startWorkout.isPending}
               />
-              <View style={styles.secondaryRow}>
-                <Button
-                  label="Generate"
-                  variant="secondary"
-                  onPress={() => router.push('/generate')}
-                  style={styles.secondaryBtn}
-                />
-                <Button
-                  label="Presets"
-                  variant="secondary"
-                  onPress={() => router.push('/templates')}
-                  style={styles.secondaryBtn}
-                />
+              {/* The other ways in, two to a row. */}
+              <View style={styles.grid}>
+                <View style={styles.gridRow}>
+                  <Button
+                    label="Generate"
+                    variant="secondary"
+                    onPress={() => router.push('/generate')}
+                    style={styles.gridButton}
+                  />
+                  <Button
+                    label="Presets"
+                    variant="secondary"
+                    onPress={() => router.push('/templates')}
+                    style={styles.gridButton}
+                  />
+                </View>
+                <View style={styles.gridRow}>
+                  {hasFeature('running') ? (
+                    <Button
+                      label={runInProgress ? 'Resume run' : 'Start a run'}
+                      variant="secondary"
+                      onPress={() => router.push('/run/record')}
+                      style={styles.gridButton}
+                    />
+                  ) : null}
+                  <Button
+                    label="Log activity"
+                    variant="secondary"
+                    onPress={() => router.push('/activity/new')}
+                    style={styles.gridButton}
+                  />
+                </View>
               </View>
-              {hasFeature('running') ? (
-                <Button
-                  label={runInProgress ? 'Resume run' : 'Start a run'}
-                  variant="secondary"
-                  onPress={() => router.push('/run/record')}
-                />
-              ) : null}
-              <Button
-                label="Log an activity instead"
-                variant="ghost"
-                onPress={() => router.push('/activity/new')}
-              />
             </>
           )}
         </Card>
 
-        <Card title="Body chart">
-          <BodyChart weekCoverage={coverage.data ?? {}} />
+        {/* Takes the rest of the screen, so Today fits without scrolling. */}
+        <Card style={styles.chartCard}>
+          <BodyChart weekCoverage={coverage.data ?? {}} fill />
         </Card>
-
-        <PresetShortcuts />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-/** Jump straight into a saved preset from the home screen. */
-function PresetShortcuts() {
-  const router = useRouter();
-  const templates = useTemplates();
-  const start = useStartWorkoutFromTemplate();
-
-  const list = templates.data ?? [];
-  if (list.length === 0) return null;
-
-  const go = async (templateId: string) => {
-    try {
-      const workoutId = await start.mutateAsync(templateId);
-      router.push(`/workout/${workoutId}`);
-    } catch (e) {
-      Alert.alert('Could not start', e instanceof Error ? e.message : 'Please try again.');
-    }
-  };
-
-  return (
-    <Card title="Start from a preset">
-      {list.slice(0, 5).map((t) => (
-        <Pressable key={t.id} style={styles.presetRow} onPress={() => go(t.id)}>
-          <View>
-            <Text style={text.body}>{t.name}</Text>
-            <Text style={text.caption}>
-              {t.items.length} exercise{t.items.length === 1 ? '' : 's'} ·{' '}
-              {t.items.reduce((n, i) => n + i.targetSets, 0)} sets
-            </Text>
-          </View>
-          <Text style={styles.presetGo}>Start ›</Text>
-        </Pressable>
-      ))}
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  content: { padding: spacing.lg, gap: spacing.xl },
-  secondaryRow: { flexDirection: 'row', gap: spacing.sm },
-  secondaryBtn: { flex: 1 },
-  presetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  presetGo: { color: colors.primary, fontWeight: '800' },
+  // flexGrow lets the body chart stretch to the bottom of the screen.
+  content: { padding: spacing.lg, gap: spacing.lg, flexGrow: 1 },
+  grid: { gap: spacing.sm },
+  gridRow: { flexDirection: 'row', gap: spacing.sm },
+  gridButton: { flex: 1 },
+  chartCard: { flexGrow: 1 },
 });

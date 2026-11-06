@@ -110,6 +110,10 @@ None of these can be settled from the code, and some block the rest:
         Profile > Steps); calories left match the Food tab, and say "eaten"
         with no goal and "over" past it; the streak shows the flame. On a
         phone where steps are off, the tile says Off and opens Settings.
+  - [ ] Today fits on one screen without scrolling: the tiles, Start
+        workout with Generate, Presets, Start a run and Log activity two to a
+        row, and the body chart filling the rest. With a plan for today or on
+        a small phone it may scroll a little; the chart never overlaps.
   - [ ] Progress: the calendar and chosen day work as the old Calendar did,
         Recent workouts lists everything newest first and opens workouts and
         runs, and the stats below match the old Stats tab. Pull to refresh.

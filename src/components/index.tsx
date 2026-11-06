@@ -52,9 +52,12 @@ export function StatTile({
   children,
   onPress,
   accessibilityLabel,
+  compact = false,
 }: {
   value: string;
   label: string;
+  /** Tighter padding and a smaller number, for Today's tiles. */
+  compact?: boolean;
   /** Drawn before the number, like the streak's flame. */
   icon?: ReactNode;
   /** Smaller text after the number: " / 10k". */
@@ -69,7 +72,7 @@ export function StatTile({
     <>
       <View style={styles.tileValue}>
         {icon}
-        <Text style={[text.stat, valueColor ? { color: valueColor } : null]}>
+        <Text style={[text.stat, compact && styles.statCompact, valueColor ? { color: valueColor } : null]}>
           {value}
           {suffix ? <Text style={styles.tileSuffix}>{suffix}</Text> : null}
         </Text>
@@ -78,16 +81,17 @@ export function StatTile({
       <Text style={text.caption}>{label}</Text>
     </>
   );
+  const tile = [styles.tile, compact && styles.tileCompact];
   if (!onPress) {
     return (
-      <View style={styles.tile} accessible={accessibilityLabel != null} accessibilityLabel={accessibilityLabel}>
+      <View style={tile} accessible={accessibilityLabel != null} accessibilityLabel={accessibilityLabel}>
         {body}
       </View>
     );
   }
   return (
     <Pressable
-      style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
+      style={({ pressed }) => [tile, pressed && styles.tilePressed]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
@@ -124,6 +128,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.xs,
   },
+  tileCompact: { padding: spacing.md },
+  statCompact: { fontSize: 24 },
   tilePressed: { backgroundColor: colors.surfaceRaised },
   tileValue: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   tileSuffix: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },

@@ -30,13 +30,14 @@ import { spacing } from '@/theme/typography';
 export function TodayTiles({ consistency, streak }: { consistency: number; streak: number }) {
   return (
     <View style={styles.tiles}>
-      <StatTile value={consistencyPercent(consistency)} label="consistency, 30 days" />
+      <StatTile compact value={consistencyPercent(consistency)} label="consistency, 30 days" />
       <StepsTile />
       <CaloriesTile />
       <StatTile
+        compact
         value={String(streak)}
         label="day streak"
-        icon={<GlyphIcon glyph="flame" color={colors.warning} size={26} />}
+        icon={<GlyphIcon glyph="flame" color={colors.warning} size={22} />}
         accessibilityLabel={`${streak}-day streak`}
       />
     </View>
@@ -54,7 +55,7 @@ function StepsTile() {
   const [editing, setEditing] = useState(false);
 
   if (access === 'undetermined') {
-    return <StatTile value="Turn on" label="steps today" onPress={() => void request()} accessibilityLabel="Turn on steps" />;
+    return <StatTile compact value="Turn on" label="steps today" onPress={() => void request()} accessibilityLabel="Turn on steps" />;
   }
   if (access === 'denied') {
     const explain = () =>
@@ -62,17 +63,18 @@ function StepsTile() {
         { text: 'Not now', style: 'cancel' },
         { text: 'Open Settings', onPress: () => void Linking.openSettings() },
       ]);
-    return <StatTile value="Off" label="steps today" onPress={explain} accessibilityLabel="Steps are off" />;
+    return <StatTile compact value="Off" label="steps today" onPress={explain} accessibilityLabel="Steps are off" />;
   }
   if (access !== 'granted' || steps == null) {
     // Still checking, or a phone that can't count steps.
-    return <StatTile value="—" label="steps today" />;
+    return <StatTile compact value="—" label="steps today" />;
   }
 
   const progress = stepProgress(steps, goal);
   return (
     <>
       <StatTile
+        compact
         value={steps.toLocaleString('en-US')}
         suffix={` / ${stepGoalShort(goal)}`}
         label="steps today"
@@ -94,7 +96,7 @@ function CaloriesTile() {
   const access = useAccess();
   const openFood = () => router.navigate('/(tabs)/food');
   if (!hasFeature('nutrition', access)) {
-    return <StatTile value="Pro" label="food diary" valueColor={colors.primary} onPress={openFood} />;
+    return <StatTile compact value="Pro" label="food diary" valueColor={colors.primary} onPress={openFood} />;
   }
   return <CaloriesLeft onPress={openFood} />;
 }
@@ -117,6 +119,7 @@ function CaloriesLeft({ onPress }: { onPress: () => void }) {
   const tile = calorieTile(view.budget, s.energyUnit);
   return (
     <StatTile
+      compact
       value={tile.value}
       label={tile.label}
       valueColor={tile.over ? colors.danger : undefined}
@@ -127,7 +130,7 @@ function CaloriesLeft({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   track: { height: 4, borderRadius: 2, backgroundColor: colors.border, overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: colors.primary },
 });
