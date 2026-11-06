@@ -44,8 +44,9 @@ None of these can be settled from the code, and some block the rest:
     Foods (FNDDS) as JSON from https://fdc.nal.usda.gov/download-datasets/
     and unzip them into a folder outside the repo, say `C:\dev\fdc`. Put
     `SUPABASE_SERVICE_ROLE_KEY` in the PC's `.env` for this step only (it is
-    gitignored; never in EAS or the app), then from `C:\dev\gym-app` do a dry
-    run first, which only counts:
+    gitignored; never in EAS or the app), then from the folder with the 1.2
+    code checked out (`C:\dev\gym-app-nutrition`; the script isn't on `main`
+    yet) do a dry run first, which only counts:
 
     ```powershell
     npm run foods:usda -- C:\dev\fdc\foundation.json C:\dev\fdc\sr_legacy.json C:\dev\fdc\survey.json
