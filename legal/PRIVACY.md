@@ -52,7 +52,7 @@ While a run records, and while the rest timer runs between sets, the app shows i
 
 ## 2. Health and fitness information
 
-Training data, bodyweight, calories burned, step counts, and everything in the food diary (what you eat and drink, weigh-ins, nutrition goals and the goal calculator's inputs) are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive. The routes of runs you record are precise location information, and can show where you live or spend your time. Only you can see a run's full route. Friends see a trimmed outline only if you choose to share a run's map (see Section 4).
+Training data, bodyweight, calories burned, step counts, and everything in the food diary (what you eat and drink, weigh-ins, nutrition goals and the goal calculator's inputs) are **health-related information**. Some state laws — including Washington's My Health My Data Act — treat this category as especially sensitive. Our Consumer Health Data Privacy Policy sets out, on its own, what health data we collect, where it comes from, who receives it and how to use your rights: https://lindellrhett-gif.github.io/rust-strength/health-data.html The routes of runs you record are precise location information, and can show where you live or spend your time. Only you can see a run's full route. Friends see a trimmed outline only if you choose to share a run's map (see Section 4).
 
 We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, recording your runs, calculating your stats and trophies, and keeping your food diary, its totals, goals and reports.
 

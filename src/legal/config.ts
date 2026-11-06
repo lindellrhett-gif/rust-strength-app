@@ -26,6 +26,11 @@ export const LEGAL = {
   privacyPolicyUrl: 'https://lindellrhett-gif.github.io/rust-strength/privacy.html',
   termsUrl: 'https://lindellrhett-gif.github.io/rust-strength/terms.html',
   /**
+   * The Consumer Health Data Privacy Policy, linked on its own from the site's
+   * homepage, the App Store description and Privacy & legal in the app.
+   */
+  healthDataPolicyUrl: 'https://lindellrhett-gif.github.io/rust-strength/health-data.html',
+  /**
    * Where the sign-up confirmation link lands. Must also be listed under
    * Supabase → Authentication → URL Configuration → Redirect URLs, or Supabase
    * ignores it and falls back to the Site URL.

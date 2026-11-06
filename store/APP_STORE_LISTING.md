@@ -94,7 +94,7 @@ LIFTING
 
 Weight suggestions after every set, with a plain-English reason for each one.
 Every set from last time shown while you log, top set in bold.
-Over 200 exercises built in, or add your own. Search forgives typos.
+Over 200 exercises built in, or add your own.
 Presets, and a generator that builds a session from your equipment.
 A rest timer on your Lock Screen and in the Dynamic Island, with your next set.
 
@@ -107,7 +107,7 @@ Save a route and compare your attempts. Enter treadmill runs by hand.
 
 FOOD DIARY (RUST STRENGTH PRO)
 
-Search thousands of everyday foods from USDA FoodData Central, or scan a barcode to look up a packaged food on Open Food Facts.
+Search thousands of everyday foods from USDA FoodData Central, or scan a barcode to look up a packaged food.
 Recent and frequent foods, quick add, saved meals, your own foods and recipes, or a recipe imported from a link.
 Calories, carbs, fat and protein for each meal and the day, plus fiber, sodium, sugars, vitamins and minerals.
 A calorie goal from a calculator or your own number, and macro and nutrient targets.
@@ -125,7 +125,7 @@ Share a card after any workout or run.
 
 DESIGNED TO ASK FOR LITTLE
 
-No ads. No tracking. No analytics beyond subscription counts. An email address and a password keep your training synced. Location is used only for runs you record and privacy zones you set, and the camera only to read barcodes, on your phone. Friends see a summary of a session, never the individual sets, and a run's map only if you share it, with the start and end hidden. Export everything, or delete your account and all its data, from inside the app.
+No ads. No tracking. No analytics beyond subscription counts. An account keeps your training synced. Location is used only for runs you record and privacy zones you set, and the camera only to read barcodes, on your phone. Friends see a summary of a session, never the individual sets, and a run's map only if you share it, with the start and end hidden. Export everything, or delete your account and all its data, from inside the app.
 
 RUST STRENGTH PRO
 
@@ -139,12 +139,15 @@ Calories and nutrients come from food labels, food databases and what you type i
 
 Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/privacy.html
 Terms of Use: https://lindellrhett-gif.github.io/rust-strength/terms.html
+Consumer Health Data Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/health-data.html
 ```
 
-`3,942 characters of 4,000`. App Review Guideline 3.1.2 wants a
+`3,983 characters of 4,000`. App Review Guideline 3.1.2 wants a
 subscription app's metadata to link its Terms of Use and Privacy Policy, so
-keep both links. The Rust Strength Pro paragraph says what is paid and how
-renewal works.
+keep both links. Washington's My Health My Data Act counts an app's download
+page as one of the places its Consumer Health Data Privacy Policy must be
+linked, so keep that link too. The Rust Strength Pro paragraph says what is
+paid and how renewal works.
 
 1.1 used:
 
@@ -236,12 +239,12 @@ Paste this into "Notes" so the reviewer is not stuck at the sign-up screen:
 ```
 Rust Strength is a workout and running tracker with a food diary. It requires an account so training data syncs across devices. Please use the demo account in the sign-in fields; it has workouts, runs, food diary days, presets and trophies already logged, so every feature is visible without recording anything.
 
-Sign-up is email and password only. There is no advertising. The paid feature, Rust Strength Pro, is described below.
+Sign-up is by email and password, or with Sign in with Apple or Google. There is no advertising. The paid feature, Rust Strength Pro, is described below.
 
 NEW IN 1.2: RUST STRENGTH PRO AND THE FOOD DIARY
 - The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, and a non-consumable Lifetime purchase.
 - Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, the Food tab says what Pro includes and offers the same plans.
-- [Say whether the demo account has Pro, or that purchases can be tested with a sandbox account.]
+- The demo account has Rust Strength Pro, so the food diary is open without buying anything. Purchases can also be tested with a sandbox account.
 - The food diary is the Food tab. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
 - The camera is requested only when the user opens the barcode scanner (Add food > Scan); the barcode is read on the device and nothing from the camera is recorded or uploaded. A barcode can also be typed in.
 - Recipe import loads the page the user links to from the device.

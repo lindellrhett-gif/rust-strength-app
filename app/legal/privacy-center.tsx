@@ -86,6 +86,11 @@ export default function PrivacyCenter() {
         <Card title="Documents">
           <LinkRow label="Privacy Policy" onPress={() => router.push('/legal/privacy')} />
           <LinkRow label="Terms of Service" onPress={() => router.push('/legal/terms')} />
+          {/* Its own row: Washington's health data law wants it linked separately. */}
+          <LinkRow
+            label="Consumer Health Data Privacy Policy"
+            onPress={() => router.push('/legal/health-data')}
+          />
           <LinkRow label="Acknowledgements" onPress={() => router.push('/legal/notices')} />
           <Text style={text.caption}>Version {LEGAL.version} · updated {LEGAL.lastUpdated}</Text>
         </Card>

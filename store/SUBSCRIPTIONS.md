@@ -13,8 +13,11 @@ Merge it only when Pro goes on sale: its Terms and Privacy Policy (version
 - The paywall is **RevenueCat's**, designed in its dashboard. Subscribers
   manage their plan in RevenueCat's **Customer Center**.
 
-**Still yours to decide:** the prices, whether there's a free trial and how
-long, and which legal entity sells it (below).
+**Decided November 6, 2026:** $9 a month and $55 a year (or the nearest App
+Store price points, $8.99 and $54.99), sold by Bluestem Software LLC (below).
+
+**Still yours to decide:** the Lifetime price, and whether there's a free
+trial and how long.
 
 ## How it fits together
 
@@ -87,6 +90,11 @@ If the LLC should be the seller, Apple has to convert the account to an
 Organization, which needs the LLC's D-U-N-S number. Decide this, ideally with
 an accountant or attorney, before setting up banking.
 
+**Decided November 6, 2026: the LLC sells it.** The account is being
+converted to an Organization. Accept the Paid Applications Agreement and add
+the LLC's banking and tax details once the conversion is done; in-app
+purchases can be created before then, but can't go on sale.
+
 ## Going live with the App Store
 
 1. **App Store Connect > Rust Strength:**
@@ -106,6 +114,9 @@ an accountant or attorney, before setting up banking.
    3. Attach them to `rust_strength_pro`.
    4. Put them in the current offering, with the same package types as the
       Test Store.
+   5. Give the App Review demo account Pro: Customers, search for the demo
+      account's user ID (Supabase > Authentication > Users), then Grant
+      entitlement, `rust_strength_pro`, for the longest time offered.
 4. **Supabase:**
    1. Apply migration `0026_subscriptions.sql`. It's additive and safe while
       1.0 and 1.1 are live. (Done November 1, 2026.)
