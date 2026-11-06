@@ -206,7 +206,8 @@ function Diary() {
           onSetGoal={() => router.push('/nutrition/settings')}
         />
 
-        <NutrientsCard key={day} total={view.total} goal={view.goal} netCarbs={s.netCarbs} />
+        {/* Keyed by day so each opens fresh on a new day; the prefixes keep the two keys apart. */}
+        <NutrientsCard key={`nutrients-${day}`} total={view.total} goal={view.goal} netCarbs={s.netCarbs} />
 
         {exercise && exercise.entries.length > 0 ? (
           <Card title="Exercise">
@@ -228,7 +229,7 @@ function Diary() {
           </Card>
         ) : null}
 
-        <DayNote key={day} day={day} />
+        <DayNote key={`note-${day}`} day={day} />
 
         <Card>
           {[

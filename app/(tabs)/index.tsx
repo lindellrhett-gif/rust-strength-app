@@ -86,11 +86,6 @@ export default function Today() {
             </>
           ) : (
             <>
-              <Text style={text.heading}>New session</Text>
-              <Text style={text.bodyMuted}>
-                Log each set with weight, reps, RPE and the machine. You’ll get a suggested weight
-                for the next set.
-              </Text>
               <Button
                 label="Start workout"
                 onPress={go}

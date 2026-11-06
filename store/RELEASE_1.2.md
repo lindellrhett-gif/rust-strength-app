@@ -113,7 +113,11 @@ None of these can be settled from the code, and some block the rest:
   - [ ] Progress: the calendar and chosen day work as the old Calendar did,
         Recent workouts lists everything newest first and opens workouts and
         runs, and the stats below match the old Stats tab. Pull to refresh.
-  - [ ] Food tab: the diary as before, and Add food comes back to it.
+  - [ ] Food tab: the diary as before, and Add food comes back to it. Paging
+        between days shows no duplicate-key error in the dev server.
+  - [ ] Logging a set: the suggestion shows only the set (say "230 × 6–8")
+        until Show details; a set past the top of the range suggests more
+        weight for the next. In a workout, the six rest presets fit on one row.
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build
