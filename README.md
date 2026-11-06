@@ -144,7 +144,7 @@ npm test
 ## Running (version 1.1, live since October 27, 2026)
 
 GPS run tracking, built into the same app: runs are activities, so they
-appear in the Calendar, the friends feed, Stats and the streak.
+appear on the Progress tab (its calendar and stats), in the friends feed and in the streak.
 
 - **Recording:** a full-screen recorder with a countdown, the time,
   distance, current and average pace, and the route drawn live on Apple

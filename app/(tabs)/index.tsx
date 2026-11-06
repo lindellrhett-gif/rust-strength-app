@@ -2,28 +2,20 @@ import { useRouter } from 'expo-router';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, Card, LoadingView, StatTile } from '@/components';
+import { Button, Card, LoadingView } from '@/components';
 import { WorkoutTimer } from '@/components/WorkoutTimer';
 import { BodyChart } from '@/components/BodyChart';
-import { StepsTodayCard } from '@/components/StepsTodayCard';
-import { NutritionTodayCard } from '@/components/nutrition/NutritionTodayCard';
-import { GlyphIcon } from '@/components/TrophyIcon';
+import { TodayTiles } from '@/components/TodayTiles';
 import { usePlannedSessions } from '@/data/planned';
 import { useRestDays } from '@/data/restDays';
 import { useProfile } from '@/data/profile';
-import {
-  useAllTimeTotals,
-  useTodayTotals,
-  useWeeklyCoverage,
-  useTrainedDates,
-} from '@/data/stats';
+import { useWeeklyCoverage, useTrainedDates } from '@/data/stats';
 import { useStartWorkoutFromTemplate, useTemplates } from '@/data/templates';
 import { useOpenWorkout, useStartWorkout } from '@/data/workouts';
-import { formatDurationShort } from '@/domain/duration';
+import { consistency } from '@/domain/achievements';
 import { hasFeature } from '@/domain/entitlements';
 import { currentStreak, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
-import { compact } from '@/lib/format';
 import { useRunInProgress } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -32,21 +24,20 @@ export default function Today() {
   const router = useRouter();
   const profile = useProfile();
   const open = useOpenWorkout();
-  const today = useTodayTotals();
   const dates = useTrainedDates();
   const restDays = useRestDays();
   const thisWeek = weekStart(todayLocal());
   const coverage = useWeeklyCoverage(thisWeek);
-  const totals = useAllTimeTotals();
   const planned = usePlannedSessions();
   const startWorkout = useStartWorkout();
   const runInProgress = useRunInProgress();
 
-  const unit = profile.data?.unit ?? 'lb';
   const todayStr = todayLocal();
   const restDates = (restDays.data ?? []).map((r) => r.rest_date);
   const streak = currentStreak(dates.data ?? [], todayStr, restDates);
-  const refreshing = today.isRefetching || dates.isRefetching || open.isRefetching;
+  // The same 30-day figure friends see on a profile: rest days count.
+  const consistent = consistency(dates.data ?? [], todayStr, 30, restDates);
+  const refreshing = dates.isRefetching || open.isRefetching || restDays.isRefetching;
 
   const todaysPlans = (planned.data ?? []).filter((p) => p.scheduled_for === todayStr);
 
@@ -66,42 +57,15 @@ export default function Today() {
             tintColor={colors.textMuted}
             refreshing={refreshing}
             onRefresh={() => {
-              today.refetch();
               dates.refetch();
+              restDays.refetch();
               open.refetch();
               planned.refetch();
             }}
           />
         }
       >
-        <View>
-          <Text style={text.bodyMuted}>
-            {profile.data?.display_name ? `Hey ${profile.data.display_name}` : 'Ready to lift?'}
-          </Text>
-          {streak > 0 ? (
-            <View style={styles.streakRow}>
-              {/* The drawn flame, same one the streak trophy uses. */}
-              <GlyphIcon glyph="flame" color={colors.warning} size={30} />
-              <Text style={text.hero}>{streak}-day streak</Text>
-            </View>
-          ) : (
-            <Text style={text.hero}>Start a streak today</Text>
-          )}
-        </View>
-
-        <View style={styles.tiles}>
-          <StatTile value={compact(today.data?.volume ?? 0)} label={`${unit} lifted today`} />
-          <StatTile value={String(today.data?.sets ?? 0)} label="sets today" />
-          <StatTile
-            value={formatDurationShort(totals.data?.totalSeconds ?? 0)}
-            label="total time training"
-          />
-          <StatTile value={String(totals.data?.totalWorkouts ?? 0)} label="workouts all-time" />
-        </View>
-
-        {hasFeature('running') ? <StepsTodayCard /> : null}
-
-        <NutritionTodayCard />
+        <TodayTiles consistency={consistent} streak={streak} />
 
         {todaysPlans.length > 0 ? (
           <Card title="Planned for today">
@@ -212,8 +176,6 @@ function PresetShortcuts() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.xl },
-  tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
-  streakRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   secondaryRow: { flexDirection: 'row', gap: spacing.sm },
   secondaryBtn: { flex: 1 },
   presetRow: {

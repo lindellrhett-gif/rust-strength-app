@@ -76,6 +76,8 @@ export const mk = {
 /** Central place for query keys so invalidation stays consistent. */
 export const qk = {
   profile: ['profile'] as const,
+  /** The daily step goal, kept on the phone (src/data/stepGoal.ts). */
+  stepGoal: ['stepGoal'] as const,
   exercises: ['exercises'] as const,
   gyms: ['gyms'] as const,
   machines: ['machines'] as const,

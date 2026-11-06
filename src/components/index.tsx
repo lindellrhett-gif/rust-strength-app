@@ -1,4 +1,5 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -42,12 +43,57 @@ export function Pill({ label, tint }: { label: string; tint?: string }) {
   );
 }
 
-export function StatTile({ value, label }: { value: string; label: string }) {
-  return (
-    <View style={styles.tile}>
-      <Text style={text.stat}>{value}</Text>
+export function StatTile({
+  value,
+  label,
+  icon,
+  suffix,
+  valueColor,
+  children,
+  onPress,
+  accessibilityLabel,
+}: {
+  value: string;
+  label: string;
+  /** Drawn before the number, like the streak's flame. */
+  icon?: ReactNode;
+  /** Smaller text after the number: " / 10k". */
+  suffix?: string;
+  valueColor?: string;
+  /** Between the number and the label, like a progress bar. */
+  children?: ReactNode;
+  onPress?: () => void;
+  accessibilityLabel?: string;
+}) {
+  const body = (
+    <>
+      <View style={styles.tileValue}>
+        {icon}
+        <Text style={[text.stat, valueColor ? { color: valueColor } : null]}>
+          {value}
+          {suffix ? <Text style={styles.tileSuffix}>{suffix}</Text> : null}
+        </Text>
+      </View>
+      {children}
       <Text style={text.caption}>{label}</Text>
-    </View>
+    </>
+  );
+  if (!onPress) {
+    return (
+      <View style={styles.tile} accessible={accessibilityLabel != null} accessibilityLabel={accessibilityLabel}>
+        {body}
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+    >
+      {body}
+    </Pressable>
   );
 }
 
@@ -78,4 +124,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.xs,
   },
+  tilePressed: { backgroundColor: colors.surfaceRaised },
+  tileValue: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  tileSuffix: { color: colors.textMuted, fontSize: 15, fontWeight: '600' },
 });

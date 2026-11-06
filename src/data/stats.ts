@@ -126,37 +126,6 @@ export function useTrainedDates() {
   };
 }
 
-export interface TodayTotals {
-  volume: number;
-  sets: number;
-  reps: number;
-}
-
-/** Set totals for the current local day. */
-export function useTodayTotals() {
-  const { userId } = useAuth();
-  return useQuery({
-    queryKey: [...qk.totals, 'today'],
-    enabled: !!userId,
-    queryFn: async (): Promise<TodayTotals> => {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const { data, error } = await supabase
-        .from('sets')
-        .select('weight, reps')
-        .gte('performed_at', start.toISOString());
-      if (error) throw error;
-      let volume = 0;
-      let reps = 0;
-      for (const s of data ?? []) {
-        volume += s.weight * s.reps;
-        reps += s.reps;
-      }
-      return { volume: Math.round(volume), reps, sets: (data ?? []).length };
-    },
-  });
-}
-
 export function useWeeklyCoverage(weekStartDate: string) {
   const { userId } = useAuth();
   return useQuery({
