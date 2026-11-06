@@ -103,7 +103,7 @@ RUNNING
 Record runs with GPS, with your phone locked: live map, distance, pace, splits and steps.
 Auto-pause at lights, and optional spoken updates every mile or kilometre.
 Pace and elevation charts, weekly distance, and records from the mile to the marathon.
-Save a route and compare your attempts. Enter treadmill runs by hand.
+Save a route and compare your attempts.
 
 FOOD DIARY (RUST STRENGTH PRO)
 
@@ -129,7 +129,7 @@ No ads. No tracking. No analytics beyond subscription counts. An account keeps y
 
 RUST STRENGTH PRO
 
-Lifting, running, friends and trophies are free. The food diary is part of Rust Strength Pro, sold as a monthly or yearly subscription or a one-time Lifetime purchase. Payment is charged to your Apple ID. A subscription renews automatically unless you cancel it at least 24 hours before the end of the period. Manage or cancel it in your Apple ID's subscription settings.
+Lifting, running, friends and trophies are free. The food diary is part of Rust Strength Pro, sold as a monthly or yearly subscription (each with a one-month free trial) or a one-time Lifetime purchase. Payment is charged to your Apple ID. A subscription renews automatically unless you cancel it at least 24 hours before the end of the period. Manage or cancel it in your Apple ID's subscription settings.
 
 IMPORTANT
 
@@ -142,7 +142,7 @@ Terms of Use: https://lindellrhett-gif.github.io/rust-strength/terms.html
 Consumer Health Data Privacy Policy: https://lindellrhett-gif.github.io/rust-strength/health-data.html
 ```
 
-`3,983 characters of 4,000`. App Review Guideline 3.1.2 wants a
+`3,988 characters of 4,000`. App Review Guideline 3.1.2 wants a
 subscription app's metadata to link its Terms of Use and Privacy Policy, so
 keep both links. Washington's My Health My Data Act counts an app's download
 page as one of the places its Consumer Health Data Privacy Policy must be
@@ -242,7 +242,7 @@ Rust Strength is a workout and running tracker with a food diary. It requires an
 Sign-up is by email and password, or with Sign in with Apple or Google. There is no advertising. The paid feature, Rust Strength Pro, is described below.
 
 NEW IN 1.2: RUST STRENGTH PRO AND THE FOOD DIARY
-- The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, and a non-consumable Lifetime purchase.
+- The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, each with a one-month free trial as an introductory offer, and a non-consumable Lifetime purchase.
 - Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, the Food tab says what Pro includes and offers the same plans.
 - The demo account has Rust Strength Pro, so the food diary is open without buying anything. Purchases can also be tested with a sandbox account.
 - The food diary is the Food tab. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.

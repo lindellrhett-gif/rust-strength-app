@@ -12,10 +12,9 @@ Nothing here has been reviewed by a lawyer.
 
 None of these can be settled from the code, and some block the rest:
 
-- [ ] **Prices and any free trial** (SUBSCRIPTIONS.md, "Still yours to decide").
-  Decided November 6, 2026: $9 a month and $55 a year (or the nearest App
-  Store price points, $8.99 and $54.99). Still open: the Lifetime price and
-  whether there is a free trial.
+- [x] **Prices and any free trial**, decided November 6, 2026: $9 a month,
+  $55 a year and $99 for Lifetime (or the nearest App Store price points),
+  with a one-month free trial on monthly and yearly (SUBSCRIPTIONS.md).
 - [x] **Who sells it:** Bluestem Software LLC, decided November 6, 2026. The
   developer account is being converted from Individual to Organization; set
   up the Paid Applications Agreement, banking and tax once that is done.
