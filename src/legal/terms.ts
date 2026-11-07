@@ -111,7 +111,7 @@ Some jurisdictions do not allow limiting liability for personal injury or gross 
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless ${LEGAL.entity} from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
+To the extent the law allows, you agree to indemnify and hold harmless ${LEGAL.entity} from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
 
 ## 15. Governing law and disputes
 
@@ -120,6 +120,11 @@ These Terms are governed by the laws of the State of ${LEGAL.governingState}, wi
 Please contact us at ${LEGAL.contactEmail} first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in ${LEGAL.governingState}, and you and we consent to that jurisdiction.
 
 Nothing here prevents either of us from bringing a claim in small-claims court.
+
+**If you live outside the United States**, choosing ${LEGAL.governingState} law does not take away the protection of the consumer laws where you live that cannot be overridden by agreement, and if those laws let you bring a claim in your local courts, you still can.
+
+- **Australia.** If you are a consumer, nothing in these Terms excludes, restricts or modifies any guarantee, right or remedy you have under the Australian Consumer Law.
+- **New Zealand.** If you are a consumer, nothing in these Terms limits your rights under the Consumer Guarantees Act 1993 or the Fair Trading Act 1986.
 
 ## 16. Apple and Google
 

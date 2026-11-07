@@ -16,6 +16,15 @@ export const LEGAL = {
   /** Monitored inbox for privacy requests and support. */
   contactEmail: 'ruststrengthsupport@gmail.com',
 
+  /**
+   * The LLC's postal address, printed in the Privacy Policy. New Zealand's
+   * Privacy Act (IPP 3) requires the name and address of the agency that
+   * collects and holds the information. A registered agent's address or a PO
+   * box is fine; it does not have to be a home address. One line, commas
+   * between parts.
+   */
+  postalAddress: 'TODO: business mailing address',
+
   /** US state whose law governs the Terms, normally where you live. */
   governingState: 'North Dakota',
 
@@ -45,13 +54,15 @@ export const LEGAL = {
    * signed-in user is asked to accept again (see src/domain/consent.ts). A
    * patch — a clarification, a new contact address — asks nobody.
    */
-  version: '1.5.0',
+  // 1.5.1 adds the New Zealand and Australia sections. A patch: it adds rights
+  // and changes nothing for anyone who already accepted 1.5.0.
+  version: '1.5.1',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'October 26, 2026',
+  lastUpdated: 'November 6, 2026',
 
-  /** Launch region. Drives which privacy laws the documents address. */
-  region: 'United States',
+  /** Where the app is offered. Drives which privacy laws the documents address. */
+  region: 'United States, New Zealand and Australia',
 } as const;
 
 /** True while a placeholder is still unfilled — surfaced in-app during dev. */
@@ -59,6 +70,7 @@ export function hasUnresolvedPlaceholders(): boolean {
   return [
     LEGAL.entity,
     LEGAL.contactEmail,
+    LEGAL.postalAddress,
     LEGAL.governingState,
     LEGAL.privacyPolicyUrl,
     LEGAL.termsUrl,
