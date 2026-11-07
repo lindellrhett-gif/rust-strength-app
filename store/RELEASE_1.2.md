@@ -12,18 +12,27 @@ Nothing here has been reviewed by a lawyer.
 
 None of these can be settled from the code, and some block the rest:
 
-- [ ] **Prices and any free trial** (SUBSCRIPTIONS.md, "Still yours to decide").
-- [ ] **Who sells it:** Apple pays and lists you personally on an Individual
-  account, while the documents name Bluestem Software LLC (SUBSCRIPTIONS.md,
-  "Before anything goes on sale").
-- [ ] **Consumer health data.** The food diary is health data by any reading
-  (what you eat, your weight). See `legal/LEGAL_AUDIT.md` section 16 for the
-  options before publishing.
-- [ ] **Subtitle and keywords** for 1.2 (APP_STORE_LISTING.md).
-- [ ] **The guardrail choices** in the goal screen (PR #3, step 7): no goal
-  under 800 kcal saved; under 18, no weight-loss goal, no calorie number of
-  their own and no goal weight below today's; the calorie floor (1,200, or
-  1,500 for male) as a warning, not a block.
+- [x] **Prices and any free trial**, decided November 6, 2026: $9 a month,
+  $55 a year and $99 for Lifetime (or the nearest App Store price points),
+  with a one-month free trial on monthly and yearly (SUBSCRIPTIONS.md).
+- [x] **Who sells it:** Bluestem Software LLC, decided November 6, 2026. The
+  developer account is being converted from Individual to Organization; set
+  up the Paid Applications Agreement, banking and tax once that is done.
+- [x] **Consumer health data.** Decided November 6, 2026: release with the
+  risk accepted, and reduce it where the code and documents can. Done: a
+  separate Consumer Health Data Privacy Policy (`src/legal/healthData.ts`),
+  linked on its own from the site's homepage and navigation, from Privacy &
+  legal in the app, from the Privacy Policy, and from the App Store
+  description; and a procedure for answering requests within 45 days
+  (`legal/PRIVACY_REQUESTS.md`). See `legal/LEGAL_AUDIT.md` section 16.
+- [x] **Subtitle and keywords:** keep the 1.1 subtitle and the drafted 1.2
+  keywords (APP_STORE_LISTING.md), decided November 6, 2026.
+- [x] **The guardrail choices** in the goal screen, kept as built, decided
+  November 6, 2026: no goal under 800 kcal saved; under 18, no weight-loss
+  goal, no calorie number of their own and no goal weight below today's; the
+  calorie floor (1,200, or 1,500 for male) as a warning, not a block.
+- [x] **The demo account has Pro** (decided November 6, 2026): grant it in
+  RevenueCat once the App Store app is set up (SUBSCRIPTIONS.md, step 3).
 
 ## 1. Any time before the release build
 
@@ -58,9 +67,11 @@ None of these can be settled from the code, and some block the rest:
     (use the file names the downloads unzip to). Expect about 13,545 foods and
     31,369 portions. Then the same command with `--apply` on the end, and take
     the key back out of `.env`. Running it again later updates foods in place.
-- [ ] **Supabase plan.** The catalog is about 16 MB and fits the free plan,
-  but a free project pauses after a week without use, and a paused project
-  during review is a rejection (LEGAL_AUDIT.md section 4).
+- [x] **Supabase plan.** Staying on the free plan for now (decided November 6,
+  2026). The catalog is 15 MB and fits, but a free project pauses after a
+  week without use, and a paused project during review is a rejection
+  (LEGAL_AUDIT.md section 4). Open the app, or the dashboard, in the week
+  before submitting and while the build is in review.
 - [ ] **The subscription setup** in SUBSCRIPTIONS.md, "Going live with the App
   Store", steps 1 to 7. In RevenueCat's paywall, describe Pro by what the food
   diary does, the way `PRO_FEATURE_LIST` in `src/domain/subscription.ts` does,
@@ -102,7 +113,8 @@ None of these can be settled from the code, and some block the rest:
         diary are locked, buying unlocks them, Restore works, and a lapsed
         subscription locks them again.
   - [ ] Profile > Privacy & legal > Acknowledgements opens, and Download my
-        data includes the food diary.
+        data includes the food diary. Consumer Health Data Privacy Policy
+        opens and reads correctly.
   - [ ] Units from the phone's region (needs 0028): sign up a new account
         with Settings > General > Language & Region > Measurement System on
         Metric; it starts in kg, and runs in km. With Region set to
@@ -177,7 +189,7 @@ None of these can be settled from the code, and some block the rest:
   Functionality, linked to the user, not used for tracking). Health already
   covers the food diary. The full answers are in APP_STORE_LISTING.md.
 - [ ] **App Review notes:** replace them with the block in
-  APP_STORE_LISTING.md, and fill in whether the demo account has Pro.
+  APP_STORE_LISTING.md (it says the demo account has Pro, so grant it first).
 - [ ] **Description, promotional text and keywords** from
   APP_STORE_LISTING.md, and the subtitle you chose.
 - [ ] **Age rating:** answer the questionnaire again (APP_STORE_LISTING.md,
@@ -201,7 +213,9 @@ None of these can be settled from the code, and some block the rest:
   links, and the live ones don't mention Pro or the food diary. With
   `rust-strength-site` checked out next to this repo, run `npm run legal`,
   then commit and push the site repo. Version 1.6.0 is a minor bump, so
-  everyone is asked to accept once when they first open 1.2.
+  everyone is asked to accept once when they first open 1.2. Check the new
+  `health-data.html` is live and linked from the homepage before submitting:
+  the App Store description links it.
 - [ ] **Submit for review with "Manually release this version"** selected.
 
 ## 4. Release day

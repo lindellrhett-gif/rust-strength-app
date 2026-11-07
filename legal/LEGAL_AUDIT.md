@@ -216,6 +216,7 @@ international transfer terms, and a documented response process for access and
 erasure requests. The documents are written for US law and say so. **Either
 restrict availability to the United States, or get the documents reviewed for the
 EU before you submit.** This is the largest open legal question.
+Notes for adding countries later are in `store/INTERNATIONAL.md`.
 
 **Move Supabase off the free tier before submission.** Free projects pause after
 roughly a week of inactivity. If yours pauses while a reviewer has the app open,
@@ -719,6 +720,38 @@ documents were rebuilt with the site sync off.
    - **(c)** release with the current policy and accept the risk.
 
    The Act has a private right of action, which is why this sits at the top.
+
+   **Decided November 6, 2026: (c), with the risk reduced where the code and
+   documents allow.** Checked against the Act's text (RCW 19.373, read that
+   day), these were done:
+   - A separate **Consumer Health Data Privacy Policy**
+     (`src/legal/healthData.ts`, published as `health-data.html`), holding
+     only health data and covering the five things in .020(1)(a): the
+     categories and their purposes, the sources, what is shared, the
+     categories of who receives it (with contact addresses, for .040(1)(a)),
+     and how to use the rights, including the 45-day answer, the one
+     45-day extension, the twice-a-year free requests, the appeal and the
+     Attorney General's complaint page (.040(1)(f)–(h)).
+   - It is linked on its own from the site's homepage and navigation, and,
+     since the Act's "homepage" for an app includes its download page and a
+     link in its settings (.010(16)), from the App Store description and
+     Profile > Privacy & legal. The Privacy Policy points to it too.
+   - `legal/PRIVACY_REQUESTS.md`: how to log, authenticate, answer and
+     appeal a request inside the deadlines.
+   - Supabase's Data Processing Addendum is incorporated into its terms
+     automatically, which is the contract .060 asks a processor to work
+     under. Whether it covers everything .060 asks was not reviewed.
+
+   Not changed, and still judgement calls: collection relies on being
+   "necessary to provide a product or service that the consumer ... has
+   requested" (.030(1)(a)(ii)) rather than a separate consent screen;
+   session summaries reach accepted friends' feeds by default once someone
+   has friends (they can turn it off); and whether disclosures to friends,
+   who are themselves consumers rather than "third parties" (.010(29)),
+   count as sharing at all. A consent screen for the food diary would
+   reduce the risk further at the cost of a step for every new user. None of
+   this has been reviewed by a lawyer, and none of it settles whether the
+   Act applies or whether the app meets it.
 2. **Open Food Facts' licence.** The app shows Open Food Facts data and lets
    someone save a private copy of a product into their own foods. Attribution
    is given in the app. Whether per-user private copies count as a "public
