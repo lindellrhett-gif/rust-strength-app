@@ -10,12 +10,14 @@ Everything lives in one Supabase project. A compromise of that project, or of th
 
 - **Email addresses** and **hashed** passwords (bcrypt, via Supabase Auth)
 - Bodyweight, training history, activity data (distance, steps, calories)
+- Recorded runs, including their routes (precise location), saved routes and privacy
+  zones, which can show where someone lives
 - Usernames, display names, friend relationships
 - Gym and machine names the user typed
 - Abuse reports
 
-Not at risk, because it is never collected: payment details, government IDs, location,
-photos, contacts, biometrics.
+Not at risk, because it is never collected: payment details, government IDs, photos,
+contacts, biometrics.
 
 **Most likely realistic causes:** a leaked `service_role` key, a misconfigured or
 disabled RLS policy on a new table, or a compromised Supabase account login.
@@ -53,6 +55,20 @@ disabled RLS policy on a new table, or a compromised Supabase account login.
    threshold number of residents.
 10. If more than 500 residents of a state are affected, additional requirements usually
     apply.
+
+**Users outside the United States.** Check whether any affected accounts are there.
+The app does not record anyone's country, so look at what the breach exposed and ask
+users if you need to.
+
+- **New Zealand** (Privacy Act 2020, Part 6). A notifiable privacy breach is one that
+  has caused, or is likely to cause, serious harm. Tell the Privacy Commissioner as
+  soon as practicable (the NotifyUs form at https://www.privacy.org.nz) and the
+  people affected. Failing to notify the Commissioner is an offence.
+- **Australia** (Notifiable Data Breaches scheme, Privacy Act 1988 Part IIIC). If you
+  suspect an eligible data breach, finish assessing it within 30 days. If it is likely
+  to cause serious harm, tell the OAIC (the statement form at https://www.oaic.gov.au)
+  and the people affected as soon as practicable. The Privacy Policy treats the Act as
+  applying, so follow this even though the small-business exemption might cover us.
 
 **After**
 11. Fix the root cause and write down what changed.
