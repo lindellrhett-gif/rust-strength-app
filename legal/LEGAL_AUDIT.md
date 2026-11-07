@@ -216,6 +216,7 @@ international transfer terms, and a documented response process for access and
 erasure requests. The documents are written for US law and say so. **Either
 restrict availability to the United States, or get the documents reviewed for the
 EU before you submit.** This is the largest open legal question.
+Notes for adding countries later are in `store/INTERNATIONAL.md`.
 
 **Move Supabase off the free tier before submission.** Free projects pause after
 roughly a week of inactivity. If yours pauses while a reviewer has the app open,
