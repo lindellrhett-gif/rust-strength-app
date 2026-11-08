@@ -1,13 +1,16 @@
 import type { QueryClient } from '@tanstack/react-query';
 
 import type { SaveRunInput } from '@/domain/running/save';
-import { mk } from '@/lib/queryClient';
+import { mk, qk } from '@/lib/queryClient';
 import { runStore } from '@/lib/runStore';
+import { SessionUnavailableError } from '@/lib/sessionGuard';
 import { supabase } from '@/lib/supabase';
 import type { Database, DiaryEntryInsert } from '@/lib/database.types';
 
 export type SetInsert = Database['public']['Tables']['sets']['Insert'];
 export type WorkoutInsert = Database['public']['Tables']['workouts']['Insert'];
+/** Only the columns a user may change — never user_id or created_at. */
+export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 /** Postgres unique_violation. */
 const DUPLICATE_KEY = '23505';
@@ -65,6 +68,24 @@ export async function saveRunRow(input: SaveRunInput): Promise<string> {
   if (error) throw error;
   await runStore.clear(input.p_id);
   return data;
+}
+
+/**
+ * A change to your own profile. Finds the signed-in person itself, so a change
+ * made with no signal can still be finished after a restart; a change of account
+ * throws away anything queued, so it can't land on someone else.
+ */
+export async function updateProfileRow(patch: ProfileUpdate): Promise<void> {
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  const userId = data.session?.user.id;
+  if (!userId) {
+    // A token that couldn't be refreshed on a weak signal isn't the same as being
+    // signed out, and gets the longer retries while it comes back.
+    if (sessionError) throw new SessionUnavailableError();
+    throw new Error('Sign in again to save this.');
+  }
+  const { error } = await supabase.from('profiles').update(patch).eq('user_id', userId);
+  if (error) throw error;
 }
 
 // --- Nutrition (0027) -----------------------------------------------------
@@ -150,4 +171,9 @@ export function registerMutationDefaults(client: QueryClient): void {
   client.setMutationDefaults(mk.saveWeighIn, { mutationFn: saveWeighInRow });
   client.setMutationDefaults(mk.deleteWeighIn, { mutationFn: deleteWeighInRow });
   client.setMutationDefaults(mk.saveDiaryDay, { mutationFn: saveDiaryDayRow });
+  client.setMutationDefaults(mk.updateProfile, {
+    mutationFn: updateProfileRow,
+    // A replayed save has no screen behind it to refresh the profile afterwards.
+    onSettled: () => client.invalidateQueries({ queryKey: qk.profile }),
+  });
 }

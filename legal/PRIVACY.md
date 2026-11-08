@@ -84,14 +84,14 @@ The social features are **opt-in**. Until you choose a username and add a friend
 - **Anyone signed in** can search usernames and display names — but only for accounts that have chosen their own handle. Nothing else is visible.
 - **Accepted friends** can see your username, display name, trophies, badges, level, streak, consistency, total workouts, total volume, total reps and sets, total time trained, activity totals, total distance run, how many friends you have, how many reactions your posts have received, the trophies you chose to show by your name, your daily step totals if you share them, your per-exercise personal bests, the dates you worked out, and whether you log in pounds or kilograms (so totals can be compared fairly).
 - **The leaderboard** ranks you and your accepted friends by current streak, total weight lifted, workout time, consistency, activity time, distance run and, for people who share them, daily steps. It uses only the figures listed above, and only you and your accepted friends appear on it.
-- **Accepted friends also see a summary of each session in the feed** (see below).
+- **Accepted friends also see a summary of each session in the feed and on your profile** (see below).
 - **Nobody** can see your email address, bodyweight, notes, planned sessions, rest days, privacy zones, saved routes, step counts (unless you share daily steps), the full route of any run, the individual sets inside a workout, or anything in your food diary. Rest days you mark do keep your streak going and count toward your consistency, so those two figures reflect them, but the days themselves are never shown to anyone.
 
 ### The friend feed
 
 **Sharing starts off.** New accounts do not post anything to the feed. When you accept your first friend, the app asks once whether to share your sessions with your friends, and you can change your answer at any time in Profile, under "Sharing with friends".
 
-While sharing is on, a summary of each workout you finish or activity you log appears in the feed of the friends you have accepted. A summary is:
+While sharing is on, a summary of each workout you finish or activity you log, including ones from before you turned sharing on, appears in the feed of the friends you have accepted, and on your profile for them to look back through. A summary is:
 
 - the name of the session or activity, and when it happened
 - how long it lasted
@@ -111,7 +111,7 @@ Each run has its own sharing switches, and Running settings sets the default for
 
 Friends can react to a post. You see how many of each reaction a post received, but **not who left them**.
 
-**You can switch this off.** In Profile, under "Sharing with friends", turn off "Show my sessions in the feed" and your sessions stop appearing for everyone immediately. The rest of the friends features keep working.
+**You can switch this off.** In Profile, under "Sharing with friends", turn off "Show my sessions in the feed" and your sessions stop appearing for everyone immediately, in the feed and on your profile. The rest of the friends features keep working.
 
 You can remove a friend or block someone at any time. Blocking removes any existing friendship and hides you from each other in search.
 

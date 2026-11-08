@@ -234,10 +234,10 @@ result the questionnaire gives.
 
 ## App Review notes
 
-Paste this into "Notes" so the reviewer is not stuck at the sign-up screen (3,766 of the 4,000 characters allowed):
+Paste this into "Notes" so the reviewer is not stuck at the sign-up screen (3,814 of the 4,000 characters allowed):
 
 ```
-Rust Strength is a workout and running tracker with a food diary. An account keeps training synced across devices. Please use the demo account; it has workouts, runs, food diary days, presets and trophies logged, so every feature is visible without recording anything.
+Rust Strength is a workout and running tracker with a food diary. An account keeps training synced across devices. Please use the demo account; it has workouts, runs, food diary days, presets, trophies and a friend with shared sessions, so every feature is visible without recording anything.
 
 Sign-up is by email and password, or Sign in with Apple or Google. No advertising.
 
@@ -263,7 +263,7 @@ RUNNING (SINCE 1.1)
 - Share cards are made on the device; saving one asks for add-only Photos access. The app never reads the photo library.
 
 USER-GENERATED CONTENT
-Users choose a username and display name and may name their own exercises, machines, presets, activities, runs and routes. Accepted friends see each other's profiles, a feed of finished sessions and runs, and a leaderboard, and can react with one of four fixed reactions. No commenting or messaging. Report and block are on any profile (Friends > open a profile > Report). Feed sharing starts off for new accounts; the app asks once when the first friend is accepted, and Profile > Sharing with friends changes it.
+Users choose a username and display name and may name their own exercises, machines, presets, activities, runs and routes. Accepted friends see each other's profiles, a feed of finished sessions and runs, and a leaderboard, and can react with one of four fixed reactions. No commenting or messaging. Report and block are on any profile (Friends > open a profile > the ... button at the top right). Feed sharing starts off for new accounts; the app asks once when the first friend is accepted, and Profile > Sharing with friends changes it.
 
 ACCOUNT
 Deletion: Profile > Privacy & legal > Delete my account. Password reset: "Forgot password?" on the sign-in screen emails a one-time code.

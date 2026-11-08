@@ -17,8 +17,8 @@ import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
 /**
- * Choosing the daily step goal, from the steps tile on Today or from
- * Profile. The goal stays on the phone with the steps themselves.
+ * Choosing the daily step goal from the steps tile on Today. Profile edits it
+ * in place instead. The goal stays on the phone with the steps themselves.
  */
 export function StepGoalSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const saved = useStepGoal();

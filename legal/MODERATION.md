@@ -113,7 +113,7 @@ webhook when the queue starts arriving faster than you check it.
 
 If they ask about content moderation, the honest answer is short:
 
-> Users can report any profile from the Friends tab and can block any user,
+> Users can report any friend's profile from its ... button and can block any user,
 > which also removes the friendship. Reports go to a queue the developer reviews
 > daily. Depending on severity the response is resetting an offensive username,
 > banning the account, or deleting it. There is no public content and no

@@ -26,6 +26,17 @@ export const colors = {
   warning: '#F5B14C',
   danger: '#F26D6D',
 
+  // Feed posters: a dark tint and its bright ink, for each kind of session
+  posterLift: '#14263F',
+  posterLiftInk: '#8FB8FF',
+  posterRecord: '#2A2008',
+  posterRecordInk: '#F5B14C',
+  posterRun: '#10202E',
+  posterRunInk: '#59C2FF',
+  posterActivity: '#10261E',
+  posterActivityInk: '#3ECF8E',
+  posterTitle: '#DDE5EC',
+
   // RPE scale (6 → 10), cool to hot
   rpe6: '#3ECf8e',
   rpe7: '#8FD14F',

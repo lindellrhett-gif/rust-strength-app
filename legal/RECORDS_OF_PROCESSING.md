@@ -232,7 +232,7 @@ screen, by a separate checkbox (`HEALTH_CONSENT_LABEL` in
 
 | | |
 |---|---|
-| Purpose | Let people find each other by a chosen username, add friends, see friends' stats, personal bests, feed and leaderboard, react to posts, and block |
+| Purpose | Let people find each other by a chosen username, add friends, see friends' stats, personal bests, feed, session grid and leaderboard, react to posts, and block |
 | Legal basis | Art. 6(1)(b) for the friend features the person uses. Showing health-related summaries to friends: Art. 9(2)(a), by turning sharing on (the Privacy Policy's table says the same) |
 | Data subjects | Users; their friends; people who send or receive requests; blocked users |
 | Personal data | **`profiles`:** `username`, `display_name`, `username_chosen`, `share_workouts` (default false for new accounts from 1.2, migration 0031), `share_choice_at` (0030), `share_steps`, `featured_trophies`. **`friendships`:** who asked whom, status, times. **`user_blocks`:** who blocked whom, time. **`feed_reactions`:** post, person, reaction, time. **Shown to friends, worked out on the server:** totals (workouts, volume, reps, sets, time, activity time, run distance), streaks, 30-day consistency, the dates the person trained, per-exercise personal bests, friend count, reactions received (a count), unit, featured trophies, shared daily steps. **Feed posts** (only with sharing on): session or activity name, time, length, volume, sets, reps, exercise names, record count; for runs, distance, time, pace and the trimmed outline if chosen. User-typed names of exercises, gyms, machines, presets, workouts and activities can appear to friends |
@@ -340,7 +340,8 @@ review: ______ (owner to fill in). Kept while the account exists.
   account and the health consent is optional.
 - The social layer is small: friends only, summaries only, no messages,
   comments, photos, public profiles, follower counts, recommendations or
-  endless feed.
+  endless feed. From 1.2 it looks bigger: large posts, a grid of a friend's
+  sessions and a count of their accepted friends, with no new data.
 - Pro (the food diary) is paid.
 - One person runs the company and does all moderation, support and requests.
 
@@ -383,7 +384,7 @@ has known weak points; see risk R12.
 | Run maps are private by default, per run and in the default setting. A shared map is a trimmed, simplified outline made on the server. The full route never reaches anyone else's phone | 0015, 0021 |
 | Location only while a run records, "While Using the App" only, no geofencing | Privacy Policy section 1, Consumer Health Data Privacy Policy section 1 |
 | "Show my sessions in the feed" starts off for new accounts from 1.2, with one question when the first friend is accepted | 0030, 0031, `src/domain/sharePrompt.ts` |
-| Feed posts are summaries; individual sets and notes never leave the server | `rpc_friend_feed` |
+| Feed posts and the grid on a friend's profile are summaries; individual sets and notes never leave the server | `rpc_friend_feed`, `rpc_friend_posts`, both through `private.feed_posts` (0035) |
 | Reactions show counts, not who reacted, enforced in the database | 0009 |
 | Rest days are never shown to anyone; only the streak and consistency figures reflect them | 0008, Privacy Policy section 4 |
 | No analytics, advertising, crash-reporting or tracking SDKs; no push tokens | `legal/LEGAL_AUDIT.md` |

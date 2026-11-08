@@ -87,15 +87,15 @@ Points that rest on text we could not read are marked **not checked**.
 
 ## 2. How the service works
 
-The assessment rests on this. Checked in the code on November 7, 2026.
+The assessment rests on this. Checked in the code on November 8, 2026.
 
 ### 2.1 What other people can see
 
 | Who | What they see | Code |
 |---|---|---|
 | Anyone signed in | The username and display name of accounts that chose their own handle, by typing the start of the username (3 characters or more, 20 results at most, blocks excluded both ways). Nothing else. | `rpc_search_users` (0007) |
-| Either side of a friend request | The other person's username (and display name). | `app/(tabs)/friends.tsx` |
-| Accepted friends | Totals, streaks, consistency, workout dates, personal bests per exercise, trophies, level and the friends-only leaderboard. If the person shares: a feed of session summaries (name, time, length, volume, sets, reps, exercise names, record count; for runs, distance, time and pace, and a trimmed map only if chosen for that run). Reaction counts, not who reacted. | `rpc_friend_stats`, `rpc_friend_prs`, `rpc_friend_leaderboard`, `rpc_friend_feed` (0024) |
+| Either side of a friend request | The other person's username (and display name). | `app/find-friends.tsx` |
+| Accepted friends | Totals, streaks, consistency, workout dates, personal bests per exercise, trophies, level and the friends-only leaderboard. If the person shares: session summaries, in a feed and as a grid on their profile, including sessions from before they turned sharing on (name, time, length, volume, sets, reps, exercise names, record count; for runs, distance, time and pace, and a trimmed map only if chosen for that run). Reaction counts, not who reacted. | `rpc_friend_stats`, `rpc_friend_leaderboard` (0024), `rpc_friend_prs` (0008), `rpc_friend_feed`, `rpc_friend_posts` (0035, sharing `private.feed_posts`) |
 | Nobody else | The food diary, weigh-ins, nutrition goals, birth year, single sets, notes, rest days, privacy zones, saved routes and full routes. | Owner-only row-level security; `supabase/tests/nutrition.test.mjs` |
 
 Section 2.4 lists where the database allows more than this.
@@ -104,7 +104,7 @@ Section 2.4 lists where the database allows more than this.
 
 - **Usernames.** Random (`lifter_7f3a91`) until the person chooses one. The app
   allows letters, numbers and underscores, 3 to 20 characters
-  (`app/(tabs)/profile.tsx`).
+  (`src/components/profile/ProfileSheets.tsx`).
 - **Display names.** Shown in search, the friends list, the feed and the
   leaderboard when set. The 1.2 app has no screen to set one, but the column
   can be written through the API (`profiles_update_own`, 0001).
@@ -125,13 +125,15 @@ Section 2.4 lists where the database allows more than this.
 - **Remove friend, block, report.** Blocking removes the friendship both ways
   and hides both people from each other's search and feed (`rpc_block_user`,
   0007). Nobody is notified of a removal or a block.
-- **Report and Block are only on an accepted friend's profile**
-  (`app/friend/[id].tsx`), not on an incoming request or a search result.
+- **Report and Block are only on an accepted friend's profile**, behind the ...
+  button at the top right (`app/friend/[id].tsx`), not on an incoming request or
+  a search result.
   Anyone can also report by email (Terms section 6).
 - **Reactions.** Four fixed ones (fire, strong, heavy, respect), one per person
   per post. The author sees counts only (0008, 0009).
 - **Not present:** direct or group messages, comments, uploaded photos, videos,
-  audio or files, livestreaming, public profiles or posts, follower counts,
+  audio or files, livestreaming, public profiles or posts, follower counts (a
+  profile does show how many accepted friends someone has, to those friends only),
   recommended people or content, an endless feed (it loads one page of 30
   posts), reposting, links, groups, a marketplace, advertising.
 - **Share cards** are images made on the phone and sent outside the app through
@@ -173,7 +175,7 @@ you accept can see anything about you. See actions 1 and 2 in section 7.
 | Risk factor | Present? | Notes |
 |---|---|---|
 | Social media service | Partly | A fitness tracker with a friends feature, not a social network. Treated as present, to be safe. |
-| User profiles | Yes | A friend's profile shows their training figures. |
+| User profiles | Yes | A friend's profile shows their training figures and, from 1.2, a grid of the session summaries they share. Friends only. |
 | Accounts without identity checks | Yes | An email address is enough. Handles are pseudonymous. The Terms allow one account per person; nothing enforces it. |
 | User connections | Yes | Friending, which both people must agree to (but see 2.4). |
 | User search | Yes | By the start of a username. |
@@ -395,7 +397,7 @@ them. The 2026 consolidated codes may number them differently (**not checked**).
 |---|---|---|---|
 | Accountable person | Rhett Lindell, who owns and runs Bluestem Software LLC, is accountable for the illegal content and children's safety duties and the reporting and complaints duties. | This file | ICU A2, PCU A2 |
 | Content moderation | A person reviews every report, once a day while the app is live. Actions: reset a name, ban, delete the account, or dismiss. Aim: act on abusive content within 24 hours. No automated moderation. | `legal/MODERATION.md`; Terms section 6 | ICU C1, C2; PCU C1, C2 |
-| Reporting | Report on a friend's profile: five reasons (harassment or bullying, pretending to be someone else, offensive username or name, spam, something else) and up to 1,000 characters (`user_reports`, 0007). Anyone, with or without an account, can report illegal content by email, saying where it is and why. | `src/components/ReportUserModal.tsx`; Terms section 6 | Reporting and complaints measures for all services |
+| Reporting | Report on a friend's profile, behind its ... button: five reasons (harassment or bullying, pretending to be someone else, offensive username or name, spam, something else) and up to 1,000 characters (`user_reports`, 0007). Anyone, with or without an account, can report illegal content by email, saying where it is and why. | `src/components/ReportUserModal.tsx`; Terms section 6 | Reporting and complaints measures for all services |
 | Reasons and appeals | When we act, we tell the person what we did, the rule or law it was based on, and how to challenge it. Anyone who thinks we got it wrong can email, and a person reviews the decision. | Terms section 6 | Complaints and appeals measures |
 | Terms of service | Section 4 (acceptable use) sets the rules; section 6 covers reporting, enforcement, reasons, appeals and the contact point. Plain English, with an equally valid French version. Linked on sign-up, the consent screen and Profile > Privacy & legal. | `src/legal/terms.ts`, `src/legal/fr/terms.ts` | ICU G1, G3; PCU G1, G3 |
 | Block and remove friend | Block ends any friendship and hides both people from each other. Removing a friend is a long press. Neither notifies anyone. | `rpc_block_user` (0007) | Beyond what a small low-risk service is asked for |
@@ -535,6 +537,7 @@ done and what it found, and of the measures taken.
 | Date | Why | What changed | By |
 |---|---|---|---|
 | November 7, 2026 | First assessment, before the UK launch | All three assessments written | Rhett Lindell |
+| November 8, 2026 | The 1.2 Friends redesign: a row of friends with a ring for training or a record today, large posts, a grid of a friend's sessions, a friend count, a podium, Report and Block moved behind a ... button | Sections 2.1, 2.3 and 2.5 and the measures table updated. No new data or audience, and no photos, comments or messages. Risk 5 (controlling behaviour): the grid and ring make someone's routine easier to watch, though nothing new is shared and sharing still starts off; stays Low, watched in reports. Over-training and comparison pressure: the podium and gold ring push the same way; stays Low with no notifications, kept under review. Report is one tap further away, so check in the first reports that people find it | Rhett Lindell |
 
 **Approved by the accountable person:** Rhett Lindell, ______________ (date).
 

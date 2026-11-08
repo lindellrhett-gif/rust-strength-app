@@ -23,6 +23,8 @@ export function useStepGoal() {
 export function useSetStepGoal() {
   const client = useQueryClient();
   return useMutation({
+    // Only ever touches the phone, so it needn't wait for a signal.
+    networkMode: 'always',
     mutationFn: async (goal: number) => {
       const clean = cleanStepGoal(goal);
       await AsyncStorage.setItem(STEP_GOAL_KEY, String(clean));

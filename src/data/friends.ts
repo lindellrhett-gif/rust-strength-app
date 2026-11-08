@@ -7,7 +7,7 @@ import {
   type LeaderboardPeriod,
 } from '@/domain/leaderboard';
 import { todayLocal } from '@/lib/dates';
-import { qk } from '@/lib/queryClient';
+import { invalidateFriendData, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -94,7 +94,8 @@ export function useSearchUsers(query: string) {
   const trimmed = query.trim();
   return useQuery({
     queryKey: [...qk.userSearch, trimmed],
-    enabled: trimmed.length >= 2,
+    // The server answers from three characters (rpc_search_users).
+    enabled: trimmed.length >= 3,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('rpc_search_users', { q: trimmed });
       if (error) throw error;
@@ -133,7 +134,7 @@ export function useRespondToRequest() {
         if (error) throw error;
       }
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.friendships }),
+    onSuccess: () => invalidateFriendData(client),
   });
 }
 
@@ -144,7 +145,7 @@ export function useRemoveFriend() {
       const { error } = await supabase.from('friendships').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.friendships }),
+    onSuccess: () => invalidateFriendData(client),
   });
 }
 

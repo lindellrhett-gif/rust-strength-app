@@ -883,3 +883,13 @@ Also corrected in the same pass, in English and French:
 - **Profiling.** "No profiling" was broader than the app's calculations
   support.
 - **Share card route.** The run share card's route now starts off.
+
+### The grid on a friend's profile (0035, November 8, 2026)
+
+Shows the same
+session summaries a friend could already fetch from the feed, through one shared
+function, so the feed and the grid can't come to disagree about who may see what
+(`supabase/tests/friend-posts.test.mjs`). Nothing new is collected. The Privacy
+Policy now says summaries also appear on your profile, and
+`legal/AU_SOCIAL_MEDIA_AGE.md` records a reassessment of the redesigned Friends
+tab.

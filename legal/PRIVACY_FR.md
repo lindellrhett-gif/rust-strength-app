@@ -84,14 +84,14 @@ Les fonctionnalités sociales sont **à adhésion volontaire**. Tant que vous n�
 - **Toute personne connectée** peut rechercher des noms d’utilisateur et des noms affichés, mais seulement pour les comptes qui ont choisi leur propre pseudonyme. Rien d’autre n’est visible.
 - **Les amis acceptés** peuvent voir votre nom d’utilisateur, votre nom affiché, vos trophées, vos badges, votre niveau, votre séquence, votre régularité, votre nombre total d’entraînements, votre volume total, votre nombre total de répétitions et de séries, votre temps total d’entraînement, vos totaux d’activité, la distance totale que vous avez courue, votre nombre d’amis, le nombre de réactions reçues par vos publications, les trophées que vous avez choisi d’afficher à côté de votre nom, vos totaux de pas quotidiens si vous les partagez, vos records personnels par exercice, les dates de vos entraînements, et si vous consignez en livres ou en kilogrammes (pour que les totaux puissent être comparés équitablement).
 - **Le classement** vous classe, vous et vos amis acceptés, selon la séquence en cours, le poids total soulevé, le temps d’entraînement, la régularité, le temps d’activité, la distance courue et, pour les personnes qui les partagent, les pas quotidiens. Il n’utilise que les chiffres énumérés ci-dessus, et n’y figurent que vous et vos amis acceptés.
-- **Les amis acceptés voient aussi un résumé de chaque séance dans le fil** (voir ci-dessous).
+- **Les amis acceptés voient aussi un résumé de chaque séance dans le fil et sur votre profil** (voir ci-dessous).
 - **Personne** ne peut voir votre adresse courriel, votre poids corporel, vos notes, vos séances planifiées, vos jours de repos, vos zones de confidentialité, vos parcours sauvegardés, vos nombres de pas (sauf si vous partagez vos pas quotidiens), le parcours complet d’une course, les séries individuelles d’un entraînement ni quoi que ce soit dans votre journal alimentaire. Les jours de repos que vous marquez maintiennent bien votre séquence et comptent dans votre régularité, de sorte que ces deux chiffres en tiennent compte, mais les jours eux-mêmes ne sont jamais montrés à personne.
 
 ### Le fil des amis
 
 **Le partage est désactivé au départ.** Les nouveaux comptes ne publient rien dans le fil. Lorsque vous acceptez votre premier ami, l’application vous demande une seule fois si vous voulez partager vos séances avec vos amis, et vous pouvez changer votre réponse à tout moment dans Profile, sous « Sharing with friends ».
 
-Tant que le partage est activé, un résumé de chaque entraînement que vous terminez ou de chaque activité que vous consignez apparaît dans le fil des amis que vous avez acceptés. Un résumé comprend :
+Tant que le partage est activé, un résumé de chaque entraînement que vous terminez ou de chaque activité que vous consignez, y compris ceux qui précèdent l’activation du partage, apparaît dans le fil des amis que vous avez acceptés, et sur votre profil, où ils peuvent le consulter plus tard. Un résumé comprend :
 
 - le nom de la séance ou de l’activité, et le moment où elle a eu lieu
 - sa durée
@@ -111,7 +111,7 @@ Chaque course a ses propres interrupteurs de partage, et l’écran Running sett
 
 Vos amis peuvent réagir à une publication. Vous voyez combien de réactions de chaque type une publication a reçues, mais **pas qui les a laissées**.
 
-**Vous pouvez désactiver ceci.** Dans Profile, sous « Sharing with friends », désactivez « Show my sessions in the feed » et vos séances cessent immédiatement d’apparaître pour tout le monde. Les autres fonctionnalités d’amis continuent de fonctionner.
+**Vous pouvez désactiver ceci.** Dans Profile, sous « Sharing with friends », désactivez « Show my sessions in the feed » et vos séances cessent immédiatement d’apparaître pour tout le monde, dans le fil et sur votre profil. Les autres fonctionnalités d’amis continuent de fonctionner.
 
 Vous pouvez retirer un ami ou bloquer quelqu’un à tout moment. Le blocage supprime toute amitié existante et vous cache l’un à l’autre dans la recherche.
 

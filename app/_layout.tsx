@@ -150,6 +150,10 @@ function RootNavigator() {
         options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
       />
       <Stack.Screen name="recent" options={{ headerShown: true, title: 'Recent workouts' }} />
+      <Stack.Screen name="stats" options={{ headerShown: true, title: 'All stats' }} />
+      <Stack.Screen name="trophies" options={{ headerShown: true, title: 'Trophies and badges' }} />
+      <Stack.Screen name="leaderboard" options={{ headerShown: true, title: 'Leaderboard' }} />
+      <Stack.Screen name="find-friends" options={{ headerShown: true, title: 'Find friends' }} />
       <Stack.Screen
         name="nutrition/add"
         options={{ headerShown: true, presentation: 'modal', title: 'Add food' }}

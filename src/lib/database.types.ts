@@ -6,6 +6,34 @@
  *   npx supabase gen types typescript --project-id <ref> > src/lib/database.types.ts
  */
 
+/** One post as rpc_friend_feed and rpc_friend_posts return it. */
+export interface FeedRpcRow {
+  subject_type: 'workout' | 'activity';
+  subject_id: string;
+  user_id: string;
+  username: string;
+  display_name: string | null;
+  occurred_at: string;
+  name: string | null;
+  duration_seconds: number;
+  volume: number;
+  total_sets: number;
+  total_reps: number;
+  exercise_names: string[];
+  record_count: number;
+  activity_kind: string | null;
+  distance: number | null;
+  distance_unit: string | null;
+  badge_ids: string[];
+  // jsonb object keyed by reaction id, e.g. { fire: 3, strong: 1 }
+  reaction_counts: Record<string, number>;
+  my_reaction: string | null;
+  route_preview: string | null;
+  featured_trophies: string[];
+  /** From migration 0035: the unit the author logs in. */
+  unit?: string | null;
+}
+
 export type Json =
   | string
   | number
@@ -1052,30 +1080,11 @@ export type Database = {
       can_react_to: { Args: { p_type: string; p_id: string }; Returns: boolean };
       rpc_friend_feed: {
         Args: { p_limit?: number; p_before?: string | null };
-        Returns: {
-          subject_type: 'workout' | 'activity';
-          subject_id: string;
-          user_id: string;
-          username: string;
-          display_name: string | null;
-          occurred_at: string;
-          name: string | null;
-          duration_seconds: number;
-          volume: number;
-          total_sets: number;
-          total_reps: number;
-          exercise_names: string[];
-          record_count: number;
-          activity_kind: string | null;
-          distance: number | null;
-          distance_unit: string | null;
-          badge_ids: string[];
-          // jsonb object keyed by reaction id, e.g. { fire: 3, strong: 1 }
-          reaction_counts: Record<string, number>;
-          my_reaction: string | null;
-          route_preview: string | null;
-          featured_trophies: string[];
-        }[];
+        Returns: FeedRpcRow[];
+      };
+      rpc_friend_posts: {
+        Args: { target: string; p_limit?: number; p_before?: string | null };
+        Returns: FeedRpcRow[];
       };
       rpc_block_user: { Args: { target: string }; Returns: undefined };
       rpc_export_my_data: { Args: Record<string, never>; Returns: Json };
