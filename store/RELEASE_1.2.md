@@ -108,6 +108,12 @@ None of these can be settled from the code, and some block the rest:
     post's volume is in. It replaces `rpc_friend_feed` with the same rules, so
     compare the live body's md5 with `0024` first. Without it the grid fills
     from the feed instead, and a kg lifter's volume isn't converted.
+  - [ ] `0036_friend_stats_unit.sql`, before testing a 1.2 build. Additive: it
+    adds the unit a friend logs in to the end of `rpc_friend_stats`. It replaces
+    that function with the same rules, so compare the live body's md5 with `0024`
+    first (`25d3743a022d65d94ef79fa266b95304` with LF line endings, matched on
+    November 8). Without it a friend's total, trophies and level stay
+    unconverted.
 - [ ] **Fill in the postal address** (`postalAddress` in `src/legal/config.ts`).
   New Zealand's privacy law requires it, and `npm run legal` refuses to
   publish the site while it is a placeholder.
@@ -233,6 +239,9 @@ None of these can be settled from the code, and some block the rest:
         "Share" turns on "Show my sessions in the feed" in Profile. Turning
         the Profile switch off and on never brings the question back.
   - [ ] A run's share card starts with "Show the route" off.
+  - [ ] A friend who logs in the other unit: "lifted" shows their total converted
+        to your unit, and their level and trophies match their own phone (needs
+        0036).
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build

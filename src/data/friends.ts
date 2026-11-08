@@ -176,6 +176,8 @@ export interface FriendStats {
   reactionsReceived: number;
   /** "trophy:tier" keys they chose to show by their name. */
   featuredTrophies: string[];
+  /** The unit they log in, which their volume and bests are stored in. Null until migration 0036. */
+  unit: 'lb' | 'kg' | null;
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -211,6 +213,7 @@ export function useFriendStats(targetUserId: string | undefined) {
         stepsTotal: row.steps_total == null ? null : Number(row.steps_total) || 0,
         reactionsReceived: Number(row.reactions_received) || 0,
         featuredTrophies: row.featured_trophies ?? [],
+        unit: row.unit === 'kg' || row.unit === 'lb' ? row.unit : null,
       };
     },
   });

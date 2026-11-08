@@ -1057,6 +1057,8 @@ export type Database = {
           steps_total: number | null;
           reactions_received: number;
           featured_trophies: string[];
+          /** From migration 0036: the unit they log in. */
+          unit?: string | null;
         }[];
       };
       rpc_friend_leaderboard: {
