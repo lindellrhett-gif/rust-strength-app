@@ -28,7 +28,30 @@ interface RawRow {
 }
 
 /**
- * All friendship edges for the signed-in user, with the other party's profile.
+ * The names of the people on the other side of your friendship rows.
+ *
+ * From migration 0033 they come through rpc_profile_names, which returns only
+ * the names; 0034 then stops anyone reading another person's profile row,
+ * which used to expose their bodyweight. Until 0033 is on the database the
+ * function doesn't exist, so the old direct read stands in.
+ */
+async function profileNames(
+  ids: string[],
+): Promise<{ user_id: string; username: string; display_name: string | null }[]> {
+  const viaRpc = await supabase.rpc('rpc_profile_names', { p_ids: ids });
+  if (!viaRpc.error) return viaRpc.data ?? [];
+  // PGRST202: no such function (yet). Anything else is a real failure.
+  if (viaRpc.error.code !== 'PGRST202') throw viaRpc.error;
+  const direct = await supabase
+    .from('profiles')
+    .select('user_id, username, display_name')
+    .in('user_id', ids);
+  if (direct.error) throw direct.error;
+  return direct.data ?? [];
+}
+
+/**
+ * All friendship edges for the signed-in user, with the other party's name.
  * Two queries rather than a join: the FK points at auth.users, so PostgREST
  * cannot embed `profiles` directly.
  */
@@ -47,11 +70,7 @@ export function useFriendships() {
       if (rows.length === 0) return [];
 
       const others = rows.map((r) => (r.requester_id === userId ? r.addressee_id : r.requester_id));
-      const { data: profiles, error: pErr } = await supabase
-        .from('profiles')
-        .select('user_id, username, display_name')
-        .in('user_id', others);
-      if (pErr) throw pErr;
+      const profiles = await profileNames(others);
 
       const byId = new Map((profiles ?? []).map((p) => [p.user_id, p]));
       return rows.map((r) => {

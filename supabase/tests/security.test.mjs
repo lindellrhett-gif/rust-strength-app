@@ -7,6 +7,9 @@ const alice = await createUser(db, 'alice@example.com');
 const bob = await createUser(db, 'bob@example.com');
 const carol = await createUser(db, 'carol@example.com');
 const dave = await createUser(db, 'dave@example.com');
+// Sharing starts off for new accounts from migration 0031; these posts are
+// meant to reach the feed, so turn it on, as the first-friend question would.
+await db.query(`update profiles set share_workouts = true`);
 
 // Alice and Bob are friends; Carol and Dave are friends; nobody else is.
 await db.query(
@@ -105,7 +108,9 @@ await asUser(db, alice, async () => {
 
   const profiles = await db.query(`select user_id from profiles order by user_id`);
   const seen = profiles.rows.map((r) => r.user_id);
-  check('profiles RLS still shows you and your friend only', seen.length === 2 && seen.includes(bob), seen);
+  // Migration 0034: nobody reads another person's profile row any more, friends
+  // included; names come through rpc_profile_names.
+  check('profiles RLS shows only your own profile', seen.length === 1 && !seen.includes(bob), seen);
 });
 
 // --- 4. Triggers still fire without EXECUTE on their functions ------------------
