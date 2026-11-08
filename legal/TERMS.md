@@ -26,7 +26,7 @@ Rust Strength is a logging and calculation tool. It is **not** a medical device,
 
 ## 2. Eligibility
 
-You must be at least 13 years old, or at least 16 if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
+You must be at least 13 years old, at least 14 if you live in Canada, or at least 16 if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
 
 ## 3. Your account
 

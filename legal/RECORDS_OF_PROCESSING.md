@@ -13,13 +13,13 @@ law. Points we could not check, or where the law is unclear, are marked
 **Status since this was written (November 7, 2026, later the same day).** The body
 below describes the code as first found. Since then:
 
-- **R2 and A8, fixed in code, not yet live.** Migration `0033_profile_names.sql`
-  adds `rpc_profile_names`, which returns only names. `src/data/friends.ts` reads
-  through it. `0034_profiles_owner_only.sql` limits the `profiles` table to its owner
-  (release day). Both are tested in `supabase/tests/friendship-integrity.test.mjs`
-  and need the owner's OK to apply to the live database. Until 0034 is live, R2
-  stays high.
-- **Also fixed in code, not yet live** (found in `legal/UK_ONLINE_SAFETY.md`):
+- **R2 and A8, half live.** Migration `0033_profile_names.sql` adds
+  `rpc_profile_names`, which returns only names, and `src/data/friends.ts` reads
+  through it; it went on the live database on November 7, 2026.
+  `0034_profiles_owner_only.sql`, which limits the `profiles` table to its owner,
+  waits for 1.2's release day. Both are tested in
+  `supabase/tests/friendship-integrity.test.mjs`. Until 0034 is live, R2 stays high.
+- **Also fixed, and live since November 7, 2026** (found in `legal/UK_ONLINE_SAFETY.md`):
   `0032_friendship_integrity.sql` stops a friendship being inserted already
   accepted, accepted by its requester, moved to other people, or requested across a
   block.
@@ -33,6 +33,8 @@ below describes the code as first found. Since then:
 - **Finding 8 and A22, done.** `legal/MODERATION.md` has the statement-of-reasons
   email.
 - **Run share cards** now start with "Show the route" off.
+- **Canada's minimum age is 14** (decided November 7, 2026), for Quebec's rule on
+  children under 14. The age is set by the phone's region like the EEA's 16.
 - **Still open:** the export gaps (finding 4), consent history (finding 6), personal
   bests revealing bodyweight (finding 2), the representatives, the postal address,
   and the other actions in 2.9 not listed here.

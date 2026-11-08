@@ -10,7 +10,7 @@ change, so recheck anything older than a few months before acting on it.
 |---|---|---|---|
 | New Zealand | The live 1.1.1, now ([PR #8](https://github.com/lindellrhett-gif/rust-strength-app/pull/8)) | Privacy Policy section; Terms consumer-law wording; breach steps | The postal address; merge #8; publish the site |
 | Australia | The live 1.1.1, now (PR #8) | As New Zealand, plus the under-16 social media self-assessment (`legal/AU_SOCIAL_MEDIA_AGE.md`) | As New Zealand |
-| Canada | 1.2 | Privacy Policy section (PIPEDA and Quebec); health consent; sharing off by default; French Terms and Privacy Policy; Quebec assessment (`legal/QUEBEC_PIA.md`) | Get the French checked; decide the Quebec under-14 question; the email provider |
+| Canada | 1.2 | Privacy Policy section (PIPEDA and Quebec); health consent; sharing off by default; French Terms and Privacy Policy; Quebec assessment (`legal/QUEBEC_PIA.md`) | Get the French checked; the email provider. Minimum age 14 in Canada (decided November 7, 2026) |
 | United Kingdom | 1.2 | UK GDPR section; health consent; sharing off by default; records and impact assessment (`legal/RECORDS_OF_PROCESSING.md`); Online Safety Act assessments (`legal/UK_ONLINE_SAFETY.md`); moderation and breach steps | A UK representative; the ICO fee check; the email provider |
 | EU, Iceland, Liechtenstein, Norway | 1.2 | As the UK, plus a minimum age of 16 there and the Digital Services Act duties in the Terms and moderation runbook | An EU representative; trader status; the email provider |
 | Mainland China | Not planned | | Needs an ICP filing number; leave it off |
@@ -46,10 +46,10 @@ documents are written as if it does, which is safe either way.
    fluent French speaker, ideally a Quebec lawyer, read them before Canada
    goes on. Both versions are stated to be equally valid, so a mistranslation
    is a real risk.
-2. **Decide the Quebec under-14 question** (`legal/QUEBEC_PIA.md`). Quebec's
-   law requires a parent's consent to collect information from a child under
-   14. The app's minimum age in Canada is 13, and it can't tell Quebec from
-   the rest of Canada.
+2. **Quebec under 14: decided November 7, 2026.** The minimum age is 14
+   when the phone's region is Canada, since Quebec's law requires a parent's
+   consent under 14 and the app can't tell Quebec from the rest of Canada
+   (`src/domain/age.ts`). Done in the app and the documents.
 3. **Answer French emails in French.** Quebec's language law gives consumers
    the right to be served in French. A translation tool is fine.
 4. **Replace the Gmail sender** for sign-up and password codes with a

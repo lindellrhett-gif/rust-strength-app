@@ -14,8 +14,14 @@ describe('minimumAgeFor', () => {
     }
   });
 
+  it('asks for 14 in Canada, for Quebec', () => {
+    expect(minimumAgeFor('CA')).toBe(14);
+    expect(minimumAgeFor('ca')).toBe(14);
+    expect(ageConfirmationLabel('CA')).toBe('I am at least 14 years old');
+  });
+
   it('keeps 13 everywhere else, the UK and Switzerland included', () => {
-    for (const region of ['US', 'GB', 'CA', 'AU', 'NZ', 'CH', 'JP']) {
+    for (const region of ['US', 'GB', 'AU', 'NZ', 'CH', 'JP']) {
       expect(minimumAgeFor(region)).toBe(13);
     }
   });
@@ -35,6 +41,7 @@ describe('minimumAgeFor', () => {
   it('uses the ages the documents print', () => {
     expect(LEGAL.minimumAge).toBe(13);
     expect(LEGAL.minimumAgeEea).toBe(16);
+    expect(LEGAL.minimumAgeCanada).toBe(14);
   });
 
   it('lists the 27 member states, 7 outermost codes and 3 other EEA states', () => {

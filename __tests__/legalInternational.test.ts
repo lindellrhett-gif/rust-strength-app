@@ -73,6 +73,9 @@ describe('the international sections', () => {
   it('print both minimum ages', () => {
     expect(TERMS_OF_SERVICE).toContain(`at least ${LEGAL.minimumAgeEea} if you live in the European Union`);
     expect(PRIVACY_POLICY).toContain(`under ${LEGAL.minimumAgeEea} in the European Union`);
+    expect(TERMS_OF_SERVICE).toContain(`at least ${LEGAL.minimumAgeCanada} if you live in Canada`);
+    expect(PRIVACY_POLICY).toContain(`under ${LEGAL.minimumAgeCanada} in Canada`);
+    expect(TERMS_OF_SERVICE_FR).toContain(`au moins ${LEGAL.minimumAgeCanada} ans si vous vivez au Canada`);
   });
 
   it('promise a representative until one is appointed', () => {

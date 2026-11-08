@@ -16,14 +16,16 @@ meets the Act.
 **Status since this was written (November 7, 2026, later the same day).** The body
 below describes the code as first found. Since then:
 
-- **The three database problems are fixed in code, but not yet live.** They are
+- **The three database problems are fixed; two of the three fixes are live.** They are
   forced or self-accepted friendships, requests across a block, and whole profile
   rows readable by friends and requesters. The fixes are migrations
   `0032_friendship_integrity.sql`, `0033_profile_names.sql` and
   `0034_profiles_owner_only.sql` (release day). They are tested in
-  `supabase/tests/friendship-integrity.test.mjs`. Each needs the owner's OK to apply
-  to the live database. The grooming and harassment ratings assume they are applied
-  before the UK storefront goes on.
+  `supabase/tests/friendship-integrity.test.mjs`. 0032 and 0033 went on the live
+  database on November 7, 2026, so forced friendships and requests across a block
+  are closed there. 0034, which closes the profile reads, waits for 1.2's release
+  day. The grooming and harassment ratings assume all three are live before the UK
+  storefront goes on.
 - **Terms section 4** now prohibits:
   - encouraging suicide, self-harm or eating disorders;
   - threats, terrorism and violent extremism;

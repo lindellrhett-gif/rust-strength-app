@@ -14,10 +14,11 @@ other law. Points we could not check, or where the law is unclear, are marked
 **Status since this was written (November 7, 2026, later the same day).** The body
 below describes the code as first found. Since then:
 
-- **T4 (R2), fixed in code, not yet live.** Migrations `0033_profile_names.sql` and
-  `0034_profiles_owner_only.sql` (release day) stop anyone but the owner reading a
-  profile row. `0032_friendship_integrity.sql` also stops forced friendships and
-  requests across a block. All three need the owner's OK to apply live.
+- **T4 (R2), fixed, half live.** Migrations `0033_profile_names.sql` and
+  `0034_profiles_owner_only.sql` stop anyone but the owner reading a profile row;
+  `0032_friendship_integrity.sql` also stops forced friendships and requests across
+  a block. 0032 and 0033 went on the live database on November 7, 2026; 0034 waits
+  for 1.2's release day.
 - **L3, done.** Canada and Quebec breach steps and an incident register, kept five
   years, are in `legal/INCIDENT_RESPONSE.md`.
 - **L4, done.** `legal/PRIVACY_REQUESTS.md` now has:
@@ -32,8 +33,11 @@ below describes the code as first found. Since then:
 - **D4, done.** The share card's "Show the route" now starts off.
 - **The Gmail mismatch in the Privacy Policy is fixed;** the provider itself is still
   consumer Gmail.
+- **D1, decided November 7, 2026: option A.** The minimum age is 14 when the
+  phone's region is Canada (`src/domain/age.ts`, `LEGAL.minimumAgeCanada`). The
+  Terms (section 2) and the Privacy Policy (sections 10 and 13) say so in both
+  languages.
 - **Still open:**
-  - the under-14 decision (D1);
   - replacing Gmail;
   - Open Food Facts;
   - the French review;
@@ -1167,7 +1171,7 @@ or decide the items in 3.1 and 3.2.
 |---|---|
 | Name | ______________________ |
 | Role | Owner, Bluestem Software LLC; person in charge of the protection of personal information |
-| D1 (Quebec under 14) decided | ______________________ (option and date) |
+| D1 (Quebec under 14) decided | Option A, minimum age 14 across Canada, November 7, 2026 |
 | D2 (Gmail) decided | ______________________ (option and date; if accepted, the reason) |
 | D3 (Open Food Facts) decided | ______________________ |
 | Signature | ______________________ |

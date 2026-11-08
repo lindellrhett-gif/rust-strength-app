@@ -78,11 +78,15 @@ None of these can be settled from the code, and some block the rest:
   requests across a block, and a friend or anyone with a pending request could
   read a person's whole profile, bodyweight included. Tested in
   `supabase/tests/friendship-integrity.test.mjs`. Needs your OK to apply each:
-  - [ ] `0032_friendship_integrity.sql`: requests only pending, only the
-    addressee accepts, nothing else changes, no requests across a block. The
-    app, 1.1 included, never did otherwise, so nothing breaks.
-  - [ ] `0033_profile_names.sql`: adds the function 1.2 reads friends' names
-    through. Additive.
+  - [x] `0032_friendship_integrity.sql`: requests only pending, only the
+    addressee accepts, nothing else changes, no requests across a block, any
+    block ends the friendship, the server stamps the accept time. The app,
+    1.1 included, never did otherwise, so nothing breaks. Applied November 7,
+    2026, with your OK, after two independent reviews; the live policies,
+    grants and triggers were checked afterwards, and the 21 friendships were
+    untouched.
+  - [x] `0033_profile_names.sql`: adds the function 1.2 reads friends' names
+    through. Additive. Applied the same day.
   - [ ] `0034_profiles_owner_only.sql` waits for **release day** (section 4):
     it closes the bodyweight leak, but 1.1 then shows "unknown" for friends'
     names until people update.
@@ -168,7 +172,8 @@ None of these can be settled from the code, and some block the rest:
         ticked. The French links under them open the French Terms and
         Privacy Policy.
   - [ ] With Settings > General > Language & Region > Region on Germany, the
-        age box says 16; on United Kingdom or United States, 13. Put it back.
+        age box says 16; on Canada, 14; on United Kingdom or United States,
+        13. Put it back.
   - [ ] An account that accepted an older version sees the consent screen
         once, with the same three boxes and the French links.
   - [ ] Profile > Privacy & legal lists both French documents, and they read

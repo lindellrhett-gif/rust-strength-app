@@ -828,9 +828,11 @@ The status and the remaining steps per country are in
    gap under the GDPR, and under Quebec's rule that information sent outside
    Quebec needs a written agreement. Replace it with a transactional provider
    before the UK, the EU or Canada.
-3. **Quebec under 14.** Quebec requires a parent's consent to collect
-   information from a child under 14. The app's Canadian minimum is 13, and
-   the phone's region cannot tell Quebec from the rest of Canada.
+3. **Quebec under 14: decided November 7, 2026.** Quebec requires a
+   parent's consent to collect information from a child under 14, and the
+   phone's region cannot tell Quebec from the rest of Canada. The owner chose
+   14 as the minimum age across Canada (`LEGAL.minimumAgeCanada`). Someone in
+   Canada whose phone region is set elsewhere still sees 13.
 4. **Consent the app depends on.** For UK and EU users, health information
    relies on explicit consent, and the app cannot work without it. Whether
    consent required to use a service is "freely given" is a known tension in
@@ -861,8 +863,11 @@ only by calling the API directly.
    Privacy Policy says nobody else sees bodyweight.
 
 Fixes:
-- Migrations `0032_friendship_integrity.sql` and `0033_profile_names.sql`.
-  Safe now; they need the owner's OK to apply live.
+- Migrations `0032_friendship_integrity.sql` and `0033_profile_names.sql`,
+  **applied to the live database on November 7, 2026** with the owner's OK,
+  after two independent reviews. The reviews added a block check on
+  accepting, a trigger that ends the friendship on any block, a server-set
+  accept time, and moved the block check out of the API.
 - `0034_profiles_owner_only.sql`, on 1.2's release day.
 - 1.2 reads friends' names through `rpc_profile_names`.
 

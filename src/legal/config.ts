@@ -91,6 +91,14 @@ export const LEGAL = {
   minimumAgeEea: 16,
 
   /**
+   * Minimum age in Canada, decided November 7, 2026. Quebec's private-sector
+   * privacy Act (s 4.1) needs a parent's consent to collect information from
+   * a child under 14, and the phone's region ("CA") can't tell Quebec from the
+   * rest of Canada, so 14 applies across Canada.
+   */
+  minimumAgeCanada: 14,
+
+  /**
    * major.minor.patch. A major or minor bump is a material change: every
    * signed-in user is asked to accept again (see src/domain/consent.ts). A
    * patch — a clarification, a new contact address — asks nobody.

@@ -7,6 +7,10 @@
  * countries, so the app asks for 16 across all of them rather than one age per
  * country. The UK's age of digital consent is 13, so it stays at 13.
  *
+ * And 14 in Canada: Quebec's privacy Act needs a parent's consent to collect
+ * information from a child under 14, and the phone's region can't tell
+ * Quebec from the rest of Canada.
+ *
  * Where someone lives is read from the phone's region setting. That is a
  * self-declared signal like the age confirmation itself; the app stores
  * neither the region nor a date of birth.
@@ -35,7 +39,9 @@ export function isEeaRegion(region: string | null | undefined): boolean {
 
 /** The minimum age for someone whose phone's region is `region`. */
 export function minimumAgeFor(region: string | null | undefined): number {
-  return isEeaRegion(region) ? LEGAL.minimumAgeEea : LEGAL.minimumAge;
+  if (isEeaRegion(region)) return LEGAL.minimumAgeEea;
+  if (region?.trim().toUpperCase() === 'CA') return LEGAL.minimumAgeCanada;
+  return LEGAL.minimumAge;
 }
 
 /** The sign-up and consent screens' age checkbox. */

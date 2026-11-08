@@ -189,7 +189,7 @@ The in-app export and delete tools satisfy access and deletion immediately. For 
 
 ## 10. Children
 
-${LEGAL.appName} is not intended for children under ${LEGAL.minimumAge}, or under ${LEGAL.minimumAgeEea} in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ${LEGAL.contactEmail} and we will delete it.
+${LEGAL.appName} is not intended for children under ${LEGAL.minimumAge}, under ${LEGAL.minimumAgeCanada} in Canada, or under ${LEGAL.minimumAgeEea} in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ${LEGAL.contactEmail} and we will delete it.
 
 ## 11. Security
 
@@ -239,6 +239,7 @@ We handle your information under the Personal Information Protection and Electro
 - **Outside Quebec and Canada:** your information is stored in the United States (see above). Before sending Quebec residents' information outside Quebec, we assessed the protection it receives there.
 - **Your rights:** you can ask what information we hold and how we use it, see and correct it, and withdraw consent. In Quebec you can also have your information in a structured, commonly used format, which **Download my data** provides. We will respond within 30 days.
 - **Complaints:** email us first. You can also complain to the Office of the Privacy Commissioner of Canada (https://www.priv.gc.ca) or, in Quebec, the Commission d'accès à l'information (https://www.cai.gouv.qc.ca).
+- **Age:** you must be at least ${LEGAL.minimumAgeCanada} to use the app in Canada, because Quebec's law requires a parent's consent to collect information from a child under ${LEGAL.minimumAgeCanada}.
 - **Breaches:** if a breach creates a real risk of significant harm to you (or, in Quebec, a risk of serious injury), we will tell you and the Commissioner or the Commission.
 - **In French:** this policy and the Terms are also available in French: ${LEGAL.privacyFrUrl} and ${LEGAL.termsFrUrl}, and in the app under **Profile → Privacy & legal**.
 

@@ -38,7 +38,7 @@ ${LEGAL.appName} is a logging and calculation tool. It is **not** a medical devi
 
 ## 2. Eligibility
 
-You must be at least ${LEGAL.minimumAge} years old, or at least ${LEGAL.minimumAgeEea} if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
+You must be at least ${LEGAL.minimumAge} years old, at least ${LEGAL.minimumAgeCanada} if you live in Canada, or at least ${LEGAL.minimumAgeEea} if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
 
 ## 3. Your account
 

@@ -178,7 +178,7 @@ The in-app export and delete tools satisfy access and deletion immediately. For 
 
 ## 10. Children
 
-Rust Strength is not intended for children under 13, or under 16 in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ruststrengthsupport@gmail.com and we will delete it.
+Rust Strength is not intended for children under 13, under 14 in Canada, or under 16 in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ruststrengthsupport@gmail.com and we will delete it.
 
 ## 11. Security
 
@@ -228,6 +228,7 @@ We handle your information under the Personal Information Protection and Electro
 - **Outside Quebec and Canada:** your information is stored in the United States (see above). Before sending Quebec residents' information outside Quebec, we assessed the protection it receives there.
 - **Your rights:** you can ask what information we hold and how we use it, see and correct it, and withdraw consent. In Quebec you can also have your information in a structured, commonly used format, which **Download my data** provides. We will respond within 30 days.
 - **Complaints:** email us first. You can also complain to the Office of the Privacy Commissioner of Canada (https://www.priv.gc.ca) or, in Quebec, the Commission d'accès à l'information (https://www.cai.gouv.qc.ca).
+- **Age:** you must be at least 14 to use the app in Canada, because Quebec's law requires a parent's consent to collect information from a child under 14.
 - **Breaches:** if a breach creates a real risk of significant harm to you (or, in Quebec, a risk of serious injury), we will tell you and the Commissioner or the Commission.
 - **In French:** this policy and the Terms are also available in French: https://lindellrhett-gif.github.io/rust-strength/confidentialite.html and https://lindellrhett-gif.github.io/rust-strength/conditions.html, and in the app under **Profile → Privacy & legal**.
 

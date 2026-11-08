@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { friendRequestError } from '@/domain/friendRequest';
 import {
   periodSince,
   type LeaderboardPerson,
@@ -110,11 +111,12 @@ export function useSendFriendRequest() {
       const { error } = await supabase
         .from('friendships')
         .insert({ requester_id: userId!, addressee_id: addresseeId });
-      if (error) throw error;
+      if (error) throw new Error(friendRequestError(error));
     },
     onSuccess: () => client.invalidateQueries({ queryKey: qk.friendships }),
   });
 }
+
 
 export function useRespondToRequest() {
   const client = useQueryClient();

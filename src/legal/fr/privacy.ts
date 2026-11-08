@@ -188,7 +188,7 @@ Les outils d’exportation et de suppression intégrés à l’application répo
 
 ## 10. Enfants
 
-L’application ${LEGAL.appName} n’est pas destinée aux enfants de moins de ${LEGAL.minimumAge} ans, ou de moins de ${LEGAL.minimumAgeEea} ans dans l’Union européenne, en Islande, au Liechtenstein et en Norvège. Vous devez confirmer que vous avez l’âge requis pour créer un compte ou, si vous vous connectez avec Apple ou Google, avant de pouvoir utiliser l’application. L’application demande l’âge le plus élevé lorsque la région de votre téléphone est réglée sur l’un de ces pays. Nous ne recueillons pas sciemment de renseignements auprès d’enfants qui n’ont pas atteint ces âges. Si vous croyez qu’un tel enfant a créé un compte, écrivez à ${LEGAL.contactEmail} et nous le supprimerons.
+L’application ${LEGAL.appName} n’est pas destinée aux enfants de moins de ${LEGAL.minimumAge} ans, de moins de ${LEGAL.minimumAgeCanada} ans au Canada, ou de moins de ${LEGAL.minimumAgeEea} ans dans l’Union européenne, en Islande, au Liechtenstein et en Norvège. Vous devez confirmer que vous avez l’âge requis pour créer un compte ou, si vous vous connectez avec Apple ou Google, avant de pouvoir utiliser l’application. L’application demande l’âge le plus élevé lorsque la région de votre téléphone est réglée sur l’un de ces pays. Nous ne recueillons pas sciemment de renseignements auprès d’enfants qui n’ont pas atteint ces âges. Si vous croyez qu’un tel enfant a créé un compte, écrivez à ${LEGAL.contactEmail} et nous le supprimerons.
 
 ## 11. Sécurité
 
@@ -238,6 +238,7 @@ Nous traitons vos renseignements conformément à la Loi sur la protection des r
 - **Hors du Québec et du Canada :** vos renseignements sont stockés aux États-Unis (voir ci-dessus). Avant de communiquer à l’extérieur du Québec les renseignements des résidents du Québec, nous avons évalué la protection dont ils y bénéficient.
 - **Vos droits :** vous pouvez demander quels renseignements nous détenons et comment nous les utilisons, y accéder et les faire rectifier, et retirer votre consentement. Au Québec, vous pouvez aussi obtenir vos renseignements dans un format technologique structuré et couramment utilisé, ce que fournit **Download my data**. Nous répondrons dans un délai de 30 jours.
 - **Plaintes :** écrivez-nous d’abord. Vous pouvez aussi porter plainte auprès du Commissariat à la protection de la vie privée du Canada (https://www.priv.gc.ca) ou, au Québec, de la Commission d’accès à l’information (https://www.cai.gouv.qc.ca).
+- **Âge :** vous devez avoir au moins ${LEGAL.minimumAgeCanada} ans pour utiliser l’application au Canada, parce que la loi du Québec exige le consentement d’un parent pour recueillir des renseignements auprès d’un enfant de moins de ${LEGAL.minimumAgeCanada} ans.
 - **Atteintes :** si une atteinte crée un risque réel de préjudice grave pour vous (ou, au Québec, un risque de préjudice sérieux), nous vous en informerons, de même que le commissaire ou la Commission.
 - **En français :** cette politique et les Conditions d’utilisation existent en français et en anglais, et les deux versions font également foi. La version anglaise se trouve à ${LEGAL.privacyPolicyUrl} et à ${LEGAL.termsUrl}, ainsi que dans l’application sous **Profile → Privacy & legal**.
 

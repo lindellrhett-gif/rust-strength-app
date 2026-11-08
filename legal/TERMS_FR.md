@@ -26,7 +26,7 @@ Rust Strength est un outil de consignation et de calcul. Ce **n’est pas** un d
 
 ## 2. Admissibilité
 
-Vous devez avoir au moins 13 ans, ou au moins 16 ans si vous vivez dans l’Union européenne, en Islande, au Liechtenstein ou en Norvège. En créant un compte, vous confirmez que vous avez l’âge requis. Si vous avez moins de 18 ans, vous devriez demander à un parent ou à un tuteur de passer en revue les présentes Conditions.
+Vous devez avoir au moins 13 ans, au moins 14 ans si vous vivez au Canada, ou au moins 16 ans si vous vivez dans l’Union européenne, en Islande, au Liechtenstein ou en Norvège. En créant un compte, vous confirmez que vous avez l’âge requis. Si vous avez moins de 18 ans, vous devriez demander à un parent ou à un tuteur de passer en revue les présentes Conditions.
 
 ## 3. Votre compte
 
