@@ -7,6 +7,6 @@
  */
 export function friendRequestError(error: { code?: string; message?: string }): string {
   if (error.code === '42501') return "You can't send a request to this person.";
-  if (error.code === '23505') return 'You already have a request with this person. Pull down to refresh.';
+  if (error.code === '23505') return 'You already have a request with this person.';
   return error.message || 'Please try again.';
 }
