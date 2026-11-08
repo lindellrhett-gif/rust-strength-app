@@ -1,6 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, defaultShouldDehydrateQuery, type QueryKey } from '@tanstack/react-query';
+import type {
+  PersistQueryClientOptions,
+  Persister,
+} from '@tanstack/react-query-persist-client';
+import Constants from 'expo-constants';
 
 import { retryDelay, shouldRetry } from './sessionGuard';
 
@@ -14,7 +19,7 @@ export const queryClient = new QueryClient({
       // Must outlive the persisted copy, or restored entries are collected
       // before they can be shown.
       gcTime: CACHE_MAX_AGE,
-      // Twice, or for about a minute while an expired session is refreshed.
+      // Twice, or for over a minute while an expired session is refreshed.
       retry: shouldRetry,
       retryDelay,
       refetchOnWindowFocus: false,
@@ -42,12 +47,89 @@ export const queryClient = new QueryClient({
  * This puts training data on disk, so it MUST be cleared when the signed-in
  * account changes — see `AuthProvider`.
  */
-export const persister = createAsyncStoragePersister({
+const disk = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: 'rust-strength-cache',
   // Batches writes; the cache changes on every keystroke in a search box.
   throttleTime: 2000,
 });
+
+/**
+ * The app version that saved the cached answers on the phone. An answer saved by
+ * an older version can be missing a field this version's screens expect, so it
+ * isn't shown. Taken from the version so nobody has to remember to change it when
+ * a query's shape changes. Builds of the same version aren't told apart.
+ */
+const CACHE_VERSION = Constants.expoConfig?.version ?? 'unknown';
+
+/**
+ * React Query's own `buster` and `maxAge` delete the whole stored copy, queued
+ * writes included, and a set logged on the old version must still reach the
+ * server. So an older or out-of-date copy is dealt with here first: the cached
+ * answers go and the writes stay, which leaves those two checks nothing to act on.
+ */
+export const persister: Persister = {
+  ...disk,
+  restoreClient: async () => {
+    const stored = await disk.restoreClient();
+    if (!stored) return stored;
+    const current =
+      stored.buster === CACHE_VERSION && Date.now() - stored.timestamp <= CACHE_MAX_AGE;
+    if (current) return stored;
+    return {
+      buster: CACHE_VERSION,
+      timestamp: Date.now(),
+      clientState: { ...stored.clientState, queries: [] },
+    };
+  },
+};
+
+/** What was typed into a search box: many entries, and no use the next time. */
+function isTypedSearch(key: QueryKey): boolean {
+  return key[0] === 'user-search' || (key[0] === 'foods' && key[1] === 'search');
+}
+
+/** For PersistQueryClientProvider in the root layout. */
+export const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+  persister,
+  maxAge: CACHE_MAX_AGE,
+  buster: CACHE_VERSION,
+  dehydrateOptions: {
+    // Only writes waiting on a connection are worth storing. A write
+    // that already landed, or one that failed outright, is not.
+    shouldDehydrateMutation: (mutation) => mutation.state.isPaused,
+    // Each launch restarts a restored entry's garbage-collection clock, so an
+    // answer nothing has asked for in weeks would otherwise be kept forever, and
+    // the whole cache is written out again on every change.
+    shouldDehydrateQuery: (query) =>
+      defaultShouldDehydrateQuery(query) &&
+      Date.now() - query.state.dataUpdatedAt <= CACHE_MAX_AGE &&
+      !isTypedSearch(query.queryKey),
+  },
+};
+
+/**
+ * Picks the restored queue back up, once the cache is back.
+ *
+ * Don't wait on this: the provider holds every query back until its onSuccess has
+ * settled, and sending the writes can take over a minute on a poor connection.
+ *
+ * A restored write has lost the hook that would refresh what it changed, and
+ * reads race it, both at launch and when the signal returns. A read can overtake
+ * the write, and a set looks gone until something refetches, which invites logging
+ * it twice. Hence the refresh once they have all landed, however long that takes.
+ */
+export function resumeRestoredWrites(client: QueryClient): void {
+  const cache = client.getMutationCache();
+  const anyQueued = cache.getAll().some((mutation) => mutation.state.isPaused);
+  void client.resumePausedMutations();
+  if (!anyQueued) return;
+  const unsubscribe = cache.subscribe(() => {
+    if (client.isMutating() > 0) return;
+    unsubscribe();
+    void client.invalidateQueries();
+  });
+}
 
 /**
  * Mutation keys for the writes that must survive going offline.

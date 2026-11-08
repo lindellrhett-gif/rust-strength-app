@@ -39,12 +39,20 @@ describe('session guard', () => {
     expect(shouldRetry(SESSION_RETRIES, session)).toBe(false);
   });
 
-  it('backs off to at most 15 seconds, about a minute in all', () => {
+  it('knows a missing session after postgrest-js has turned it into a plain object', () => {
+    const wrapped = { message: 'SessionUnavailableError: Reconnecting', details: '', hint: '', code: '' };
+    expect(shouldRetry(DEFAULT_RETRIES, wrapped)).toBe(true);
+    expect(shouldRetry(SESSION_RETRIES, wrapped)).toBe(false);
+    expect(shouldRetry(DEFAULT_RETRIES, { message: 'TypeError: Network request failed' })).toBe(false);
+    expect(shouldRetry(DEFAULT_RETRIES, null)).toBe(false);
+  });
+
+  it('backs off to at most 15 seconds, outlasting the minute supabase-js pauses for', () => {
     expect(retryDelay(0)).toBe(1000);
     expect(retryDelay(1)).toBe(2000);
     expect(retryDelay(10)).toBe(15_000);
     const total = Array.from({ length: SESSION_RETRIES }, (_, i) => retryDelay(i)).reduce((a, b) => a + b);
-    expect(total).toBeGreaterThanOrEqual(45_000);
+    expect(total).toBeGreaterThan(60_000);
     expect(total).toBeLessThanOrEqual(90_000);
   });
 

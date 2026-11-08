@@ -156,6 +156,15 @@ export function useMyLevel(): LevelSnapshot {
       trophyTotals.isSuccess &&
       friendships.isSuccess &&
       activity.isSuccess &&
-      dates.data !== undefined,
+      dates.data !== undefined &&
+      // Data restored from the phone counts as a success while it refetches, and
+      // may be from before a trophy was earned on another device.
+      !totals.isFetching &&
+      !prs.isFetching &&
+      !profile.isFetching &&
+      !trophyTotals.isFetching &&
+      !friendships.isFetching &&
+      !activity.isFetching &&
+      !dates.isRefetching,
   };
 }
