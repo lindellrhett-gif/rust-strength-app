@@ -234,42 +234,44 @@ result the questionnaire gives.
 
 ## App Review notes
 
-Paste this into "Notes" so the reviewer is not stuck at the sign-up screen:
+Paste this into "Notes" so the reviewer is not stuck at the sign-up screen (3,766 of the 4,000 characters allowed):
 
 ```
-Rust Strength is a workout and running tracker with a food diary. It requires an account so training data syncs across devices. Please use the demo account in the sign-in fields; it has workouts, runs, food diary days, presets and trophies already logged, so every feature is visible without recording anything.
+Rust Strength is a workout and running tracker with a food diary. An account keeps training synced across devices. Please use the demo account; it has workouts, runs, food diary days, presets and trophies logged, so every feature is visible without recording anything.
 
-Sign-up is by email and password, or with Sign in with Apple or Google. There is no advertising. The paid feature, Rust Strength Pro, is described below.
+Sign-up is by email and password, or Sign in with Apple or Google. No advertising.
+
+On first opening 1.2, an account is asked to accept the updated Terms and Privacy Policy and to consent to the use of its health information: tick the three boxes.
 
 NEW IN 1.2: RUST STRENGTH PRO AND THE FOOD DIARY
-- The food diary is the paid feature. It is sold as two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, each with a one-month free trial as an introductory offer, and a non-consumable Lifetime purchase.
-- Profile > Rust Strength Pro > See plans opens the paywall, which has Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, the Food tab says what Pro includes and offers the same plans.
-- The demo account has Rust Strength Pro, so the food diary is open without buying anything. Purchases can also be tested with a sandbox account.
-- The food diary is the Food tab. Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
-- The camera is requested only when the user opens the barcode scanner (Add food > Scan); the barcode is read on the device and nothing from the camera is recorded or uploaded. A barcode can also be typed in.
-- Recipe import loads the page the user links to from the device.
-- The calorie goal calculator does not offer weight-loss goals to users under 18 (by the birth year entered), and a goal under the calorie floor is saved only after a warning.
+- The food diary (Food tab) is the paid feature: two auto-renewable subscriptions, monthly and yearly, in the "Rust Strength Pro" group, each with a one-month free trial, and a non-consumable Lifetime purchase.
+- Profile > Rust Strength Pro > See plans opens the paywall, with Restore purchases and links to the Terms of Use and Privacy Policy. Without Pro, the Food tab offers the same plans.
+- The demo account has Pro, so the diary is open without buying. Purchases can also be tested with a sandbox account.
+- Everyday foods come from USDA FoodData Central, stored on our server; packaged foods are looked up on Open Food Facts from the device.
+- The camera is requested only when the barcode scanner opens (Add food > Scan); the barcode is read on the device and nothing from the camera is recorded or uploaded. A barcode can also be typed.
+- Recipe import loads the linked page from the device.
+- The goal calculator offers no weight-loss goals under 18 (by birth year), and a goal under the calorie floor saves only after a warning.
 - Nothing in the food diary is shared with friends.
 
 RUNNING (SINCE 1.1)
-- Today > Start run records a run with GPS. To see finished runs without going outside, open Progress > Running on the demo account, or enter one by hand: Today > Log activity > Run > Enter a run.
-- Location is requested "While Using the App" only, when the user taps Start (or places a privacy zone at their current location), and is used only between Start and Save. The app never requests "Always".
-- Background modes: "location" keeps a run recording with the screen locked (the blue location indicator shows the whole time); "audio" is used only to speak distance and pace updates during a run with the screen locked, which can be turned off in Running settings.
-- Live Activities: while a run records, its time, distance and pace show on the Lock Screen and in the Dynamic Island; between sets, the rest timer and next set show the same way. They are started and updated on the device. The app uses no push notifications.
-- Motion & Fitness is requested to count steps. Daily step totals leave the device only if the user turns on Profile > Sharing with friends > Share daily steps (off by default).
-- Friends see a run's map only if the user turns it on for that run, and the server removes the start and end first.
-- Share cards: after a workout or run, the user can make an image card and share it or save it to Photos. Saving asks for add-only Photos access; the app never reads the photo library.
+- Today > Start run records a run with GPS. To see runs without going outside, open Progress > Running, or enter one: Today > Log activity > Run > Enter a run.
+- Location is requested "While Using the App" only, when the user taps Start (or places a privacy zone where they stand), and used only between Start and Save. Never "Always".
+- Background modes: "location" keeps a run recording with the screen locked (the blue indicator shows throughout); "audio" only speaks distance and pace during a run, and can be turned off in Running settings.
+- Live Activities show a run's time, distance and pace, or the rest timer and next set, on the Lock Screen and Dynamic Island, updated on the device. No push notifications.
+- Motion & Fitness is requested to count steps. Daily totals leave the device only with Profile > Sharing with friends > Share daily steps (off by default).
+- Friends see a run's map only if the user turns it on for that run; the server removes the start and end first.
+- Share cards are made on the device; saving one asks for add-only Photos access. The app never reads the photo library.
 
 USER-GENERATED CONTENT
-Users choose a username and display name, and may name their own exercises, machines, presets, activities, runs and saved routes. Accepted friends can see each other's profiles, a feed of finished sessions and runs, and a leaderboard, and can react to a post from a fixed set of four reactions. There is no free-text commenting or messaging. Report and block are on any user's profile (Friends > open a profile > Report). Feed sharing can be turned off at Profile > Sharing with friends.
+Users choose a username and display name and may name their own exercises, machines, presets, activities, runs and routes. Accepted friends see each other's profiles, a feed of finished sessions and runs, and a leaderboard, and can react with one of four fixed reactions. No commenting or messaging. Report and block are on any profile (Friends > open a profile > Report). Feed sharing starts off for new accounts; the app asks once when the first friend is accepted, and Profile > Sharing with friends changes it.
 
 ACCOUNT
-Account deletion: Profile > Privacy & legal > Delete my account. Password reset: "Forgot password?" on the sign-in screen emails a one-time code.
+Deletion: Profile > Privacy & legal > Delete my account. Password reset: "Forgot password?" on the sign-in screen emails a one-time code.
 
 NOTIFICATIONS
-The app asks for notification permission only if the user turns on Profile > Rest timer > "Alert when rest is over", a local notification scheduled on the device.
+Requested only if the user turns on Profile > Rest timer > "Alert when rest is over", a local notification.
 
-Levels and badges come from the user's own logged training. The Influencer and Beta Tester badges are awarded by the developer and cannot be obtained in the app, and Rust Strength Pro does not award or unlock any badge.
+Levels and badges come from the user's own training. The Influencer and Beta Tester badges are awarded by the developer, and Pro does not award or unlock any badge.
 ```
 
 Create the demo account before submitting and put its credentials in the

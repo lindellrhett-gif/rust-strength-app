@@ -79,6 +79,11 @@ export type Database = {
           age_confirmed_at: string | null;
           username_chosen: boolean;
           share_workouts: boolean;
+          /**
+           * Migration 0030. Optional because the app tells "never chose"
+           * (null) apart from "the backend has no such column yet" (absent).
+           */
+          share_choice_at?: string | null;
           rest_seconds: number;
           rest_auto: boolean;
           level_seen: number;
@@ -109,6 +114,7 @@ export type Database = {
           age_confirmed_at?: string | null;
           username_chosen?: boolean;
           share_workouts?: boolean;
+          share_choice_at?: string | null;
           rest_seconds?: number;
           rest_auto?: boolean;
           level_seen?: number;
@@ -907,6 +913,10 @@ export type Database = {
       };
       rpc_sync_daily_steps: { Args: { p_days: Json }; Returns: number };
       rpc_set_share_steps: { Args: { p_on: boolean }; Returns: undefined };
+      rpc_profile_names: {
+        Args: { p_ids: string[] };
+        Returns: { user_id: string; username: string; display_name: string | null }[];
+      };
       rpc_my_trophy_totals: {
         Args: Record<string, never>;
         Returns: { run_distance_m: number; steps_total: number; reactions_received: number }[];

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: October 29, 2026**
+**Last updated: November 6, 2026**
 
 Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -16,7 +16,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 - **Bodyweight (optional).** Used to work out the load on bodyweight and assisted exercises, such as pull-ups or an assisted dip machine, and to estimate the calories a recorded run burns. You can leave it blank; assisted exercises then ask for it before you log them. If you log weigh-ins in the food diary, the latest one becomes your bodyweight.
 - **Training data.** Exercises, weights, reps, how long you held timed exercises such as planks, RPE, sets, workouts, presets, planned sessions, rest days, and the gyms and machines you name.
 - **Activity data.** Activities you log such as runs or sports, their duration, and — only if you choose to enter them — distance, step count, and calories burned.
-- **Runs you record (optional).** If you record a run, the app uses your phone's precise location while the run is recording, including with the screen locked, to measure your distance and pace and to draw your route. We store the route (the points along it, with the altitude and time at each), your distance, moving and total time, splits, best efforts and estimated calories, and any title, notes and effort rating you add. Location is used only between Start and Finish; nothing is tracked at any other time. You can also enter a run by hand, with no location at all.
+- **Runs you record (optional).** If you record a run, the app uses your phone's precise location while the run is recording, including with the screen locked, to measure your distance and pace and to draw your route. We store the route (the points along it, with the altitude and time at each), your distance, moving and total time, splits, best efforts and estimated calories, and any title, notes and effort rating you add. Location is recorded only between Start and Finish. Before you press Start, while the recording screen is open, the app also reads your location on your phone to show the GPS signal and centre the map; that is not saved or sent to us. Nothing is tracked at any other time. You can also enter a run by hand, with no location at all.
 - **Steps (optional).** If you allow Motion & Fitness access, the app reads step counts from your iPhone's motion sensors. A recorded run's step total is stored with the run. Your daily step counts stay on your phone unless you turn on "Share daily steps" (Profile, under Sharing with friends, off by default): then, whenever you open the app, it uploads one total per day for the past week, for the steps leaderboard and the Steps trophy. Turning it off deletes the totals already uploaded.
 - **Privacy zones (optional).** Places you add, such as home, as a point and a size, so that maps you share hide the start and end of runs there. Only you can see them.
 - **Saved routes (optional).** Routes you save from your own runs to run again, with the names you give them.
@@ -33,7 +33,7 @@ We built this app to collect as little as possible. We do not sell your data, we
 
 - **Timestamps.** When workouts and activities start and end, so the app can show durations, streaks and history.
 - **A random account identifier.** Used to link your data to your account.
-- **A record of your agreement.** When you accept the Terms and Privacy Policy and confirm your age, we store which version you accepted and when. We store that you confirmed your age, never your date of birth. (The food diary's goal calculator asks for a birth year, as described above.)
+- **A record of your agreement.** When you accept the Terms and Privacy Policy, consent to our use of your health information (Section 2) and confirm your age, we store which version you accepted and when. We store that you confirmed your age, never your date of birth. (The food diary's goal calculator asks for a birth year, as described above.)
 - **Server logs.** Our hosting provider records standard technical information, including IP addresses, to operate and secure the service.
 
 ### What we do NOT collect
@@ -56,6 +56,8 @@ Training data, bodyweight, calories burned, step counts, and everything in the f
 
 We use it only to run the features you see: showing your history, estimating your one-rep max, suggesting your next weight, recording your runs, calculating your stats and trophies, and keeping your food diary, its totals, goals and reports.
 
+**We ask for your consent first.** Before you can use the app, we ask you to agree, separately from the Terms, to our using your health information as this policy describes. Recording your training and health is what the app does, so it cannot work without that consent. You can withdraw it at any time by deleting the information or your account (Section 8). Withdrawing does not affect what we did before.
+
 **Your food diary is private.** Nothing in it is shown to friends, in the feed, on the leaderboard or on share cards. The one link to the rest of the app is that your latest weigh-in becomes your bodyweight, which stays private too.
 
 **We do not sell it, share it for advertising, or use it for any purpose other than operating the app.** It is visible to another person only where you have chosen to share it (see Section 4).
@@ -73,7 +75,7 @@ We use it only to run the features you see: showing your history, estimating you
 - To review reports of abuse
 - To keep the service working and secure
 
-We do not use your information for advertising, profiling, or automated decisions with legal effects.
+We do not use your information for advertising, and we make no automated decisions about you that have legal or similarly significant effects. The app does work things out from what you log, such as weight suggestions, a calorie goal, your level and trophies, only to show them to you, and you are free to ignore them.
 
 ## 4. What other people can see
 
@@ -87,7 +89,9 @@ The social features are **opt-in**. Until you choose a username and add a friend
 
 ### The friend feed
 
-When you finish a workout or log an activity, a summary of it appears in the feed of the friends you have accepted. A summary is:
+**Sharing starts off.** New accounts do not post anything to the feed. When you accept your first friend, the app asks once whether to share your sessions with your friends, and you can change your answer at any time in Profile, under "Sharing with friends".
+
+While sharing is on, a summary of each workout you finish or activity you log appears in the feed of the friends you have accepted. A summary is:
 
 - the name of the session or activity, and when it happened
 - how long it lasted
@@ -102,7 +106,7 @@ When you finish a workout or log an activity, a summary of it appears in the fee
 
 Each run has its own sharing switches, and Running settings sets the default for new runs:
 
-- **Share to friends' feed.** On by default. Turn it off and the run is visible only to you.
+- **Share to friends' feed.** On by default for each run, but no run reaches the feed while "Show my sessions in the feed" is off. Turn it off for one run and that run is visible only to you.
 - **Show the map to friends.** You choose this on the recording screen for every run, and it starts **off** unless you change the default in Running settings. Off, friends see your distance, time and pace, not where you ran. You always see the outline of your own runs. If you turn it on, friends see a simplified outline of the route with the first and last 200 metres always removed, and any part of the start or end inside one of your privacy zones removed too. The trimming happens on our server, so the full route never reaches anyone else's phone. A route that passes through a privacy zone in the middle is still shown there: zones hide where a run starts and ends, not where it goes.
 
 Friends can react to a post. You see how many of each reaction a post received, but **not who left them**.
@@ -116,7 +120,7 @@ You can remove a friend or block someone at any time. Blocking removes any exist
 After a workout or a run you can make an image card to share, for example to Instagram, Messages or your Photos. **The card is made on your phone and nothing about it is sent to us.** It is shared only if you tap Share or Save to Photos, and only to the app or person you pick. Once you share it, what happens to it is up to you and the service you sent it to, under that service's own terms.
 
 - A **workout card** shows the session's name, date and length, total weight lifted, sets, reps, how many exercises, your personal records, the muscle groups worked, and each exercise's number of sets and best set.
-- A **run card** shows the run's name, date, distance, time, pace, climb, splits and best efforts. If you leave "Show the route" on, it also shows the route's shape, with no map, trimmed at least as much as for friends (the first and last 200 metres, and any part of the start or end inside your privacy zones, are removed). The trimming happens on your phone before the image is made.
+- A **run card** shows the run's name, date, distance, time, pace, climb, splits and best efforts. If you turn on "Show the route" (it starts off), it also shows the route's shape, with no map, trimmed at least as much as for friends (the first and last 200 metres, and any part of the start or end inside your privacy zones, are removed). The trimming happens on your phone before the image is made.
 
 ## 5. Who we share with
 
@@ -127,7 +131,7 @@ We use these service providers:
 | Provider | What it does | What it receives |
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
-| Google (Gmail) | Sends password reset emails | Your email address and the one-time code, only when you ask to reset your password |
+| Google (Gmail) | Sends the codes to confirm your email and to reset your password, and holds our support inbox | Your email address and the one-time code, when you sign up or ask to reset your password; and any email you send us |
 | Apple (Sign in with Apple) | Signs you in, if you choose it | Apple confirms your Apple ID and sends us your email address (or private relay address) and an account identifier. When you delete your account, we ask Apple to end the app's access to your Apple ID |
 | Google (Sign in with Google) | Signs you in, if you choose it | Google confirms your Google account and sends us your email address and an account identifier, along with your name and profile picture link, which we discard |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
@@ -174,7 +178,7 @@ The in-app export and delete tools satisfy access and deletion immediately. For 
 
 ## 10. Children
 
-Rust Strength is not intended for children under 13. You must confirm you are at least 13 to create an account or, if you sign in with Apple or Google, before you can use the app. We do not knowingly collect information from children under 13. If you believe a child under 13 has created an account, email ruststrengthsupport@gmail.com and we will delete it.
+Rust Strength is not intended for children under 13, or under 16 in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ruststrengthsupport@gmail.com and we will delete it.
 
 ## 11. Security
 
@@ -186,7 +190,77 @@ No system is perfectly secure, and we cannot guarantee absolute security.
 
 If we change this policy materially we will update the date above and ask you to accept the new version in the app.
 
-## 13. Contact
+## 13. If you live outside the United States
+
+Everything above applies wherever you live. This section adds what the law in some other countries asks us to tell you.
+
+**Your information is stored in the United States.** Supabase holds it for us there (Section 6), and the providers in Section 5 are US companies. US law may protect your information less than the law where you live. We apply this policy to it wherever it is.
+
+### New Zealand
+
+We handle your information under the Privacy Act 2020.
+
+- **Who collects and holds it:** Bluestem Software LLC, TODO: business mailing address. Supabase stores it on our behalf.
+- **What we collect, why, and who sees it:** Sections 1 to 5. Your email address is needed to create an account. Everything else is optional; leaving it out only means the feature that uses it does not work.
+- **Access and correction:** you can see and download your information at any time (**Profile → Privacy & legal → Download my data**) and change most of it in the app. To ask for anything else, or to have something corrected, email ruststrengthsupport@gmail.com. We will respond within 20 working days.
+- **Complaints:** email us first. If you are not satisfied, you can complain to the Privacy Commissioner: https://www.privacy.org.nz
+- **Breaches:** if a privacy breach is likely to cause you serious harm, we will tell you and the Privacy Commissioner as soon as we can.
+
+### Australia
+
+We handle your information in line with the Australian Privacy Principles in the Privacy Act 1988.
+
+- **Who we are:** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Health information** (Section 2) is sensitive information. We collect it only with your consent, which you give by entering it, and use it only for the features that need it. You can withdraw your consent by deleting that information or your account (Section 8).
+- **You do not have to give your real name.** Your account starts with a random handle, and the app never asks for your name.
+- **Overseas:** your information is stored and processed in the United States (see above).
+- **Access and correction:** as for New Zealand above. We will respond within 30 days.
+- **Complaints:** email us and we will reply within 30 days. If you are not satisfied, you can complain to the Office of the Australian Information Commissioner: https://www.oaic.gov.au
+- **Breaches:** if a data breach is likely to result in serious harm to you, we will tell you and the Commissioner.
+
+### Canada
+
+We handle your information under the Personal Information Protection and Electronic Documents Act (PIPEDA) and, if you live in Quebec, the Act respecting the protection of personal information in the private sector.
+
+- **Who is responsible:** our Privacy Officer, Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com. They are in charge of protecting your personal information and of answering your questions and requests.
+- **Consent:** we use your information only for the purposes in Sections 2 and 3. You give explicit consent to our use of your health information before you can use the app (Section 2). You can withdraw consent at any time by deleting the information or your account; the features that use it then stop working.
+- **Private by default:** new accounts start with sharing with friends off, and nothing you log is shown to anyone until you choose to share it (Section 4).
+- **Outside Quebec and Canada:** your information is stored in the United States (see above). Before sending Quebec residents' information outside Quebec, we assessed the protection it receives there.
+- **Your rights:** you can ask what information we hold and how we use it, see and correct it, and withdraw consent. In Quebec you can also have your information in a structured, commonly used format, which **Download my data** provides. We will respond within 30 days.
+- **Complaints:** email us first. You can also complain to the Office of the Privacy Commissioner of Canada (https://www.priv.gc.ca) or, in Quebec, the Commission d'accès à l'information (https://www.cai.gouv.qc.ca).
+- **Breaches:** if a breach creates a real risk of significant harm to you (or, in Quebec, a risk of serious injury), we will tell you and the Commissioner or the Commission.
+- **In French:** this policy and the Terms are also available in French: https://lindellrhett-gif.github.io/rust-strength/confidentialite.html and https://lindellrhett-gif.github.io/rust-strength/conditions.html, and in the app under **Profile → Privacy & legal**.
+
+### United Kingdom, European Union, Iceland, Liechtenstein and Norway
+
+We handle your information under the UK GDPR and the EU General Data Protection Regulation.
+
+- **Controller:** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Our representative in the United Kingdom:** to be named here before Rust Strength is offered in the United Kingdom.
+- **Our representative in the European Union:** to be named here before Rust Strength is offered in the European Union.
+
+You can contact a representative instead of us about anything to do with your information.
+
+**Why we use your information (our legal bases):**
+
+| What we do | Legal basis |
+|---|---|
+| Create your account and run the features you use (Sections 1 and 3), including Pro if you buy it | It is needed to provide the app you signed up for (contract, Article 6(1)(b)) |
+| Use your health information (Section 2), including showing session summaries to friends if you turn sharing on | Your explicit consent (Article 9(2)(a)) |
+| Keep the service secure, prevent abuse and review reports | Our legitimate interest in keeping the app and the people using it safe (Article 6(1)(f)) |
+| Keep records the law requires and answer lawful requests from authorities | Legal obligation (Article 6(1)(c)) |
+
+- **Your rights:** you can ask for a copy of your information, have it corrected or erased, restrict how we use it, receive it in a machine-readable format (**Download my data**), and object to what we do on the basis of our legitimate interests. You can withdraw consent at any time, as described in Section 2. We will respond within one month; if a request is complex we may take up to two more months, and we will tell you if so.
+- **Complaints:** contact us or our representative first if you can. You can also complain to a data protection authority: in the UK, the Information Commissioner's Office (https://ico.org.uk); in the EU, Iceland, Liechtenstein and Norway, the authority where you live (listed at https://www.edpb.europa.eu/about-edpb/about-edpb/members_en).
+- **Transfers to the United States:** Supabase's data processing agreement includes the European Commission's standard contractual clauses and the UK addendum to them, which set the protections your information keeps while it is held in the United States. Email us for a copy. The other providers in Section 5 receive much less, under their own terms.
+- **Automated decisions:** we make none that have legal or similarly significant effects on you. Weight suggestions and calorie goals are calculations you are free to ignore.
+- **What you must give us:** an email address, to create an account, and the health information the app records, since recording it is what the app does. Everything else is optional.
+- **Children:** you must be at least 16 in the EU, Iceland, Liechtenstein and Norway, and at least 13 in the UK. New accounts start with sharing off.
+
+## 14. Contact
 
 Bluestem Software LLC
+TODO: business mailing address
 ruststrengthsupport@gmail.com
+
+Our Privacy Officer can be reached at the same address.

@@ -72,6 +72,31 @@ None of these can be settled from the code, and some block the rest:
   week without use, and a paused project during review is a rejection
   (LEGAL_AUDIT.md section 4). Open the app, or the dashboard, in the week
   before submitting and while the build is in review.
+- [ ] **Live database, security fixes. Apply as soon as you can.** Found on
+  November 7, 2026, and live in 1.1 too: through the API (not the app), anyone
+  could make themselves someone's friend without their agreement, or send
+  requests across a block, and a friend or anyone with a pending request could
+  read a person's whole profile, bodyweight included. Tested in
+  `supabase/tests/friendship-integrity.test.mjs`. Needs your OK to apply each:
+  - [ ] `0032_friendship_integrity.sql`: requests only pending, only the
+    addressee accepts, nothing else changes, no requests across a block. The
+    app, 1.1 included, never did otherwise, so nothing breaks.
+  - [ ] `0033_profile_names.sql`: adds the function 1.2 reads friends' names
+    through. Additive.
+  - [ ] `0034_profiles_owner_only.sql` waits for **release day** (section 4):
+    it closes the bodyweight leak, but 1.1 then shows "unknown" for friends'
+    names until people update.
+- [ ] **Live database, for the other countries** (store/INTERNATIONAL.md).
+  Needs your OK to apply each one to the live database:
+  - [ ] `0030_share_choice.sql`, before testing a 1.2 build. Additive: it adds
+    `profiles.share_choice_at` and marks everyone who has sharing off today
+    as having chosen. Without it the first-friend question never shows.
+  - [ ] `0031_private_sharing_default.sql` waits for **release day** (section
+    4): it makes sharing start off for new accounts, and 1.1 has no question
+    to turn it back on.
+- [ ] **Fill in the postal address** (`postalAddress` in `src/legal/config.ts`).
+  New Zealand's privacy law requires it, and `npm run legal` refuses to
+  publish the site while it is a placeholder.
 - [ ] **The subscription setup** in SUBSCRIPTIONS.md, "Going live with the App
   Store", steps 1 to 7. In RevenueCat's paywall, describe Pro by what the food
   diary does, the way `PRO_FEATURE_LIST` in `src/domain/subscription.ts` does,
@@ -138,6 +163,24 @@ None of these can be settled from the code, and some block the rest:
   - [ ] Logging a set: the suggestion shows only the set (say "230 × 6–8")
         until Show details; a set past the top of the range suggests more
         weight for the next. In a workout, the six rest presets fit on one row.
+  - [ ] Sign-up has three boxes: the age, the Terms and Privacy Policy, and
+        the health consent. Sign up stays greyed out until all three are
+        ticked. The French links under them open the French Terms and
+        Privacy Policy.
+  - [ ] With Settings > General > Language & Region > Region on Germany, the
+        age box says 16; on United Kingdom or United States, 13. Put it back.
+  - [ ] An account that accepted an older version sees the consent screen
+        once, with the same three boxes and the French links.
+  - [ ] Profile > Privacy & legal lists both French documents, and they read
+        correctly.
+  - [ ] Sharing (needs 0030, and 0031 on a test account or a new account
+        with sharing switched off): with sharing off and no friends, nothing
+        is asked. Accept a friend: the Friends tab asks once, with two
+        equal buttons. "Keep private" keeps it off and the question never
+        returns; on another account,
+        "Share" turns on "Show my sessions in the feed" in Profile. Turning
+        the Profile switch off and on never brings the question back.
+  - [ ] A run's share card starts with "Show the route" off.
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build
@@ -215,12 +258,22 @@ None of these can be settled from the code, and some block the rest:
   then commit and push the site repo. Version 1.6.0 is a minor bump, so
   everyone is asked to accept once when they first open 1.2. Check the new
   `health-data.html` is live and linked from the homepage before submitting:
-  the App Store description links it.
+  the App Store description links it. Check `conditions.html` and
+  `confidentialite.html` (the French versions) are live too: the English
+  documents link them.
 - [ ] **Submit for review with "Manually release this version"** selected.
 
 ## 4. Release day
 
 - [ ] Release the version in App Store Connect.
+- [ ] **Apply `0031_private_sharing_default.sql`** to the live database (needs
+  your OK), once 1.2 is live: new accounts then start with sharing off.
+- [ ] **Apply `0034_profiles_owner_only.sql`** (needs your OK), once 1.2 is
+  live: nobody can read anyone else's profile row any more. Check the Friends
+  list on 1.2 still shows names afterwards.
+- [ ] **Turn on the countries that are ready**, following
+  store/INTERNATIONAL.md. Canada, the UK and the EU each have their own
+  conditions there; don't tick a country before its list is done.
 - [ ] Tag the release: `git tag v1.2.0`, then `git push origin v1.2.0`.
 - [ ] Check a real purchase reaches the `subscriptions` table (the webhook).
 - [ ] Tell your beta testers what's new.

@@ -17,6 +17,7 @@ import { useRestDays } from '@/data/restDays';
 import { useTrainedDates } from '@/data/stats';
 import { useStepGoal } from '@/data/stepGoal';
 import { useSetShareSteps } from '@/data/trophies';
+import { shareChoice } from '@/domain/sharePrompt';
 import { cleanStepGoal } from '@/domain/todayTiles';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -330,7 +331,7 @@ export default function ProfileScreen() {
           </View>
           <Switch
             value={p.share_workouts}
-            onValueChange={(on) => update.mutate({ share_workouts: on })}
+            onValueChange={(on) => update.mutate(shareChoice(on, p))}
             trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>

@@ -123,3 +123,107 @@ If they ask about content moderation, the honest answer is short:
 
 That last sentence is worth keeping true. Adding comments or direct messages
 would change the moderation burden completely.
+
+---
+
+## Users outside the United States (added November 7, 2026)
+
+Version 1.2 is meant for Canada, the UK and the EU as well. Their rules add a
+few steps to the routine above. They're small at this size, but they apply
+from the first user there. Not reviewed by a lawyer.
+
+### Reports can come from anyone
+
+The Terms (section 6) say anyone, with or without an account, can report
+illegal content by email. Treat an email to the support address that points at
+something in the app the same as an in-app report:
+- log it (see "Keep a record" below);
+- find the account with `rpc_admin_user_text`;
+- decide.
+
+If they gave a name and address, tell them what you decided.
+
+This is the EU Digital Services Act's notice-and-action duty (Article 16),
+which applies to hosting services of every size.
+
+### Always tell the person why
+
+Whenever you reset a name, ban or delete an account, email the account's
+address. The Terms promise it, and Article 17 of the Act requires it for EU
+users. Do it for everyone; it's the same email. Skip it only if the law
+forbids telling them, or telling them would put someone at risk.
+
+Template:
+
+> Subject: About your Rust Strength account
+>
+> We have [reset your username / suspended your account until DATE /
+> deleted your account] on DATE.
+>
+> Why: [what was written, or what happened, in a sentence].
+> This breaks section 4 of our Terms of Service ([the rule]) [and/or: is
+> illegal under [the law], as far as we can tell].
+>
+> How we decided: a person reviewed it. We don't use automated tools to
+> moderate content.
+>
+> If you think we got it wrong, reply to this email and a person will look at
+> it again.
+
+Reply in French to someone who writes in French.
+
+### Threats to someone's life or safety
+
+If a report or anything you read gives you reason to suspect a crime that
+threatens someone's life or safety:
+- **In the US:** call 911, or the local police where the person is, when it's
+  urgent.
+- **For an EU user:** the Act (Article 18) also requires telling the police or
+  judicial authorities of the EU country concerned, with what you know.
+
+Keep a copy of what you saw. Don't delete the account first, unless it is
+actively being used to cause harm: the evidence goes with it.
+
+### Complaints about moderation
+
+People can email to complain:
+- about a decision;
+- about how a report was handled;
+- about how the app meets its UK Online Safety Act duties (Terms, section 6).
+
+Answer every complaint, normally within 14 days, saying what you looked at and
+what you decided. For the UK Act's assessments and the measures they rely on,
+see `legal/UK_ONLINE_SAFETY.md`.
+
+### Keep a record outside the database
+
+A report row is deleted when either account is deleted, so the database isn't
+a record. Keep a private log (the same kind of spreadsheet as for privacy
+requests, outside this repo), one row per report, notice or complaint:
+- the date;
+- who reported it, if known;
+- what it was about;
+- what you decided and why;
+- when you told the person.
+
+Keep rows for two years, and avoid copying in more of anyone's text than you
+need. The UK Act expects records of moderation and of the risk assessments.
+Under the EU Act, the record is the evidence the reasons were given.
+
+### What doesn't apply at this size
+
+Under the Digital Services Act, micro and small enterprises don't have to:
+- publish transparency reports (Article 15);
+- meet the extra duties of online platforms (Articles 19 to 28).
+
+Bluestem Software LLC is a micro enterprise. Every hosting service must still
+have:
+- the contact point (Articles 11 and 12, in the Terms);
+- the legal representative (Article 13, still to be appointed);
+- clear moderation rules (Article 14, Terms sections 4 and 6);
+- the duties above (Articles 16 to 18).
+
+### Answer in French
+
+Quebec users have the right to be served in French. When a report, complaint
+or reply arrives in French, answer in French. A translation tool is fine.

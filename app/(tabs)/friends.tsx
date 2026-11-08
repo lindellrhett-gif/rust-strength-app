@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card } from '@/components';
 import { FeedCard } from '@/components/FeedCard';
+import { SharePrompt } from '@/components/SharePrompt';
 import { Field } from '@/components/Field';
 import { keyboardAware } from '@/components/keyboard';
 import { useFriendFeed, useReact } from '@/data/feed';
@@ -71,6 +72,8 @@ export default function FriendsScreen() {
           onPress={() => setTab('friends')}
         />
       </View>
+
+      <SharePrompt />
 
       {tab === 'feed' ? (
         <FeedTab />
