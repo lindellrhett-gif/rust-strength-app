@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Avatar } from '../Avatar';
-import { FeaturedTrophies } from '../FeaturedTrophies';
+import { FeaturedTrophies, featuredTrophiesLabel } from '../FeaturedTrophies';
 import { levelTint, XpBreakdownSheet } from '../LevelCard';
 import { MiniStat, MiniStatRow } from '../MiniStat';
 import type { LevelProgress, XpBreakdown } from '@/domain/xp';
@@ -45,7 +45,7 @@ export function ProfileHeader({
         accessibilityRole="button"
         accessibilityLabel={`@${username}. Level ${level.level}, ${level.title}. ${
           level.maxed ? 'Maximum level reached' : `${comma(level.xpToNext)} XP to level ${level.level + 1}`
-        }. See where your XP came from.`}
+        }. ${featuredTrophiesLabel(featured) ? `${featuredTrophiesLabel(featured)}. ` : ''}See where your XP came from.`}
       >
         <View style={styles.identity}>
           <Avatar name={displayName?.trim() || username} size={52} ringColor={tint} />
@@ -81,6 +81,10 @@ export function ProfileHeader({
           value={`${consistency30}%`}
           label="consistent"
           spoken={`${consistency30} percent consistent over the last 30 days`}
+          help={{
+            title: 'Consistent',
+            body: 'The share of the last 30 days you trained or marked a rest day.',
+          }}
         />
         <MiniStat value={String(trophyTiers)} label="trophy tiers" />
       </MiniStatRow>

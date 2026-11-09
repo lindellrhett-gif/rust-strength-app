@@ -893,3 +893,10 @@ function, so the feed and the grid can't come to disagree about who may see what
 Policy now says summaries also appear on your profile, and
 `legal/AU_SOCIAL_MEDIA_AGE.md` records a reassessment of the redesigned Friends
 tab.
+
+Decided the same day: turning sharing on also shows sessions logged before it was
+on, as it always has. The first-friend question, the sharing help and the Privacy
+Policy say so. Sharing only later sessions would need a server-side cutoff.
+
+Applied to the live database November 8, 2026: 0030, 0035 and 0036. 0031 and 0034
+still wait for 1.2's release day.

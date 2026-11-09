@@ -97,18 +97,18 @@ None of these can be settled from the code, and some block the rest:
     names until people update.
 - [ ] **Live database, for the other countries** (store/INTERNATIONAL.md).
   Needs your OK to apply each one to the live database:
-  - [ ] `0030_share_choice.sql`, before testing a 1.2 build. Additive: it adds
+  - [x] `0030_share_choice.sql` (applied November 8, 2026, with your OK). Additive: it adds
     `profiles.share_choice_at` and marks everyone who has sharing off today
     as having chosen. Without it the first-friend question never shows.
   - [ ] `0031_private_sharing_default.sql` waits for **release day** (section
     4): it makes sharing start off for new accounts, and 1.1 has no question
     to turn it back on.
-  - [ ] `0035_friend_posts.sql`, before testing a 1.2 build. Additive: it adds
+  - [x] `0035_friend_posts.sql` (applied November 8, 2026, with your OK; the live body matched `0024`). Additive: it adds
     the function behind the grid on a friend's profile, and the unit each
     post's volume is in. It replaces `rpc_friend_feed` with the same rules, so
     compare the live body's md5 with `0024` first. Without it the grid fills
     from the feed instead, and a kg lifter's volume isn't converted.
-  - [ ] `0036_friend_stats_unit.sql`, before testing a 1.2 build. Additive: it
+  - [x] `0036_friend_stats_unit.sql` (applied November 8, 2026, with your OK; the live body matched `0024`). Additive: it
     adds the unit a friend logs in to the end of `rpc_friend_stats`. It replaces
     that function with the same rules, so compare the live body's md5 with `0024`
     first (`25d3743a022d65d94ef79fa266b95304` with LF line endings, matched on
@@ -208,6 +208,10 @@ None of these can be settled from the code, and some block the rest:
         opens it with working reactions. A friend with sharing off shows "No
         shared sessions." Stats, trophies and badges opens everything else. The
         ... button offers Report and Block, and both work.
+  - [ ] Food > add: tap a food you haven't opened recently. The amount sheet stays
+        open and shows the food, first time, from search, Recent and My foods, on
+        Wi-Fi and on a weak signal. Adding it closes both and the entry shows in the
+        diary. The + on a Recent or Frequent row turns into a tick and logs it once.
   - [ ] Today fits on one screen without scrolling: the tiles, Start
         workout with Generate, Presets, Start a run and Log activity two to a
         row, and the body chart filling the rest. With a plan for today or on
