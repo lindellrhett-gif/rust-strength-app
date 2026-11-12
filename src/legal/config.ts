@@ -23,7 +23,7 @@ export const LEGAL = {
    * box is fine; it does not have to be a home address. One line, commas
    * between parts.
    */
-  postalAddress: 'TODO: business mailing address',
+  postalAddress: '308 6th St W, Park River, ND 58270',
 
   /** US state whose law governs the Terms, normally where you live. */
   governingState: 'North Dakota',

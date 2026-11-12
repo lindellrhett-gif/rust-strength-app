@@ -178,7 +178,7 @@ Rust Strength is offered in the United States, New Zealand and Australia. Everyt
 
 We handle your information under the Privacy Act 2020.
 
-- **Who collects and holds it:** Bluestem Software LLC, TODO: business mailing address. Supabase stores it on our behalf.
+- **Who collects and holds it:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270. Supabase stores it on our behalf.
 - **What we collect, why, and who sees it:** Sections 1 to 5. Your email address is needed to create an account. Everything else is optional; leaving it out only means the feature that uses it does not work.
 - **Access and correction:** you can see and download your information at any time (**Profile → Privacy & legal → Download my data**) and change most of it in the app. To ask for anything else, or to have something corrected, email ruststrengthsupport@gmail.com. We will respond within 20 working days.
 - **Complaints:** email us first. If you are not satisfied, you can complain to the Privacy Commissioner: https://www.privacy.org.nz
@@ -188,7 +188,7 @@ We handle your information under the Privacy Act 2020.
 
 We handle your information in line with the Australian Privacy Principles in the Privacy Act 1988.
 
-- **Who we are:** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Who we are:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
 - **Health information** (Section 2) is sensitive information. We collect it only with your consent, which you give by entering it, and use it only for the features that need it. You can withdraw your consent by deleting that information or your account (Section 8).
 - **You do not have to give your real name.** Your account starts with a random handle, and the app never asks for your name.
 - **Overseas:** your information is stored and processed in the United States (see above).
@@ -199,5 +199,5 @@ We handle your information in line with the Australian Privacy Principles in the
 ## 14. Contact
 
 Bluestem Software LLC
-TODO: business mailing address
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com
