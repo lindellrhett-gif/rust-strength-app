@@ -25,6 +25,9 @@ const db = await freshDb();
 const alice = await createUser(db, 'alice@example.com');
 const bob = await createUser(db, 'bob@example.com');
 const carol = await createUser(db, 'carol@example.com');
+// Sharing starts off for new accounts from migration 0031; these posts are
+// meant to reach the feed, so turn it on, as the first-friend question would.
+await db.query(`update profiles set share_workouts = true`);
 await db.query(`insert into friendships (requester_id, addressee_id, status) values ($1, $2, 'accepted')`, [alice, bob]);
 
 // --- A run, its outline in your own feed ---------------------------------

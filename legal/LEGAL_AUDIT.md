@@ -764,3 +764,153 @@ documents were rebuilt with the site sync off.
 4. **Data accuracy.** Open Food Facts is user-contributed, and USDA values
    describe a typical food, not the one on the plate. The app and the Terms
    say the figures are estimates; nothing more is promised.
+
+---
+
+## 17. Pending: other countries (November 6 and 7, 2026)
+
+Decided by the owner on November 6, 2026: offer the live 1.1.1 in New
+Zealand and Australia now, and Canada, the UK and the EU/EEA with 1.2. Four
+decisions came with it:
+- minimum age 16 when the phone's region is in the EU/EEA, 13 elsewhere;
+- sharing with friends off for new accounts, with one question at the first
+  accepted friend;
+- French versions of the Terms and Privacy Policy, drafted now and checked
+  by a French speaker before Canada goes on;
+- paid UK and EU representatives.
+
+The status and the remaining steps per country are in
+`store/INTERNATIONAL.md`.
+
+### Done
+
+- **Live line (`main`, legal 1.5.1, PR #8).**
+  - Privacy Policy section 13 for New Zealand (checked against IPP 3 and s 44
+    of the Privacy Act 2020) and Australia (written as if the Privacy Act
+    1988 applies).
+  - Terms consumer-law wording.
+  - Australia's under-16 social media self-assessment
+    (`legal/AU_SOCIAL_MEDIA_AGE.md`), checked against ss 63C and 63D, Rules
+    s 5, the March 2026 s 4A amendment and the explanatory statement.
+  - The site build now refuses to publish while a config value is a
+    placeholder.
+- **1.2 line (legal 1.6.0).**
+  - Section 13 adds Canada (PIPEDA and Quebec's private-sector Act) and the
+    UK, the EU, Iceland, Liechtenstein and Norway (UK GDPR and GDPR: legal
+    bases, rights, transfers under Supabase's DPA, which incorporates the EU
+    standard contractual clauses and the UK Addendum, checked on its site).
+  - **Explicit consent** to health information on sign-up and on the consent
+    screen, separate from the Terms (`src/domain/consent.ts`).
+  - **Age:** 16 in the EEA by the phone's region (`src/domain/age.ts`).
+  - **Sharing:** off for new accounts (migrations 0030 and 0031), with the
+    first-friend question (`src/domain/sharePrompt.ts`).
+  - **Terms:**
+    - the Digital Services Act contact point;
+    - reports from anyone;
+    - reasons given for moderation decisions;
+    - consumer law in Quebec, the UK and the EU;
+    - the languages clause.
+  - **French Terms and Privacy Policy** (`src/legal/fr/`), with a build step
+    and a test that stop them falling behind the English.
+  - **New documents:**
+    - `legal/RECORDS_OF_PROCESSING.md` (Article 30 record and impact
+      assessment);
+    - `legal/UK_ONLINE_SAFETY.md`;
+    - `legal/QUEBEC_PIA.md`.
+  - **Updated runbooks:** moderation, incidents and privacy requests.
+
+### Open, and not decided by the code
+
+1. **Representatives.** The UK and EU representatives aren't appointed yet.
+   The documents say one will be named before the app is offered there.
+2. **The Gmail sender.** Sign-up and password-reset codes go out through a
+   consumer Gmail account, which has no data processing agreement. That's a
+   gap under the GDPR, and under Quebec's rule that information sent outside
+   Quebec needs a written agreement. Replace it with a transactional provider
+   before the UK, the EU or Canada.
+3. **Quebec under 14: decided November 7, 2026.** Quebec requires a
+   parent's consent to collect information from a child under 14, and the
+   phone's region cannot tell Quebec from the rest of Canada. The owner chose
+   14 as the minimum age across Canada (`LEGAL.minimumAgeCanada`). Someone in
+   Canada whose phone region is set elsewhere still sees 13.
+4. **Consent the app depends on.** For UK and EU users, health information
+   relies on explicit consent, and the app cannot work without it. Whether
+   consent required to use a service is "freely given" is a known tension in
+   the GDPR. Fitness apps commonly handle it this way, but it has not been
+   tested for this app.
+5. **Age by region.** The phone's region is a self-declared signal, like the
+   age box. Someone in the EU with a US region setting sees 13.
+6. **The translations.** Equally valid by their own terms, and not yet
+   reviewed by a French-speaking lawyer.
+7. **Not checked:** whether the ICO data protection fee is owed (the ICO's
+   site blocks automated checks).
+
+None of this has been reviewed by a lawyer, and none of it settles whether
+the app meets any of these laws.
+
+### Security fixes found while writing these (November 7, 2026)
+
+Three problems, live in 1.1 as well. None could be triggered from the app,
+only by calling the API directly.
+
+1. **Forced friendships.** A friendship could be inserted already accepted,
+   or accepted by its own requester. That let anyone see a person's stats,
+   feed and shared run maps without their agreement.
+2. **Requests across a block.** A friend request could be sent to or from
+   someone who had blocked the sender.
+3. **Bodyweight readable by others.** Friends and anyone with a pending
+   request could read the whole profile row, including bodyweight. The
+   Privacy Policy says nobody else sees bodyweight.
+
+Fixes:
+- Migrations `0032_friendship_integrity.sql` and `0033_profile_names.sql`,
+  **applied to the live database on November 7, 2026** with the owner's OK,
+  after two independent reviews. The reviews added a block check on
+  accepting, a trigger that ends the friendship on any block, a server-set
+  accept time, and moved the block check out of the API.
+- `0034_profiles_owner_only.sql`, on 1.2's release day.
+- 1.2 reads friends' names through `rpc_profile_names`.
+
+Tested in `supabase/tests/friendship-integrity.test.mjs` (17 checks).
+
+Not knowable: whether anyone used 1 or 2 before the fix. The database does
+not record which side accepted a friendship.
+
+Also corrected in the same pass, in English and French:
+- **Gmail.** The Privacy Policy undersold it: it sends the sign-up codes
+  too, and holds the support inbox.
+- **Location.** It didn't mention the GPS preview before a run starts.
+- **Profiling.** "No profiling" was broader than the app's calculations
+  support.
+- **Share card route.** The run share card's route now starts off.
+
+### The grid on a friend's profile (0035, November 8, 2026)
+
+Shows the same
+session summaries a friend could already fetch from the feed, through one shared
+function, so the feed and the grid can't come to disagree about who may see what
+(`supabase/tests/friend-posts.test.mjs`). Nothing new is collected. The Privacy
+Policy now says summaries also appear on your profile, and
+`legal/AU_SOCIAL_MEDIA_AGE.md` records a reassessment of the redesigned Friends
+tab.
+
+Decided the same day: turning sharing on also shows sessions logged before it was
+on, as it always has. The first-friend question, the sharing help and the Privacy
+Policy say so. Sharing only later sessions would need a server-side cutoff.
+
+Applied to the live database November 8, 2026: 0030, 0035 and 0036. 0031 and 0034
+still wait for 1.2's release day.
+
+### Personal bests on bodyweight exercises (0037, November 11, 2026)
+
+A friend's best on a pull-up or an assisted dip was a number that included the
+person's bodyweight, against the Privacy Policy's "nobody can see your
+bodyweight". Decided: friends get BW and the reps, never a weight or an
+estimated max, on bodyweight and assisted exercises and on anything logged with
+the BW button. A level's strength XP comes from one server total instead, so a
+friend's level still matches. Tested in
+`supabase/tests/friend-bests-bodyweight.test.mjs`. Applied on release day with
+0034, which closes the other way bodyweight could be read.
+
+Still open: a feed post's total weight and reps. On a session of nothing but
+bodyweight sets, dividing one by the other gives the bodyweight.

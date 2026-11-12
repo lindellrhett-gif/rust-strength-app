@@ -23,7 +23,7 @@ ${LEGAL.appName} is operated by ${LEGAL.entity} ("we", "us"). We do not sell hea
 
 ## 1. The health data we collect, and why
 
-We treat all of the following as consumer health data. We collect each kind only when you use the feature it belongs to, and use it only to run that feature.
+We treat all of the following as consumer health data. We collect each kind only when you use the feature it belongs to, and use it only to run that feature. Before you can use the app, we ask for your consent to this, separately from the Terms of Service.
 
 | What | What it includes | What we use it for |
 |---|---|---|
@@ -49,7 +49,7 @@ We do not collect medical records, diagnoses, medications, reproductive or sexua
 
 | Who | What they receive | When |
 |---|---|---|
-| Other people who use the app, that you accept as friends | Summaries of your sessions (name, time, length, total weight, sets, reps, exercise names and how many records you set); your totals, streak, consistency, level, trophies and badges; your personal best for each exercise and the dates you trained; for runs, distance, time and pace, and a trimmed outline of the route only if you turn on the map; your daily step totals only if you turn on Share daily steps | Only after you choose a username and accept a friend. You can turn off the feed, step sharing and run maps in the app at any time |
+| Other people who use the app, that you accept as friends | Summaries of your sessions (name, time, length, total weight, sets, reps, exercise names and how many records you set); your totals, streak, consistency, level, trophies and badges; your personal best for each exercise and the dates you trained; for runs, distance, time and pace, and a trimmed outline of the route only if you turn on the map; your daily step totals only if you turn on Share daily steps | Only after you choose a username and accept a friend. Session summaries only once you turn on sharing, which starts off for new accounts; the app asks when you accept your first friend. You can turn off the feed, step sharing and run maps in the app at any time |
 | Supabase, our hosting and database provider, working on our behalf | All of the health data above, stored for us | Whenever you use the app |
 | Open Food Facts, a non-profit food database | The barcode or search words for a packaged food, sent from your phone, with your IP address. Not your account or your diary | When you scan, type or search for a packaged food |
 
@@ -76,5 +76,6 @@ Health data travels over encrypted connections (HTTPS/TLS). The database lets ea
 If we change this policy materially, we will update the date above and tell you in the app. We will ask for your separate consent before we collect, use or share health data in a way this policy doesn't describe.
 
 ${LEGAL.entity}
+${LEGAL.postalAddress}
 ${LEGAL.contactEmail}
 `;

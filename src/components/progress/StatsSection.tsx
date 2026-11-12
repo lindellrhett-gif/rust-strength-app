@@ -28,9 +28,9 @@ import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
 /**
- * The stats half of the Progress tab: streaks and all-time totals, running,
- * food, activity time, this week's muscle groups and personal records. The
- * Progress screen scrolls and refreshes it.
+ * Every number, opened from Progress: streaks and all-time totals, running,
+ * food, activity time, this week's muscle groups and personal records. The All
+ * stats screen scrolls and refreshes it.
  */
 export function StatsSection() {
   const router = useRouter();
@@ -135,9 +135,6 @@ export function StatsSection() {
         {!prs.data?.length ? (
           <Text style={text.bodyMuted}>Log some working sets to start setting PRs.</Text>
         ) : (
-          <Text style={text.caption}>Tap an exercise to see how it has moved over time.</Text>
-        )}
-        {!prs.data?.length ? null : (
           prs.data.map((pr) => (
             <Pressable
               key={pr.exerciseId}

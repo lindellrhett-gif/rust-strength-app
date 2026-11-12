@@ -18,7 +18,9 @@ export default function ShareRun() {
   const run = useRun(id);
   const zones = usePrivacyZones();
   const history = useRunHistory();
-  const [showRoute, setShowRoute] = useState(true);
+  // Off until chosen: the most private setting by default (Quebec's Law 25,
+  // s 9.1). The route is trimmed on the phone either way.
+  const [showRoute, setShowRoute] = useState(false);
 
   const hasRoute = (run.data?.route.length ?? 0) >= 2;
 

@@ -4,9 +4,13 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field, Screen } from '@/components';
 import { Checkbox } from '@/components/Checkbox';
+import { FrenchLegalLinks } from '@/components/FrenchLegalLinks';
 import { SocialSignIn } from '@/components/SocialSignIn';
+import { ageConfirmationLabel } from '@/domain/age';
+import { HEALTH_CONSENT_LABEL } from '@/domain/consent';
 import { EXISTING_ACCOUNT_MESSAGE, confirmErrorMessage } from '@/domain/emailConfirm';
 import { LEGAL } from '@/legal/config';
+import { deviceRegion } from '@/lib/deviceRegion';
 import { useAuth } from '@/providers/AuthProvider';
 import { spacing, text } from '@/theme/typography';
 
@@ -20,10 +24,13 @@ export default function SignUp() {
   // The email already has an account: offer the way in instead of a new one.
   const [existing, setExisting] = useState(false);
   const [busy, setBusy] = useState(false);
-  // Two separate confirmations: an age gate (13+) and acceptance of the
-  // documents. Both are recorded on the profile when the account is created.
+  // Three separate confirmations: an age gate (13+, or 16+ when the phone's
+  // region is in the EEA; see src/domain/age.ts), acceptance of the documents,
+  // and explicit consent to health information. All three are needed, and
+  // the accepted version on the profile records them.
   const [ageOk, setAgeOk] = useState(false);
   const [termsOk, setTermsOk] = useState(false);
+  const [healthOk, setHealthOk] = useState(false);
   const router = useRouter();
 
   const submit = async () => {
@@ -34,8 +41,8 @@ export default function SignUp() {
       setError('Password must be at least 8 characters.');
       return;
     }
-    if (!ageOk || !termsOk) {
-      setError('Please confirm your age and accept the Terms and Privacy Policy.');
+    if (!ageOk || !termsOk || !healthOk) {
+      setError('Please confirm your age, accept the Terms and Privacy Policy, and give your consent.');
       return;
     }
     setBusy(true);
@@ -125,12 +132,17 @@ export default function SignUp() {
           <Checkbox
             checked={ageOk}
             onToggle={() => setAgeOk((v) => !v)}
-            label={`I am at least ${LEGAL.minimumAge} years old`}
+            label={ageConfirmationLabel(deviceRegion())}
           />
           <Checkbox
             checked={termsOk}
             onToggle={() => setTermsOk((v) => !v)}
             label="I agree to the Terms of Service and Privacy Policy"
+          />
+          <Checkbox
+            checked={healthOk}
+            onToggle={() => setHealthOk((v) => !v)}
+            label={HEALTH_CONSENT_LABEL}
           />
           <View style={styles.legalLinks}>
             <Pressable onPress={() => router.push('/legal/terms')} hitSlop={6}>
@@ -141,13 +153,14 @@ export default function SignUp() {
               <Text style={styles.legalLink}>Privacy Policy</Text>
             </Pressable>
           </View>
+          <FrenchLegalLinks />
 
           <Button
             label="Sign up"
             onPress={submit}
             loading={busy}
             size="lg"
-            disabled={!ageOk || !termsOk}
+            disabled={!ageOk || !termsOk || !healthOk}
           />
           {/* A sign-up that went through but left them here (confirmation off
               and the sign-in failed) still needs a way on. */}

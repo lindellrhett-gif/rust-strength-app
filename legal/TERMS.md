@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last updated: October 29, 2026**
+**Last updated: November 6, 2026**
 
 These Terms are an agreement between you and Bluestem Software LLC ("we", "us") covering your use of Rust Strength (the "App"). By creating an account you agree to them.
 
@@ -26,7 +26,7 @@ Rust Strength is a logging and calculation tool. It is **not** a medical device,
 
 ## 2. Eligibility
 
-You must be at least 13 years old. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
+You must be at least 13 years old, at least 14 if you live in Canada, or at least 16 if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
 
 ## 3. Your account
 
@@ -42,6 +42,9 @@ The App has a social layer where other users can see your username, display name
 - Impersonate any person or organisation, or pick a username or display name suggesting you are someone you are not
 - Use obscene, hateful, sexually explicit, or discriminatory names or text
 - Post anything unlawful, or that infringes anyone's rights
+- Post or name anything that encourages suicide, self-harm or an eating disorder
+- Threaten violence, or promote terrorism or violent extremism
+- Offer, sell or promote illegal drugs, other controlled substances (including anabolic steroids) or weapons
 - Spam other users or send unsolicited promotions
 - Attempt to access another user's account or data
 - Probe, scan, overload, reverse-engineer, scrape or disrupt the service
@@ -60,9 +63,13 @@ You are responsible for your content and confirm you have the right to post it.
 
 If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email ruststrengthsupport@gmail.com. You can also block any user immediately, which removes any friendship and hides you from each other.
 
-We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk.
+**Anyone can report illegal content**, with or without an account. Email ruststrengthsupport@gmail.com saying where it is in the App and why you believe it is illegal.
 
-If you think we got it wrong, email ruststrengthsupport@gmail.com and we will review it.
+We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms or the law. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk. A person reviews every report; we do not use automated tools to moderate content.
+
+**When we act, we tell you why.** If we remove something you wrote, or restrict, suspend or end your account, we tell you what we did, what rule or law it was based on, and how to challenge it, unless the law or someone's safety prevents us. If you think we got it wrong, email ruststrengthsupport@gmail.com and a person will review the decision. You can also email us to complain about how we handle reports or content, or about how we meet our duties under the UK Online Safety Act, and we will reply.
+
+**Contact point.** For users and authorities, including under the EU Digital Services Act: ruststrengthsupport@gmail.com, in English or French. Our legal representative in the European Union: to be named here before Rust Strength is offered in the European Union.
 
 ## 7. Copyright
 
@@ -115,7 +122,7 @@ Some jurisdictions do not allow limiting liability for personal injury or gross 
 
 ## 14. Indemnification
 
-You agree to indemnify and hold harmless Bluestem Software LLC from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
+To the extent the law allows, you agree to indemnify and hold harmless Bluestem Software LLC from claims, damages and reasonable legal fees arising from your use of the App, your content, or your breach of these Terms.
 
 ## 15. Governing law and disputes
 
@@ -124,6 +131,13 @@ These Terms are governed by the laws of the State of North Dakota, without regar
 Please contact us at ruststrengthsupport@gmail.com first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in North Dakota, and you and we consent to that jurisdiction.
 
 Nothing here prevents either of us from bringing a claim in small-claims court.
+
+**If you live outside the United States**, choosing North Dakota law does not take away the protection of the consumer laws where you live that cannot be overridden by agreement, and if those laws let you bring a claim in your local courts, you still can.
+
+- **Australia.** If you are a consumer, nothing in these Terms excludes, restricts or modifies any guarantee, right or remedy you have under the Australian Consumer Law.
+- **New Zealand.** If you are a consumer, nothing in these Terms limits your rights under the Consumer Guarantees Act 1993 or the Fair Trading Act 1986.
+- **Canada.** If you live in Quebec, nothing in these Terms limits your rights under Quebec's Consumer Protection Act, and you can bring a claim in the courts of Quebec.
+- **United Kingdom and European Union.** If you are a consumer, you keep the rights the consumer law where you live gives you, and you can bring a claim in the courts where you live.
 
 ## 16. Apple and Google
 
@@ -137,7 +151,10 @@ We may update these Terms. If the change is material we will update the date abo
 
 If any provision is unenforceable, the rest stays in force. Our not enforcing a provision is not a waiver of it. These Terms, with the Privacy Policy, are the whole agreement between us.
 
+**Languages.** These Terms and the Privacy Policy are available in English and in French (https://lindellrhett-gif.github.io/rust-strength/conditions.html and https://lindellrhett-gif.github.io/rust-strength/confidentialite.html, and in the App under **Profile → Privacy & legal**). Both versions are equally valid. You can read either before you agree.
+
 ## 19. Contact
 
 Bluestem Software LLC
+TODO: business mailing address
 ruststrengthsupport@gmail.com

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { addDays } from '@/domain/stats';
@@ -22,6 +23,10 @@ export interface MonthCalendarProps {
   onSelect: (date: string) => void;
   onPrevMonth: () => void;
   onNextMonth: () => void;
+  /** Leave out the colour key under the grid, because the screen offers it elsewhere. */
+  hideLegend?: boolean;
+  /** Beside the month's name, like a ? button. */
+  titleAccessory?: ReactNode;
 }
 
 /**
@@ -41,6 +46,8 @@ export function MonthCalendar({
   onSelect,
   onPrevMonth,
   onNextMonth,
+  hideLegend = false,
+  titleAccessory,
 }: MonthCalendarProps) {
   const [y, m] = month.split('-').map(Number);
   const first = `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-01`;
@@ -64,11 +71,26 @@ export function MonthCalendar({
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
-        <Pressable onPress={onPrevMonth} hitSlop={12} style={styles.nav}>
+        <Pressable
+          onPress={onPrevMonth}
+          hitSlop={12}
+          style={styles.nav}
+          accessibilityRole="button"
+          accessibilityLabel="Previous month"
+        >
           <Text style={styles.navText}>‹</Text>
         </Pressable>
-        <Text style={text.heading}>{title}</Text>
-        <Pressable onPress={onNextMonth} hitSlop={12} style={styles.nav}>
+        <View style={styles.title}>
+          <Text style={text.heading}>{title}</Text>
+          {titleAccessory}
+        </View>
+        <Pressable
+          onPress={onNextMonth}
+          hitSlop={12}
+          style={styles.nav}
+          accessibilityRole="button"
+          accessibilityLabel="Next month"
+        >
           <Text style={styles.navText}>›</Text>
         </Pressable>
       </View>
@@ -99,6 +121,9 @@ export function MonthCalendar({
                 <Pressable
                   key={date}
                   onPress={() => onSelect(date)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={dayLabel(date, { isToday, trained, active, planned, rested })}
                   style={[
                     styles.cell,
                     trained && styles.cellTrained,
@@ -129,12 +154,40 @@ export function MonthCalendar({
         ))}
       </View>
 
-      <View style={styles.legend}>
-        <Key color={colors.primary} label="lifted" filled />
-        <Key color={colors.success} label="activity" />
-        <Key color={colors.warning} label="planned" />
-        <Key color={colors.textMuted} label="rest" />
-      </View>
+      {hideLegend ? null : <CalendarLegend />}
+    </View>
+  );
+}
+
+/** A day in words, since its colour and dots say nothing to VoiceOver. */
+function dayLabel(
+  date: string,
+  day: { isToday: boolean; trained: boolean; active: boolean; planned: boolean; rested: boolean },
+): string {
+  const name = new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
+    month: 'long',
+    day: 'numeric',
+  });
+  return [
+    name,
+    day.isToday ? 'today' : null,
+    day.trained ? 'lifted' : null,
+    day.active ? 'activity' : null,
+    day.planned ? 'planned' : null,
+    day.rested && !day.trained ? 'rest day' : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
+/** What the calendar's colours mean. */
+export function CalendarLegend() {
+  return (
+    <View style={styles.legend}>
+      <Key color={colors.primary} label="lifted" filled />
+      <Key color={colors.success} label="activity" />
+      <Key color={colors.warning} label="planned" />
+      <Key color={colors.textMuted} label="rest" />
     </View>
   );
 }
@@ -212,6 +265,7 @@ const styles = StyleSheet.create({
   dotPlanned: { backgroundColor: colors.warning },
   dotRest: { backgroundColor: colors.textMuted },
 
+  title: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.lg },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   legendBox: { width: 10, height: 10, borderRadius: 2 },

@@ -102,6 +102,8 @@ function RootNavigator() {
       <Stack.Screen name="templates/[id]" options={{ headerShown: true, title: 'Preset' }} />
       <Stack.Screen name="legal/privacy" options={{ headerShown: true, title: 'Privacy Policy' }} />
       <Stack.Screen name="legal/terms" options={{ headerShown: true, title: 'Terms of Service' }} />
+      <Stack.Screen name="legal/privacy-fr" options={{ headerShown: true, title: 'Politique de confidentialité' }} />
+      <Stack.Screen name="legal/terms-fr" options={{ headerShown: true, title: 'Conditions d’utilisation' }} />
       <Stack.Screen name="legal/health-data" options={{ headerShown: true, title: 'Health Data Policy' }} />
       <Stack.Screen name="legal/notices" options={{ headerShown: true, title: 'Acknowledgements' }} />
       <Stack.Screen
@@ -148,6 +150,10 @@ function RootNavigator() {
         options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
       />
       <Stack.Screen name="recent" options={{ headerShown: true, title: 'Recent workouts' }} />
+      <Stack.Screen name="stats" options={{ headerShown: true, title: 'All stats' }} />
+      <Stack.Screen name="trophies" options={{ headerShown: true, title: 'Trophies and badges' }} />
+      <Stack.Screen name="leaderboard" options={{ headerShown: true, title: 'Leaderboard' }} />
+      <Stack.Screen name="find-friends" options={{ headerShown: true, title: 'Find friends' }} />
       <Stack.Screen
         name="nutrition/add"
         options={{ headerShown: true, presentation: 'modal', title: 'Add food' }}

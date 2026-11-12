@@ -1,61 +1,83 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 
-import { Button, Card, Field, LoadingView, Screen } from '@/components';
-import { AchievementGrid } from '@/components/AchievementGrid';
-import { BadgeShelf } from '@/components/BadgeShelf';
-import { FeaturedTrophies } from '@/components/FeaturedTrophies';
-import { LevelCard } from '@/components/LevelCard';
-import { NumberStepper } from '@/components/NumberStepper';
-import { ProCard } from '@/components/ProCard';
-import { RestAlertToggle } from '@/components/RestAlertToggle';
-import { StepGoalSheet } from '@/components/StepGoalSheet';
+import { Button, LoadingView, Screen } from '@/components';
+import { InlineNumber } from '@/components/InlineNumber';
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import {
+  EquipmentRow,
+  ProRow,
+  RestTimerRow,
+  UsernameRow,
+} from '@/components/profile/ProfileSheets';
+import { SettingGroup, SettingRow, type HelpContent } from '@/components/SettingRow';
 import { useMyLevel } from '@/data/level';
-import { useProfile, useUpdateProfile } from '@/data/profile';
+import { useProfile, useUpdateProfile, type ProfileUpdate } from '@/data/profile';
 import { useRestDays } from '@/data/restDays';
 import { useTrainedDates } from '@/data/stats';
-import { useStepGoal } from '@/data/stepGoal';
+import { useSetStepGoal, useStepGoal } from '@/data/stepGoal';
 import { useSetShareSteps } from '@/data/trophies';
-import { cleanStepGoal } from '@/domain/todayTiles';
-import { LEGAL } from '@/legal/config';
-import { useAuth } from '@/providers/AuthProvider';
-import { useOnboardingControls } from '@/providers/OnboardingProvider';
 import {
   consistency,
-  earnedCount,
   refreshFeatured,
-  toggleFeatured,
-  totalTiersEarned,
   totalTiersAvailable,
+  totalTiersEarned,
 } from '@/domain/achievements';
-import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
-import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
-import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { hasFeature } from '@/domain/entitlements';
+import { editRepRange } from '@/domain/inlineEdit';
+import { MAX_REPS, repRangeOrDefault } from '@/domain/recommender';
+import { shareChoice } from '@/domain/sharePrompt';
+import { currentStreak } from '@/domain/stats';
+import { STEP_GOAL_MAX, STEP_GOAL_MIN, cleanStepGoal } from '@/domain/todayTiles';
+import { LEGAL } from '@/legal/config';
 import { todayLocal } from '@/lib/dates';
-import type { EquipmentKind, WeightUnit } from '@/lib/database.types';
 import { subscriptionsOn } from '@/lib/purchases';
+import { useAuth } from '@/providers/AuthProvider';
+import { useOnboardingControls } from '@/providers/OnboardingProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
+const HELP: Record<'bodyweight' | 'repRange' | 'stepGoal' | 'sharing', HelpContent> = {
+  bodyweight: {
+    title: 'Bodyweight',
+    body: 'Used by the BW button when logging pull-ups, dips, push-ups and other bodyweight movements.',
+  },
+  repRange: {
+    title: 'Rep range',
+    body: 'The weight suggestion aims for you to reach failure inside this range.',
+  },
+  stepGoal: {
+    title: 'Daily step goal',
+    body: 'Today shows your steps out of this goal. It stays on your phone, like your steps.',
+  },
+  sharing: {
+    title: 'Sharing with friends',
+    body: [
+      'Show my sessions in the feed: friends you have accepted see a summary of each workout and activity, including ones you logged earlier, in their feed and on your profile: its name, time, volume, sets, reps, records and which exercises you did. Individual sets are never shared. Turn this off and your sessions stop appearing for everyone.',
+      'Share daily steps: puts you on the steps leaderboard and counts toward the Steps trophy. Friends see your step totals, nothing else. Turning this off deletes the totals already shared.',
+    ],
+  },
+};
+
 export default function ProfileScreen() {
   const { signOut } = useAuth();
-  const profile = useProfile();
-  const update = useUpdateProfile();
-
-  const dates = useTrainedDates();
-  const restDays = useRestDays();
-  const today = todayLocal();
   const router = useRouter();
   const onboarding = useOnboardingControls();
+  const profile = useProfile();
+  const update = useUpdateProfile();
+  const dates = useTrainedDates();
+  const restDays = useRestDays();
+  const shareSteps = useSetShareSteps();
+  const stepGoal = useStepGoal().data ?? cleanStepGoal(null);
+  const saveStepGoal = useSetStepGoal();
+
+  const bodyweightField = useRef<TextInput>(null);
+  const stepGoalField = useRef<TextInput>(null);
 
   // XP, level, badges and trophies all come from one place, so this screen can
   // never disagree with the post-workout screen about what level you are.
-  const { xp, level, badges, achievements, trophiesSettled } = useMyLevel();
-  const shareSteps = useSetShareSteps();
-  const stepGoal = useStepGoal().data ?? cleanStepGoal(null);
-  const [editingStepGoal, setEditingStepGoal] = useState(false);
+  const { xp, level, achievements, trophiesSettled } = useMyLevel();
 
   // Featured trophies at the tiers held now: one shown at Silver moves up at
   // Gold, and one no longer held drops off. Saved back once everything the
@@ -65,370 +87,201 @@ export default function ProfileScreen() {
   const featuredKey = featured.join(',');
   const storedKey = storedFeatured.join(',');
   const { mutate: saveProfile } = update;
+  // Tried once per change. A failed save puts the stored value back, which would
+  // otherwise set this off again for as long as the server keeps failing.
+  const featuredTried = useRef<string | null>(null);
   useEffect(() => {
-    if (!trophiesSettled || featuredKey === storedKey) return;
+    if (!trophiesSettled || featuredKey === storedKey || featuredTried.current === featuredKey) return;
+    featuredTried.current = featuredKey;
     saveProfile({ featured_trophies: featuredKey ? featuredKey.split(',') : [] });
   }, [trophiesSettled, featuredKey, storedKey, saveProfile]);
-
-  const [handle, setHandle] = useState<string | null>(null);
-  const [rest, setRest] = useState<number | null>(null);
-  const [low, setLow] = useState<number | null>(null);
-  const [high, setHigh] = useState<number | null>(null);
-  const [bw, setBw] = useState<number | null>(null);
 
   if (profile.isLoading || !profile.data) return <LoadingView />;
 
   const p = profile.data;
-  const repLow = low ?? p.target_rep_low;
-  const repHigh = high ?? p.target_rep_high;
-  const rangeDirty = repLow !== p.target_rep_low || repHigh !== p.target_rep_high;
+  const today = todayLocal();
+  const rest = (restDays.data ?? []).map((r) => r.rest_date);
+  const trained = dates.data ?? [];
 
-  const bodyWeight = bw ?? p.body_weight ?? 0;
-  const bwDirty = bw != null && bw !== p.body_weight;
+  /** A setting saved the moment it changes, with a word if the save fails. */
+  const save = (patch: ProfileUpdate) =>
+    update.mutate(patch, {
+      onError: (e) =>
+        Alert.alert('Could not save', e instanceof Error ? e.message : 'Please try again.'),
+    });
 
-  const equipment = p.equipment ?? [];
-  const restSeconds = rest ?? p.rest_seconds;
-  const restDirty = restSeconds !== p.rest_seconds;
-  const consistency30 = Math.round(
-    consistency(
-      dates.data ?? [],
-      today,
-      30,
-      (restDays.data ?? []).map((r) => r.rest_date),
-    ) * 100,
-  );
-
-  const setUnit = (unit: WeightUnit) => update.mutate({ unit });
-
-  const saveRange = () => {
-    const [lo, hi] = repRangeOrDefault(repLow, repHigh);
-    update.mutate(
-      { target_rep_low: lo, target_rep_high: hi },
-      {
-        onSuccess: () => {
-          setLow(null);
-          setHigh(null);
-        },
-      },
+  const saveRepEnd = (end: 'low' | 'high', value: number | null) => {
+    if (value == null) return;
+    const [lo, hi] = repRangeOrDefault(
+      ...editRepRange([p.target_rep_low, p.target_rep_high], end, value),
     );
+    save({ target_rep_low: lo, target_rep_high: hi });
   };
 
-  const saveBodyWeight = () => {
-    update.mutate(
-      { body_weight: bodyWeight > 0 ? bodyWeight : null },
-      { onSuccess: () => setBw(null) },
-    );
-  };
+  const setShareSteps = (on: boolean) =>
+    shareSteps.mutate(on, {
+      onError: (e) =>
+        Alert.alert(
+          'Could not change step sharing',
+          e instanceof Error ? e.message : 'Please try again.',
+        ),
+    });
 
-  const toggleEquipment = (kind: EquipmentKind) => {
-    const next = equipment.includes(kind)
-      ? equipment.filter((e) => e !== kind)
-      : [...equipment, kind];
-    update.mutate({ equipment: next });
+  // The ? explains this too, but a switch that deletes something says so itself.
+  const onShareSteps = (on: boolean) => {
+    if (on) {
+      setShareSteps(true);
+      return;
+    }
+    Alert.alert('Stop sharing steps?', 'This deletes the step totals already shared.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Stop sharing', style: 'destructive', onPress: () => setShareSteps(false) },
+    ]);
   };
 
   return (
     <Screen scroll edges={['left', 'right', 'bottom']}>
-      <View>
-        <View style={styles.nameRow}>
-          <Text style={[text.hero, styles.name]} numberOfLines={1}>
-            @{p.username}
-          </Text>
-          <FeaturedTrophies keys={featured} size={30} />
-        </View>
-        <Text style={text.bodyMuted}>
-          {p.display_name ?? 'Lifter'} · {consistency30}% consistent (30d) ·{' '}
-          {earnedCount(achievements)} trophies
-        </Text>
-      </View>
+      <ProfileHeader
+        username={p.username}
+        displayName={p.display_name}
+        level={level}
+        breakdown={xp}
+        featured={featured}
+        streak={currentStreak(trained, today, rest)}
+        consistency30={Math.round(consistency(trained, today, 30, rest) * 100)}
+        trophyTiers={totalTiersEarned(achievements)}
+      />
 
-      <LevelCard level={level} breakdown={xp} />
-
-      <Card title="Username">
-        <Text style={text.bodyMuted}>
-          {p.username_chosen
-            ? 'Other people can find you by this handle.'
-            : 'Pick a handle so friends can find you. Until you do, you are not searchable.'}
+      {p.username_chosen ? null : (
+        <Text style={styles.nudge}>
+          Pick a username under More so friends can find you. Until you do, you are not searchable.
         </Text>
-        <Field
-          label="Username"
-          value={handle ?? p.username}
-          onChangeText={(v: string) => setHandle(v.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase())}
-          autoCapitalize="none"
-          autoCorrect={false}
-          maxLength={20}
+      )}
+
+      <SettingGroup>
+        <SettingRow
+          label="Trophies and badges"
+          value={`${totalTiersEarned(achievements)} of ${totalTiersAvailable(achievements)}`}
+          onPress={() => router.push('/trophies')}
         />
-        <Text style={text.caption}>
-          Letters, numbers and underscores. This is visible to anyone searching, so avoid using
-          your real name or email if you would rather stay anonymous.
-        </Text>
-        {handle && handle !== p.username && handle.length >= 3 ? (
-          <Button
-            label="Save username"
-            onPress={() => {
-              update.mutate(
-                { username: handle, username_chosen: true },
-                {
-                  onSuccess: () => setHandle(null),
-                  onError: (e) =>
-                    Alert.alert(
-                      'Could not save',
-                      e instanceof Error && e.message.includes('duplicate')
-                        ? 'That username is taken.'
-                        : 'Please try a different username.',
-                    ),
-                },
-              );
-            }}
-            loading={update.isPending}
+      </SettingGroup>
+
+      <SettingGroup title="Training">
+        <SettingRow
+          label="Bodyweight"
+          help={HELP.bodyweight}
+          onPressField={() => bodyweightField.current?.focus()}
+        >
+          <InlineNumber
+            inputRef={bodyweightField}
+            label={`Bodyweight in ${p.unit}`}
+            value={p.body_weight}
+            onCommit={(n) => save({ body_weight: n != null && n > 0 ? n : null })}
+            min={0}
+            max={1000}
+            precision={1}
+            suffix={p.unit}
+            clearable
           />
-        ) : null}
-      </Card>
+        </SettingRow>
 
-      <Card title="Bodyweight">
-        <Text style={text.bodyMuted}>
-          Used by the BW button when logging pull-ups, dips, push-ups and other bodyweight
-          movements.
-        </Text>
-        <NumberStepper
-          label={`Bodyweight (${p.unit})`}
-          value={bodyWeight}
-          onChange={setBw}
-          step={p.unit === 'kg' ? 0.5 : 1}
-          precision={1}
-          min={0}
-          max={1000}
-        />
-        {bwDirty ? (
-          <Button label="Save bodyweight" onPress={saveBodyWeight} loading={update.isPending} />
-        ) : null}
-      </Card>
-
-      <Card title="Units">
-        <View style={styles.segment}>
-          {(['lb', 'kg'] as const).map((u) => (
-            <Pressable
-              key={u}
-              onPress={() => setUnit(u)}
-              style={[styles.segmentBtn, p.unit === u && styles.segmentActive]}
-            >
-              <Text style={[styles.segmentText, p.unit === u && styles.segmentTextActive]}>
-                {u.toUpperCase()}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      </Card>
-
-      <Card title="Target rep range">
-        <Text style={text.bodyMuted}>
-          The recommender aims for you to reach failure inside this range.
-        </Text>
-        <View style={styles.rangeRow}>
-          <NumberStepper label="Low reps" value={repLow} onChange={setLow} min={1} max={repHigh} />
-          <NumberStepper
-            label="High reps"
-            value={repHigh}
-            onChange={setHigh}
-            min={repLow}
-            max={MAX_REPS}
-          />
-        </View>
-        {rangeDirty ? (
-          <Button label="Save range" onPress={saveRange} loading={update.isPending} />
-        ) : null}
-      </Card>
-
-      <Card title="My usual equipment">
-        <Text style={text.bodyMuted}>
-          Pre-selected when generating a workout. You can still change it each time.
-        </Text>
-        <View style={styles.chips}>
-          {EQUIPMENT_OPTIONS.map((kind) => {
-            const on = equipment.includes(kind);
-            return (
+        <SettingRow label="Units">
+          <View style={styles.segment}>
+            {(['lb', 'kg'] as const).map((u) => (
               <Pressable
-                key={kind}
-                onPress={() => toggleEquipment(kind)}
-                style={[styles.chip, on && styles.chipActive]}
+                key={u}
+                onPress={() => save({ unit: u })}
+                style={[styles.segmentBtn, p.unit === u && styles.segmentOn]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: p.unit === u }}
               >
-                <Text style={[styles.chipText, on && styles.chipTextActive]}>{kind}</Text>
+                <Text style={[styles.segmentText, p.unit === u && styles.segmentTextOn]}>{u}</Text>
               </Pressable>
-            );
-          })}
-        </View>
-      </Card>
-
-      <Card title="Badges">
-        <Text style={text.bodyMuted}>
-          Levelling up unlocks these. Influencer and Beta Tester are handed out by us and cannot
-          be earned in the app.
-        </Text>
-        <BadgeShelf badges={badges} />
-      </Card>
-
-      <Card title="Rest timer">
-        <Text style={text.bodyMuted}>
-          How long the timer runs between sets. It starts on its own when you save a working set.
-        </Text>
-        <View style={styles.chips}>
-          {REST_PRESETS.map((seconds) => (
-            <Pressable
-              key={seconds}
-              onPress={() => setRest(seconds)}
-              style={[styles.chip, restSeconds === seconds && styles.chipActive]}
-            >
-              <Text style={[styles.chipText, restSeconds === seconds && styles.chipTextActive]}>
-                {restLabel(seconds)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        <NumberStepper
-          label="Rest (seconds)"
-          value={restSeconds}
-          onChange={(v) => setRest(clampRest(v))}
-          step={15}
-          min={5}
-          max={3600}
-        />
-        {restDirty ? (
-          <Button
-            label="Save rest time"
-            loading={update.isPending}
-            onPress={() =>
-              update.mutate(
-                { rest_seconds: clampRest(restSeconds) },
-                { onSuccess: () => setRest(null) },
-              )
-            }
-          />
-        ) : null}
-        <View style={styles.activityRow}>
-          <View style={styles.toggleText}>
-            <Text style={text.body}>Start automatically</Text>
-            <Text style={text.caption}>Begin the rest timer as soon as a working set is saved.</Text>
+            ))}
           </View>
-          <Switch
-            value={p.rest_auto}
-            onValueChange={(on) => update.mutate({ rest_auto: on })}
-            trackColor={{ true: colors.primary, false: colors.border }}
-          />
-        </View>
-        <RestAlertToggle />
-      </Card>
+        </SettingRow>
 
-      <Card title="Sharing with friends">
-        <View style={styles.activityRow}>
-          <View style={styles.toggleText}>
-            <Text style={text.body}>Show my sessions in the feed</Text>
-            <Text style={text.caption}>
-              Friends you have accepted see a summary of each workout and activity: its name,
-              time, volume and which exercises you did. Individual sets are never shared. Turn
-              this off and your sessions stop appearing for everyone.
-            </Text>
+        <SettingRow label="Rep range" help={HELP.repRange}>
+          <View style={styles.range}>
+            <InlineNumber
+              label="Lowest reps"
+              value={p.target_rep_low}
+              onCommit={(n) => saveRepEnd('low', n)}
+              min={1}
+              max={MAX_REPS}
+            />
+            <Text style={text.caption}>to</Text>
+            <InlineNumber
+              label="Highest reps"
+              value={p.target_rep_high}
+              onCommit={(n) => saveRepEnd('high', n)}
+              min={1}
+              max={MAX_REPS}
+            />
           </View>
+        </SettingRow>
+
+        <SettingRow
+          label="Daily step goal"
+          help={HELP.stepGoal}
+          onPressField={() => stepGoalField.current?.focus()}
+        >
+          <InlineNumber
+            inputRef={stepGoalField}
+            label="Daily step goal"
+            value={stepGoal}
+            onCommit={(n) => {
+              if (n != null) {
+                saveStepGoal.mutate(n, {
+                  onError: () => Alert.alert('Couldn’t save the goal', 'Please try again.'),
+                });
+              }
+            }}
+            min={STEP_GOAL_MIN}
+            max={STEP_GOAL_MAX}
+            grouped
+          />
+        </SettingRow>
+
+        <EquipmentRow profile={p} />
+        <RestTimerRow profile={p} />
+      </SettingGroup>
+
+      <SettingGroup
+        title="Sharing with friends"
+        help={HELP.sharing}
+        footer="Summaries only, never single sets."
+      >
+        <SettingRow label="Show my sessions in the feed">
           <Switch
             value={p.share_workouts}
-            onValueChange={(on) => update.mutate({ share_workouts: on })}
+            onValueChange={(on) => save(shareChoice(on, p))}
             trackColor={{ true: colors.primary, false: colors.border }}
+            accessibilityLabel="Show my sessions in the feed"
           />
-        </View>
-        <View style={styles.activityRow}>
-          <View style={styles.toggleText}>
-            <Text style={text.body}>Share daily steps</Text>
-            <Text style={text.caption}>
-              Puts you on the steps leaderboard and counts toward the Steps trophy. Friends see
-              your step totals, nothing else. Turning this off deletes the totals already shared.
-            </Text>
-          </View>
+        </SettingRow>
+        <SettingRow label="Share daily steps">
           <Switch
             value={shareSteps.isPending ? !!shareSteps.variables : p.share_steps}
-            onValueChange={(on) =>
-              shareSteps.mutate(on, {
-                onError: (e) =>
-                  Alert.alert('Could not change step sharing', e instanceof Error ? e.message : 'Please try again.'),
-              })
-            }
+            onValueChange={onShareSteps}
             disabled={shareSteps.isPending}
             trackColor={{ true: colors.primary, false: colors.border }}
+            accessibilityLabel="Share daily steps"
           />
-        </View>
-      </Card>
+        </SettingRow>
+      </SettingGroup>
 
-      <Card
-        title={`Trophies · ${totalTiersEarned(achievements)} of ${totalTiersAvailable(achievements)} tiers`}
-      >
-        <AchievementGrid
-          achievements={achievements}
-          featuredIds={featured.map((k) => k.split(':')[0])}
-          onToggleFeatured={(a) => update.mutate({ featured_trophies: toggleFeatured(featured, a) })}
-        />
-      </Card>
-
-      <Card title="Help">
-        <Pressable
-          style={styles.legalRow}
-          onPress={() => onboarding?.replay()}
-          disabled={!onboarding}
-          accessibilityRole="button"
-        >
-          <View style={styles.helpText}>
-            <Text style={text.body}>How this app works</Text>
-            <Text style={text.caption}>Run through the welcome cards again</Text>
-          </View>
-          <Text style={styles.chev}>›</Text>
-        </Pressable>
-      </Card>
-
-      <Card title="Steps">
-        <Pressable
-          style={styles.legalRow}
-          onPress={() => setEditingStepGoal(true)}
-          accessibilityRole="button"
-        >
-          <View>
-            <Text style={text.body}>Daily step goal</Text>
-            <Text style={text.caption}>{stepGoal.toLocaleString('en-US')} steps a day, shown on Today</Text>
-          </View>
-          <Text style={styles.chev}>›</Text>
-        </Pressable>
-        <StepGoalSheet visible={editingStepGoal} onClose={() => setEditingStepGoal(false)} />
-      </Card>
-
-      {hasFeature('running') ? (
-        <Card title="Running">
-          <Pressable
-            style={styles.legalRow}
-            onPress={() => router.push('/run/settings')}
-            accessibilityRole="button"
-          >
-            <View>
-              <Text style={text.body}>Running settings</Text>
-              <Text style={text.caption}>Auto-pause, sharing and privacy zones</Text>
-            </View>
-            <Text style={styles.chev}>›</Text>
-          </Pressable>
-        </Card>
-      ) : null}
-
-      {subscriptionsOn ? <ProCard /> : null}
-
-      <Card title="Privacy & legal">
-        <Pressable style={styles.legalRow} onPress={() => router.push('/legal/privacy-center')}>
-          <View>
-            <Text style={text.body}>Privacy & legal</Text>
-            <Text style={text.caption}>
-              Documents, download your data, blocked users, delete account
-            </Text>
-          </View>
-          <Text style={styles.chev}>›</Text>
-        </Pressable>
-        <Text style={text.caption}>
-          {LEGAL.appName} is a logging tool, not medical or fitness advice. Lifting carries a real
-          risk of injury — train within your limits.
-        </Text>
-      </Card>
+      <SettingGroup title="More">
+        <UsernameRow profile={p} />
+        {hasFeature('running') ? (
+          <SettingRow label="Running settings" onPress={() => router.push('/run/settings')} />
+        ) : null}
+        {subscriptionsOn ? <ProRow /> : null}
+        {onboarding ? (
+          <SettingRow label="How this app works" onPress={() => onboarding.replay()} />
+        ) : null}
+        <SettingRow label="Privacy & legal" onPress={() => router.push('/legal/privacy-center')} />
+      </SettingGroup>
 
       <Button
         label="Sign out"
@@ -440,52 +293,34 @@ export default function ProfileScreen() {
           ])
         }
       />
+
+      <Text style={styles.disclaimer}>
+        {LEGAL.appName} is a logging tool, not medical or fitness advice. Lifting carries a real
+        risk of injury, so train within your limits.
+      </Text>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  name: { flexShrink: 1 },
-  legalRow: {
+  nudge: { ...text.caption, color: colors.warning },
+  range: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  segment: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
+    overflow: 'hidden',
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  chev: { color: colors.textFaint, fontSize: 20 },
-  helpText: { flex: 1, gap: 2 },
-  activityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  toggleText: { flex: 1, gap: 2 },
-  segment: { flexDirection: 'row', gap: spacing.sm },
   segmentBtn: {
-    flex: 1,
-    paddingVertical: spacing.md,
+    minWidth: 44,
+    minHeight: 42,
     alignItems: 'center',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    justifyContent: 'center',
     backgroundColor: colors.surfaceRaised,
   },
-  segmentActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  segmentOn: { backgroundColor: colors.primary },
   segmentText: { color: colors.textMuted, fontWeight: '700' },
-  segmentTextActive: { color: colors.onPrimary },
-  rangeRow: { gap: spacing.md },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: {
-    paddingVertical: 6,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceRaised,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipText: { color: colors.textMuted, fontWeight: '600', textTransform: 'capitalize' },
-  chipTextActive: { color: colors.onPrimary },
+  segmentTextOn: { color: colors.onPrimary },
+  disclaimer: { ...text.caption, textAlign: 'center' },
 });

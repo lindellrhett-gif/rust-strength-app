@@ -8,6 +8,7 @@ import {
   type FeedRow,
   type ReactionId,
 } from '@/domain/feed';
+import type { FeedRpcRow } from '@/lib/database.types';
 import { qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
@@ -29,7 +30,9 @@ export function useFriendFeed() {
   const unit = profile.data?.unit ?? 'lb';
 
   return useQuery({
-    queryKey: [...qk.feed, unit],
+    // 'posts' because the shape changed in 1.2: a post saved on the phone by an
+    // older version, with no poster, must never be read as a new one.
+    queryKey: [...qk.feed, 'posts', unit],
     enabled: !!userId,
     // A feed that never refreshes feels dead; a feed that refreshes constantly
     // burns the user's data plan for very little.
@@ -37,34 +40,70 @@ export function useFriendFeed() {
     queryFn: async (): Promise<FeedPost[]> => {
       const { data, error } = await supabase.rpc('rpc_friend_feed', { p_limit: PAGE_SIZE });
       if (error) throw error;
-
-      const rows: FeedRow[] = (data ?? []).map((r) => ({
-        subjectType: r.subject_type,
-        subjectId: r.subject_id,
-        userId: r.user_id,
-        username: r.username,
-        displayName: r.display_name,
-        occurredAt: r.occurred_at,
-        name: r.name,
-        durationSeconds: Number(r.duration_seconds) || 0,
-        volume: Number(r.volume) || 0,
-        totalSets: Number(r.total_sets) || 0,
-        totalReps: Number(r.total_reps) || 0,
-        exerciseNames: r.exercise_names ?? [],
-        recordCount: Number(r.record_count) || 0,
-        badgeIds: r.badge_ids ?? [],
-        activityKind: r.activity_kind,
-        distance: r.distance == null ? null : Number(r.distance),
-        distanceUnit: r.distance_unit,
-        reactionCounts: normaliseCounts(r.reaction_counts),
-        myReaction: r.my_reaction && isReactionId(r.my_reaction) ? r.my_reaction : null,
-        routePreview: r.route_preview ?? null,
-        featuredTrophies: r.featured_trophies ?? [],
-      }));
-
-      return buildFeed(rows, unit);
+      return buildFeed((data ?? []).map(toFeedRow), unit);
     },
   });
+}
+
+/** Most the feed function returns at once; only used while 0035 isn't applied. */
+const FEED_MAX = 100;
+
+/**
+ * One friend's sessions, for the grid on their profile. One page and no more:
+ * there's no endless scrolling here, as there's none in the feed.
+ *
+ * Under the feed's query key, so a reaction updates both. From migration 0035
+ * they come through rpc_friend_posts, by the same rules as the feed. Until that
+ * is on the database the function doesn't exist, so the feed stands in.
+ */
+export function useFriendPosts(target: string | undefined) {
+  const profile = useProfile();
+  const unit = profile.data?.unit ?? 'lb';
+
+  return useQuery({
+    queryKey: [...qk.feed, 'author', target ?? 'none', unit],
+    enabled: !!target,
+    staleTime: 60_000,
+    queryFn: async (): Promise<FeedPost[]> => {
+      const posts = await supabase.rpc('rpc_friend_posts', { target: target!, p_limit: PAGE_SIZE });
+      if (!posts.error) return buildFeed((posts.data ?? []).map(toFeedRow), unit);
+      // PGRST202: no such function (yet). Anything else is a real failure.
+      if (posts.error.code !== 'PGRST202') throw posts.error;
+
+      const feed = await supabase.rpc('rpc_friend_feed', { p_limit: FEED_MAX });
+      if (feed.error) throw feed.error;
+      const theirs = (feed.data ?? []).filter((r) => r.user_id === target).slice(0, PAGE_SIZE);
+      return buildFeed(theirs.map(toFeedRow), unit);
+    },
+  });
+}
+
+/** One row as the database returns it, in the app's words. */
+function toFeedRow(r: FeedRpcRow): FeedRow {
+  return {
+    subjectType: r.subject_type,
+    subjectId: r.subject_id,
+    userId: r.user_id,
+    username: r.username,
+    displayName: r.display_name,
+    occurredAt: r.occurred_at,
+    name: r.name,
+    durationSeconds: Number(r.duration_seconds) || 0,
+    volume: Number(r.volume) || 0,
+    totalSets: Number(r.total_sets) || 0,
+    totalReps: Number(r.total_reps) || 0,
+    exerciseNames: r.exercise_names ?? [],
+    recordCount: Number(r.record_count) || 0,
+    badgeIds: r.badge_ids ?? [],
+    activityKind: r.activity_kind,
+    distance: r.distance == null ? null : Number(r.distance),
+    distanceUnit: r.distance_unit,
+    reactionCounts: normaliseCounts(r.reaction_counts),
+    myReaction: r.my_reaction && isReactionId(r.my_reaction) ? r.my_reaction : null,
+    routePreview: r.route_preview ?? null,
+    featuredTrophies: r.featured_trophies ?? [],
+    authorUnit: r.unit === 'kg' || r.unit === 'lb' ? r.unit : null,
+  };
 }
 
 /** jsonb arrives as a plain object; drop anything this build does not know. */

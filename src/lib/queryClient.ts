@@ -135,8 +135,9 @@ export function resumeRestoredWrites(client: QueryClient): void {
  * Mutation keys for the writes that must survive going offline.
  *
  * A paused write is stored without its function, so on restart React Query
- * needs a registered default to know how to finish it. Only the logging loop
- * gets this treatment — it is the part someone does mid-session with no signal.
+ * needs a registered default to know how to finish it. The logging loop gets
+ * this treatment, since it is the part someone does mid-session with no signal,
+ * and so do profile settings, which show as changed the moment they're tapped.
  */
 export const mk = {
   addSet: ['mutation', 'add-set'] as const,
@@ -153,6 +154,7 @@ export const mk = {
   saveWeighIn: ['mutation', 'save-weigh-in'] as const,
   deleteWeighIn: ['mutation', 'delete-weigh-in'] as const,
   saveDiaryDay: ['mutation', 'save-diary-day'] as const,
+  updateProfile: ['mutation', 'update-profile'] as const,
 };
 
 /** Central place for query keys so invalidation stays consistent. */
@@ -221,3 +223,16 @@ export const qk = {
   recipe: (id: string) => ['foods', 'recipe', id] as const,
   savedMeals: ['saved-meals'] as const,
 };
+
+/**
+ * After a friendship starts or ends, everything that depends on who your friends
+ * are. A friend's own stats aren't refetched, since nobody may be looking at
+ * them, but they won't be served as fresh again.
+ */
+export function invalidateFriendData(client: QueryClient): void {
+  void client.invalidateQueries({ queryKey: qk.friendships });
+  void client.invalidateQueries({ queryKey: qk.feed });
+  void client.invalidateQueries({ queryKey: ['leaderboard'] });
+  void client.invalidateQueries({ queryKey: ['friend-stats'], refetchType: 'none' });
+  void client.invalidateQueries({ queryKey: ['friend-prs'], refetchType: 'none' });
+}

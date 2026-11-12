@@ -138,6 +138,25 @@ export function rankLeaderboard(
   return rows;
 }
 
+/** How many people stand on the podium; the rest go in the list under it. */
+export const PODIUM_PLACES = 3;
+
+export interface PodiumSpot {
+  row: LeaderboardRow;
+  /** 1, 2 or 3: how high the block is. Tied people keep the same rank, not place. */
+  place: 1 | 2 | 3;
+}
+
+/** The top three in the order they stand: second, first, third. */
+export function podiumOrder(rows: readonly LeaderboardRow[]): PodiumSpot[] {
+  const [first, second, third] = rows;
+  const spots: PodiumSpot[] = [];
+  if (second) spots.push({ row: second, place: 2 });
+  if (first) spots.push({ row: first, place: 1 });
+  if (third) spots.push({ row: third, place: 3 });
+  return spots;
+}
+
 export function formatMetric(value: number, metric: LeaderboardMetric, unit: 'lb' | 'kg'): string {
   switch (metric) {
     case 'streak':

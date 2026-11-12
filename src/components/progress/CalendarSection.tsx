@@ -4,7 +4,8 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card } from '@/components';
 import { Field } from '@/components/Field';
-import { MonthCalendar } from '@/components/MonthCalendar';
+import { HelpButton } from '@/components/HelpButton';
+import { CalendarLegend, MonthCalendar } from '@/components/MonthCalendar';
 import {
   useCreatePlannedSession,
   useDeletePlannedSession,
@@ -118,6 +119,12 @@ export function CalendarSection() {
     );
   };
 
+  const confirmRemovePlan = (plan: { id: string; title: string }) =>
+    Alert.alert('Remove plan?', plan.title, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: () => deletePlan.mutate(plan.id) },
+    ]);
+
   /** Start a planned session, pre-loading its preset when it has one. */
   const startPlan = async (templateId: string | null) => {
     try {
@@ -146,13 +153,22 @@ export function CalendarSection() {
           onSelect={setSelected}
           onPrevMonth={() => shiftMonth(-1)}
           onNextMonth={() => shiftMonth(1)}
+          hideLegend
+          titleAccessory={
+            <HelpButton
+              title="Calendar colours"
+              body="A blue day is one you lifted. A rest day keeps your streak going without adding to it."
+            >
+              <CalendarLegend />
+            </HelpButton>
+          }
         />
       </Card>
 
       <Card title={formatDate(`${selected}T12:00:00`)}>
-        {dayWorkouts.length === 0 && dayPlans.length === 0 ? (
+        {dayWorkouts.length === 0 && dayPlans.length === 0 && dayEntries.length === 0 ? (
           <Text style={text.bodyMuted}>
-            {isPast ? 'No workout logged on this day.' : 'Nothing planned yet.'}
+            {isPast ? 'Nothing logged.' : 'Nothing planned.'}
           </Text>
         ) : null}
 
@@ -210,27 +226,29 @@ export function CalendarSection() {
           <Pressable
             key={p.id}
             style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
-            onLongPress={() =>
-              Alert.alert('Remove plan?', p.title, [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                  text: 'Remove',
-                  style: 'destructive',
-                  onPress: () => deletePlan.mutate(p.id),
-                },
-              ])
-            }
+            onLongPress={() => confirmRemovePlan(p)}
+            accessible={false}
           >
-            <View style={styles.rowMain}>
+            <View
+              style={styles.rowMain}
+              accessible
+              accessibilityActions={[{ name: 'remove', label: 'Remove plan' }]}
+              onAccessibilityAction={() => confirmRemovePlan(p)}
+            >
               <Text style={text.body}>{p.title}</Text>
               <Text style={text.caption}>
                 {p.template_id
-                  ? `${(templates.data ?? []).find((t) => t.id === p.template_id)?.items.length ?? 0} exercises ready · long-press to remove`
-                  : 'planned · long-press to remove'}
+                  ? `${(templates.data ?? []).find((t) => t.id === p.template_id)?.items.length ?? 0} exercises ready`
+                  : 'planned'}
               </Text>
             </View>
             {p.template_id ? (
-              <Pressable onPress={() => startPlan(p.template_id)} hitSlop={8}>
+              <Pressable
+                onPress={() => startPlan(p.template_id)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={`Start ${p.title}`}
+              >
                 <Text style={styles.startPlan}>Start ›</Text>
               </Pressable>
             ) : (
@@ -295,24 +313,32 @@ export function CalendarSection() {
             </View>
           </View>
         ) : (
-          <>
+          <View style={styles.planRow}>
             {plannable ? (
-              <Button label="＋ Plan a session" variant="secondary" onPress={() => setAdding(true)} />
+              <Button
+                label="＋ Plan"
+                variant="secondary"
+                onPress={() => setAdding(true)}
+                style={styles.planButton}
+              />
             ) : null}
             {selectedRest || plannable ? (
               <Button
-                label={selectedRest ? 'Remove rest day' : 'Mark as rest day'}
+                label={selectedRest ? 'Remove rest day' : 'Rest day'}
                 variant={selectedRest ? 'danger' : 'ghost'}
                 onPress={toggleRestDay}
                 loading={setRestDay.isPending || deleteRestDay.isPending}
+                style={styles.planButton}
               />
             ) : null}
-            <Text style={text.caption}>
-              {plannable
-                ? 'A rest day keeps your streak going instead of breaking it. Mark today, or plan one ahead.'
-                : 'Rest days and sessions can only be planned for today or a day ahead.'}
-            </Text>
-          </>
+            <HelpButton
+              title="Planning"
+              body={[
+                'Plan a session for today or a day ahead, from a preset if you like. Long-press a plan to remove it.',
+                'A rest day keeps your streak going instead of breaking it. Mark today, or plan one ahead. Plans and rest days can’t be added to past days.',
+              ]}
+            />
+          </View>
         )}
       </Card>
     </>
@@ -321,6 +347,8 @@ export function CalendarSection() {
 
 const styles = StyleSheet.create({
   kindBar: { width: 3, alignSelf: 'stretch', borderRadius: 2 },
+  planRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: spacing.sm },
+  planButton: { flex: 1 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

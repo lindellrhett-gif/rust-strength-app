@@ -33,6 +33,8 @@ execFileSync(
     'src/legal/privacy.ts',
     'src/legal/terms.ts',
     'src/legal/healthData.ts',
+    'src/legal/fr/terms.ts',
+    'src/legal/fr/privacy.ts',
     '--outDir',
     '.legal-build',
     '--module',
@@ -46,10 +48,27 @@ execFileSync(
   { cwd: ROOT, stdio: 'inherit' },
 );
 
-const { LEGAL } = require(path.join(OUT, 'config.js'));
+const { LEGAL, hasUnresolvedPlaceholders } = require(path.join(OUT, 'config.js'));
 const { PRIVACY_POLICY } = require(path.join(OUT, 'privacy.js'));
 const { TERMS_OF_SERVICE } = require(path.join(OUT, 'terms.js'));
 const { HEALTH_DATA_POLICY } = require(path.join(OUT, 'healthData.js'));
+// The French translations, for Quebec. tsc keeps the folder: src/legal/fr ->
+// .legal-build/fr. A translation behind the English is a broken promise
+// ("both versions are equally valid"), so the build stops on one.
+const { TERMS_OF_SERVICE_FR, TERMS_FR_SOURCE_VERSION } = require(path.join(OUT, 'fr', 'terms.js'));
+const { PRIVACY_POLICY_FR, PRIVACY_FR_SOURCE_VERSION } = require(path.join(OUT, 'fr', 'privacy.js'));
+for (const [name, version] of [
+  ['src/legal/fr/terms.ts', TERMS_FR_SOURCE_VERSION],
+  ['src/legal/fr/privacy.ts', PRIVACY_FR_SOURCE_VERSION],
+]) {
+  if (version !== LEGAL.version) {
+    console.error(
+      `${name} translates version ${version}, but the English is ${LEGAL.version}. ` +
+        'Update the translation (and its version constant) before building.',
+    );
+    process.exit(1);
+  }
+}
 
 // --- minimal markdown renderer ---------------------------------------------
 // The input is ours and uses a small, known subset, so a full parser would be
@@ -180,9 +199,9 @@ footer {
 }
 `;
 
-function page(title, body, { description } = {}) {
+function page(title, body, { description, lang = 'en' } = {}) {
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -204,14 +223,15 @@ ${description ? `<meta name="description" content="${escapeHtml(description)}">`
     <a href="./health-data.html">Consumer Health Data Privacy Policy</a>
     <a href="./delete-account.html">Delete your account</a>
     <a href="./support.html">Support</a>
+    <a href="./conditions.html" hreflang="fr" lang="fr">Français</a>
   </nav>
 </header>
 <main>
 ${body}
 </main>
 <footer>
-  <p>${escapeHtml(LEGAL.appName)} is operated by ${escapeHtml(LEGAL.entity)}.
-  Contact: <a href="mailto:${escapeHtml(LEGAL.contactEmail)}">${escapeHtml(LEGAL.contactEmail)}</a></p>
+  <p>${escapeHtml(LEGAL.appName)} ${lang.startsWith('fr') ? 'est exploitée par' : 'is operated by'} ${escapeHtml(LEGAL.entity)}.
+  ${lang.startsWith('fr') ? 'Courriel :' : 'Contact:'} <a href="mailto:${escapeHtml(LEGAL.contactEmail)}">${escapeHtml(LEGAL.contactEmail)}</a></p>
 </footer>
 </body>
 </html>
@@ -227,6 +247,25 @@ fs.mkdirSync(legalDir, { recursive: true });
 fs.writeFileSync(path.join(legalDir, 'PRIVACY.md'), PRIVACY_POLICY);
 fs.writeFileSync(path.join(legalDir, 'TERMS.md'), TERMS_OF_SERVICE);
 fs.writeFileSync(path.join(legalDir, 'HEALTH_DATA.md'), HEALTH_DATA_POLICY);
+fs.writeFileSync(path.join(legalDir, 'TERMS_FR.md'), TERMS_OF_SERVICE_FR);
+fs.writeFileSync(path.join(legalDir, 'PRIVACY_FR.md'), PRIVACY_POLICY_FR);
+
+// The French pages. Their file names are LEGAL.termsFrUrl and
+// LEGAL.privacyFrUrl, which the English documents print.
+fs.writeFileSync(
+  path.join(docs, 'conditions.html'),
+  page('Conditions d’utilisation', markdownToHtml(TERMS_OF_SERVICE_FR), {
+    lang: 'fr-CA',
+    description: `Les conditions d’utilisation de ${LEGAL.appName}.`,
+  }),
+);
+fs.writeFileSync(
+  path.join(docs, 'confidentialite.html'),
+  page('Politique de confidentialité', markdownToHtml(PRIVACY_POLICY_FR), {
+    lang: 'fr-CA',
+    description: `Comment ${LEGAL.appName} traite vos données.`,
+  }),
+);
 
 fs.writeFileSync(
   path.join(docs, 'privacy.html'),
@@ -266,6 +305,8 @@ actually be set to.</p>
     <li><a href="./delete-account.html">Delete your account and data</a></li>
     <li><a href="./support.html">Support</a></li>
   </ul>
+  <p lang="fr">En français : <a href="./conditions.html">Conditions d’utilisation</a> ·
+  <a href="./confidentialite.html">Politique de confidentialité</a></p>
 </div>
 <p><strong>Not medical advice.</strong> ${escapeHtml(LEGAL.appName)} suggests
 training weights from the numbers you enter. It does not know your health,
@@ -354,7 +395,7 @@ and we will get back to you.</p>
   <ul>
     <li><a href="./delete-account.html">Delete my account and data</a></li>
     <li>Download my data — <strong>Profile → Privacy &amp; legal → Download my data</strong></li>
-    <li>Report a user — open their profile and tap <strong>Report</strong></li>
+    <li>Report a user — open their profile, tap the <strong>...</strong> button at the top right, then <strong>Report</strong></li>
     <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a>
     and, for health data, the <a href="./health-data.html">Consumer Health Data Privacy Policy</a></li>
   </ul>
@@ -430,7 +471,12 @@ if (fs.existsSync(icon)) fs.copyFileSync(icon, path.join(docs, 'icon.png'));
 // beginning with an underscore and slows publishing down for no benefit.
 fs.writeFileSync(path.join(docs, '.nojekyll'), '');
 
-if (fs.existsSync(SITE_REPO)) {
+// A placeholder must never reach the public site, so an unfilled config value
+// stops the sync rather than only warning about it.
+const unresolved = hasUnresolvedPlaceholders();
+if (unresolved) {
+  console.log('Not syncing the published site: src/legal/config.ts still has placeholders.');
+} else if (fs.existsSync(SITE_REPO)) {
   for (const f of fs.readdirSync(docs)) {
     fs.copyFileSync(path.join(docs, f), path.join(SITE_REPO, f));
   }
@@ -446,7 +492,7 @@ if (fs.existsSync(SITE_REPO)) {
 fs.rmSync(OUT, { recursive: true, force: true });
 
 console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md, legal/HEALTH_DATA.md and docs/*.html');
-if (LEGAL.entity.includes('TODO') || LEGAL.contactEmail.includes('TODO')) {
+if (unresolved) {
   console.log(
     '\n⚠️  src/legal/config.ts still has TODO placeholders. Fill them in and\n' +
       '   re-run `npm run legal` before publishing the site or submitting.',
