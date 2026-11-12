@@ -222,7 +222,7 @@ We handle your information in line with the Australian Privacy Principles in the
 
 We handle your information under the Personal Information Protection and Electronic Documents Act (PIPEDA) and, if you live in Quebec, the Act respecting the protection of personal information in the private sector.
 
-- **Who is responsible:** our Privacy Officer, Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com. They are in charge of protecting your personal information and of answering your questions and requests.
+- **Who is responsible:** our Privacy Officer, Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com. They are in charge of protecting your personal information and of answering your questions and requests.
 - **Consent:** we use your information only for the purposes in Sections 2 and 3. You give explicit consent to our use of your health information before you can use the app (Section 2). You can withdraw consent at any time by deleting the information or your account; the features that use it then stop working.
 - **Private by default:** new accounts start with sharing with friends off, and nothing you log is shown to anyone until you choose to share it (Section 4).
 - **Outside Quebec and Canada:** your information is stored in the United States (see above). Before sending Quebec residents' information outside Quebec, we assessed the protection it receives there.
@@ -236,7 +236,7 @@ We handle your information under the Personal Information Protection and Electro
 
 We handle your information under the UK GDPR and the EU General Data Protection Regulation.
 
-- **Controller:** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Controller:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
 - **Our representative in the United Kingdom:** to be named here before Rust Strength is offered in the United Kingdom.
 - **Our representative in the European Union:** to be named here before Rust Strength is offered in the European Union.
 

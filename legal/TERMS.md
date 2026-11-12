@@ -156,5 +156,5 @@ If any provision is unenforceable, the rest stays in force. Our not enforcing a 
 ## 19. Contact
 
 Bluestem Software LLC
-TODO: business mailing address
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com

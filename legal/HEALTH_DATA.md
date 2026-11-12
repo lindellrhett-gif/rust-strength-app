@@ -61,5 +61,5 @@ Health data travels over encrypted connections (HTTPS/TLS). The database lets ea
 If we change this policy materially, we will update the date above and tell you in the app. We will ask for your separate consent before we collect, use or share health data in a way this policy doesn't describe.
 
 Bluestem Software LLC
-TODO: business mailing address
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com

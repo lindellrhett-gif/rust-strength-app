@@ -156,5 +156,5 @@ Si une disposition est inapplicable, les autres demeurent en vigueur. Le fait qu
 ## 19. Nous joindre
 
 Bluestem Software LLC
-TODO: business mailing address
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com

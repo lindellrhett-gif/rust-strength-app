@@ -200,7 +200,7 @@ Tout ce qui précède s’applique où que vous habitiez. Cette section ajoute c
 
 Nous traitons vos renseignements conformément à la Privacy Act 2020 (loi néo-zélandaise de 2020 sur la protection des renseignements personnels).
 
-- **Qui les recueille et les détient :** Bluestem Software LLC, TODO: business mailing address. Supabase les stocke pour notre compte.
+- **Qui les recueille et les détient :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270. Supabase les stocke pour notre compte.
 - **Ce que nous recueillons, pourquoi, et qui y a accès :** sections 1 à 5. Votre adresse courriel est nécessaire pour créer un compte. Tout le reste est facultatif; ne pas le fournir signifie seulement que la fonctionnalité qui l’utilise ne fonctionne pas.
 - **Accès et correction :** vous pouvez consulter et télécharger vos renseignements à tout moment (**Profile → Privacy & legal → Download my data**) et en modifier la plupart dans l’application. Pour toute autre demande, ou pour faire corriger quelque chose, écrivez à ruststrengthsupport@gmail.com. Nous répondrons dans un délai de 20 jours ouvrables.
 - **Plaintes :** écrivez-nous d’abord. Si la réponse ne vous satisfait pas, vous pouvez porter plainte auprès du Privacy Commissioner (commissaire néo-zélandais à la protection de la vie privée) : https://www.privacy.org.nz
@@ -210,7 +210,7 @@ Nous traitons vos renseignements conformément à la Privacy Act 2020 (loi néo-
 
 Nous traitons vos renseignements conformément aux Australian Privacy Principles (principes australiens de protection de la vie privée) de la Privacy Act 1988 (loi australienne de 1988 sur la protection de la vie privée).
 
-- **Qui nous sommes :** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Qui nous sommes :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
 - **Les renseignements sur la santé** (section 2) sont des renseignements sensibles. Nous ne les recueillons qu’avec votre consentement, que vous donnez en les saisissant, et nous ne les utilisons que pour les fonctionnalités qui en ont besoin. Vous pouvez retirer votre consentement en supprimant ces renseignements ou votre compte (section 8).
 - **Vous n’avez pas à donner votre vrai nom.** Votre compte commence avec un pseudonyme aléatoire, et l’application ne demande jamais votre nom.
 - **À l’étranger :** vos renseignements sont stockés et traités aux États-Unis (voir ci-dessus).
@@ -222,7 +222,7 @@ Nous traitons vos renseignements conformément aux Australian Privacy Principles
 
 Nous traitons vos renseignements conformément à la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) et, si vous habitez au Québec, à la Loi sur la protection des renseignements personnels dans le secteur privé.
 
-- **Personne responsable :** notre responsable de la protection des renseignements personnels (Privacy Officer), Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com. Cette personne veille à la protection de vos renseignements personnels et répond à vos questions et à vos demandes.
+- **Personne responsable :** notre responsable de la protection des renseignements personnels (Privacy Officer), Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com. Cette personne veille à la protection de vos renseignements personnels et répond à vos questions et à vos demandes.
 - **Consentement :** nous utilisons vos renseignements uniquement aux fins décrites aux sections 2 et 3. Vous donnez un consentement exprès à notre utilisation de vos renseignements sur la santé avant de pouvoir utiliser l’application (section 2). Vous pouvez retirer votre consentement à tout moment en supprimant les renseignements ou votre compte; les fonctionnalités qui les utilisent cessent alors de fonctionner.
 - **Confidentialité par défaut :** les nouveaux comptes commencent avec le partage avec les amis désactivé, et rien de ce que vous consignez n’est montré à qui que ce soit tant que vous ne choisissez pas de le partager (section 4).
 - **Hors du Québec et du Canada :** vos renseignements sont stockés aux États-Unis (voir ci-dessus). Avant de communiquer à l’extérieur du Québec les renseignements des résidents du Québec, nous avons évalué la protection dont ils y bénéficient.
@@ -236,7 +236,7 @@ Nous traitons vos renseignements conformément à la Loi sur la protection des r
 
 Nous traitons vos renseignements conformément au RGPD du Royaume-Uni (UK GDPR) et au Règlement général sur la protection des données (RGPD) de l’Union européenne.
 
-- **Responsable du traitement :** Bluestem Software LLC, TODO: business mailing address, ruststrengthsupport@gmail.com.
+- **Responsable du traitement :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
 - **Notre représentant au Royaume-Uni :** sera nommé ici avant que Rust Strength soit offert au Royaume-Uni.
 - **Notre représentant dans l’Union européenne :** sera nommé ici avant que Rust Strength soit offert dans l’Union européenne.
 
@@ -261,7 +261,7 @@ Vous pouvez communiquer avec un représentant plutôt qu’avec nous pour toute 
 ## 14. Nous joindre
 
 Bluestem Software LLC
-TODO: business mailing address
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com
 
 Vous pouvez joindre notre responsable de la protection des renseignements personnels (Privacy Officer) à la même adresse.
