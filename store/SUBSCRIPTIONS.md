@@ -13,8 +13,14 @@ Merge it only when Pro goes on sale: its Terms and Privacy Policy (version
 - The paywall is **RevenueCat's**, designed in its dashboard. Subscribers
   manage their plan in RevenueCat's **Customer Center**.
 
-**Still yours to decide:** the prices, whether there's a free trial and how
-long, and which legal entity sells it (below).
+**Decided November 6, 2026:**
+- **Prices:** $9 a month, $55 a year and $99 for Lifetime, or the nearest App
+  Store price points ($8.99, $54.99, $99.99).
+- **Free trial:** one month free on the monthly and the yearly plan, as an
+  introductory offer. Apple gives each Apple ID one introductory offer per
+  subscription group, so someone who trials monthly can't trial yearly too.
+  Lifetime has no trial.
+- **Seller:** Bluestem Software LLC (below).
 
 ## How it fits together
 
@@ -60,7 +66,10 @@ Test Store key to any EAS environment.**
       **Restore purchases** and add links to the **Terms of Use**
       (`https://lindellrhett-gif.github.io/rust-strength/terms.html`) and
       **Privacy Policy** (`…/privacy.html`). Apple requires them on a
-      subscription screen.
+      subscription screen. With the free trial, the paywall must also say
+      plainly how long the trial is and what it costs after (for example
+      "1 month free, then $54.99/year"): use RevenueCat's trial text for
+      eligible customers, and the plain price for everyone else.
    4. Optional: set up the Customer Center. It needs a RevenueCat **Pro or
       Enterprise** plan. Without it, "Manage subscription" opens Apple's
       subscription settings instead.
@@ -87,6 +96,11 @@ If the LLC should be the seller, Apple has to convert the account to an
 Organization, which needs the LLC's D-U-N-S number. Decide this, ideally with
 an accountant or attorney, before setting up banking.
 
+**Decided November 6, 2026: the LLC sells it.** The account is being
+converted to an Organization. Accept the Paid Applications Agreement and add
+the LLC's banking and tax details once the conversion is done; in-app
+purchases can be created before then, but can't go on sale.
+
 ## Going live with the App Store
 
 1. **App Store Connect > Rust Strength:**
@@ -94,8 +108,11 @@ an accountant or attorney, before setting up banking.
    2. Add two auto-renewable subscriptions: monthly (1 month) and yearly
       (1 year).
    3. Under In-App Purchases, add a **non-consumable** for Lifetime.
-   4. Set prices, display names, descriptions and review screenshots. Add a
-      free trial as an introductory offer if you want one.
+   4. Set prices, display names, descriptions and review screenshots:
+      monthly $8.99 (or $9.00 if offered), yearly $54.99 (or $55.00), Lifetime
+      $99.99 (or $99.00).
+   5. On monthly and on yearly, add an introductory offer: Free, 1 month, in
+      every territory the app is sold in.
 2. **App Store Connect > Users and Access > Integrations > In-App Purchase:**
    generate an in-app purchase key for RevenueCat. Keep it like the App Store
    Connect key, never in the repo.
@@ -106,6 +123,9 @@ an accountant or attorney, before setting up banking.
    3. Attach them to `rust_strength_pro`.
    4. Put them in the current offering, with the same package types as the
       Test Store.
+   5. Give the App Review demo account Pro: Customers, search for the demo
+      account's user ID (Supabase > Authentication > Users), then Grant
+      entitlement, `rust_strength_pro`, for the longest time offered.
 4. **Supabase:**
    1. Apply migration `0026_subscriptions.sql`. It's additive and safe while
       1.0 and 1.1 are live. (Done November 1, 2026.)

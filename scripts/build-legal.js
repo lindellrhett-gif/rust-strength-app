@@ -32,6 +32,7 @@ execFileSync(
     'src/legal/config.ts',
     'src/legal/privacy.ts',
     'src/legal/terms.ts',
+    'src/legal/healthData.ts',
     '--outDir',
     '.legal-build',
     '--module',
@@ -48,6 +49,7 @@ execFileSync(
 const { LEGAL } = require(path.join(OUT, 'config.js'));
 const { PRIVACY_POLICY } = require(path.join(OUT, 'privacy.js'));
 const { TERMS_OF_SERVICE } = require(path.join(OUT, 'terms.js'));
+const { HEALTH_DATA_POLICY } = require(path.join(OUT, 'healthData.js'));
 
 // --- minimal markdown renderer ---------------------------------------------
 // The input is ours and uses a small, known subset, so a full parser would be
@@ -63,7 +65,10 @@ function inline(s) {
   return escapeHtml(s)
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    // Bare https URLs, which the documents write out because the app can't
+    // render links. Not ones already inside a link, and not a trailing stop.
+    .replace(/(^|[\s(])(https:\/\/[^\s<)]*[^\s<).,])/g, '$1<a href="$2">$2</a>');
 }
 
 function markdownToHtml(md) {
@@ -196,6 +201,7 @@ ${description ? `<meta name="description" content="${escapeHtml(description)}">`
     <a href="./index.html">Home</a>
     <a href="./privacy.html">Privacy Policy</a>
     <a href="./terms.html">Terms of Service</a>
+    <a href="./health-data.html">Consumer Health Data Privacy Policy</a>
     <a href="./delete-account.html">Delete your account</a>
     <a href="./support.html">Support</a>
   </nav>
@@ -220,6 +226,7 @@ fs.mkdirSync(legalDir, { recursive: true });
 
 fs.writeFileSync(path.join(legalDir, 'PRIVACY.md'), PRIVACY_POLICY);
 fs.writeFileSync(path.join(legalDir, 'TERMS.md'), TERMS_OF_SERVICE);
+fs.writeFileSync(path.join(legalDir, 'HEALTH_DATA.md'), HEALTH_DATA_POLICY);
 
 fs.writeFileSync(
   path.join(docs, 'privacy.html'),
@@ -230,6 +237,14 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(docs, 'terms.html'),
   page('Terms of Service', markdownToHtml(TERMS_OF_SERVICE)),
+);
+// Washington's My Health My Data Act wants this as its own page, linked on
+// its own from the homepage below.
+fs.writeFileSync(
+  path.join(docs, 'health-data.html'),
+  page('Consumer Health Data Privacy Policy', markdownToHtml(HEALTH_DATA_POLICY), {
+    description: `The health data ${LEGAL.appName} handles, who receives it, and your rights.`,
+  }),
 );
 
 fs.writeFileSync(
@@ -247,6 +262,7 @@ actually be set to.</p>
   <ul>
     <li><a href="./privacy.html">Privacy Policy</a></li>
     <li><a href="./terms.html">Terms of Service</a></li>
+    <li><a href="./health-data.html">Consumer Health Data Privacy Policy</a></li>
     <li><a href="./delete-account.html">Delete your account and data</a></li>
     <li><a href="./support.html">Support</a></li>
   </ul>
@@ -339,7 +355,8 @@ and we will get back to you.</p>
     <li><a href="./delete-account.html">Delete my account and data</a></li>
     <li>Download my data — <strong>Profile → Privacy &amp; legal → Download my data</strong></li>
     <li>Report a user — open their profile and tap <strong>Report</strong></li>
-    <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a></li>
+    <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a>
+    and, for health data, the <a href="./health-data.html">Consumer Health Data Privacy Policy</a></li>
   </ul>
 </div>
 <h2>Reporting abuse</h2>
@@ -428,7 +445,7 @@ if (fs.existsSync(SITE_REPO)) {
 
 fs.rmSync(OUT, { recursive: true, force: true });
 
-console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md and docs/*.html');
+console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md, legal/HEALTH_DATA.md and docs/*.html');
 if (LEGAL.entity.includes('TODO') || LEGAL.contactEmail.includes('TODO')) {
   console.log(
     '\n⚠️  src/legal/config.ts still has TODO placeholders. Fill them in and\n' +
