@@ -22,6 +22,8 @@ interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Says more than the label, when the label alone is ambiguous. */
+  accessibilityLabel?: string;
 }
 
 export function Button({
@@ -32,11 +34,13 @@ export function Button({
   disabled,
   loading,
   style,
+  accessibilityLabel,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled }}
       onPress={onPress}
       disabled={isDisabled}

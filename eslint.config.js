@@ -5,7 +5,9 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'node_modules/*', 'src/lib/database.types.ts', '.expo/*'],
+    // Edge Functions run on Deno (npm: imports, the Deno global); their shared
+    // logic in supabase/functions/_shared is plain TypeScript and is linted.
+    ignores: ['dist/*', 'node_modules/*', 'src/lib/database.types.ts', '.expo/*', 'supabase/functions/*/index.ts'],
   },
   {
     // The build scripts are plain Node programs, not app code, so they need

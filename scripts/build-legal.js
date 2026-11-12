@@ -32,6 +32,9 @@ execFileSync(
     'src/legal/config.ts',
     'src/legal/privacy.ts',
     'src/legal/terms.ts',
+    'src/legal/healthData.ts',
+    'src/legal/fr/terms.ts',
+    'src/legal/fr/privacy.ts',
     '--outDir',
     '.legal-build',
     '--module',
@@ -48,6 +51,24 @@ execFileSync(
 const { LEGAL, hasUnresolvedPlaceholders } = require(path.join(OUT, 'config.js'));
 const { PRIVACY_POLICY } = require(path.join(OUT, 'privacy.js'));
 const { TERMS_OF_SERVICE } = require(path.join(OUT, 'terms.js'));
+const { HEALTH_DATA_POLICY } = require(path.join(OUT, 'healthData.js'));
+// The French translations, for Quebec. tsc keeps the folder: src/legal/fr ->
+// .legal-build/fr. A translation behind the English is a broken promise
+// ("both versions are equally valid"), so the build stops on one.
+const { TERMS_OF_SERVICE_FR, TERMS_FR_SOURCE_VERSION } = require(path.join(OUT, 'fr', 'terms.js'));
+const { PRIVACY_POLICY_FR, PRIVACY_FR_SOURCE_VERSION } = require(path.join(OUT, 'fr', 'privacy.js'));
+for (const [name, version] of [
+  ['src/legal/fr/terms.ts', TERMS_FR_SOURCE_VERSION],
+  ['src/legal/fr/privacy.ts', PRIVACY_FR_SOURCE_VERSION],
+]) {
+  if (version !== LEGAL.version) {
+    console.error(
+      `${name} translates version ${version}, but the English is ${LEGAL.version}. ` +
+        'Update the translation (and its version constant) before building.',
+    );
+    process.exit(1);
+  }
+}
 
 // --- minimal markdown renderer ---------------------------------------------
 // The input is ours and uses a small, known subset, so a full parser would be
@@ -78,9 +99,28 @@ function markdownToHtml(md) {
       inList = false;
     }
   };
+  // Pipe tables: the first row is the header, the |---| row is skipped.
+  let table = [];
+  const cells = (line) => line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
+  const flushTable = () => {
+    if (table.length === 0) return;
+    const [head, ...body] = table;
+    out.push('<div class="table"><table>');
+    out.push(`<thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join('')}</tr></thead>`);
+    out.push('<tbody>');
+    for (const row of body) out.push(`<tr>${row.map((c) => `<td>${inline(c)}</td>`).join('')}</tr>`);
+    out.push('</tbody></table></div>');
+    table = [];
+  };
 
   for (const rawLine of md.split('\n')) {
     const line = rawLine.trimEnd();
+    if (/^\s*\|.*\|\s*$/.test(line)) {
+      closeList();
+      if (!/^\s*\|[\s|:-]+\|\s*$/.test(line)) table.push(cells(line));
+      continue;
+    }
+    flushTable();
     if (line.trim() === '') {
       closeList();
       continue;
@@ -104,6 +144,7 @@ function markdownToHtml(md) {
     closeList();
     out.push(`<p>${inline(line)}</p>`);
   }
+  flushTable();
   closeList();
   return out.join('\n');
 }
@@ -130,6 +171,10 @@ h2 { font-size: 1.25rem; margin: 2.25rem 0 .6rem; }
 h3 { font-size: 1.02rem; margin: 1.5rem 0 .4rem; color: #C7D2DC; }
 p, li { color: #C9D3DD; }
 ul { padding-left: 1.2rem; }
+.table { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { border: 1px solid #2A323C; padding: .5rem .6rem; text-align: left; vertical-align: top; color: #C9D3DD; }
+th { background: #14181D; color: #F2F5F8; }
 li { margin: .3rem 0; }
 code {
   background: #1C222A; padding: .12em .38em; border-radius: 4px;
@@ -154,9 +199,9 @@ footer {
 }
 `;
 
-function page(title, body, { description } = {}) {
+function page(title, body, { description, lang = 'en' } = {}) {
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -175,16 +220,18 @@ ${description ? `<meta name="description" content="${escapeHtml(description)}">`
     <a href="./index.html">Home</a>
     <a href="./privacy.html">Privacy Policy</a>
     <a href="./terms.html">Terms of Service</a>
+    <a href="./health-data.html">Consumer Health Data Privacy Policy</a>
     <a href="./delete-account.html">Delete your account</a>
     <a href="./support.html">Support</a>
+    <a href="./conditions.html" hreflang="fr" lang="fr">Français</a>
   </nav>
 </header>
 <main>
 ${body}
 </main>
 <footer>
-  <p>${escapeHtml(LEGAL.appName)} is operated by ${escapeHtml(LEGAL.entity)}.
-  Contact: <a href="mailto:${escapeHtml(LEGAL.contactEmail)}">${escapeHtml(LEGAL.contactEmail)}</a></p>
+  <p>${escapeHtml(LEGAL.appName)} ${lang.startsWith('fr') ? 'est exploitée par' : 'is operated by'} ${escapeHtml(LEGAL.entity)}.
+  ${lang.startsWith('fr') ? 'Courriel :' : 'Contact:'} <a href="mailto:${escapeHtml(LEGAL.contactEmail)}">${escapeHtml(LEGAL.contactEmail)}</a></p>
 </footer>
 </body>
 </html>
@@ -199,6 +246,26 @@ fs.mkdirSync(legalDir, { recursive: true });
 
 fs.writeFileSync(path.join(legalDir, 'PRIVACY.md'), PRIVACY_POLICY);
 fs.writeFileSync(path.join(legalDir, 'TERMS.md'), TERMS_OF_SERVICE);
+fs.writeFileSync(path.join(legalDir, 'HEALTH_DATA.md'), HEALTH_DATA_POLICY);
+fs.writeFileSync(path.join(legalDir, 'TERMS_FR.md'), TERMS_OF_SERVICE_FR);
+fs.writeFileSync(path.join(legalDir, 'PRIVACY_FR.md'), PRIVACY_POLICY_FR);
+
+// The French pages. Their file names are LEGAL.termsFrUrl and
+// LEGAL.privacyFrUrl, which the English documents print.
+fs.writeFileSync(
+  path.join(docs, 'conditions.html'),
+  page('Conditions d’utilisation', markdownToHtml(TERMS_OF_SERVICE_FR), {
+    lang: 'fr-CA',
+    description: `Les conditions d’utilisation de ${LEGAL.appName}.`,
+  }),
+);
+fs.writeFileSync(
+  path.join(docs, 'confidentialite.html'),
+  page('Politique de confidentialité', markdownToHtml(PRIVACY_POLICY_FR), {
+    lang: 'fr-CA',
+    description: `Comment ${LEGAL.appName} traite vos données.`,
+  }),
+);
 
 fs.writeFileSync(
   path.join(docs, 'privacy.html'),
@@ -209,6 +276,14 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(docs, 'terms.html'),
   page('Terms of Service', markdownToHtml(TERMS_OF_SERVICE)),
+);
+// Washington's My Health My Data Act wants this as its own page, linked on
+// its own from the homepage below.
+fs.writeFileSync(
+  path.join(docs, 'health-data.html'),
+  page('Consumer Health Data Privacy Policy', markdownToHtml(HEALTH_DATA_POLICY), {
+    description: `The health data ${LEGAL.appName} handles, who receives it, and your rights.`,
+  }),
 );
 
 fs.writeFileSync(
@@ -226,9 +301,12 @@ actually be set to.</p>
   <ul>
     <li><a href="./privacy.html">Privacy Policy</a></li>
     <li><a href="./terms.html">Terms of Service</a></li>
+    <li><a href="./health-data.html">Consumer Health Data Privacy Policy</a></li>
     <li><a href="./delete-account.html">Delete your account and data</a></li>
     <li><a href="./support.html">Support</a></li>
   </ul>
+  <p lang="fr">En français : <a href="./conditions.html">Conditions d’utilisation</a> ·
+  <a href="./confidentialite.html">Politique de confidentialité</a></p>
 </div>
 <p><strong>Not medical advice.</strong> ${escapeHtml(LEGAL.appName)} suggests
 training weights from the numbers you enter. It does not know your health,
@@ -270,18 +348,29 @@ not need to contact us, and you do not need to ask permission.</p>
   <li>Your username, display name, bodyweight and preferences</li>
   <li>Every workout, set, exercise, preset, planned session and rest day</li>
   <li>Every activity you logged, including any distance, steps or calories</li>
+  <li>Every run, with its route, splits and best efforts, and your privacy
+  zones, saved routes, running settings and daily step totals</li>
+  <li>Your food diary: entries, your own foods, recipes and saved meals, day
+  notes, water, weigh-ins, nutrition goals and settings</li>
   <li>Your gyms and machines</li>
-  <li>Your friendships and any pending friend requests</li>
+  <li>Your friendships and any pending friend requests, blocks, badges,
+  reactions you left and reports you filed</li>
+  <li>Our record of your ${escapeHtml(LEGAL.appName)} Pro subscription, if you
+  have one. We also ask our subscription provider, RevenueCat, to delete its
+  record of you</li>
 </ul>
+
+<p><strong>Deleting your account does not cancel a ${escapeHtml(LEGAL.appName)}
+Pro subscription.</strong> Cancel it first in your iPhone's Settings (your name
+&rarr; Subscriptions), or Apple will keep charging you.</p>
 
 <h2>What may be kept, and for how long</h2>
 <ul>
-  <li><strong>Reports you filed about other users.</strong> Kept without your
-  identity attached, so that a report cannot be erased by deleting the account
-  that made it. Retained up to <strong>12 months</strong>.</li>
   <li><strong>Routine server logs</strong> held by our hosting provider, which
-  may contain an IP address. These expire on their own, normally within
-  <strong>30 days</strong>.</li>
+  may contain an IP address. These expire on their own, under the provider's
+  retention schedule.</li>
+  <li><strong>Apple's record of your purchases</strong>, which Apple keeps under
+  its own privacy policy.</li>
 </ul>
 <p>Backups are overwritten on a rolling cycle, so a copy of deleted data may
 persist in backup storage for a short period before being cycled out.</p>
@@ -306,8 +395,9 @@ and we will get back to you.</p>
   <ul>
     <li><a href="./delete-account.html">Delete my account and data</a></li>
     <li>Download my data — <strong>Profile → Privacy &amp; legal → Download my data</strong></li>
-    <li>Report a user — open their profile and tap <strong>Report</strong></li>
-    <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a></li>
+    <li>Report a user — open their profile, tap the <strong>...</strong> button at the top right, then <strong>Report</strong></li>
+    <li>Privacy questions — see the <a href="./privacy.html">Privacy Policy</a>
+    and, for health data, the <a href="./health-data.html">Consumer Health Data Privacy Policy</a></li>
   </ul>
 </div>
 <h2>Reporting abuse</h2>
@@ -401,7 +491,7 @@ if (unresolved) {
 
 fs.rmSync(OUT, { recursive: true, force: true });
 
-console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md and docs/*.html');
+console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md, legal/HEALTH_DATA.md and docs/*.html');
 if (unresolved) {
   console.log(
     '\n⚠️  src/legal/config.ts still has TODO placeholders. Fill them in and\n' +

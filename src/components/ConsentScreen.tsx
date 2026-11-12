@@ -4,10 +4,12 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from './Button';
 import { Checkbox } from './Checkbox';
+import { FrenchLegalLinks } from './FrenchLegalLinks';
 import { Screen } from './Screen';
 import { useAcceptTerms } from '@/data/privacy';
-import { consentHeading, type ConsentRecord } from '@/domain/consent';
-import { LEGAL } from '@/legal/config';
+import { ageConfirmationLabel } from '@/domain/age';
+import { HEALTH_CONSENT_LABEL, consentHeading, type ConsentRecord } from '@/domain/consent';
+import { deviceRegion } from '@/lib/deviceRegion';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -16,8 +18,10 @@ import { spacing, text } from '@/theme/typography';
  * Shown instead of the app when a signed-in user has no consent on record, or
  * accepted a version of the documents that has since changed materially.
  *
- * Same two confirmations as sign-up, recorded the same way. The only way past
- * it is to agree or to sign out — the documents can be read from here first.
+ * Same three confirmations as sign-up (age, the documents, and explicit
+ * consent to health information), recorded the same way. The only way past it
+ * is to agree or to sign out — the documents can be read from here first, in
+ * English or French.
  */
 export function ConsentScreen({
   record,
@@ -32,6 +36,7 @@ export function ConsentScreen({
   const accept = useAcceptTerms();
   const [ageOk, setAgeOk] = useState(false);
   const [termsOk, setTermsOk] = useState(false);
+  const [healthOk, setHealthOk] = useState(false);
 
   const agree = () => {
     accept.mutate(undefined, {
@@ -66,24 +71,30 @@ export function ConsentScreen({
           <Text style={styles.link}>Privacy Policy</Text>
         </Pressable>
       </View>
+      <FrenchLegalLinks />
 
       <View style={styles.form}>
         <Checkbox
           checked={ageOk}
           onToggle={() => setAgeOk((v) => !v)}
-          label={`I am at least ${LEGAL.minimumAge} years old`}
+          label={ageConfirmationLabel(deviceRegion())}
         />
         <Checkbox
           checked={termsOk}
           onToggle={() => setTermsOk((v) => !v)}
           label="I agree to the Terms of Service and Privacy Policy"
         />
+        <Checkbox
+          checked={healthOk}
+          onToggle={() => setHealthOk((v) => !v)}
+          label={HEALTH_CONSENT_LABEL}
+        />
         <Button
           label="Continue"
           size="lg"
           onPress={agree}
           loading={accept.isPending}
-          disabled={!ageOk || !termsOk}
+          disabled={!ageOk || !termsOk || !healthOk}
         />
         <Pressable onPress={() => void signOut()} hitSlop={8} style={styles.signOut}>
           <Text style={text.bodyMuted}>Sign out instead</Text>

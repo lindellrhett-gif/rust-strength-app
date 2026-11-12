@@ -7,8 +7,8 @@
  */
 export const TAB_TITLES = {
   index: 'Today',
-  calendar: 'Calendar',
-  stats: 'Stats',
+  food: 'Food',
+  progress: 'Progress',
   friends: 'Friends',
   profile: 'Profile',
 } as const;

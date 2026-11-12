@@ -5,8 +5,8 @@ import { TAB_TITLES, tabTitle } from '../src/domain/tabs';
 describe('tabTitle', () => {
   it('names each tab', () => {
     expect(tabTitle('index')).toBe('Today');
-    expect(tabTitle('calendar')).toBe('Calendar');
-    expect(tabTitle('stats')).toBe('Stats');
+    expect(tabTitle('food')).toBe('Food');
+    expect(tabTitle('progress')).toBe('Progress');
     expect(tabTitle('friends')).toBe('Friends');
     expect(tabTitle('profile')).toBe('Profile');
   });

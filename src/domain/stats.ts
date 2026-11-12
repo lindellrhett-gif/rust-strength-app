@@ -1,5 +1,5 @@
 /**
- * Pure aggregation helpers for the Stats screen: streaks, all-time totals,
+ * Pure aggregation helpers for the stats on the Progress tab: streaks, all-time totals,
  * weekly whole-body coverage. All date inputs are local `YYYY-MM-DD` strings
  * (the data layer converts timestamps using the device's local date), so the
  * math here has no timezone concerns.

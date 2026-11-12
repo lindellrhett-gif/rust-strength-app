@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { hasAppleSignIn } from '@/domain/socialAuth';
 import type { Profile } from '@/lib/database.types';
-import { qk } from '@/lib/queryClient';
+import { subscriptionsOn } from '@/lib/purchases';
+import { qk, invalidateFriendData } from '@/lib/queryClient';
+import { SignInCancelled, appBundleId, appleAuthorizationCode } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 import { LEGAL } from '@/legal/config';
 import { useAuth } from '@/providers/AuthProvider';
@@ -19,19 +22,54 @@ export function useExportMyData() {
 
 /**
  * Permanent account deletion. The RPC removes the auth user, which cascades to
- * every table, so there is nothing left to sign back in to.
+ * every table, so there is nothing left to sign back in to. Once
+ * subscriptions are on, or for an account that uses Sign in with Apple, it
+ * goes through the delete-account Edge Function, which revokes the app's
+ * Apple tokens and removes the RevenueCat customer first, then runs the
+ * same RPC.
+ *
+ * Revoking needs a fresh one-time code from Apple, so an Apple account is
+ * asked to confirm with Apple once more. Backing out there deletes nothing.
  */
 export function useDeleteMyAccount() {
   const client = useQueryClient();
+  const { session } = useAuth();
+  const apple = hasAppleSignIn(session?.user);
   return useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc('rpc_delete_my_account');
-      if (error) throw error;
+      if (subscriptionsOn || apple) {
+        let body: { appleAuthorizationCode: string; appleClientId: string | undefined } | undefined;
+        if (apple) {
+          try {
+            body = {
+              appleAuthorizationCode: await appleAuthorizationCode(),
+              appleClientId: appBundleId() ?? undefined,
+            };
+          } catch (e) {
+            if (e instanceof SignInCancelled) {
+              throw new Error('Nothing was deleted. Confirm with Apple to delete your account.');
+            }
+            throw e;
+          }
+        }
+        const { error } = await supabase.functions.invoke('delete-account', { method: 'POST', body });
+        if (error) throw new Error(await functionErrorMessage(error));
+      } else {
+        const { error } = await supabase.rpc('rpc_delete_my_account');
+        if (error) throw error;
+      }
       // The session now points at a user that no longer exists.
       await supabase.auth.signOut();
       client.clear();
     },
   });
+}
+
+/** The message an Edge Function sent back with an error, or a generic one. */
+async function functionErrorMessage(error: unknown): Promise<string> {
+  const response = (error as { context?: { json?: () => Promise<{ message?: string }> } }).context;
+  const body = await response?.json?.().catch(() => null);
+  return body?.message ?? 'Couldn’t delete your account. Please try again, or email us.';
 }
 
 /** Record that the user accepted the current Terms and confirmed their age. */
@@ -115,8 +153,8 @@ export function useBlockUser() {
     },
     onSuccess: () => {
       client.invalidateQueries({ queryKey: qk.blockedUsers });
-      client.invalidateQueries({ queryKey: qk.friendships });
       client.invalidateQueries({ queryKey: qk.userSearch });
+      invalidateFriendData(client);
     },
   });
 }

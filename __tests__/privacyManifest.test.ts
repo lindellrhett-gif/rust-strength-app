@@ -96,6 +96,9 @@ describe('iOS privacy manifest', () => {
       'NSPrivacyCollectedDataTypeFitness',
       'NSPrivacyCollectedDataTypeHealth',
       'NSPrivacyCollectedDataTypeOtherUserContent',
+      'NSPrivacyCollectedDataTypePreciseLocation',
+      // Rust Strength Pro, from 1.2: which plan, when, and whether it renews.
+      'NSPrivacyCollectedDataTypePurchaseHistory',
     ]) {
       expect(types).toContain(required);
     }

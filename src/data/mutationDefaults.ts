@@ -1,13 +1,16 @@
 import type { QueryClient } from '@tanstack/react-query';
 
 import type { SaveRunInput } from '@/domain/running/save';
-import { mk } from '@/lib/queryClient';
+import { mk, qk } from '@/lib/queryClient';
 import { runStore } from '@/lib/runStore';
+import { SessionUnavailableError } from '@/lib/sessionGuard';
 import { supabase } from '@/lib/supabase';
-import type { Database } from '@/lib/database.types';
+import type { Database, DiaryEntryInsert } from '@/lib/database.types';
 
 export type SetInsert = Database['public']['Tables']['sets']['Insert'];
 export type WorkoutInsert = Database['public']['Tables']['workouts']['Insert'];
+/** Only the columns a user may change — never user_id or created_at. */
+export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 /** Postgres unique_violation. */
 const DUPLICATE_KEY = '23505';
@@ -68,6 +71,90 @@ export async function saveRunRow(input: SaveRunInput): Promise<string> {
 }
 
 /**
+ * A change to your own profile. Finds the signed-in person itself, so a change
+ * made with no signal can still be finished after a restart; a change of account
+ * throws away anything queued, so it can't land on someone else.
+ */
+export async function updateProfileRow(patch: ProfileUpdate): Promise<void> {
+  const { data, error: sessionError } = await supabase.auth.getSession();
+  const userId = data.session?.user.id;
+  if (!userId) {
+    // A token that couldn't be refreshed on a weak signal isn't the same as being
+    // signed out, and gets the longer retries while it comes back.
+    if (sessionError) throw new SessionUnavailableError();
+    throw new Error('Sign in again to save this.');
+  }
+  const { error } = await supabase.from('profiles').update(patch).eq('user_id', userId);
+  if (error) throw error;
+}
+
+// --- Nutrition (0027) -----------------------------------------------------
+// The diary is logged the same way as sets: ids made on the phone, writes
+// never awaited, and each function safe to run twice.
+
+export type DiaryEntryUpdate = Database['public']['Tables']['diary_entries']['Update'];
+export type WaterInsert = Database['public']['Tables']['water_logs']['Insert'];
+
+export async function insertDiaryEntryRow(row: DiaryEntryInsert): Promise<void> {
+  const { error } = await supabase.from('diary_entries').insert(row);
+  if (error && error.code !== DUPLICATE_KEY) throw error;
+}
+
+export async function updateDiaryEntryRow({ id, patch }: { id: string; patch: DiaryEntryUpdate }): Promise<void> {
+  const { error } = await supabase.from('diary_entries').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+/** Deleting what is already gone (or never arrived) is a success. */
+export async function deleteDiaryEntryRow({ id }: { id: string }): Promise<void> {
+  const { error } = await supabase.from('diary_entries').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function insertWaterRow(row: WaterInsert): Promise<void> {
+  const { error } = await supabase.from('water_logs').insert(row);
+  if (error && error.code !== DUPLICATE_KEY) throw error;
+}
+
+export async function deleteWaterRow({ id }: { id: string }): Promise<void> {
+  const { error } = await supabase.from('water_logs').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export interface WeighInInput {
+  user_id: string;
+  measured_on: string;
+  kg: number;
+}
+
+/** One weigh-in a day: a second one that day replaces the first. */
+export async function saveWeighInRow(row: WeighInInput): Promise<void> {
+  const { error } = await supabase.from('body_weights').upsert(row, { onConflict: 'user_id,measured_on' });
+  if (error) throw error;
+}
+
+export async function deleteWeighInRow({ userId, measuredOn }: { userId: string; measuredOn: string }): Promise<void> {
+  const { error } = await supabase
+    .from('body_weights')
+    .delete()
+    .eq('user_id', userId)
+    .eq('measured_on', measuredOn);
+  if (error) throw error;
+}
+
+export interface DiaryDayInput {
+  user_id: string;
+  day: string;
+  note: string | null;
+  completed_at: string | null;
+}
+
+export async function saveDiaryDayRow(row: DiaryDayInput): Promise<void> {
+  const { error } = await supabase.from('diary_days').upsert(row, { onConflict: 'user_id,day' });
+  if (error) throw error;
+}
+
+/**
  * Must run before the persisted cache is restored, or a queue replayed at
  * startup finds no function to call and the writes are dropped.
  */
@@ -76,4 +163,17 @@ export function registerMutationDefaults(client: QueryClient): void {
   client.setMutationDefaults(mk.startWorkout, { mutationFn: insertWorkoutRow });
   client.setMutationDefaults(mk.endWorkout, { mutationFn: endWorkoutRow });
   client.setMutationDefaults(mk.saveRun, { mutationFn: saveRunRow });
+  client.setMutationDefaults(mk.logFood, { mutationFn: insertDiaryEntryRow });
+  client.setMutationDefaults(mk.updateEntry, { mutationFn: updateDiaryEntryRow });
+  client.setMutationDefaults(mk.deleteEntry, { mutationFn: deleteDiaryEntryRow });
+  client.setMutationDefaults(mk.addWater, { mutationFn: insertWaterRow });
+  client.setMutationDefaults(mk.deleteWater, { mutationFn: deleteWaterRow });
+  client.setMutationDefaults(mk.saveWeighIn, { mutationFn: saveWeighInRow });
+  client.setMutationDefaults(mk.deleteWeighIn, { mutationFn: deleteWeighInRow });
+  client.setMutationDefaults(mk.saveDiaryDay, { mutationFn: saveDiaryDayRow });
+  client.setMutationDefaults(mk.updateProfile, {
+    mutationFn: updateProfileRow,
+    // A replayed save has no screen behind it to refresh the profile afterwards.
+    onSettled: () => client.invalidateQueries({ queryKey: qk.profile }),
+  });
 }

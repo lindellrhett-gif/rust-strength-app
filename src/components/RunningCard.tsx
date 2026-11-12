@@ -12,9 +12,8 @@ import { spacing, text } from '@/theme/typography';
 
 import { Card } from './Card';
 
-/** This week's running on the Stats tab, and the way into the running hub. */
-export function RunningCard() {
-  const router = useRouter();
+/** This week's runs, shared by the card here and the tile on Progress. */
+export function useRunningWeek() {
   const profile = useProfile();
   const unit = runUnitFor(profile.data?.unit ?? 'lb');
   const runs = useRunHistory().data ?? [];
@@ -24,6 +23,13 @@ export function RunningCard() {
   const week = runs.filter((r) => r.date >= thisWeek && r.date <= today);
   const distance = week.reduce((s, r) => s + r.distanceM, 0);
   const goal = weekGoalProgress(runs, today, prefs.weeklyGoalM);
+  return { unit, runs, week, distance, goal };
+}
+
+/** This week's running under All stats, and the way into the running hub. */
+export function RunningCard() {
+  const router = useRouter();
+  const { unit, runs, week, distance, goal } = useRunningWeek();
 
   const summary =
     runs.length === 0

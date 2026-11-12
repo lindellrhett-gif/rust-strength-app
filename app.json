@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rust Strength",
     "slug": "rust-strength",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "orientation": "portrait",
     "scheme": "ruststrength",
     "userInterfaceStyle": "dark",
@@ -14,6 +14,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ruststrength.app",
       "appleTeamId": "V7YLBXSTX2",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
@@ -85,6 +86,14 @@
             "NSPrivacyCollectedDataTypePurposes": [
               "NSPrivacyCollectedDataTypePurposeAppFunctionality"
             ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePurchaseHistory",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
           }
         ]
       }
@@ -110,6 +119,7 @@
         }
       ],
       "expo-font",
+      "expo-apple-authentication",
       "expo-notifications",
       [
         "expo-location",
@@ -142,6 +152,14 @@
           "savePhotosPermission": "Rust Strength saves your workout and run cards to Photos when you tap Save to Photos. It can add pictures but never see the ones already there.",
           "isAccessMediaLocationEnabled": false,
           "granularPermissions": ["photo"]
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Rust Strength uses the camera to scan the barcode on a packaged food, so you can log it without typing it in. Nothing is recorded or saved.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
         }
       ],
       "@bacons/apple-targets"

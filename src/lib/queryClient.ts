@@ -135,8 +135,9 @@ export function resumeRestoredWrites(client: QueryClient): void {
  * Mutation keys for the writes that must survive going offline.
  *
  * A paused write is stored without its function, so on restart React Query
- * needs a registered default to know how to finish it. Only the logging loop
- * gets this treatment — it is the part someone does mid-session with no signal.
+ * needs a registered default to know how to finish it. The logging loop gets
+ * this treatment, since it is the part someone does mid-session with no signal,
+ * and so do profile settings, which show as changed the moment they're tapped.
  */
 export const mk = {
   addSet: ['mutation', 'add-set'] as const,
@@ -144,11 +145,23 @@ export const mk = {
   endWorkout: ['mutation', 'end-workout'] as const,
   /** A finished run, often saved right where the signal dropped. */
   saveRun: ['mutation', 'save-run'] as const,
+  // The food diary: logged at the table or the counter, signal or not.
+  logFood: ['mutation', 'log-food'] as const,
+  updateEntry: ['mutation', 'update-entry'] as const,
+  deleteEntry: ['mutation', 'delete-entry'] as const,
+  addWater: ['mutation', 'add-water'] as const,
+  deleteWater: ['mutation', 'delete-water'] as const,
+  saveWeighIn: ['mutation', 'save-weigh-in'] as const,
+  deleteWeighIn: ['mutation', 'delete-weigh-in'] as const,
+  saveDiaryDay: ['mutation', 'save-diary-day'] as const,
+  updateProfile: ['mutation', 'update-profile'] as const,
 };
 
 /** Central place for query keys so invalidation stays consistent. */
 export const qk = {
   profile: ['profile'] as const,
+  /** The daily step goal, kept on the phone (src/data/stepGoal.ts). */
+  stepGoal: ['stepGoal'] as const,
   exercises: ['exercises'] as const,
   gyms: ['gyms'] as const,
   machines: ['machines'] as const,
@@ -189,4 +202,37 @@ export const qk = {
   runPreferences: ['run-preferences'] as const,
   // Under 'activities', so logging or deleting one refreshes it too.
   trophyTotals: ['activities', 'trophy-totals'] as const,
+  proStatus: ['subscription', 'status'] as const,
+  // Nutrition. Everything a diary write touches sits under 'diary', so one
+  // invalidation refreshes the day, the history and the reports.
+  diaryEntries: (day: string) => ['diary', 'entries', day] as const,
+  diaryRange: (from: string, to: string) => ['diary', 'range', from, to] as const,
+  foodHistory: ['diary', 'history'] as const,
+  diaryDay: (day: string) => ['diary', 'day', day] as const,
+  water: (day: string) => ['diary', 'water', day] as const,
+  weighIns: ['weigh-ins'] as const,
+  nutritionSettings: ['nutrition', 'settings'] as const,
+  nutritionGoals: ['nutrition', 'goals'] as const,
+  foodSearch: (query: string) => ['foods', 'search', query] as const,
+  food: (id: string) => ['foods', id] as const,
+  /** An Open Food Facts product, by its barcode. */
+  offFood: (barcode: string) => ['foods', 'off', barcode] as const,
+  /** Your foods first, then Open Food Facts, for a scanned code. */
+  barcodeFood: (barcode: string) => ['foods', 'barcode', barcode] as const,
+  myFoods: ['foods', 'mine'] as const,
+  recipe: (id: string) => ['foods', 'recipe', id] as const,
+  savedMeals: ['saved-meals'] as const,
 };
+
+/**
+ * After a friendship starts or ends, everything that depends on who your friends
+ * are. A friend's own stats aren't refetched, since nobody may be looking at
+ * them, but they won't be served as fresh again.
+ */
+export function invalidateFriendData(client: QueryClient): void {
+  void client.invalidateQueries({ queryKey: qk.friendships });
+  void client.invalidateQueries({ queryKey: qk.feed });
+  void client.invalidateQueries({ queryKey: ['leaderboard'] });
+  void client.invalidateQueries({ queryKey: ['friend-stats'], refetchType: 'none' });
+  void client.invalidateQueries({ queryKey: ['friend-prs'], refetchType: 'none' });
+}

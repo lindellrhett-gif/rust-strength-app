@@ -1,5 +1,5 @@
 /**
- * The friend feed — shaping server rows into the cards the Friends tab shows.
+ * The friend feed: shaping server rows into the posts the Friends tab shows.
  *
  * A post is a *summary*, never a set-by-set replay. Friends see what someone
  * trained and how much work it was; they do not get a window into every rep.
@@ -7,7 +7,8 @@
  * nothing.
  */
 
-import { formatClock } from './duration';
+import { formatClock, formatDurationShort } from './duration';
+import { convertVolume } from './leaderboard';
 import type { LatLon } from './running/geo';
 import { decodePolyline } from './running/polyline';
 import type { TrophyGlyph } from './achievements';
@@ -68,11 +69,25 @@ export interface FeedRow {
   routePreview?: string | null;
   /** "trophy:tier" keys the author shows by their name. */
   featuredTrophies?: string[];
+  /** The unit the author logs in, which their volume is stored in. Null until migration 0035. */
+  authorUnit?: 'lb' | 'kg' | null;
 }
 
-export interface FeedStat {
-  label: string;
-  value: string;
+/** The kind of session a post's graphic is coloured for. */
+export type PosterTone = 'record' | 'lift' | 'run' | 'activity';
+
+/** The big graphic at the heart of a post, in words and numbers. */
+export interface PostPoster {
+  tone: PosterTone;
+  /** The small line at the top, e.g. "Two personal records". */
+  eyebrow: string | null;
+  title: string;
+  /** The one big number. */
+  hero: string;
+  /** The rest, smaller: "1h 5m", "24 sets". */
+  details: string[];
+  /** The short version for the grid on a friend's profile. */
+  tile: { value: string };
 }
 
 export interface FeedPost {
@@ -83,14 +98,12 @@ export interface FeedPost {
   username: string;
   displayName: string | null;
   occurredAt: string;
-  /** What the card is called: the preset name, the activity, or a fallback. */
+  /** What the post is called: the preset name, the activity, or a fallback. */
   title: string;
-  /** One line under the title, e.g. "3 personal records". */
-  headline: string | null;
-  stats: FeedStat[];
-  /** Up to four exercise names, for the chip row. */
+  poster: PostPoster;
+  /** Up to four exercise names, for the line under the post. */
   exercises: string[];
-  /** How many more exercises the chips are hiding. */
+  /** How many more exercises that line leaves out. */
   moreExercises: number;
   recordCount: number;
   badgeIds: string[];
@@ -103,7 +116,7 @@ export interface FeedPost {
   featuredTrophies: string[];
 }
 
-const MAX_EXERCISE_CHIPS = 4;
+const MAX_EXERCISES_SHOWN = 4;
 
 /** The outline of a shared run, or null when there is none or it can't be read. */
 export function routeFrom(encoded: string | null | undefined): LatLon[] | null {
@@ -151,42 +164,78 @@ export function postTitle(row: FeedRow): string {
 }
 
 /**
- * The line under the title. Personal records outrank everything, because that
- * is the thing a friend would actually want to say something about.
+ * The small line on a workout's graphic. Personal records outrank everything,
+ * because that is the thing a friend would actually want to say something about.
  */
 export function postHeadline(row: FeedRow): string | null {
   if (row.subjectType === 'workout') {
-    if (row.recordCount >= 3) return `${row.recordCount} personal records — huge session`;
+    if (row.recordCount >= 3) return `${row.recordCount} personal records`;
     if (row.recordCount === 2) return 'Two personal records';
     if (row.recordCount === 1) return 'New personal record';
     if (row.totalSets >= 20) return 'Big volume day';
-    return null;
-  }
-  if (row.distance != null && row.distance > 0 && row.distanceUnit) {
-    return `${Number(row.distance.toFixed(2))} ${row.distanceUnit}`;
   }
   return null;
 }
 
-export function postStats(row: FeedRow, unit: 'lb' | 'kg'): FeedStat[] {
-  const stats: FeedStat[] = [];
+const plural = (n: number, one: string) => `${comma(n)} ${one}${n === 1 ? '' : 's'}`;
 
-  if (row.durationSeconds > 0) {
-    stats.push({ label: 'time', value: formatClock(row.durationSeconds) });
-  }
+/** 14,120 as "14.1k", for a tile too small for the whole number. */
+function shortNumber(n: number): string {
+  const trim = (s: string) => s.replace(/\.0$/, '');
+  if (n >= 1_000_000) return `${trim((n / 1_000_000).toFixed(1))}M`;
+  if (n >= 100_000) return `${Math.round(n / 1_000)}k`;
+  if (n >= 1_000) return `${trim((n / 1_000).toFixed(1))}k`;
+  return comma(n);
+}
+
+/**
+ * What a post's graphic says. Only what a summary already shares: the session's
+ * name, time, total weight, sets and reps, records, distance and pace.
+ */
+export function postPoster(row: FeedRow, unit: 'lb' | 'kg'): PostPoster {
+  const title = postTitle(row);
+  const time = row.durationSeconds > 0 ? formatDurationShort(row.durationSeconds) : null;
+
   if (row.subjectType === 'workout') {
-    if (row.volume > 0) stats.push({ label: `${unit} moved`, value: comma(row.volume) });
-    if (row.totalSets > 0) stats.push({ label: 'sets', value: comma(row.totalSets) });
-    if (row.totalReps > 0) stats.push({ label: 'reps', value: comma(row.totalReps) });
-  } else if (row.distance != null && row.distance > 0 && row.distanceUnit) {
-    stats.push({ label: row.distanceUnit, value: String(Number(row.distance.toFixed(2))) });
-    // Pace is what a runner looks at first.
-    if (row.activityKind === 'run' && row.durationSeconds > 0 && (row.distanceUnit === 'mi' || row.distanceUnit === 'km')) {
-      stats.push({ label: `per ${row.distanceUnit}`, value: formatClock(Math.round(row.durationSeconds / row.distance)) });
-    }
+    // Stored in the author's unit; shown in the viewer's.
+    const volume = Math.round(convertVolume(row.volume, row.authorUnit ?? unit, unit));
+    const reps = row.totalReps > 0 ? plural(row.totalReps, 'rep') : null;
+    const sets = row.totalSets > 0 ? plural(row.totalSets, 'set') : null;
+    const hero = volume > 0 ? `${comma(volume)} ${unit}` : (reps ?? time ?? '0 sets');
+    return {
+      tone: row.recordCount > 0 ? 'record' : 'lift',
+      eyebrow: postHeadline(row),
+      title,
+      hero,
+      details: [time, sets, reps].filter((d): d is string => d != null && d !== hero),
+      tile: {
+        value:
+          row.recordCount > 0
+            ? `${row.recordCount} PR${row.recordCount === 1 ? '' : 's'}`
+            : volume > 0
+              ? shortNumber(volume)
+              : hero,
+      },
+    };
   }
 
-  return stats;
+  const isRun = row.activityKind === 'run';
+  const hasDistance = row.distance != null && row.distance > 0 && !!row.distanceUnit;
+  const distance = hasDistance ? `${Number(row.distance!.toFixed(2))} ${row.distanceUnit}` : null;
+  const hero = distance ?? time ?? '0m';
+  // Pace is what a runner looks at first.
+  const pace =
+    isRun && hasDistance && row.durationSeconds > 0 && (row.distanceUnit === 'mi' || row.distanceUnit === 'km')
+      ? `${formatClock(Math.round(row.durationSeconds / row.distance!))} /${row.distanceUnit}`
+      : null;
+  return {
+    tone: isRun ? 'run' : 'activity',
+    eyebrow: null,
+    title,
+    hero,
+    details: [time, pace].filter((d): d is string => d != null && d !== hero),
+    tile: { value: hero },
+  };
 }
 
 export function totalReactions(counts: Partial<Record<ReactionId, number>>): number {
@@ -203,10 +252,9 @@ export function buildFeed(rows: FeedRow[], unit: 'lb' | 'kg'): FeedPost[] {
     displayName: row.displayName,
     occurredAt: row.occurredAt,
     title: postTitle(row),
-    headline: postHeadline(row),
-    stats: postStats(row, unit),
-    exercises: row.exerciseNames.slice(0, MAX_EXERCISE_CHIPS),
-    moreExercises: Math.max(0, row.exerciseNames.length - MAX_EXERCISE_CHIPS),
+    poster: postPoster(row, unit),
+    exercises: row.exerciseNames.slice(0, MAX_EXERCISES_SHOWN),
+    moreExercises: Math.max(0, row.exerciseNames.length - MAX_EXERCISES_SHOWN),
     recordCount: row.recordCount,
     badgeIds: row.badgeIds,
     reactionCounts: row.reactionCounts,

@@ -1,0 +1,327 @@
+{
+ "SurveyFoods": [
+  {
+   "fdcId": 2709224,
+   "description": "Banana, raw",
+   "dataType": "Survey (FNDDS)",
+   "foodNutrients": [
+    {
+     "nutrient": {
+      "id": 1003,
+      "number": "203",
+      "name": "Protein",
+      "unitName": "g"
+     },
+     "amount": 0.74
+    },
+    {
+     "nutrient": {
+      "id": 1004,
+      "number": "204",
+      "name": "Total lipid (fat)",
+      "unitName": "g"
+     },
+     "amount": 0.28
+    },
+    {
+     "nutrient": {
+      "id": 1005,
+      "number": "205",
+      "name": "Carbohydrate, by difference",
+      "unitName": "g"
+     },
+     "amount": 22.7
+    },
+    {
+     "nutrient": {
+      "id": 1008,
+      "number": "208",
+      "name": "Energy",
+      "unitName": "kcal"
+     },
+     "amount": 97.0
+    },
+    {
+     "nutrient": {
+      "id": 1018,
+      "number": "221",
+      "name": "Alcohol, ethyl",
+      "unitName": "g"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1051,
+      "number": "255",
+      "name": "Water",
+      "unitName": "g"
+     },
+     "amount": 75.6
+    },
+    {
+     "nutrient": {
+      "id": 1057,
+      "number": "262",
+      "name": "Caffeine",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 2000,
+      "number": "269",
+      "name": "Total Sugars",
+      "unitName": "g"
+     },
+     "amount": 15.8
+    },
+    {
+     "nutrient": {
+      "id": 1079,
+      "number": "291",
+      "name": "Fiber, total dietary",
+      "unitName": "g"
+     },
+     "amount": 1.7
+    },
+    {
+     "nutrient": {
+      "id": 1087,
+      "number": "301",
+      "name": "Calcium, Ca",
+      "unitName": "mg"
+     },
+     "amount": 5.0
+    },
+    {
+     "nutrient": {
+      "id": 1089,
+      "number": "303",
+      "name": "Iron, Fe",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1090,
+      "number": "304",
+      "name": "Magnesium, Mg",
+      "unitName": "mg"
+     },
+     "amount": 28.0
+    },
+    {
+     "nutrient": {
+      "id": 1092,
+      "number": "306",
+      "name": "Potassium, K",
+      "unitName": "mg"
+     },
+     "amount": 326
+    },
+    {
+     "nutrient": {
+      "id": 1093,
+      "number": "307",
+      "name": "Sodium, Na",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1095,
+      "number": "309",
+      "name": "Zinc, Zn",
+      "unitName": "mg"
+     },
+     "amount": 0.16
+    },
+    {
+     "nutrient": {
+      "id": 1106,
+      "number": "320",
+      "name": "Vitamin A, RAE",
+      "unitName": "µg"
+     },
+     "amount": 1.0
+    },
+    {
+     "nutrient": {
+      "id": 1114,
+      "number": "328",
+      "name": "Vitamin D (D2 + D3)",
+      "unitName": "µg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1162,
+      "number": "401",
+      "name": "Vitamin C, total ascorbic acid",
+      "unitName": "mg"
+     },
+     "amount": 12.0
+    },
+    {
+     "nutrient": {
+      "id": 1178,
+      "number": "418",
+      "name": "Vitamin B-12",
+      "unitName": "µg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1253,
+      "number": "601",
+      "name": "Cholesterol",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1258,
+      "number": "606",
+      "name": "Fatty acids, total saturated",
+      "unitName": "g"
+     },
+     "amount": 0.112
+    },
+    {
+     "nutrient": {
+      "id": 1292,
+      "number": "645",
+      "name": "Fatty acids, total monounsaturated",
+      "unitName": "g"
+     },
+     "amount": 0.032
+    },
+    {
+     "nutrient": {
+      "id": 1293,
+      "number": "646",
+      "name": "Fatty acids, total polyunsaturated",
+      "unitName": "g"
+     },
+     "amount": 0.073
+    }
+   ],
+   "foodPortions": [
+    {
+     "modifier": "10118",
+     "gramWeight": 225,
+     "portionDescription": "1 cup, mashed",
+     "sequenceNumber": 4,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "60343",
+     "gramWeight": 126,
+     "portionDescription": "1 banana",
+     "sequenceNumber": 1,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "10205",
+     "gramWeight": 150,
+     "portionDescription": "1 cup",
+     "sequenceNumber": 3,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "61935",
+     "gramWeight": 6,
+     "portionDescription": "1 slice",
+     "sequenceNumber": 2,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "90000",
+     "gramWeight": 126,
+     "portionDescription": "Quantity not specified",
+     "sequenceNumber": 6,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "63525",
+     "gramWeight": 15,
+     "portionDescription": "1 linear inch",
+     "sequenceNumber": 5,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    }
+   ]
+  },
+  {
+   "fdcId": 2705383,
+   "description": "Milk, human",
+   "dataType": "Survey (FNDDS)",
+   "foodNutrients": [],
+   "foodPortions": [
+    {
+     "modifier": "90000",
+     "gramWeight": 0,
+     "portionDescription": "Quantity not specified",
+     "sequenceNumber": 2,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "10205",
+     "gramWeight": 246,
+     "portionDescription": "1 cup",
+     "sequenceNumber": 1,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "modifier": "30000",
+     "gramWeight": 30.8,
+     "portionDescription": "1 fl oz",
+     "sequenceNumber": 3,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    }
+   ]
+  }
+ ]
+}

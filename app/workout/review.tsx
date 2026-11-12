@@ -105,7 +105,7 @@ export default function ReviewWorkout() {
     if (!online) {
       Alert.alert(
         'No connection',
-        'Saving changes needs a connection. Your workout is already saved as it was, and you can edit it later from the Calendar.',
+        'Saving changes needs a connection. Your workout is already saved as it was, and you can edit it later from Progress.',
         afterFinish
           ? [
               { text: 'Stay here', style: 'cancel' },

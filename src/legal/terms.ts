@@ -1,11 +1,14 @@
-import { LEGAL } from './config';
+import { LEGAL, representative } from './config';
 
 /**
  * Terms of Service.
  *
- * Scoped to what this app actually is: a free, no-purchase, no-ads workout
- * tracker with an opt-in friends feature. Clauses that would not apply (payment
- * terms, refunds, marketplace rules) are deliberately absent.
+ * Scoped to what this app actually is: a no-ads workout tracker with an
+ * opt-in friends feature, free at its core, with Rust Strength Pro (the food
+ * diary) sold through Apple. Clauses that would not apply (our own payment
+ * processing, marketplace rules) are deliberately absent.
+ *
+ * src/legal/fr/terms.ts is its French translation. Change both together.
  */
 export const TERMS_OF_SERVICE = `# Terms of Service
 
@@ -24,18 +27,22 @@ ${LEGAL.appName} is a logging and calculation tool. It is **not** a medical devi
 - Generated workouts are **general suggestions** built from your equipment and history, not a program designed for you by a professional.
 - Distance, pace, elevation, steps and calories from a recorded run are **estimates** from your phone's GPS and motion sensors, which can be wrong, especially near tall buildings, under trees or in tunnels.
 - Trophies and streaks are for motivation. Nothing in the App is a recommendation to train through pain, injury, or exhaustion.
+- Calories and nutrients in the food diary come from food labels, USDA FoodData Central, Open Food Facts (whose entries are added by its users) and what you type in. They can be wrong or missing. Check the label when it matters to you.
+- The calorie goal is an **estimate** from a standard equation (Mifflin-St Jeor) and the numbers you enter. It is not a diet plan or nutrition advice. Weight-loss goals are offered only to adults, going by the birth year you enter.
 
 **Lifting weights carries a real risk of serious injury.** You are solely responsible for deciding what is safe for you. Consult a qualified physician or trainer before starting or changing a training program, particularly if you have any medical condition or injury. Do not attempt a weight because the App suggested it. Use appropriate form, equipment, and spotters.
+
+**Changing how you eat can affect your health.** Talk to a doctor or registered dietitian before you do, especially if you are pregnant or breastfeeding, have a medical condition, or have had an eating disorder. Do not rely on the food diary to manage a medical condition, such as diabetes or a food allergy.
 
 **Running outdoors has its own risks.** Watch where you are going, not your phone, and obey traffic laws. Maps and saved routes do not tell you whether a route is safe, legal or open to the public.
 
 ## 2. Eligibility
 
-You must be at least ${LEGAL.minimumAge} years old. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
+You must be at least ${LEGAL.minimumAge} years old, at least ${LEGAL.minimumAgeCanada} if you live in Canada, or at least ${LEGAL.minimumAgeEea} if you live in the European Union, Iceland, Liechtenstein or Norway. By creating an account you confirm that you are. If you are under 18, you should have a parent or guardian review these Terms.
 
 ## 3. Your account
 
-You are responsible for keeping your password secure and for activity under your account. Give us accurate information and keep it current. Tell us at ${LEGAL.contactEmail} if you believe your account has been accessed without your permission.
+You are responsible for keeping your password, or the Apple ID or Google account you sign in with, secure, and for activity under your account. Give us accurate information and keep it current. Tell us at ${LEGAL.contactEmail} if you believe your account has been accessed without your permission.
 
 One account per person. Do not share, sell or transfer your account.
 
@@ -47,6 +54,9 @@ The App has a social layer where other users can see your username, display name
 - Impersonate any person or organisation, or pick a username or display name suggesting you are someone you are not
 - Use obscene, hateful, sexually explicit, or discriminatory names or text
 - Post anything unlawful, or that infringes anyone's rights
+- Post or name anything that encourages suicide, self-harm or an eating disorder
+- Threaten violence, or promote terrorism or violent extremism
+- Offer, sell or promote illegal drugs, other controlled substances (including anabolic steroids) or weapons
 - Spam other users or send unsolicited promotions
 - Attempt to access another user's account or data
 - Probe, scan, overload, reverse-engineer, scrape or disrupt the service
@@ -65,9 +75,13 @@ You are responsible for your content and confirm you have the right to post it.
 
 If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email ${LEGAL.contactEmail}. You can also block any user immediately, which removes any friendship and hides you from each other.
 
-We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk.
+**Anyone can report illegal content**, with or without an account. Email ${LEGAL.contactEmail} saying where it is in the App and why you believe it is illegal.
 
-If you think we got it wrong, email ${LEGAL.contactEmail} and we will review it.
+We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms or the law. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk. A person reviews every report; we do not use automated tools to moderate content.
+
+**When we act, we tell you why.** If we remove something you wrote, or restrict, suspend or end your account, we tell you what we did, what rule or law it was based on, and how to challenge it, unless the law or someone's safety prevents us. If you think we got it wrong, email ${LEGAL.contactEmail} and a person will review the decision. You can also email us to complain about how we handle reports or content, or about how we meet our duties under the UK Online Safety Act, and we will reply.
+
+**Contact point.** For users and authorities, including under the EU Digital Services Act: ${LEGAL.contactEmail}, in English or French. Our legal representative in the European Union: ${representative(LEGAL.euRepresentative, 'the European Union')}.
 
 ## 7. Copyright
 
@@ -75,11 +89,20 @@ If you believe content in the App infringes your copyright, email ${LEGAL.contac
 
 ## 8. Our content
 
-The App itself — its code, design, text, icons and branding — belongs to us or our licensors. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
+The App itself — its code, design, text, icons and branding — belongs to us or our licensors. Open-source software in the App, and the food data from USDA FoodData Central and Open Food Facts, are used under their own licences, which the App lists under **Profile → Privacy & legal → Acknowledgements**. We grant you a personal, non-exclusive, non-transferable, revocable licence to use the App for your own non-commercial use. You may not copy, modify, distribute, sell or create derivative works from it.
 
-## 9. The App is free
+## 9. ${LEGAL.appName} Pro
 
-${LEGAL.appName} is currently free with no purchases or subscriptions. If we introduce paid features, we will tell you the price and terms before you are charged, and any purchase will go through the App Store or Google Play under their rules.
+The App's core features are free. ${LEGAL.appName} Pro is an optional upgrade that adds extra features, which the App lists before you buy. It is sold as a monthly or yearly subscription, or as a one-time Lifetime purchase.
+
+- **Price and billing.** The price is shown in the App before you confirm. Payment is taken through your Apple ID by Apple, not by us, and is subject to Apple's terms.
+- **Automatic renewal (monthly and yearly).** A subscription renews automatically at the end of each period, at the then-current price, unless you cancel at least 24 hours before the period ends. Apple charges the renewal within the 24 hours before the period ends.
+- **Lifetime.** A single payment that unlocks Pro for as long as we offer Pro in the App. It does not renew and there is nothing to cancel. "Lifetime" means the life of the Pro service, not your lifetime: if we stop offering the App or Pro, Lifetime access ends with it.
+- **Free trials.** If a free trial is offered, you are charged when it ends unless you cancel before then. Any unused part of a free trial ends when you buy a subscription.
+- **Cancelling.** You can cancel at any time in your device's settings (Settings > your name > Subscriptions). Pro then stays active until the end of the period you have paid for. Deleting the App or your account does not cancel your subscription.
+- **Refunds.** Purchases are handled by Apple, so refund requests go to Apple under its policies. We cannot issue refunds ourselves.
+- **Price changes.** If the price changes, Apple tells you in advance and, where its rules or the law require, asks you to agree before you are charged the new price.
+- **Changes to Pro.** We may add, change or remove Pro features. If a change materially reduces what Pro includes, we will tell you before it takes effect, and you can cancel.
 
 ## 10. Availability
 
@@ -125,6 +148,8 @@ Nothing here prevents either of us from bringing a claim in small-claims court.
 
 - **Australia.** If you are a consumer, nothing in these Terms excludes, restricts or modifies any guarantee, right or remedy you have under the Australian Consumer Law.
 - **New Zealand.** If you are a consumer, nothing in these Terms limits your rights under the Consumer Guarantees Act 1993 or the Fair Trading Act 1986.
+- **Canada.** If you live in Quebec, nothing in these Terms limits your rights under Quebec's Consumer Protection Act, and you can bring a claim in the courts of Quebec.
+- **United Kingdom and European Union.** If you are a consumer, you keep the rights the consumer law where you live gives you, and you can bring a claim in the courts where you live.
 
 ## 16. Apple and Google
 
@@ -138,8 +163,11 @@ We may update these Terms. If the change is material we will update the date abo
 
 If any provision is unenforceable, the rest stays in force. Our not enforcing a provision is not a waiver of it. These Terms, with the Privacy Policy, are the whole agreement between us.
 
+**Languages.** These Terms and the Privacy Policy are available in English and in French (${LEGAL.termsFrUrl} and ${LEGAL.privacyFrUrl}, and in the App under **Profile → Privacy & legal**). Both versions are equally valid. You can read either before you agree.
+
 ## 19. Contact
 
 ${LEGAL.entity}
+${LEGAL.postalAddress}
 ${LEGAL.contactEmail}
 `;

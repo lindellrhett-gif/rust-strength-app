@@ -1,0 +1,575 @@
+{
+ "SRLegacyFoods": [
+  {
+   "fdcId": 173944,
+   "description": "Bananas, raw",
+   "dataType": "SR Legacy",
+   "foodNutrients": [
+    {
+     "nutrient": {
+      "id": 1018,
+      "number": "221",
+      "name": "Alcohol, ethyl",
+      "unitName": "g"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1258,
+      "number": "606",
+      "name": "Fatty acids, total saturated",
+      "unitName": "g"
+     },
+     "amount": 0.112
+    },
+    {
+     "nutrient": {
+      "id": 1106,
+      "number": "320",
+      "name": "Vitamin A, RAE",
+      "unitName": "µg"
+     },
+     "amount": 3.0
+    },
+    {
+     "nutrient": {
+      "id": 1292,
+      "number": "645",
+      "name": "Fatty acids, total monounsaturated",
+      "unitName": "g"
+     },
+     "amount": 0.032
+    },
+    {
+     "nutrient": {
+      "id": 1293,
+      "number": "646",
+      "name": "Fatty acids, total polyunsaturated",
+      "unitName": "g"
+     },
+     "amount": 0.073
+    },
+    {
+     "nutrient": {
+      "id": 1005,
+      "number": "205",
+      "name": "Carbohydrate, by difference",
+      "unitName": "g"
+     },
+     "amount": 22.8
+    },
+    {
+     "nutrient": {
+      "id": 1008,
+      "number": "208",
+      "name": "Energy",
+      "unitName": "kcal"
+     },
+     "amount": 89.0
+    },
+    {
+     "nutrient": {
+      "id": 1257,
+      "number": "605",
+      "name": "Fatty acids, total trans",
+      "unitName": "g"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1178,
+      "number": "418",
+      "name": "Vitamin B-12",
+      "unitName": "µg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1253,
+      "number": "601",
+      "name": "Cholesterol",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1057,
+      "number": "262",
+      "name": "Caffeine",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1114,
+      "number": "328",
+      "name": "Vitamin D (D2 + D3)",
+      "unitName": "µg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1162,
+      "number": "401",
+      "name": "Vitamin C, total ascorbic acid",
+      "unitName": "mg"
+     },
+     "amount": 8.7
+    },
+    {
+     "nutrient": {
+      "id": 1079,
+      "number": "291",
+      "name": "Fiber, total dietary",
+      "unitName": "g"
+     },
+     "amount": 2.6
+    },
+    {
+     "nutrient": {
+      "id": 1089,
+      "number": "303",
+      "name": "Iron, Fe",
+      "unitName": "mg"
+     },
+     "amount": 0.26
+    },
+    {
+     "nutrient": {
+      "id": 1090,
+      "number": "304",
+      "name": "Magnesium, Mg",
+      "unitName": "mg"
+     },
+     "amount": 27.0
+    },
+    {
+     "nutrient": {
+      "id": 1093,
+      "number": "307",
+      "name": "Sodium, Na",
+      "unitName": "mg"
+     },
+     "amount": 1.0
+    },
+    {
+     "nutrient": {
+      "id": 1003,
+      "number": "203",
+      "name": "Protein",
+      "unitName": "g"
+     },
+     "amount": 1.09
+    },
+    {
+     "nutrient": {
+      "id": 2000,
+      "number": "269",
+      "name": "Total Sugars",
+      "unitName": "g"
+     },
+     "amount": 12.2
+    },
+    {
+     "nutrient": {
+      "id": 1087,
+      "number": "301",
+      "name": "Calcium, Ca",
+      "unitName": "mg"
+     },
+     "amount": 5.0
+    },
+    {
+     "nutrient": {
+      "id": 1092,
+      "number": "306",
+      "name": "Potassium, K",
+      "unitName": "mg"
+     },
+     "amount": 358
+    },
+    {
+     "nutrient": {
+      "id": 1095,
+      "number": "309",
+      "name": "Zinc, Zn",
+      "unitName": "mg"
+     },
+     "amount": 0.15
+    },
+    {
+     "nutrient": {
+      "id": 1051,
+      "number": "255",
+      "name": "Water",
+      "unitName": "g"
+     },
+     "amount": 74.9
+    },
+    {
+     "nutrient": {
+      "id": 1004,
+      "number": "204",
+      "name": "Total lipid (fat)",
+      "unitName": "g"
+     },
+     "amount": 0.33
+    }
+   ],
+   "foodPortions": [
+    {
+     "amount": 1.0,
+     "modifier": "NLEA serving",
+     "gramWeight": 126.0,
+     "sequenceNumber": 8,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "extra large (9\" or longer)",
+     "gramWeight": 152.0,
+     "sequenceNumber": 7,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "large (8\" to 8-7/8\" long)",
+     "gramWeight": 136.0,
+     "sequenceNumber": 6,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "cup, sliced",
+     "gramWeight": 150.0,
+     "sequenceNumber": 2,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "small (6\" to 6-7/8\" long)",
+     "gramWeight": 101.0,
+     "sequenceNumber": 4,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "extra small (less than 6\" long)",
+     "gramWeight": 81.0,
+     "sequenceNumber": 3,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "medium (7\" to 7-7/8\" long)",
+     "gramWeight": 118.0,
+     "sequenceNumber": 5,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "cup, mashed",
+     "gramWeight": 225.0,
+     "sequenceNumber": 1,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    }
+   ]
+  },
+  {
+   "fdcId": 170899,
+   "description": "Cheese, cheddar, sharp, sliced",
+   "dataType": "SR Legacy",
+   "foodNutrients": [
+    {
+     "nutrient": {
+      "id": 1003,
+      "number": "203",
+      "name": "Protein",
+      "unitName": "g"
+     },
+     "amount": 24.2
+    },
+    {
+     "nutrient": {
+      "id": 1018,
+      "number": "221",
+      "name": "Alcohol, ethyl",
+      "unitName": "g"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1079,
+      "number": "291",
+      "name": "Fiber, total dietary",
+      "unitName": "g"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1089,
+      "number": "303",
+      "name": "Iron, Fe",
+      "unitName": "mg"
+     },
+     "amount": 0.16
+    },
+    {
+     "nutrient": {
+      "id": 1090,
+      "number": "304",
+      "name": "Magnesium, Mg",
+      "unitName": "mg"
+     },
+     "amount": 27.0
+    },
+    {
+     "nutrient": {
+      "id": 1093,
+      "number": "307",
+      "name": "Sodium, Na",
+      "unitName": "mg"
+     },
+     "amount": 644
+    },
+    {
+     "nutrient": {
+      "id": 1106,
+      "number": "320",
+      "name": "Vitamin A, RAE",
+      "unitName": "µg"
+     },
+     "amount": 263
+    },
+    {
+     "nutrient": {
+      "id": 1114,
+      "number": "328",
+      "name": "Vitamin D (D2 + D3)",
+      "unitName": "µg"
+     },
+     "amount": 1.0
+    },
+    {
+     "nutrient": {
+      "id": 1162,
+      "number": "401",
+      "name": "Vitamin C, total ascorbic acid",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 1178,
+      "number": "418",
+      "name": "Vitamin B-12",
+      "unitName": "µg"
+     },
+     "amount": 0.88
+    },
+    {
+     "nutrient": {
+      "id": 1253,
+      "number": "601",
+      "name": "Cholesterol",
+      "unitName": "mg"
+     },
+     "amount": 99.0
+    },
+    {
+     "nutrient": {
+      "id": 1257,
+      "number": "605",
+      "name": "Fatty acids, total trans",
+      "unitName": "g"
+     },
+     "amount": 1.18
+    },
+    {
+     "nutrient": {
+      "id": 1258,
+      "number": "606",
+      "name": "Fatty acids, total saturated",
+      "unitName": "g"
+     },
+     "amount": 19.4
+    },
+    {
+     "nutrient": {
+      "id": 1004,
+      "number": "204",
+      "name": "Total lipid (fat)",
+      "unitName": "g"
+     },
+     "amount": 33.8
+    },
+    {
+     "nutrient": {
+      "id": 1005,
+      "number": "205",
+      "name": "Carbohydrate, by difference",
+      "unitName": "g"
+     },
+     "amount": 2.13
+    },
+    {
+     "nutrient": {
+      "id": 1008,
+      "number": "208",
+      "name": "Energy",
+      "unitName": "kcal"
+     },
+     "amount": 410
+    },
+    {
+     "nutrient": {
+      "id": 1051,
+      "number": "255",
+      "name": "Water",
+      "unitName": "g"
+     },
+     "amount": 36.2
+    },
+    {
+     "nutrient": {
+      "id": 1057,
+      "number": "262",
+      "name": "Caffeine",
+      "unitName": "mg"
+     },
+     "amount": 0.0
+    },
+    {
+     "nutrient": {
+      "id": 2000,
+      "number": "269",
+      "name": "Total Sugars",
+      "unitName": "g"
+     },
+     "amount": 0.27
+    },
+    {
+     "nutrient": {
+      "id": 1087,
+      "number": "301",
+      "name": "Calcium, Ca",
+      "unitName": "mg"
+     },
+     "amount": 711
+    },
+    {
+     "nutrient": {
+      "id": 1092,
+      "number": "306",
+      "name": "Potassium, K",
+      "unitName": "mg"
+     },
+     "amount": 76.0
+    },
+    {
+     "nutrient": {
+      "id": 1095,
+      "number": "309",
+      "name": "Zinc, Zn",
+      "unitName": "mg"
+     },
+     "amount": 3.74
+    },
+    {
+     "nutrient": {
+      "id": 1292,
+      "number": "645",
+      "name": "Fatty acids, total monounsaturated",
+      "unitName": "g"
+     },
+     "amount": 8.43
+    },
+    {
+     "nutrient": {
+      "id": 1293,
+      "number": "646",
+      "name": "Fatty acids, total polyunsaturated",
+      "unitName": "g"
+     },
+     "amount": 1.43
+    }
+   ],
+   "foodPortions": [
+    {
+     "amount": 1.0,
+     "modifier": "slice (1 oz)",
+     "gramWeight": 28.0,
+     "sequenceNumber": 3,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "slice (3/4 oz)",
+     "gramWeight": 21.0,
+     "sequenceNumber": 2,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    },
+    {
+     "amount": 1.0,
+     "modifier": "slice (2/3 oz)",
+     "gramWeight": 19.0,
+     "sequenceNumber": 1,
+     "measureUnit": {
+      "id": 9999,
+      "name": "undetermined",
+      "abbreviation": "undetermined"
+     }
+    }
+   ]
+  }
+ ]
+}

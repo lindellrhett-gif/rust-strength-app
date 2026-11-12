@@ -1,14 +1,28 @@
 /**
- * Which features this person can use. Running, nutrition and the coach will
- * sit behind a subscription eventually; until there is one, everything is
- * available. Every entry point asks here, so adding the paywall later is a
- * change to this one function rather than a hunt through the screens.
+ * Which features this person can use. Every entry point asks here, so the
+ * paywall is a change to this one function rather than a hunt through the
+ * screens.
+ *
+ * Only new features are paid (see src/domain/subscription.ts): everything in
+ * 1.0 and 1.1, running included, is free for good. Until subscriptions are
+ * switched on, the paid features are open to everyone too.
  */
 
-export type Feature = 'running';
+export type Feature = 'running' | 'nutrition' | 'coach';
 
-// The parameter is unused until there is a paywall to check against.
-export function hasFeature(feature: Feature): boolean {
-  void feature;
-  return true;
+/** Features that need Rust Strength Pro once subscriptions are on. */
+export const PRO_FEATURES: readonly Feature[] = ['nutrition', 'coach'];
+
+export interface Access {
+  /** Subscriptions are live in this build (see src/lib/purchases.ts). */
+  subscriptionsOn: boolean;
+  /** This person has an active Pro subscription. */
+  pro: boolean;
+}
+
+export const OPEN_ACCESS: Access = { subscriptionsOn: false, pro: false };
+
+export function hasFeature(feature: Feature, access: Access = OPEN_ACCESS): boolean {
+  if (!PRO_FEATURES.includes(feature)) return true;
+  return !access.subscriptionsOn || access.pro;
 }

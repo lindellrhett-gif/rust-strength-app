@@ -102,6 +102,10 @@ function RootNavigator() {
       <Stack.Screen name="templates/[id]" options={{ headerShown: true, title: 'Preset' }} />
       <Stack.Screen name="legal/privacy" options={{ headerShown: true, title: 'Privacy Policy' }} />
       <Stack.Screen name="legal/terms" options={{ headerShown: true, title: 'Terms of Service' }} />
+      <Stack.Screen name="legal/privacy-fr" options={{ headerShown: true, title: 'Politique de confidentialité' }} />
+      <Stack.Screen name="legal/terms-fr" options={{ headerShown: true, title: 'Conditions d’utilisation' }} />
+      <Stack.Screen name="legal/health-data" options={{ headerShown: true, title: 'Health Data Policy' }} />
+      <Stack.Screen name="legal/notices" options={{ headerShown: true, title: 'Acknowledgements' }} />
       <Stack.Screen
         name="legal/privacy-center"
         options={{ headerShown: true, title: 'Privacy & legal' }}
@@ -145,6 +149,33 @@ function RootNavigator() {
         name="run/manual"
         options={{ headerShown: true, presentation: 'modal', title: 'Enter a run' }}
       />
+      <Stack.Screen name="recent" options={{ headerShown: true, title: 'Recent workouts' }} />
+      <Stack.Screen name="stats" options={{ headerShown: true, title: 'All stats' }} />
+      <Stack.Screen name="trophies" options={{ headerShown: true, title: 'Trophies and badges' }} />
+      <Stack.Screen name="leaderboard" options={{ headerShown: true, title: 'Leaderboard' }} />
+      <Stack.Screen name="find-friends" options={{ headerShown: true, title: 'Find friends' }} />
+      <Stack.Screen
+        name="nutrition/add"
+        options={{ headerShown: true, presentation: 'modal', title: 'Add food' }}
+      />
+      <Stack.Screen
+        name="nutrition/quick"
+        options={{ headerShown: true, presentation: 'modal', title: 'Quick add' }}
+      />
+      <Stack.Screen
+        name="nutrition/food-edit"
+        options={{ headerShown: true, presentation: 'modal', title: 'Food' }}
+      />
+      <Stack.Screen
+        name="nutrition/recipe"
+        options={{ headerShown: true, presentation: 'modal', title: 'Recipe' }}
+      />
+      <Stack.Screen name="nutrition/goals" options={{ headerShown: true, title: 'Goals' }} />
+      <Stack.Screen name="nutrition/weight" options={{ headerShown: true, title: 'Weight' }} />
+      <Stack.Screen name="nutrition/reports" options={{ headerShown: true, title: 'Nutrition reports' }} />
+      <Stack.Screen name="nutrition/settings" options={{ headerShown: true, title: 'Diary settings' }} />
+      {/* The camera fills the screen; its own Close button leaves. */}
+      <Stack.Screen name="nutrition/scan" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen
         name="share/workout/[id]"
         options={{ headerShown: true, presentation: 'modal', title: 'Share workout' }}

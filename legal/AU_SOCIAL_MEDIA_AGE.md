@@ -36,8 +36,8 @@ health of end-users".
 |---|---|---|
 | 1. Social interaction a significant purpose | Friends, a feed of friends' session summaries, reactions, a friends-only leaderboard. All optional: nobody is visible until they choose a username and accept a friend, and every other feature works without friends. | Arguable. Treated as met, to be safe. |
 | 2. Link to or interact with others | Friend requests, reactions. | Yes |
-| 3. Post material | Session summaries go to accepted friends' feeds. People also type usernames, display names and names of exercises and gyms that friends can see. | Yes |
-| 4. Recommender or account-only feature | **Feedback feature: yes.** A user sees how many reactions each post got. **Endless feed: no.** The feed loads one page of friends' posts and stops; nothing loads as you scroll. **Time-limited posts: no.** **Recommender: probably not.** The feed shows accepted friends' posts newest first, and nothing is picked by interest or engagement. A broad reading could still count "posts from your friends" as selection by account information. | Yes, through the feedback feature |
+| 3. Post material | Session summaries go to accepted friends' feeds and, from 1.2, the person's profile, which only those friends can open. People also type usernames, display names and names of workouts, activities, runs and custom exercises that friends can see. | Yes |
+| 4. Recommender or account-only feature | **Feedback feature: yes.** A user sees how many reactions each post got. **Endless feed: no.** The feed loads one page of friends' posts and stops; nothing loads as you scroll. The grid on a friend's profile does the same. **Time-limited posts: no.** A blue ring for training today, or a gold one for a record today, around the circle with someone's initial goes at midnight, but it isn't a post, and the session itself stays. **Recommender: probably not.** The feed shows accepted friends' posts newest first, and nothing is picked by interest or engagement. A broad reading could still count "posts from your friends" as selection by account information. | Yes, through the feedback feature |
 
 So conditions 1 to 4 may all be met, and the answer rests on the health
 exclusion.
@@ -87,6 +87,43 @@ and its minimum age in Australia stays 13.
   accounts and asks once when someone accepts their first friend.
 - **Not tested.** eSafety's November 2025 lists don't include any fitness app
   either way.
+- **The Friends tab now looks more like a photo-sharing app.** See the
+  reassessment below.
+
+## Reassessed November 8, 2026, for the 1.2 Friends redesign
+
+Version 1.2 redraws the Friends tab:
+- a row of friends across the top, with a blue ring for who trained today and a
+  gold one for a record today;
+- large full-width posts with a graphic made from the session;
+- double-tapping a post to react;
+- a grid of a friend's sessions on their profile, one page of 30 and no more;
+- a count of accepted friends on that profile, visible only to those friends;
+- a podium on the leaderboard.
+
+Most of this isn't on the "what would change the answer" list below. There are
+still no public profiles or posts, comments, direct messages, photos or video,
+recommendations or endless feed, and no new kind of data is posted or collected:
+every number on a post was already in the session summary.
+
+Three things are close enough to record:
+- **The friend count.** It isn't a follower count as the list means it: friending
+  takes both people's agreement, nobody can follow anyone, and only accepted
+  friends can see it. It is still a visible number of connections, which it wasn't
+  before.
+- **The order of the row.** It puts people with a ring first and records before
+  the rest. That is sorted by what they did today, not by interest or engagement,
+  and it only reorders people the viewer already accepted, so it doesn't change
+  the recommender answer above. A broad reading of "recommender" is still possible.
+- **The grid.** It gathers one person's sessions in one place. A friend could
+  already fetch them, but the app now makes it easy to look back through someone's
+  training.
+
+The honest weak point is the look. The explanatory statement asks about the
+experience of end-users, and a feed designed to be more engaging moves that
+experience toward the social side, even though it shares no data it didn't share
+before. The primary purpose is still each person's own training, so the conclusion
+above stands, but with less margin than it had.
 
 ## What would change the answer
 
