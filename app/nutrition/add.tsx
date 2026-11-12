@@ -27,7 +27,7 @@ import { hasFeature } from '@/domain/entitlements';
 import { energyUnitLabel, formatEnergy, mealNamesFor, SOURCE_LABELS } from '@/domain/nutrition/diary';
 import { copyEntries, entryFromFood, MAX_MEALS, type DiaryEntry } from '@/domain/nutrition/entries';
 import { formatAmount, type Food } from '@/domain/nutrition/foods';
-import { frequentFoods, recentFoods } from '@/domain/nutrition/history';
+import { foodKey, frequentFoods, recentFoods } from '@/domain/nutrition/history';
 import { entriesFromSavedMeal, savedMealTotal, type SavedMeal } from '@/domain/nutrition/savedMeals';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
@@ -41,6 +41,12 @@ const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Frequent foods count the last 30 days. */
 const FREQUENT_DAYS = 30;
+
+/**
+ * What a Recent or Frequent row's tick follows. Not the entry's id: logging it
+ * puts a new entry at the head of the list, and the row then shows that one.
+ */
+const historyKey = (entry: DiaryEntry) => foodKey(entry) ?? entry.id;
 
 /** What was tapped: a food to load by id or barcode, maybe with last time's amount. */
 interface Picked {
@@ -102,7 +108,7 @@ function AddFood() {
 
   const logAgain = (entry: DiaryEntry) => {
     log(copyEntries([entry], { day, meal, loggedAt: new Date().toISOString() }, newId));
-    setAdded((prev) => new Set(prev).add(entry.id));
+    setAdded((prev) => new Set(prev).add(historyKey(entry)));
   };
 
   const logMeal = (saved: SavedMeal) => {
@@ -312,14 +318,14 @@ function AddFood() {
                   </Pressable>
                   <Pressable
                     onPress={() => logAgain(entry)}
-                    disabled={added.has(entry.id)}
+                    disabled={added.has(historyKey(entry))}
                     hitSlop={8}
                     style={styles.plus}
                     accessibilityRole="button"
-                    accessibilityLabel={added.has(entry.id) ? `${entry.name} added` : `Log ${entry.name} again, same amount`}
+                    accessibilityLabel={added.has(historyKey(entry)) ? `${entry.name} added` : `Log ${entry.name} again, same amount`}
                   >
-                    <Text style={[styles.plusText, added.has(entry.id) && styles.plusDone]}>
-                      {added.has(entry.id) ? '✓' : '+'}
+                    <Text style={[styles.plusText, added.has(historyKey(entry)) && styles.plusDone]}>
+                      {added.has(historyKey(entry)) ? '✓' : '+'}
                     </Text>
                   </Pressable>
                 </View>
@@ -331,8 +337,12 @@ function AddFood() {
 
       {picked ? (
         <FoodAmountSheet
-          // A fresh sheet once the food has loaded, so its unit and amount start from the food.
-          key={`${picked.foodId ?? picked.barcode}:${food ? 'ready' : 'loading'}`}
+          // One sheet per food, loaded or not. The form inside only appears once
+          // the food has, so its unit and amount still start from the food. Changing
+          // this key when the food arrived swapped one native modal for another in a
+          // single update, and iOS refuses the second while the first is moving: the
+          // sheet vanished or froze on the first tap of a food that wasn't cached yet.
+          key={picked.foodId ?? picked.barcode ?? 'none'}
           visible
           food={food}
           loading={loadingFood}

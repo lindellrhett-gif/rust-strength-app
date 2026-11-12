@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { HelpButton } from './HelpButton';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -13,12 +14,15 @@ export function MiniStat({
   value,
   label,
   spoken,
+  help,
   onPress,
 }: {
   value: string;
   label: string;
   /** For VoiceOver, when "value label" alone wouldn't say what it means. */
   spoken?: string;
+  /** A ? in the corner, for a number that needs saying what it means. */
+  help?: { title: string; body: string };
   onPress?: () => void;
 }) {
   const accessibilityLabel = spoken ?? `${value} ${label}`;
@@ -34,8 +38,16 @@ export function MiniStat({
   );
   if (!onPress) {
     return (
-      <View style={styles.tile} accessible accessibilityLabel={accessibilityLabel}>
-        {body}
+      <View style={styles.tile}>
+        {/* Apart from the ?, or VoiceOver couldn't reach it. */}
+        <View style={styles.words} accessible accessibilityLabel={accessibilityLabel}>
+          {body}
+        </View>
+        {help ? (
+          <View style={styles.help}>
+            <HelpButton title={help.title} body={help.body} />
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -62,6 +74,8 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
+  words: { gap: 2 },
+  help: { position: 'absolute', top: spacing.xs, right: spacing.xs },
   pressed: { backgroundColor: colors.surfaceRaised },
   value: { color: colors.text, fontSize: 20, fontWeight: '800' },
 });

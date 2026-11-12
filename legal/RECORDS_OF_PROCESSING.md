@@ -515,7 +515,10 @@ here; each is an action in 2.9.
    project.
 2. **Personal bests reveal bodyweight (R3).** `rpc_friend_prs` (0008) returns
    `max(sets.weight)` per exercise; for bodyweight and assisted exercises that
-   number includes the person's bodyweight.
+   number includes the person's bodyweight. **Decided November 11, 2026:** friends
+   get BW, the reps and no weight on those exercises, and a level's strength
+   figure comes as one total (`0037_friend_bests_bodyweight.sql`, applied on
+   1.2's release day with 0034).
 3. **The Privacy Policy's provider table understates Gmail.** Section 5 of
    `src/legal/privacy.ts` says Gmail "sends password reset emails" only.
    Section 1 and `legal/LEGAL_AUDIT.md` say it also sends sign-up
@@ -590,7 +593,7 @@ This conclusion has not been reviewed by a lawyer.
 | # | Action | Risk or reason |
 |---|---|---|
 | A8 | Stop other people reading the whole profile row. For example: limit the `profiles` select policy to your own row, and give friends and requesters the username and display name through a `SECURITY DEFINER` function or a narrow view. Add a test that checks columns, not just rows | R2 (high) |
-| A9 | Decide how to handle personal bests on bodyweight and assisted exercises: return only the added weight (or reps) to friends, or say in the Privacy Policy that these figures include bodyweight | R3 |
+| A9 | Personal bests on bodyweight and assisted exercises: friends get BW and the reps, never a weight (0037, release day). Decided November 11, 2026 | R3 |
 | A10 | Add the missing tables to `rpc_export_my_data` (finding 4) | Rights |
 | A11 | Turn on two-factor sign-in everywhere `legal/PRIVACY_REQUESTS.md` lists, and confirm it | R1 |
 
