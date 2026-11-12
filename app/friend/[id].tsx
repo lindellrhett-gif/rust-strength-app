@@ -32,6 +32,7 @@ import { evaluateAchievements, totalTiersEarned } from '@/domain/achievements';
 import { evaluateBadges } from '@/domain/badges';
 import { formatDurationShort } from '@/domain/duration';
 import type { ReactionId } from '@/domain/feed';
+import { friendDataUnit, friendVolume } from '@/domain/friendProfile';
 import { MUSCLE_GROUPS } from '@/domain/stats';
 import { computeXp, levelProgress, strengthScore } from '@/domain/xp';
 import { compact } from '@/lib/format';
@@ -51,6 +52,7 @@ export default function FriendProfile() {
   const react = useReact();
 
   const unit = me.data?.unit ?? 'lb';
+  const theirUnit = friendDataUnit(stats.data?.unit, unit);
   const router = useRouter();
   const report = useReportUser();
   const block = useBlockUser();
@@ -81,15 +83,15 @@ export default function FriendProfile() {
       activityKinds: stats.data.activityKinds,
       bestWeightByExercise: prs.data?.bestWeight ?? {},
       bestRepsByExercise: prs.data?.bestReps ?? {},
-      // A friend's numbers are stored in their own unit; we render in ours,
-      // which is the same assumption the rest of this screen already makes.
-      unit,
+      // Their numbers in their unit, as their own phone scores them. This screen
+      // shows tiers from these, not the weights, so no weight appears in their unit.
+      unit: theirUnit,
       runDistanceM: stats.data.runDistanceM,
       stepsTotal: stats.data.stepsTotal,
       friendCount: stats.data.friendCount,
       reactionsReceived: stats.data.reactionsReceived,
     });
-  }, [stats.data, prs.data, unit]);
+  }, [stats.data, prs.data, theirUnit]);
 
   /**
    * Their level, worked out by the same code that works out yours, from the
@@ -106,10 +108,12 @@ export default function FriendProfile() {
       bestStreak: stats.data.bestStreak,
       friendCount: stats.data.friendCount,
       trophyTiers: totalTiersEarned(achievements),
-      strengthScore: strengthScore(prs.data?.bestE1rm ?? {}),
-      unit,
+      // One total from the server once 0037 is on, since a bodyweight exercise's
+      // own number no longer comes through; added up here before that.
+      strengthScore: stats.data.strengthScore ?? strengthScore(prs.data?.bestE1rm ?? {}),
+      unit: theirUnit,
     });
-  }, [stats.data, achievements, prs.data, unit]);
+  }, [stats.data, achievements, prs.data, theirUnit]);
 
   const level = xp ? levelProgress(xp.total) : null;
   const badges = evaluateBadges(level?.level ?? 1, badgeIds.data ?? []);
@@ -278,7 +282,10 @@ export default function FriendProfile() {
           <StatTile value={`${s.bestStreak}`} label="best streak" />
           <StatTile value={`${s.consistency30}%`} label="consistency (30d)" />
           <StatTile value={`${s.totalWorkouts}`} label="workouts" />
-          <StatTile value={compact(s.totalVolume)} label={`${unit} lifted`} />
+          <StatTile
+            value={compact(friendVolume(s.totalVolume, s.unit, unit))}
+            label={`${unit} lifted`}
+          />
           <StatTile value={formatDurationShort(s.totalSeconds)} label="time training" />
           <StatTile value={compact(s.totalReps)} label="reps" />
           <StatTile value={compact(s.totalSets)} label="sets" />

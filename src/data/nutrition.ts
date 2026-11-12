@@ -12,7 +12,8 @@
  */
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
+import { Alert } from 'react-native';
 
 import { kgFrom, type WeightUnit } from '@/domain/nutrition/body';
 import type { DiaryEntry } from '@/domain/nutrition/entries';
@@ -241,9 +242,19 @@ export function useFoodHistory() {
 export function useLogEntries() {
   const { userId } = useAuth();
   const client = useQueryClient();
+  const lastWarned = useRef(0);
   const mutation = useMutation({
     mutationKey: mk.logFood,
     mutationFn: insertDiaryEntryRow,
+    // The entry showed at once and the sheet has closed, so this is the only sign
+    // it didn't save. Waiting for a signal isn't an error; that write is held.
+    onError: () => {
+      // One message when a whole meal fails together.
+      const now = Date.now();
+      if (now - lastWarned.current < 5000) return;
+      lastWarned.current = now;
+      Alert.alert('Couldn’t save that', 'It didn’t reach your diary. Please add it again.');
+    },
     onSettled: (_d, _e, row) => {
       client.invalidateQueries({ queryKey: qk.diaryEntries(row.day) });
       client.invalidateQueries({ queryKey: ['diary', 'range'] });
