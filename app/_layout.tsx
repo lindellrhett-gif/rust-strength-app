@@ -12,7 +12,7 @@ import { OfflineBanner } from '@/components/OfflineBanner';
 import { registerMutationDefaults } from '@/data/mutationDefaults';
 import { useProfile } from '@/data/profile';
 import { tabTitle } from '@/domain/tabs';
-import { CACHE_MAX_AGE, persister, queryClient } from '@/lib/queryClient';
+import { persistOptions, queryClient, resumeRestoredWrites } from '@/lib/queryClient';
 import { startNetworkWatcher } from '@/lib/network';
 import {
   installNotificationHandler,
@@ -188,23 +188,13 @@ export default function RootLayout() {
         {/*
           The cache is restored from the phone before anything renders, so the
           app opens with your training visible even with no signal — and any
-          writes queued in a dead spot are picked back up here and replayed in
-          the order they were made.
+          writes queued in a dead spot are picked back up here. They are sent
+          all together, not one at a time in the order they were made.
         */}
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{
-            persister,
-            maxAge: CACHE_MAX_AGE,
-            // Only writes waiting on a connection are worth storing. A write
-            // that already landed, or one that failed outright, is not.
-            dehydrateOptions: {
-              shouldDehydrateMutation: (mutation) => mutation.state.isPaused,
-            },
-          }}
-          onSuccess={() => {
-            void queryClient.resumePausedMutations();
-          }}
+          persistOptions={persistOptions}
+          onSuccess={() => resumeRestoredWrites(queryClient)}
         >
           <AuthProvider>
             <StatusBar style="light" />

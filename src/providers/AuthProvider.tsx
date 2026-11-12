@@ -16,7 +16,7 @@ import { deviceUnits } from '@/lib/deviceUnits';
 import { persister, queryClient } from '@/lib/queryClient';
 import { LEGAL } from '@/legal/config';
 import { SignInCancelled, appleIdToken, googleIdToken, googleSignOut } from '@/lib/socialSignIn';
-import { supabase } from '@/lib/supabase';
+import { firstSession, supabase } from '@/lib/supabase';
 
 export interface SignUpConsent {
   /** The Terms / Privacy Policy version the user agreed to. */
@@ -82,12 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const recoveringRef = useRef(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+    void firstSession().then((first) => {
+      setSession(first);
       setInitializing(false);
     });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      // firstSession answers this one, and can tell a failed refresh from a sign-out.
+      if (event === 'INITIAL_SESSION') return;
       setSession(next);
     });
     return () => sub.subscription.unsubscribe();
@@ -109,12 +111,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    *
    * Keyed on the user id rather than on the event, so a routine token refresh
    * does not throw away data the user is looking at.
+   *
+   * Nothing is compared until the first session has resolved. `session` starts
+   * out null for everyone, so comparing from there makes every signed-in launch
+   * look like someone signing in, and that would throw away the sets queued in
+   * a dead spot and the cache that lets the app open with no signal.
    */
   const lastUserId = useRef<string | null | undefined>(undefined);
   useEffect(() => {
+    if (initializing) return;
     const id = session?.user.id ?? null;
     if (lastUserId.current === undefined) {
       lastUserId.current = id;
+      if (id) void discardRunsNotOwnedBy(id).catch(() => undefined);
       return;
     }
     if (lastUserId.current !== id) {
@@ -131,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // person's route never stays behind for the next person.
       if (id) void discardRunsNotOwnedBy(id).catch(() => undefined);
     }
-  }, [session]);
+  }, [session, initializing]);
 
   const value = useMemo<AuthState>(
     () => ({
