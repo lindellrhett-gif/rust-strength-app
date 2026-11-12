@@ -883,3 +883,34 @@ Also corrected in the same pass, in English and French:
 - **Profiling.** "No profiling" was broader than the app's calculations
   support.
 - **Share card route.** The run share card's route now starts off.
+
+### The grid on a friend's profile (0035, November 8, 2026)
+
+Shows the same
+session summaries a friend could already fetch from the feed, through one shared
+function, so the feed and the grid can't come to disagree about who may see what
+(`supabase/tests/friend-posts.test.mjs`). Nothing new is collected. The Privacy
+Policy now says summaries also appear on your profile, and
+`legal/AU_SOCIAL_MEDIA_AGE.md` records a reassessment of the redesigned Friends
+tab.
+
+Decided the same day: turning sharing on also shows sessions logged before it was
+on, as it always has. The first-friend question, the sharing help and the Privacy
+Policy say so. Sharing only later sessions would need a server-side cutoff.
+
+Applied to the live database November 8, 2026: 0030, 0035 and 0036. 0031 and 0034
+still wait for 1.2's release day.
+
+### Personal bests on bodyweight exercises (0037, November 11, 2026)
+
+A friend's best on a pull-up or an assisted dip was a number that included the
+person's bodyweight, against the Privacy Policy's "nobody can see your
+bodyweight". Decided: friends get BW and the reps, never a weight or an
+estimated max, on bodyweight and assisted exercises and on anything logged with
+the BW button. A level's strength XP comes from one server total instead, so a
+friend's level still matches. Tested in
+`supabase/tests/friend-bests-bodyweight.test.mjs`. Applied on release day with
+0034, which closes the other way bodyweight could be read.
+
+Still open: a feed post's total weight and reps. On a session of nothing but
+bodyweight sets, dividing one by the other gives the bodyweight.

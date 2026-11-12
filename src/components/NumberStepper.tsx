@@ -1,15 +1,8 @@
 import { useId, useState } from 'react';
-import {
-  InputAccessoryView,
-  Keyboard,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { KeyboardDoneBar } from './KeyboardDoneBar';
+import { parseInlineNumber } from '@/domain/inlineEdit';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -23,6 +16,8 @@ interface NumberStepperProps {
   /** Decimal places to display / allow. */
   precision?: number;
   suffix?: string;
+  /** Each keystroke, for a screen that can close before the field loses focus. */
+  onTyping?: (text: string) => void;
 }
 
 export function NumberStepper({
@@ -34,6 +29,7 @@ export function NumberStepper({
   max = Number.MAX_SAFE_INTEGER,
   precision = 0,
   suffix,
+  onTyping,
 }: NumberStepperProps) {
   const [draft, setDraft] = useState<string | null>(null);
   // Each stepper gets its own accessory bar, so one inside a modal still finds
@@ -47,11 +43,9 @@ export function NumberStepper({
   const bump = (dir: 1 | -1) => onChange(round(clamp(value + dir * step)));
 
   const commit = () => {
-    const parsed = Number(draft);
+    const parsed = draft == null ? null : parseInlineNumber(draft, { min, max, precision });
     setDraft(null);
-    if (draft != null && draft.trim() !== '' && Number.isFinite(parsed)) {
-      onChange(round(clamp(parsed)));
-    }
+    if (parsed != null) onChange(parsed);
   };
 
   return (
@@ -70,7 +64,10 @@ export function NumberStepper({
         <View style={styles.valueBox}>
           <TextInput
             value={display}
-            onChangeText={setDraft}
+            onChangeText={(typed) => {
+              setDraft(typed);
+              onTyping?.(typed);
+            }}
             onFocus={() => setDraft(String(round(value)))}
             onEndEditing={commit}
             onBlur={commit}
@@ -80,21 +77,7 @@ export function NumberStepper({
             inputAccessoryViewID={Platform.OS === 'ios' ? accessoryId : undefined}
             accessibilityLabel={label}
           />
-          {Platform.OS === 'ios' ? (
-            // The iOS number pad has no return key. Without this bar the only
-            // way to put the keyboard away is to find something else to tap.
-            <InputAccessoryView nativeID={accessoryId}>
-              <View style={styles.accessory}>
-                <Pressable
-                  onPress={() => Keyboard.dismiss()}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                >
-                  <Text style={styles.accessoryDone}>Done</Text>
-                </Pressable>
-              </View>
-            </InputAccessoryView>
-          ) : null}
+          <KeyboardDoneBar nativeID={accessoryId} />
           {suffix ? <Text style={styles.suffix}>{suffix}</Text> : null}
         </View>
 
@@ -145,14 +128,4 @@ const styles = StyleSheet.create({
     minWidth: 60,
   },
   suffix: { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
-  accessory: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surfaceRaised,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-  },
-  accessoryDone: { color: colors.primary, fontSize: 16, fontWeight: '700' },
 });

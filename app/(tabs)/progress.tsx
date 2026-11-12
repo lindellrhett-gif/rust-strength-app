@@ -6,13 +6,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { keyboardAware } from '@/components/keyboard';
 import { CalendarSection } from '@/components/progress/CalendarSection';
-import { StatsSection } from '@/components/progress/StatsSection';
+import { ProgressHeadline, ProgressTiles, TopRecords } from '@/components/progress/ProgressSummary';
+import { settledOrAfter } from '@/lib/pullRefresh';
 import { colors } from '@/theme/colors';
 import { radius, spacing } from '@/theme/typography';
 
 /**
- * Progress: the calendar and the chosen day, the way into every recent
- * workout, then the stats. Calendar and Stats were separate tabs before 1.2.
+ * Progress: three headline numbers, the calendar and the chosen day, the way
+ * into every recent workout, your best lifts, then running and food. Every other
+ * number is under All stats. Calendar and Stats were separate tabs before 1.2.
  */
 export default function Progress() {
   const router = useRouter();
@@ -22,7 +24,7 @@ export default function Progress() {
   // Pull to refresh fetches what's on this screen again, and nothing else.
   const refresh = async () => {
     setRefreshing(true);
-    await client.refetchQueries({ type: 'active' }).catch(() => undefined);
+    await settledOrAfter(client.refetchQueries({ type: 'active' }));
     setRefreshing(false);
   };
 
@@ -35,6 +37,8 @@ export default function Progress() {
           <RefreshControl tintColor={colors.textMuted} refreshing={refreshing} onRefresh={() => void refresh()} />
         }
       >
+        <ProgressHeadline />
+
         <CalendarSection />
 
         <Pressable
@@ -46,7 +50,8 @@ export default function Progress() {
           <Text style={styles.chev}>›</Text>
         </Pressable>
 
-        <StatsSection />
+        <TopRecords />
+        <ProgressTiles />
       </ScrollView>
     </SafeAreaView>
   );

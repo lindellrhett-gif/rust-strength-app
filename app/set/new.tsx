@@ -23,6 +23,7 @@ import {
   useSetsForWorkout,
 } from '@/data/sets';
 import { useWorkoutExercises } from '@/data/templates';
+import { parseInlineNumber } from '@/domain/inlineEdit';
 import {
   asLoadType,
   assistProblem,
@@ -908,6 +909,11 @@ function BodyweightPrompt({ unit }: { unit: string }) {
         label={`Bodyweight (${unit})`}
         value={value}
         onChange={setValue}
+        // Save can be tapped with the keyboard still up, before the field reports.
+        onTyping={(typed) => {
+          const n = parseInlineNumber(typed, { min: 1, max: 1000, precision: 1 });
+          if (n != null) setValue(n);
+        }}
         step={unit === 'kg' ? 0.5 : 1}
         precision={1}
         min={1}

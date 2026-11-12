@@ -9,15 +9,21 @@ import { todayLocal } from '@/lib/dates';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
 
-/** The last seven days of food on the Progress tab, and the way into the reports. Shown only with access. */
-export function NutritionStatsCard() {
-  const router = useRouter();
+/** The last seven days of food, shared by the card here and the tile on Progress. */
+export function useWeekFood() {
   const today = todayLocal();
   const from = rangeStart('week', today);
   const entries = useDiaryRange(from, today);
   const goals = useNutritionGoals();
   const unit = (useNutritionSettings().data ?? nutritionDefaults()).energyUnit;
   const summary = reportSummary(reportDays(entries.data ?? [], goals.data ?? [], from, today));
+  return { summary, unit };
+}
+
+/** The last seven days of food under All stats, and the way into the reports. Shown only with access. */
+export function NutritionStatsCard() {
+  const router = useRouter();
+  const { summary, unit } = useWeekFood();
 
   const words =
     summary.averageKcal == null

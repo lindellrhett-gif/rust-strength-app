@@ -31,6 +31,11 @@ None of these can be settled from the code, and some block the rest:
   November 6, 2026: no goal under 800 kcal saved; under 18, no weight-loss
   goal, no calorie number of their own and no goal weight below today's; the
   calorie floor (1,200, or 1,500 for male) as a warning, not a block.
+- [ ] **Give the demo account a friend**, on a second account you control, with
+  sharing on and a few sessions logged, including a record and a run with a shared
+  map. App Review checks Report and Block, which are only on a friend's profile,
+  and without a friend the feed, grid and podium are empty. The review notes say
+  the account has one.
 - [x] **The demo account has Pro** (decided November 6, 2026): grant it in
   RevenueCat once the App Store app is set up (SUBSCRIPTIONS.md, step 3).
 
@@ -92,12 +97,23 @@ None of these can be settled from the code, and some block the rest:
     names until people update.
 - [ ] **Live database, for the other countries** (store/INTERNATIONAL.md).
   Needs your OK to apply each one to the live database:
-  - [ ] `0030_share_choice.sql`, before testing a 1.2 build. Additive: it adds
+  - [x] `0030_share_choice.sql` (applied November 8, 2026, with your OK). Additive: it adds
     `profiles.share_choice_at` and marks everyone who has sharing off today
     as having chosen. Without it the first-friend question never shows.
   - [ ] `0031_private_sharing_default.sql` waits for **release day** (section
     4): it makes sharing start off for new accounts, and 1.1 has no question
     to turn it back on.
+  - [x] `0035_friend_posts.sql` (applied November 8, 2026, with your OK; the live body matched `0024`). Additive: it adds
+    the function behind the grid on a friend's profile, and the unit each
+    post's volume is in. It replaces `rpc_friend_feed` with the same rules, so
+    compare the live body's md5 with `0024` first. Without it the grid fills
+    from the feed instead, and a kg lifter's volume isn't converted.
+  - [x] `0036_friend_stats_unit.sql` (applied November 8, 2026, with your OK; the live body matched `0024`). Additive: it
+    adds the unit a friend logs in to the end of `rpc_friend_stats`. It replaces
+    that function with the same rules, so compare the live body's md5 with `0024`
+    first (`25d3743a022d65d94ef79fa266b95304` with LF line endings, matched on
+    November 8). Without it a friend's total, trophies and level stay
+    unconverted.
 - [ ] **Fill in the postal address** (`postalAddress` in `src/legal/config.ts`).
   New Zealand's privacy law requires it, and `npm run legal` refuses to
   publish the site while it is a placeholder.
@@ -135,7 +151,8 @@ None of these can be settled from the code, and some block the rest:
         save. Split by meal shows each meal's share in the diary.
   - [ ] Water, weigh-ins and the trend. After a weigh-in, Profile shows the
         same bodyweight.
-  - [ ] Reports for 7 days, 30 days and 12 weeks, and the food card on Progress.
+  - [ ] Reports for 7 days, 30 days and 12 weeks, the food tile on Progress, and
+        the food card under All stats.
   - [ ] Settings: rename a meal, add one, remove the last one; net carbs;
         exercise on and off (only runs and activities add calories).
   - [ ] With subscriptions on and a sandbox account: the Today card and the
@@ -150,18 +167,58 @@ None of these can be settled from the code, and some block the rest:
         Australia, the diary shows kJ until you choose otherwise, and still
         does after renaming a meal. Put both settings back afterwards.
   - [ ] Sign in with Apple and Google: the list in SIGN_IN.md, section 4.
-  - [ ] Today's tiles: consistency matches Friends > your profile; steps show
+  - [ ] Today's tiles: consistency matches Friends > Leaderboard; steps show
         out of 10k with a bar, and tapping them changes the goal (also in
-        Profile > Steps); calories left match the Food tab, and say "eaten"
+        Profile > Daily step goal); calories left match the Food tab, and say "eaten"
         with no goal and "over" past it; the streak shows the flame. On a
         phone where steps are off, the tile says Off and opens Settings.
+  - [ ] Profile: tap Bodyweight, each end of Rep range and Daily step goal,
+        and type over the number where it sits. Done on the keyboard saves it,
+        and it is still there after closing and reopening the app. Clearing
+        Bodyweight clears it; clearing the others keeps the old number. Typing
+        a low end above the high end moves the high end up. A step goal of
+        7,777 becomes 8,000. Each ? opens its help and closes again.
+  - [ ] Profile > Share daily steps: turning it off asks first and says what it
+        deletes; Cancel leaves it on.
+  - [ ] Profile > Rest timer, Usual equipment and Username open their sheets;
+        Trophies and badges opens its page; tapping the header shows the XP
+        sheet. With subscriptions on, Rust Strength Pro opens its sheet.
+  - [ ] Progress: the three numbers match All stats; the calendar's ? shows the
+        colour key; Plan and Rest day work for today and later and are gone for
+        a past day; the top three records open their charts; See all and All
+        stats open the full page; the Running and food tiles open their screens.
+  - [ ] Friends tab, with a friend who has posted: the row across the top starts
+        with You, then whoever trained today with a blue ring (gold for a new
+        record), then everyone else. Tapping a person opens their profile; You
+        opens Profile. A post's graphic is gold for a record, shows the route on
+        a run with a shared map and never on one without. Double-tapping a post
+        with no reaction of yours adds On fire and shows a flame; doing it again
+        changes nothing. The four reaction buttons still add, change and clear,
+        each showing its own count. A friend logging in kg shows converted to
+        your unit (needs 0035).
+  - [ ] Friends > trophy icon: the top three stand on the podium, second, first,
+        third, with the others listed under them. Both pills change the board,
+        Streak and Consistency have no period, the ? explains each figure, and
+        with no friends it offers Find friends.
+  - [ ] Friends > person icon: search from 3 characters, Add, requests with a number on the icon,
+        Accept and Decline, Cancel on a sent request, press and hold to remove a
+        friend. Back on the Friends tab, a first accepted friend brings up the
+        sharing question.
+  - [ ] A friend's profile: their sessions in a grid of three across; tapping one
+        opens it with working reactions. A friend with sharing off shows "No
+        shared sessions." Stats, trophies and badges opens everything else. The
+        ... button offers Report and Block, and both work.
+  - [ ] Food > add: tap a food you haven't opened recently. The amount sheet stays
+        open and shows the food, first time, from search, Recent and My foods, on
+        Wi-Fi and on a weak signal. Adding it closes both and the entry shows in the
+        diary. The + on a Recent or Frequent row turns into a tick and logs it once.
   - [ ] Today fits on one screen without scrolling: the tiles, Start
         workout with Generate, Presets, Start a run and Log activity two to a
         row, and the body chart filling the rest. With a plan for today or on
         a small phone it may scroll a little; the chart never overlaps.
   - [ ] Progress: the calendar and chosen day work as the old Calendar did,
         Recent workouts lists everything newest first and opens workouts and
-        runs, and the stats below match the old Stats tab. Pull to refresh.
+        runs, and All stats matches the old Stats tab. Pull to refresh.
   - [ ] Food tab: the diary as before, and Add food comes back to it. Paging
         between days shows no duplicate-key error in the dev server.
   - [ ] Logging a set: the suggestion shows only the set (say "230 × 6–8")
@@ -186,6 +243,9 @@ None of these can be settled from the code, and some block the rest:
         "Share" turns on "Show my sessions in the feed" in Profile. Turning
         the Profile switch off and on never brings the question back.
   - [ ] A run's share card starts with "Show the route" off.
+  - [ ] A friend who logs in the other unit: "lifted" shows their total converted
+        to your unit, and their level and trophies match their own phone (needs
+        0036).
   - [ ] A quick pass through lifting, running and friends.
 
 ## 2. The release build
@@ -273,6 +333,9 @@ None of these can be settled from the code, and some block the rest:
 - [ ] Release the version in App Store Connect.
 - [ ] **Apply `0031_private_sharing_default.sql`** to the live database (needs
   your OK), once 1.2 is live: new accounts then start with sharing off.
+- [ ] **Apply `0037_friend_bests_bodyweight.sql`** (needs your OK), together
+  with 0034: friends then get BW, not a weight, on bodyweight exercises. Check a
+  friend's level on 1.2 still matches their own phone.
 - [ ] **Apply `0034_profiles_owner_only.sql`** (needs your OK), once 1.2 is
   live: nobody can read anyone else's profile row any more. Check the Friends
   list on 1.2 still shows names afterwards.

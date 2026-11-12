@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, AppState, Linking, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { HelpButton } from './HelpButton';
 import type { AlertPermission } from '@/domain/restAlert';
 import {
   getAlertPermission,
@@ -85,10 +86,10 @@ export function RestAlertToggle() {
       <View style={styles.row}>
         <View style={styles.label}>
           <Text style={text.body}>Alert when rest is over</Text>
-          <Text style={text.caption}>
-            A notification when the timer ends, so you hear it with the phone locked or in another
-            app. It is set on your phone and nothing is sent anywhere.
-          </Text>
+          <HelpButton
+            title="Alert when rest is over"
+            body="A notification when the timer ends, so you hear it with the phone locked or in another app. It is set on your phone and nothing is sent anywhere."
+          />
         </View>
         <Switch
           value={on}
@@ -117,6 +118,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
   },
-  label: { flex: 1, gap: 2 },
+  label: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   warning: { ...text.caption, color: colors.warning },
 });

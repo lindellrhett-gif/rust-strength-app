@@ -33,9 +33,10 @@ export function SharePrompt() {
   return (
     <Card title="Share your sessions with friends?" style={styles.card}>
       <Text style={text.bodyMuted}>
-        Friends you have accepted would see a summary of each workout and activity in their feed: its
-        name, time, volume and which exercises you did. Never individual sets, and never your food
-        diary. You can change this any time in Profile, under Sharing with friends.
+        Friends you have accepted would see a summary of each workout and activity, including ones
+        you have already logged, in their feed and on your profile: its name, time, volume, sets,
+        reps, records and which exercises you did. Never individual sets, and never your food diary.
+        You can change this any time in Profile, under Sharing with friends.
       </Text>
       <View style={styles.row}>
         <Button

@@ -7,8 +7,10 @@ import {
   formatMetric,
   metricNote,
   periodSince,
+  podiumOrder,
   rankLeaderboard,
   type LeaderboardPerson,
+  type LeaderboardRow,
 } from '../src/domain/leaderboard';
 
 const person = (over: Partial<LeaderboardPerson>): LeaderboardPerson => ({
@@ -198,5 +200,54 @@ describe('run distance and steps boards', () => {
     expect(rows.map((r) => r.person.username)).toEqual(['a', 'c']);
     expect(formatMetric(42_000, 'steps', 'lb')).toBe('42k');
     expect(metricNote('steps', 'week')).toMatch(/share their daily steps/);
+  });
+});
+
+describe('podiumOrder', () => {
+  const row = (rank: number, username: string, value = 10): LeaderboardRow => ({
+    rank,
+    value,
+    person: {
+      userId: username,
+      username,
+      displayName: null,
+      unit: 'lb',
+      isMe: false,
+      totalVolume: 0,
+      workoutSeconds: 0,
+      activitySeconds: 0,
+      currentStreak: 0,
+      consistency: 0,
+      runDistanceM: 0,
+      steps: null,
+    },
+  });
+  const order = (rows: LeaderboardRow[]) =>
+    podiumOrder(rows).map((s) => [s.row.person.username, s.place]);
+
+  it('stands the top three second, first, third', () => {
+    expect(order([row(1, 'a'), row(2, 'b'), row(3, 'c'), row(4, 'd')])).toEqual([
+      ['b', 2],
+      ['a', 1],
+      ['c', 3],
+    ]);
+  });
+
+  it('copes with one or two people', () => {
+    expect(order([row(1, 'a')])).toEqual([['a', 1]]);
+    expect(order([row(1, 'a'), row(2, 'b')])).toEqual([
+      ['b', 2],
+      ['a', 1],
+    ]);
+  });
+
+  it('copes with nobody', () => {
+    expect(order([])).toEqual([]);
+  });
+
+  it('keeps a shared rank, whatever block they stand on', () => {
+    const spots = podiumOrder([row(1, 'a'), row(1, 'b'), row(3, 'c')]);
+    expect(spots.map((s) => s.row.rank)).toEqual([1, 1, 3]);
+    expect(spots.map((s) => s.place)).toEqual([2, 1, 3]);
   });
 });

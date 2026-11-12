@@ -7,7 +7,7 @@ import {
   buildFeed,
   isReactionId,
   postHeadline,
-  postStats,
+  postPoster,
   postTitle,
   relativeTime,
   routeFrom,
@@ -89,7 +89,7 @@ describe('postHeadline', () => {
   it('leads with personal records', () => {
     expect(postHeadline(row({ recordCount: 1 }))).toBe('New personal record');
     expect(postHeadline(row({ recordCount: 2 }))).toBe('Two personal records');
-    expect(postHeadline(row({ recordCount: 4 }))).toBe('4 personal records — huge session');
+    expect(postHeadline(row({ recordCount: 4 }))).toBe('4 personal records');
   });
 
   it('calls out a big session when there were no records', () => {
@@ -100,9 +100,9 @@ describe('postHeadline', () => {
     expect(postHeadline(row({ totalSets: 9 }))).toBeNull();
   });
 
-  it('shows distance for an activity that has one', () => {
+  it('leaves an activity’s distance to the big number', () => {
     const post = row({ subjectType: 'activity', distance: 3.107, distanceUnit: 'mi' });
-    expect(postHeadline(post)).toBe('3.11 mi');
+    expect(postHeadline(post)).toBeNull();
   });
 
   it('says nothing for an activity logged without distance', () => {
@@ -110,48 +110,110 @@ describe('postHeadline', () => {
   });
 });
 
-describe('postStats', () => {
-  it('reports time, volume, sets and reps for a workout', () => {
-    const stats = postStats(
-      row({ durationSeconds: 3_600, volume: 12_500, totalSets: 18, totalReps: 150 }),
+describe('postPoster', () => {
+  it('makes a workout’s total weight the big number', () => {
+    const poster = postPoster(
+      row({ name: 'Push day', durationSeconds: 3_900, volume: 18_450, totalSets: 18, totalReps: 150 }),
       'lb',
     );
-    expect(stats.map((s) => s.label)).toEqual(['time', 'lb moved', 'sets', 'reps']);
-    expect(stats[1].value).toBe('12,500');
+    expect(poster.tone).toBe('lift');
+    expect(poster.title).toBe('Push day');
+    expect(poster.hero).toBe('18,450 lb');
+    expect(poster.details).toEqual(['1h 5m', '18 sets', '150 reps']);
+    expect(poster.tile.value).toBe('18.4k');
   });
 
   it('labels volume in the viewer’s own unit', () => {
-    expect(postStats(row({ volume: 500 }), 'kg')[0].label).toBe('kg moved');
+    expect(postPoster(row({ volume: 500 }), 'kg').hero).toBe('500 kg');
   });
 
-  it('leaves out numbers a session does not have', () => {
-    expect(postStats(row(), 'lb')).toHaveLength(0);
+  it('converts a volume logged in another unit', () => {
+    expect(postPoster(row({ volume: 1000, authorUnit: 'kg' }), 'lb').hero).toBe('2,205 lb');
+    expect(postPoster(row({ volume: 2205, authorUnit: 'lb' }), 'kg').hero).toBe('1,000 kg');
+    expect(postPoster(row({ volume: 1000, authorUnit: 'kg' }), 'kg').hero).toBe('1,000 kg');
   });
 
-  it('reports distance rather than volume for an activity', () => {
-    const stats = postStats(
+  it('takes the viewer’s unit when the author’s isn’t known', () => {
+    expect(postPoster(row({ volume: 1000, authorUnit: null }), 'kg').hero).toBe('1,000 kg');
+  });
+
+  it('turns gold for a personal record and says so', () => {
+    const poster = postPoster(row({ volume: 1000, recordCount: 2 }), 'lb');
+    expect(poster.tone).toBe('record');
+    expect(poster.eyebrow).toBe('Two personal records');
+    expect(poster.tile.value).toBe('2 PRs');
+  });
+
+  it('says one record in the singular', () => {
+    expect(postPoster(row({ recordCount: 1 }), 'lb').tile.value).toBe('1 PR');
+  });
+
+  it('falls back to reps, then time, when no weight was lifted', () => {
+    const reps = postPoster(row({ totalReps: 40, totalSets: 4, durationSeconds: 600 }), 'lb');
+    expect(reps.hero).toBe('40 reps');
+    expect(reps.details).toEqual(['10m', '4 sets']);
+    const time = postPoster(row({ durationSeconds: 600 }), 'lb');
+    expect(time.hero).toBe('10m');
+    expect(time.details).toEqual([]);
+  });
+
+  it('still has something to say about an empty session', () => {
+    expect(postPoster(row(), 'lb').hero).toBe('0 sets');
+  });
+
+  it('uses singular words for one set and one rep', () => {
+    expect(postPoster(row({ volume: 100, totalSets: 1, totalReps: 1 }), 'lb').details).toEqual(['1 set', '1 rep']);
+  });
+
+  it('shortens big numbers for the grid', () => {
+    const tile = (volume: number) => postPoster(row({ volume }), 'lb').tile.value;
+    expect(tile(950)).toBe('950');
+    expect(tile(14_120)).toBe('14.1k');
+    expect(tile(2_000)).toBe('2k');
+    expect(tile(123_456)).toBe('123k');
+    expect(tile(1_250_000)).toBe('1.3M');
+  });
+
+  it('gives an activity with no distance its time', () => {
+    const poster = postPoster(row({ subjectType: 'activity', activityKind: 'yoga', durationSeconds: 2_700 }), 'lb');
+    expect(poster.tone).toBe('activity');
+    expect(poster.title).toBe('Yoga');
+    expect(poster.hero).toBe('45m');
+    expect(poster.details).toEqual([]);
+  });
+
+  it('gives an activity with a distance its distance', () => {
+    const poster = postPoster(
       row({ subjectType: 'activity', durationSeconds: 1_800, distance: 5, distanceUnit: 'km' }),
       'lb',
     );
-    expect(stats.map((s) => s.label)).toEqual(['time', 'km']);
+    expect(poster.hero).toBe('5 km');
+    expect(poster.details).toEqual(['30m']);
+  });
+
+  it('never mentions a single set or its weight', () => {
+    const poster = postPoster(row({ volume: 1000, totalSets: 3, totalReps: 10, recordCount: 1 }), 'lb');
+    expect(JSON.stringify(poster)).not.toMatch(/rpe|×/i);
   });
 });
 
 describe('runs in the feed', () => {
   it('shows a run’s pace next to its distance', () => {
-    const stats = postStats(
+    const poster = postPoster(
       row({ subjectType: 'activity', activityKind: 'run', durationSeconds: 1500, distance: 3.1, distanceUnit: 'mi' }),
       'lb',
     );
-    expect(stats).toContainEqual({ label: 'per mi', value: '8:04' });
+    expect(poster.tone).toBe('run');
+    expect(poster.hero).toBe('3.1 mi');
+    expect(poster.details).toContain('8:04 /mi');
   });
 
   it('doesn’t give a pace to activities that aren’t runs', () => {
-    const stats = postStats(
+    const poster = postPoster(
       row({ subjectType: 'activity', activityKind: 'cycle', durationSeconds: 3600, distance: 20, distanceUnit: 'mi' }),
       'lb',
     );
-    expect(stats.some((s) => s.label.startsWith('per'))).toBe(false);
+    expect(poster.details.some((d) => d.includes('/'))).toBe(false);
   });
 
   it('carries a shared map’s outline, and nothing when the map isn’t shared', () => {

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { hasAppleSignIn } from '@/domain/socialAuth';
 import type { Profile } from '@/lib/database.types';
 import { subscriptionsOn } from '@/lib/purchases';
-import { qk } from '@/lib/queryClient';
+import { qk, invalidateFriendData } from '@/lib/queryClient';
 import { SignInCancelled, appBundleId, appleAuthorizationCode } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 import { LEGAL } from '@/legal/config';
@@ -153,8 +153,8 @@ export function useBlockUser() {
     },
     onSuccess: () => {
       client.invalidateQueries({ queryKey: qk.blockedUsers });
-      client.invalidateQueries({ queryKey: qk.friendships });
       client.invalidateQueries({ queryKey: qk.userSearch });
+      invalidateFriendData(client);
     },
   });
 }

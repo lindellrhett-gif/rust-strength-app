@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { friendBests, type FriendBests } from '@/domain/friendBests';
 import { friendRequestError } from '@/domain/friendRequest';
 import {
   periodSince,
@@ -7,7 +8,7 @@ import {
   type LeaderboardPeriod,
 } from '@/domain/leaderboard';
 import { todayLocal } from '@/lib/dates';
-import { qk } from '@/lib/queryClient';
+import { invalidateFriendData, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -94,7 +95,8 @@ export function useSearchUsers(query: string) {
   const trimmed = query.trim();
   return useQuery({
     queryKey: [...qk.userSearch, trimmed],
-    enabled: trimmed.length >= 2,
+    // The server answers from three characters (rpc_search_users).
+    enabled: trimmed.length >= 3,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('rpc_search_users', { q: trimmed });
       if (error) throw error;
@@ -133,7 +135,7 @@ export function useRespondToRequest() {
         if (error) throw error;
       }
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.friendships }),
+    onSuccess: () => invalidateFriendData(client),
   });
 }
 
@@ -144,7 +146,7 @@ export function useRemoveFriend() {
       const { error } = await supabase.from('friendships').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => client.invalidateQueries({ queryKey: qk.friendships }),
+    onSuccess: () => invalidateFriendData(client),
   });
 }
 
@@ -175,6 +177,14 @@ export interface FriendStats {
   reactionsReceived: number;
   /** "trophy:tier" keys they chose to show by their name. */
   featuredTrophies: string[];
+  /** The unit they log in, which their volume and bests are stored in. Null until migration 0036. */
+  unit: 'lb' | 'kg' | null;
+  /**
+   * The sum of their best estimated maxes, in their unit: what their strength
+   * XP comes from. Null until migration 0037, which stops sending the
+   * per-exercise numbers this used to be added up from on bodyweight exercises.
+   */
+  strengthScore: number | null;
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -210,22 +220,20 @@ export function useFriendStats(targetUserId: string | undefined) {
         stepsTotal: row.steps_total == null ? null : Number(row.steps_total) || 0,
         reactionsReceived: Number(row.reactions_received) || 0,
         featuredTrophies: row.featured_trophies ?? [],
+        unit: row.unit === 'kg' || row.unit === 'lb' ? row.unit : null,
+        strengthScore: row.strength_score == null ? null : Number(row.strength_score) || 0,
       };
     },
   });
 }
 
 
-export interface FriendPRs {
-  /** Best weight per exercise, keyed by lowercased exercise name. */
-  bestWeight: Record<string, number>;
-  /** Best reps in a single set per exercise, keyed by lowercased name. */
-  bestReps: Record<string, number>;
-  /** Best estimated 1RM per exercise — the XP "personal records" source. */
-  bestE1rm: Record<string, number>;
-}
+export type FriendPRs = FriendBests;
 
-/** A friend's per-exercise bests, so their lift trophies render on their profile. */
+/**
+ * A friend's per-exercise bests, so their lift trophies render on their profile.
+ * Bodyweight and assisted exercises come back as BW: reps, never a weight.
+ */
 export function useFriendPRs(targetUserId: string | undefined) {
   return useQuery({
     queryKey: qk.friendPRs(targetUserId ?? 'none'),
@@ -235,17 +243,7 @@ export function useFriendPRs(targetUserId: string | undefined) {
         target: targetUserId!,
       });
       if (error) throw error;
-      const bestWeight: Record<string, number> = {};
-      const bestReps: Record<string, number> = {};
-      const bestE1rm: Record<string, number> = {};
-      for (const row of data ?? []) {
-        const key = (row.exercise_name ?? '').toLowerCase();
-        if (!key) continue;
-        bestWeight[key] = Math.max(bestWeight[key] ?? 0, Number(row.best_weight) || 0);
-        bestReps[key] = Math.max(bestReps[key] ?? 0, Number(row.best_reps) || 0);
-        bestE1rm[key] = Math.max(bestE1rm[key] ?? 0, Number(row.best_e1rm) || 0);
-      }
-      return { bestWeight, bestReps, bestE1rm };
+      return friendBests(data ?? []);
     },
   });
 }

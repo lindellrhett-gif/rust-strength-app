@@ -38,6 +38,7 @@ const carols = await post(carol);
 // --- 1. Signed-out callers -------------------------------------------------
 const anonCalls = {
   rpc_friend_feed: `select * from rpc_friend_feed()`,
+  rpc_friend_posts: `select * from rpc_friend_posts('${bob}')`,
   rpc_friend_leaderboard: `select * from rpc_friend_leaderboard()`,
   rpc_friend_stats: `select * from rpc_friend_stats('${bob}')`,
   rpc_friend_prs: `select * from rpc_friend_prs('${bob}')`,

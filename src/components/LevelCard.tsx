@@ -76,46 +76,59 @@ export function LevelCard({ level, breakdown, name }: LevelCardProps) {
         {body}
       </Pressable>
 
-      <ModalScreen visible={open} onRequestClose={() => setOpen(false)}>
-          <View style={styles.sheetHead}>
-            <Text style={text.title}>Where your XP came from</Text>
-            <Pressable onPress={() => setOpen(false)} hitSlop={12}>
-              <Text style={styles.close}>Close</Text>
-            </Pressable>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sheetBody}>
-            <Text style={text.bodyMuted}>
-              XP is worked out from your own totals every time this screen opens. Nothing is
-              banked, so deleting a set takes its points back with it.
-            </Text>
-
-            {breakdown.sources
-              .filter((s) => s.xp > 0)
-              .sort((a, b) => b.xp - a.xp)
-              .map((source) => (
-                <View key={source.id} style={styles.row}>
-                  <View style={styles.rowMain}>
-                    <Text style={text.body}>{source.label}</Text>
-                    {source.detail ? <Text style={text.caption}>{source.detail}</Text> : null}
-                  </View>
-                  <Text style={styles.rowXp}>+{comma(source.xp)}</Text>
-                </View>
-              ))}
-
-            <View style={[styles.row, styles.totalRow]}>
-              <Text style={text.heading}>Total</Text>
-              <Text style={[styles.rowXp, styles.totalXp]}>{comma(breakdown.total)} XP</Text>
-            </View>
-
-            {breakdown.sources.every((s) => s.xp === 0) ? (
-              <Text style={text.bodyMuted}>
-                Nothing yet. Finish a workout and this fills in.
-              </Text>
-            ) : null}
-          </ScrollView>
-      </ModalScreen>
+      <XpBreakdownSheet visible={open} onClose={() => setOpen(false)} breakdown={breakdown} />
     </>
+  );
+}
+
+/** Where the XP came from, opened from the level card and the Profile header. */
+export function XpBreakdownSheet({
+  visible,
+  onClose,
+  breakdown,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  breakdown: XpBreakdown;
+}) {
+  return (
+    <ModalScreen visible={visible} onRequestClose={onClose}>
+      <View style={styles.sheetHead}>
+        <Text style={text.title}>Where your XP came from</Text>
+        <Pressable onPress={onClose} hitSlop={12}>
+          <Text style={styles.close}>Close</Text>
+        </Pressable>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.sheetBody}>
+        <Text style={text.bodyMuted}>
+          XP is worked out from your own totals every time this screen opens. Nothing is
+          banked, so deleting a set takes its points back with it.
+        </Text>
+
+        {breakdown.sources
+          .filter((s) => s.xp > 0)
+          .sort((a, b) => b.xp - a.xp)
+          .map((source) => (
+            <View key={source.id} style={styles.row}>
+              <View style={styles.rowMain}>
+                <Text style={text.body}>{source.label}</Text>
+                {source.detail ? <Text style={text.caption}>{source.detail}</Text> : null}
+              </View>
+              <Text style={styles.rowXp}>+{comma(source.xp)}</Text>
+            </View>
+          ))}
+
+        <View style={[styles.row, styles.totalRow]}>
+          <Text style={text.heading}>Total</Text>
+          <Text style={[styles.rowXp, styles.totalXp]}>{comma(breakdown.total)} XP</Text>
+        </View>
+
+        {breakdown.sources.every((s) => s.xp === 0) ? (
+          <Text style={text.bodyMuted}>Nothing yet. Finish a workout and this fills in.</Text>
+        ) : null}
+      </ScrollView>
+    </ModalScreen>
   );
 }
 
