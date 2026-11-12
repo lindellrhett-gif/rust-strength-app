@@ -1059,6 +1059,8 @@ export type Database = {
           featured_trophies: string[];
           /** From migration 0036: the unit they log in. */
           unit?: string | null;
+          /** From migration 0037: the sum of their best estimated maxes. */
+          strength_score?: number | null;
         }[];
       };
       rpc_friend_leaderboard: {
@@ -1095,9 +1097,12 @@ export type Database = {
         Args: { target: string };
         Returns: {
           exercise_name: string;
-          best_weight: number;
+          /** Null for a friend's bodyweight or assisted exercise, from migration 0037. */
+          best_weight: number | null;
           best_reps: number;
-          best_e1rm: number;
+          best_e1rm: number | null;
+          /** From migration 0037: shown as BW, with reps only. */
+          bodyweight?: boolean | null;
         }[];
       };
       rpc_save_workout_as_template: {

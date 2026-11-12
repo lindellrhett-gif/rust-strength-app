@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { friendBests, type FriendBests } from '@/domain/friendBests';
 import { friendRequestError } from '@/domain/friendRequest';
 import {
   periodSince,
@@ -178,6 +179,12 @@ export interface FriendStats {
   featuredTrophies: string[];
   /** The unit they log in, which their volume and bests are stored in. Null until migration 0036. */
   unit: 'lb' | 'kg' | null;
+  /**
+   * The sum of their best estimated maxes, in their unit: what their strength
+   * XP comes from. Null until migration 0037, which stops sending the
+   * per-exercise numbers this used to be added up from on bodyweight exercises.
+   */
+  strengthScore: number | null;
 }
 
 export function useFriendStats(targetUserId: string | undefined) {
@@ -214,22 +221,19 @@ export function useFriendStats(targetUserId: string | undefined) {
         reactionsReceived: Number(row.reactions_received) || 0,
         featuredTrophies: row.featured_trophies ?? [],
         unit: row.unit === 'kg' || row.unit === 'lb' ? row.unit : null,
+        strengthScore: row.strength_score == null ? null : Number(row.strength_score) || 0,
       };
     },
   });
 }
 
 
-export interface FriendPRs {
-  /** Best weight per exercise, keyed by lowercased exercise name. */
-  bestWeight: Record<string, number>;
-  /** Best reps in a single set per exercise, keyed by lowercased name. */
-  bestReps: Record<string, number>;
-  /** Best estimated 1RM per exercise — the XP "personal records" source. */
-  bestE1rm: Record<string, number>;
-}
+export type FriendPRs = FriendBests;
 
-/** A friend's per-exercise bests, so their lift trophies render on their profile. */
+/**
+ * A friend's per-exercise bests, so their lift trophies render on their profile.
+ * Bodyweight and assisted exercises come back as BW: reps, never a weight.
+ */
 export function useFriendPRs(targetUserId: string | undefined) {
   return useQuery({
     queryKey: qk.friendPRs(targetUserId ?? 'none'),
@@ -239,17 +243,7 @@ export function useFriendPRs(targetUserId: string | undefined) {
         target: targetUserId!,
       });
       if (error) throw error;
-      const bestWeight: Record<string, number> = {};
-      const bestReps: Record<string, number> = {};
-      const bestE1rm: Record<string, number> = {};
-      for (const row of data ?? []) {
-        const key = (row.exercise_name ?? '').toLowerCase();
-        if (!key) continue;
-        bestWeight[key] = Math.max(bestWeight[key] ?? 0, Number(row.best_weight) || 0);
-        bestReps[key] = Math.max(bestReps[key] ?? 0, Number(row.best_reps) || 0);
-        bestE1rm[key] = Math.max(bestE1rm[key] ?? 0, Number(row.best_e1rm) || 0);
-      }
-      return { bestWeight, bestReps, bestE1rm };
+      return friendBests(data ?? []);
     },
   });
 }

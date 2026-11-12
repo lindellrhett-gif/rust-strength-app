@@ -333,6 +333,9 @@ None of these can be settled from the code, and some block the rest:
 - [ ] Release the version in App Store Connect.
 - [ ] **Apply `0031_private_sharing_default.sql`** to the live database (needs
   your OK), once 1.2 is live: new accounts then start with sharing off.
+- [ ] **Apply `0037_friend_bests_bodyweight.sql`** (needs your OK), together
+  with 0034: friends then get BW, not a weight, on bodyweight exercises. Check a
+  friend's level on 1.2 still matches their own phone.
 - [ ] **Apply `0034_profiles_owner_only.sql`** (needs your OK), once 1.2 is
   live: nobody can read anyone else's profile row any more. Check the Friends
   list on 1.2 still shows names afterwards.

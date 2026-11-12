@@ -900,3 +900,17 @@ Policy say so. Sharing only later sessions would need a server-side cutoff.
 
 Applied to the live database November 8, 2026: 0030, 0035 and 0036. 0031 and 0034
 still wait for 1.2's release day.
+
+### Personal bests on bodyweight exercises (0037, November 11, 2026)
+
+A friend's best on a pull-up or an assisted dip was a number that included the
+person's bodyweight, against the Privacy Policy's "nobody can see your
+bodyweight". Decided: friends get BW and the reps, never a weight or an
+estimated max, on bodyweight and assisted exercises and on anything logged with
+the BW button. A level's strength XP comes from one server total instead, so a
+friend's level still matches. Tested in
+`supabase/tests/friend-bests-bodyweight.test.mjs`. Applied on release day with
+0034, which closes the other way bodyweight could be read.
+
+Still open: a feed post's total weight and reps. On a session of nothing but
+bodyweight sets, dividing one by the other gives the bodyweight.

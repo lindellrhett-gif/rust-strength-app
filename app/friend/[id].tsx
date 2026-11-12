@@ -108,7 +108,9 @@ export default function FriendProfile() {
       bestStreak: stats.data.bestStreak,
       friendCount: stats.data.friendCount,
       trophyTiers: totalTiersEarned(achievements),
-      strengthScore: strengthScore(prs.data?.bestE1rm ?? {}),
+      // One total from the server once 0037 is on, since a bodyweight exercise's
+      // own number no longer comes through; added up here before that.
+      strengthScore: stats.data.strengthScore ?? strengthScore(prs.data?.bestE1rm ?? {}),
       unit: theirUnit,
     });
   }, [stats.data, achievements, prs.data, theirUnit]);
