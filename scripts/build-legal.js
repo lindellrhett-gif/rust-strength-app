@@ -45,7 +45,7 @@ execFileSync(
   { cwd: ROOT, stdio: 'inherit' },
 );
 
-const { LEGAL } = require(path.join(OUT, 'config.js'));
+const { LEGAL, hasUnresolvedPlaceholders } = require(path.join(OUT, 'config.js'));
 const { PRIVACY_POLICY } = require(path.join(OUT, 'privacy.js'));
 const { TERMS_OF_SERVICE } = require(path.join(OUT, 'terms.js'));
 
@@ -63,7 +63,10 @@ function inline(s) {
   return escapeHtml(s)
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    // Bare https URLs, which the documents write out because the app can't
+    // render links. Not ones already inside a link, and not a trailing stop.
+    .replace(/(^|[\s(])(https:\/\/[^\s<)]*[^\s<).,])/g, '$1<a href="$2">$2</a>');
 }
 
 function markdownToHtml(md) {
@@ -378,7 +381,12 @@ if (fs.existsSync(icon)) fs.copyFileSync(icon, path.join(docs, 'icon.png'));
 // beginning with an underscore and slows publishing down for no benefit.
 fs.writeFileSync(path.join(docs, '.nojekyll'), '');
 
-if (fs.existsSync(SITE_REPO)) {
+// A placeholder must never reach the public site, so an unfilled config value
+// stops the sync rather than only warning about it.
+const unresolved = hasUnresolvedPlaceholders();
+if (unresolved) {
+  console.log('Not syncing the published site: src/legal/config.ts still has placeholders.');
+} else if (fs.existsSync(SITE_REPO)) {
   for (const f of fs.readdirSync(docs)) {
     fs.copyFileSync(path.join(docs, f), path.join(SITE_REPO, f));
   }
@@ -394,7 +402,7 @@ if (fs.existsSync(SITE_REPO)) {
 fs.rmSync(OUT, { recursive: true, force: true });
 
 console.log('\nWrote legal/PRIVACY.md, legal/TERMS.md and docs/*.html');
-if (LEGAL.entity.includes('TODO') || LEGAL.contactEmail.includes('TODO')) {
+if (unresolved) {
   console.log(
     '\n⚠️  src/legal/config.ts still has TODO placeholders. Fill them in and\n' +
       '   re-run `npm run legal` before publishing the site or submitting.',

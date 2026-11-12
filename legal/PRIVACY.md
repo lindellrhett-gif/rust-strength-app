@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: October 26, 2026**
+**Last updated: November 6, 2026**
 
 Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -168,7 +168,36 @@ No system is perfectly secure, and we cannot guarantee absolute security.
 
 If we change this policy materially we will update the date above and ask you to accept the new version in the app.
 
-## 13. Contact
+## 13. If you live outside the United States
+
+Rust Strength is offered in the United States, New Zealand and Australia. Everything above applies wherever you live. This section adds what the law where you live asks us to tell you.
+
+**Your information is stored in the United States.** Supabase holds it for us there (Section 6), and the providers in Section 5 are US companies. US law may protect your information less than the law where you live. We apply this policy to it wherever it is.
+
+### New Zealand
+
+We handle your information under the Privacy Act 2020.
+
+- **Who collects and holds it:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270. Supabase stores it on our behalf.
+- **What we collect, why, and who sees it:** Sections 1 to 5. Your email address is needed to create an account. Everything else is optional; leaving it out only means the feature that uses it does not work.
+- **Access and correction:** you can see and download your information at any time (**Profile → Privacy & legal → Download my data**) and change most of it in the app. To ask for anything else, or to have something corrected, email ruststrengthsupport@gmail.com. We will respond within 20 working days.
+- **Complaints:** email us first. If you are not satisfied, you can complain to the Privacy Commissioner: https://www.privacy.org.nz
+- **Breaches:** if a privacy breach is likely to cause you serious harm, we will tell you and the Privacy Commissioner as soon as we can.
+
+### Australia
+
+We handle your information in line with the Australian Privacy Principles in the Privacy Act 1988.
+
+- **Who we are:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
+- **Health information** (Section 2) is sensitive information. We collect it only with your consent, which you give by entering it, and use it only for the features that need it. You can withdraw your consent by deleting that information or your account (Section 8).
+- **You do not have to give your real name.** Your account starts with a random handle, and the app never asks for your name.
+- **Overseas:** your information is stored and processed in the United States (see above).
+- **Access and correction:** as for New Zealand above. We will respond within 30 days.
+- **Complaints:** email us and we will reply within 30 days. If you are not satisfied, you can complain to the Office of the Australian Information Commissioner: https://www.oaic.gov.au
+- **Breaches:** if a data breach is likely to result in serious harm to you, we will tell you and the Commissioner.
+
+## 14. Contact
 
 Bluestem Software LLC
+308 6th St W, Park River, ND 58270
 ruststrengthsupport@gmail.com
