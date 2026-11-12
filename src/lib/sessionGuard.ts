@@ -29,16 +29,31 @@ export function isAnonymousDataRequest(
   return url.includes('/rest/v1/') && authorization === `Bearer ${anonKey}`;
 }
 
-/** How many times to retry after a failure; a missing session gets longer to come back. */
-export const SESSION_RETRIES = 6;
+/**
+ * How many times to retry after a failure; a missing session gets longer to come
+ * back. Long enough to outlast the minute supabase-js waits after a failed refresh
+ * before it tries again: fall short and a queued write, replayed the moment the
+ * signal returns, runs out of retries and is lost.
+ */
+export const SESSION_RETRIES = 8;
 export const DEFAULT_RETRIES = 2;
 
+/**
+ * The class alone isn't enough: postgrest-js catches a rejected fetch and hands
+ * back a plain object, with the error's name at the start of its message.
+ */
+function isSessionUnavailable(error: unknown): boolean {
+  if (error instanceof SessionUnavailableError) return true;
+  const message = (error as { message?: unknown } | null | undefined)?.message;
+  return typeof message === 'string' && message.startsWith('SessionUnavailableError:');
+}
+
 export function shouldRetry(failureCount: number, error: unknown): boolean {
-  const limit = error instanceof SessionUnavailableError ? SESSION_RETRIES : DEFAULT_RETRIES;
+  const limit = isSessionUnavailable(error) ? SESSION_RETRIES : DEFAULT_RETRIES;
   return failureCount < limit;
 }
 
-/** 1s, 2s, 4s… capped at 15s: about a minute in all for a session to recover. */
+/** 1s, 2s, 4s… capped at 15s: 75 seconds in all for a session to recover. */
 export function retryDelay(attempt: number): number {
   return Math.min(1000 * 2 ** attempt, 15_000);
 }
