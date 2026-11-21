@@ -4,6 +4,7 @@
  */
 
 import { recipeFromHtml, type ImportedRecipe } from '@/domain/nutrition/recipeImport';
+import { fetchProblem } from '@/lib/fetchProblem';
 
 const TIMEOUT_MS = 15_000;
 /** Recipe pages run to a few hundred kilobytes; past this something is wrong. */
@@ -38,8 +39,7 @@ export async function fetchRecipe(typed: string): Promise<RecipeFetch> {
     const recipe = recipeFromHtml(html);
     return recipe ? { recipe } : { problem: 'no_recipe' };
   } catch (e) {
-    const message = e instanceof Error ? e.message : '';
-    return { problem: /network|abort|failed to fetch/i.test(message) ? 'offline' : 'unavailable' };
+    return { problem: fetchProblem(e) };
   } finally {
     clearTimeout(timer);
   }

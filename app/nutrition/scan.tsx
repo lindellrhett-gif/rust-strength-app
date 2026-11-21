@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components';
 import { FoodAmountSheet } from '@/components/nutrition/FoodAmountSheet';
 import { NutritionLocked } from '@/components/nutrition/NutritionLocked';
-import { nutritionDefaults, useBarcodeFood, useLogEntries, useNutritionSettings } from '@/data/nutrition';
+import { BarcodeLookupError, nutritionDefaults, useBarcodeFood, useLogEntries, useNutritionSettings } from '@/data/nutrition';
 import { useAccess } from '@/data/subscription';
 import { hasFeature } from '@/domain/entitlements';
 import { mealNamesFor } from '@/domain/nutrition/diary';
@@ -80,7 +80,10 @@ function Scanner() {
   }, []);
 
   const CameraView = camera?.CameraView ?? null;
-  const result = lookup.data;
+  // A lookup that couldn't get through is an error, not cached data; it is
+  // shown the same way.
+  const result: Result =
+    lookup.data ?? (lookup.error instanceof BarcodeLookupError ? { problem: lookup.error.problem } : undefined);
   const found = result && 'food' in result ? result.food : null;
   const ownId = found?.id && found.source !== 'usda' ? found.id : null;
   const mealNames = mealNamesFor(s.mealNames, meal);
@@ -198,7 +201,7 @@ function Scanner() {
   );
 }
 
-type Result = ReturnType<typeof useBarcodeFood>['data'];
+type Result = ReturnType<typeof useBarcodeFood>['data'] | { problem: BarcodeLookupError['problem'] };
 
 function problemTitle(result: Result): string {
   if (!result || 'food' in result) return 'Couldn’t look it up';

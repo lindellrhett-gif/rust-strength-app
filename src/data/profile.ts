@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { ProfileUpdate } from './mutationDefaults';
-import { mk, qk } from '@/lib/queryClient';
+import { mk, ms, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/database.types';
 import { useAuth } from '@/providers/AuthProvider';
@@ -34,6 +34,7 @@ export function useUpdateProfile() {
     // The function itself is registered in mutationDefaults, so a change made
     // with no signal is finished after a restart rather than quietly dropped.
     mutationKey: mk.updateProfile,
+    scope: ms.profile,
     // Shown straight away and undone if the save fails, so a number typed into
     // a row or a flipped switch doesn't snap back while the save is on its way.
     onMutate: async (patch) => {

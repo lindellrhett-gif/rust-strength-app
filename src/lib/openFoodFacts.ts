@@ -16,6 +16,7 @@ import {
   OFF_USER_AGENT,
   type OffResult,
 } from '@/domain/nutrition/openFoodFacts';
+import { fetchProblem } from '@/lib/fetchProblem';
 
 export type LookupResult = OffResult | { problem: 'offline' | 'unavailable' };
 
@@ -51,8 +52,7 @@ export async function lookupBarcode(scanned: string): Promise<LookupResult> {
     try {
       body = await fetchProduct(code);
     } catch (e) {
-      const message = e instanceof Error ? e.message : '';
-      return { problem: /network|abort|failed to fetch/i.test(message) ? 'offline' : 'unavailable' };
+      return { problem: fetchProblem(e) };
     }
     if (body === 'missing') continue;
     const result = foodFromOpenFoodFacts(body, code);
@@ -79,8 +79,7 @@ export async function searchOpenFoodFacts(
     if (!res.ok) return { problem: 'unavailable' };
     return { foods: foodsFromSearch(await res.json()) };
   } catch (e) {
-    const message = e instanceof Error ? e.message : '';
-    return { problem: /network|abort|failed to fetch/i.test(message) ? 'offline' : 'unavailable' };
+    return { problem: fetchProblem(e) };
   } finally {
     clearTimeout(timer);
   }

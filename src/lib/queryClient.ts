@@ -157,6 +157,19 @@ export const mk = {
   updateProfile: ['mutation', 'update-profile'] as const,
 };
 
+/**
+ * Writes that must land in the order they were made. React Query replays a
+ * paused queue all at once, so without a scope "log a food, then delete it"
+ * done offline could bring the food back, or an older edit land over a newer
+ * one. Writes sharing a scope run one at a time, oldest first. Each goes on
+ * the hook and on its registered default, so a write replayed after a restart
+ * keeps its place too.
+ */
+export const ms = {
+  diary: { id: 'diary' },
+  profile: { id: 'profile' },
+} as const;
+
 /** Central place for query keys so invalidation stays consistent. */
 export const qk = {
   profile: ['profile'] as const,

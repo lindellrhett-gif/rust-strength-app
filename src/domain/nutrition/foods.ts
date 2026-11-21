@@ -111,6 +111,9 @@ export function measure(food: Food, amount: number, unitKey: string): Measured |
   const unit = unitsFor(food).find((u) => u.key === unitKey);
   if (!unit) return null;
   const grams = unit.grams == null ? null : Math.round(amount * unit.grams * 100) / 100;
+  // The weight has the same limit as the amount, and rounds to 0 for a crumb:
+  // 500 × "1 cup" or 0.004 g would be refused by the database every time.
+  if (grams != null && (!(grams > 0) || grams > MAX_AMOUNT)) return null;
   return { amount, unit, grams, nutrients: scaleNutrients(food.nutrients, amount * unit.factor) };
 }
 

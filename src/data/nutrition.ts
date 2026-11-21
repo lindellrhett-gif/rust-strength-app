@@ -27,7 +27,7 @@ import { toLocalDateString } from '@/lib/dates';
 import { deviceUnits } from '@/lib/deviceUnits';
 import { newId } from '@/lib/ids';
 import { lookupBarcode, type LookupResult } from '@/lib/openFoodFacts';
-import { mk, qk } from '@/lib/queryClient';
+import { mk, ms, qk } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -245,6 +245,7 @@ export function useLogEntries() {
   const lastWarned = useRef(0);
   const mutation = useMutation({
     mutationKey: mk.logFood,
+    scope: ms.diary,
     mutationFn: insertDiaryEntryRow,
     // The entry showed at once and the sheet has closed, so this is the only sign
     // it didn't save. Waiting for a signal isn't an error; that write is held.
@@ -285,6 +286,7 @@ export function useUpdateEntry() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.updateEntry,
+    scope: ms.diary,
     mutationFn: updateDiaryEntryRow,
     onSettled: () => client.invalidateQueries({ queryKey: ['diary'] }),
   });
@@ -311,6 +313,7 @@ export function useDeleteEntry() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.deleteEntry,
+    scope: ms.diary,
     mutationFn: deleteDiaryEntryRow,
     onSettled: () => client.invalidateQueries({ queryKey: ['diary'] }),
   });
@@ -347,6 +350,7 @@ export function useSaveDiaryDay() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.saveDiaryDay,
+    scope: ms.diary,
     mutationFn: saveDiaryDayRow,
     onSettled: (_d, _e, row) => client.invalidateQueries({ queryKey: qk.diaryDay(row.day) }),
   });
@@ -384,6 +388,7 @@ export function useAddWater() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.addWater,
+    scope: ms.diary,
     mutationFn: insertWaterRow,
     onSettled: (_d, _e, row) => client.invalidateQueries({ queryKey: qk.water(row.day) }),
   });
@@ -405,6 +410,7 @@ export function useDeleteWater() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.deleteWater,
+    scope: ms.diary,
     mutationFn: deleteWaterRow,
     onSettled: () => client.invalidateQueries({ queryKey: ['diary', 'water'] }),
   });
@@ -450,6 +456,7 @@ export function useSaveWeighIn() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.saveWeighIn,
+    scope: ms.diary,
     mutationFn: saveWeighInRow,
     onSettled: () => {
       client.invalidateQueries({ queryKey: qk.weighIns });
@@ -498,6 +505,7 @@ export function useDeleteWeighIn() {
   const client = useQueryClient();
   const mutation = useMutation({
     mutationKey: mk.deleteWeighIn,
+    scope: ms.diary,
     mutationFn: deleteWeighInRow,
     onSettled: () => {
       client.invalidateQueries({ queryKey: qk.weighIns });
@@ -652,6 +660,18 @@ export function useDeleteFood() {
 }
 
 /**
+ * A lookup that couldn't reach Open Food Facts. Thrown rather than returned,
+ * so it isn't cached as an answer: scanning the same code again once the
+ * signal is back asks again instead of showing "No connection" for minutes.
+ */
+export class BarcodeLookupError extends Error {
+  constructor(readonly problem: 'offline' | 'unavailable') {
+    super(problem);
+    this.name = 'BarcodeLookupError';
+  }
+}
+
+/**
  * The food for a scanned barcode: your own copy if you have one (from the
  * cached list first, so it works offline), else Open Food Facts.
  */
@@ -668,7 +688,11 @@ export function useBarcodeFood(barcode: string | null) {
       if (cached) return { food: cached };
       const own = await ownFoodForBarcode(code!).catch(() => null);
       if (own) return { food: own };
-      return lookupBarcode(code!);
+      const result = await lookupBarcode(code!);
+      if ('problem' in result && (result.problem === 'offline' || result.problem === 'unavailable')) {
+        throw new BarcodeLookupError(result.problem);
+      }
+      return result;
     },
   });
 }

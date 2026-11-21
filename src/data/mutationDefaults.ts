@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 
 import type { SaveRunInput } from '@/domain/running/save';
-import { mk, qk } from '@/lib/queryClient';
+import { mk, ms, qk } from '@/lib/queryClient';
 import { runStore } from '@/lib/runStore';
 import { SessionUnavailableError } from '@/lib/sessionGuard';
 import { supabase } from '@/lib/supabase';
@@ -163,16 +163,17 @@ export function registerMutationDefaults(client: QueryClient): void {
   client.setMutationDefaults(mk.startWorkout, { mutationFn: insertWorkoutRow });
   client.setMutationDefaults(mk.endWorkout, { mutationFn: endWorkoutRow });
   client.setMutationDefaults(mk.saveRun, { mutationFn: saveRunRow });
-  client.setMutationDefaults(mk.logFood, { mutationFn: insertDiaryEntryRow });
-  client.setMutationDefaults(mk.updateEntry, { mutationFn: updateDiaryEntryRow });
-  client.setMutationDefaults(mk.deleteEntry, { mutationFn: deleteDiaryEntryRow });
-  client.setMutationDefaults(mk.addWater, { mutationFn: insertWaterRow });
-  client.setMutationDefaults(mk.deleteWater, { mutationFn: deleteWaterRow });
-  client.setMutationDefaults(mk.saveWeighIn, { mutationFn: saveWeighInRow });
-  client.setMutationDefaults(mk.deleteWeighIn, { mutationFn: deleteWeighInRow });
-  client.setMutationDefaults(mk.saveDiaryDay, { mutationFn: saveDiaryDayRow });
+  client.setMutationDefaults(mk.logFood, { mutationFn: insertDiaryEntryRow, scope: ms.diary });
+  client.setMutationDefaults(mk.updateEntry, { mutationFn: updateDiaryEntryRow, scope: ms.diary });
+  client.setMutationDefaults(mk.deleteEntry, { mutationFn: deleteDiaryEntryRow, scope: ms.diary });
+  client.setMutationDefaults(mk.addWater, { mutationFn: insertWaterRow, scope: ms.diary });
+  client.setMutationDefaults(mk.deleteWater, { mutationFn: deleteWaterRow, scope: ms.diary });
+  client.setMutationDefaults(mk.saveWeighIn, { mutationFn: saveWeighInRow, scope: ms.diary });
+  client.setMutationDefaults(mk.deleteWeighIn, { mutationFn: deleteWeighInRow, scope: ms.diary });
+  client.setMutationDefaults(mk.saveDiaryDay, { mutationFn: saveDiaryDayRow, scope: ms.diary });
   client.setMutationDefaults(mk.updateProfile, {
     mutationFn: updateProfileRow,
+    scope: ms.profile,
     // A replayed save has no screen behind it to refresh the profile afterwards.
     onSettled: () => client.invalidateQueries({ queryKey: qk.profile }),
   });

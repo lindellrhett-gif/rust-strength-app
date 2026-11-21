@@ -34,6 +34,7 @@ import { cleanMealName, itemsFromEntries } from '@/domain/nutrition/savedMeals';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { newId } from '@/lib/ids';
+import { useToday } from '@/lib/useToday';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -66,8 +67,14 @@ export default function FoodDiary() {
 function Diary() {
   const router = useRouter();
   const params = useLocalSearchParams<{ day?: string }>();
-  const today = todayLocal();
-  const [day, setDay] = useState(params.day && DAY_RE.test(params.day) ? params.day : today);
+  const today = useToday();
+  // null follows today, so a diary left open overnight (or in the background)
+  // shows the new day rather than staying on yesterday.
+  const [picked, setPicked] = useState<string | null>(
+    params.day && DAY_RE.test(params.day) && params.day !== todayLocal() ? params.day : null,
+  );
+  const day = picked ?? today;
+  const setDay = (next: string) => setPicked(next === today ? null : next);
   const previousDay = addDays(day, -1);
   // "Copy from yesterday", or from the day before the one shown: "Copy from Sun, Oct 19".
   const previousWords = inSentence(dayLabel(previousDay, today));
