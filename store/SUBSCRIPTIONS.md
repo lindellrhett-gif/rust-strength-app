@@ -13,9 +13,9 @@ Merge it only when Pro goes on sale: its Terms and Privacy Policy (version
 - The paywall is **RevenueCat's**, designed in its dashboard. Subscribers
   manage their plan in RevenueCat's **Customer Center**.
 
-**Decided November 6, 2026:**
-- **Prices:** $9 a month, $55 a year and $99 for Lifetime, or the nearest App
-  Store price points ($8.99, $54.99, $99.99).
+**Decided November 6, 2026 (prices changed November 20):**
+- **Prices:** $5.99 a month, $44.99 a year and $89.99 for Lifetime (changed
+  on November 20, 2026 from $8.99, $54.99 and $99.99; set in App Store Connect).
 - **Free trial:** one month free on the monthly and the yearly plan, as an
   introductory offer. Apple gives each Apple ID one introductory offer per
   subscription group, so someone who trials monthly can't trial yearly too.
@@ -46,8 +46,9 @@ Merge it only when Pro goes on sale: its Terms and Privacy Policy (version
   0026), so server code such as the coach can check `has_pro()` without
   trusting the phone. Lifetime is stored as Pro with no expiry.
 - **Account deletion,** once Pro is on, goes through the `delete-account` Edge
-  Function, which deletes the RevenueCat customer and then runs
-  `rpc_delete_my_account`. The app warns that deleting the account doesn't
+  Function, which runs `rpc_delete_my_account` and only then deletes the
+  RevenueCat customer, so a failed delete never leaves an account without
+  its purchase records. The app warns that deleting the account doesn't
   cancel an Apple subscription.
 
 ## Testing now, with the Test Store
@@ -68,7 +69,7 @@ Test Store key to any EAS environment.**
       **Privacy Policy** (`…/privacy.html`). Apple requires them on a
       subscription screen. With the free trial, the paywall must also say
       plainly how long the trial is and what it costs after (for example
-      "1 month free, then $54.99/year"): use RevenueCat's trial text for
+      "1 month free, then $44.99/year"): use RevenueCat's trial text for
       eligible customers, and the plain price for everyone else.
    4. Optional: set up the Customer Center. It needs a RevenueCat **Pro or
       Enterprise** plan. Without it, "Manage subscription" opens Apple's
@@ -109,8 +110,8 @@ purchases can be created before then, but can't go on sale.
       (1 year).
    3. Under In-App Purchases, add a **non-consumable** for Lifetime.
    4. Set prices, display names, descriptions and review screenshots:
-      monthly $8.99 (or $9.00 if offered), yearly $54.99 (or $55.00), Lifetime
-      $99.99 (or $99.00).
+      monthly $5.99, yearly $44.99, Lifetime $89.99. Product IDs:
+      `com.ruststrength.app.pro.monthly`, `.pro.yearly` and `.pro.lifetime`.
    5. On monthly and on yearly, add an introductory offer: Free, 1 month, in
       every territory the app is sold in.
 2. **App Store Connect > Users and Access > Integrations > In-App Purchase:**

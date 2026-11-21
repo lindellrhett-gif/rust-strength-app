@@ -1,16 +1,19 @@
 /**
- * Deletes the signed-in person's account, in this order, stopping with
- * nothing deleted if a step fails:
+ * Deletes the signed-in person's account, in this order:
  *
  *  1. Sign in with Apple, if the account uses it. Apple requires an app to
  *     revoke its tokens when such an account is deleted. The app sends a
  *     fresh one-time code from Apple (appleAuthorizationCode, with the
  *     appleClientId it was issued to); this trades it for the app's tokens
  *     and revokes them straight away, so no Apple token is ever stored.
- *  2. Their RevenueCat customer, once subscriptions are on, so its purchase
- *     records don't outlive the account.
- *  3. Everything here, through rpc_delete_my_account, called as them so it
- *     runs exactly as it does from the app.
+ *     If this fails, nothing is deleted.
+ *  2. Everything here, through rpc_delete_my_account, called as them so it
+ *     runs exactly as it does from the app. If this fails, nothing else is
+ *     deleted, so the account and its purchase records stay together.
+ *  3. Their RevenueCat customer, once subscriptions are on, so its purchase
+ *     records don't outlive the account. This runs only after the account is
+ *     gone. If RevenueCat fails then, the account stays deleted and the
+ *     leftover customer is logged by id for removal by hand.
  *
  * Deleting the account doesn't cancel an Apple subscription; only the person
  * can, in their Apple ID settings. The app says so before they delete.
@@ -111,18 +114,22 @@ Deno.serve(async (req) => {
     if (problem) return reply(400, problem);
   }
 
+  const { error: deleteError } = await asUser.rpc('rpc_delete_my_account');
+  if (deleteError) return reply(500, 'Couldn’t delete your account. Please try again.');
+
   if (REVENUECAT_SECRET) {
-    const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(data.user.id)}`, {
+    const userId = data.user.id;
+    const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(userId)}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${REVENUECAT_SECRET}` },
-    });
-    // 404: never subscribed, nothing to remove.
-    if (!res.ok && res.status !== 404) {
-      return reply(502, 'Couldn’t remove your purchase records. Nothing was deleted; please try again.');
+    }).catch(() => null);
+    // 404: never subscribed, nothing to remove. Anything else leaves a
+    // RevenueCat customer behind for an account that no longer exists; the
+    // account itself is already gone, so log the id for removal by hand.
+    if (!res || (!res.ok && res.status !== 404)) {
+      console.error(`delete-account: RevenueCat customer not removed for ${userId} (status ${res?.status ?? 'network'})`);
     }
   }
 
-  const { error: deleteError } = await asUser.rpc('rpc_delete_my_account');
-  if (deleteError) return reply(500, 'Couldn’t delete your account. Please try again.');
   return reply(200, 'Deleted');
 });
