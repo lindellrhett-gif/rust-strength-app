@@ -1,6 +1,6 @@
 // Migration 0037: a friend's personal bests on bodyweight and assisted exercises
-// come back as BW, with no weight or estimated max, and their level's strength
-// figure comes back as one total.
+// come back as BW, with no weight or estimated max, and no total a friend sees
+// (strength score, volume, a feed post, the leaderboard) counts bodyweight sets.
 import { asUser, check, createUser, done, errorOf, freshDb } from './harness.mjs';
 
 const db = await freshDb();
@@ -81,16 +81,48 @@ check('marked BW for you too', myPullUp?.bodyweight === true, myPullUp);
 const stranger = await asUser(db, cy, () => errorOf(() => db.query(`select * from rpc_friend_prs($1)`, [ana])));
 check('someone who isn’t a friend still gets nothing', stranger != null && /not friends/.test(stranger), stranger);
 
-// --- One strength total keeps the level matching ----------------------------
-const stats = await asUser(db, ben, async () =>
-  (await db.query(`select * from rpc_friend_stats($1, current_date)`, [ana])).rows[0],
-);
-const expected = 116.7 + 111 + 79.2 + 115.5;
+// --- Totals a friend sees leave bodyweight out -----------------------------
+const statsFor = (viewer) =>
+  asUser(db, viewer, async () => (await db.query(`select * from rpc_friend_stats($1, current_date)`, [ana])).rows[0]);
+const stats = await statsFor(ben);
 check(
-  'strength_score is the sum of her best estimated maxes, warm-ups left out',
-  Math.abs(stats.strength_score - expected) < 1e-6,
-  { got: stats.strength_score, expected },
+  'a friend’s strength_score leaves out the exercises shown as BW',
+  Math.abs(stats.strength_score - 116.7) < 1e-6,
+  { got: stats.strength_score, expected: 116.7 },
 );
+const own = await statsFor(ana);
+const allBests = 116.7 + 111 + 79.2 + 115.5;
+check(
+  'your own strength_score is every best estimated max, warm-ups left out',
+  Math.abs(own.strength_score - allBests) < 1e-6,
+  { got: own.strength_score, expected: allBests },
+);
+
+// Bench 100 x 5 plus the 60 x 10 warm-up: the only sets a friend's volume counts.
+const benchOnly = 100 * 5 + 60 * 10;
+const everything = benchOnly + 92.5 * 6 + 62.5 * 8 + 82.5 * 12;
+check('a friend’s total_volume leaves out bodyweight sets', stats.total_volume === benchOnly, stats.total_volume);
+check('your own total_volume counts every set', own.total_volume === everything, own.total_volume);
+
+// New accounts start with sharing off (0031); Ana shares her sessions.
+await db.query(`update profiles set share_workouts = true where user_id = $1`, [ana]);
+const feedFor = (viewer) =>
+  asUser(db, viewer, async () =>
+    (await db.query(`select * from rpc_friend_feed(30, null)`)).rows.find((r) => r.subject_id === w[0].id),
+  );
+const friendPost = await feedFor(ben);
+check('a friend sees the session on the feed', friendPost != null, friendPost);
+check('its volume leaves out bodyweight sets (and warm-ups, as before)', friendPost?.volume === 100 * 5, friendPost?.volume);
+const ownPost = await feedFor(ana);
+check('your own post counts them', ownPost?.volume === 100 * 5 + 92.5 * 6 + 62.5 * 8 + 82.5 * 12, ownPost?.volume);
+
+const boardFor = (viewer) =>
+  asUser(db, viewer, async () =>
+    (await db.query(`select * from rpc_friend_leaderboard(null, current_date)`)).rows.find((r) => r.user_id === ana),
+  );
+check('on a friend’s weight-lifted board, bodyweight sets are left out', (await boardFor(ben))?.total_volume === benchOnly);
+check('on your own board, they count', (await boardFor(ana))?.total_volume === everything);
+
 check('rpc_friend_stats still carries the unit before it', stats.unit === 'lb' || stats.unit === 'kg', stats.unit);
 const columns = Object.keys(stats);
 check('strength_score is the last column', columns[columns.length - 1] === 'strength_score', columns);
