@@ -1,6 +1,6 @@
 # Politique de confidentialité
 
-**Dernière mise à jour : 6 novembre 2026**
+**Dernière mise à jour : 21 novembre 2026**
 
 L’application Rust Strength est exploitée par Bluestem Software LLC (« nous »). Cette politique explique ce que nous recueillons, pourquoi, et ce que vous pouvez faire à ce sujet.
 

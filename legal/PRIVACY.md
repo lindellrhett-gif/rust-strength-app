@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: November 6, 2026**
+**Last updated: November 21, 2026**
 
 Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 

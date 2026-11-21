@@ -1,6 +1,6 @@
 # Consumer Health Data Privacy Policy
 
-**Last updated: November 6, 2026**
+**Last updated: November 21, 2026**
 
 This policy covers the health information Rust Strength handles: what it is, where it comes from, why we have it, who else receives it, and how to see it, delete it or stop it. It is written for Washington's My Health My Data Act and similar state laws, and it applies to everyone who uses the app. Our Privacy Policy covers everything else: https://lindellrhett-gif.github.io/rust-strength/privacy.html
 

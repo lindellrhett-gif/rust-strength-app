@@ -113,9 +113,9 @@ export const LEGAL = {
   version: '1.6.0',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'November 6, 2026',
+  lastUpdated: 'November 21, 2026',
   /** The same date, as the French translations write it. A test keeps the two in step. */
-  lastUpdatedFr: '6 novembre 2026',
+  lastUpdatedFr: '21 novembre 2026',
 
   /** Where the app is offered. Drives which privacy laws the documents address. */
   region: 'United States, New Zealand, Australia, Canada, the United Kingdom and the European Economic Area',
