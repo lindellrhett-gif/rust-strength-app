@@ -165,12 +165,31 @@ regenerate them with `UPDATE_FIXTURES=1 npx jest runningSaveContract`
 
 ## Releasing
 
-iOS builds go through EAS:
+iOS builds for TestFlight are made on the Mac with Xcode (`eas build --local`),
+like Shelfsmith and Orbit Arena. They use the signing credentials, environment
+variables and build numbers stored on EAS, take about 10-20 minutes, and don't
+use the Expo plan's monthly builds:
 
 ```bash
-eas build --platform ios --profile production
-eas submit --platform ios --latest
+scripts/ios-release.sh build
 ```
+
+```bash
+scripts/ios-release.sh submit
+```
+
+`build` leaves the `.ipa` in `dist/` and `submit` uploads the newest one there to
+TestFlight. Both sign in to Apple with the App Store Connect API key from
+`eas.json`, so there is no Apple ID prompt; if one ever appears, press Ctrl+C.
+`--check` checks the settings without building, `--cloud` builds or submits on
+Expo's servers instead, and `scripts/ios-release.sh sim` makes a simulator app.
+Local builds need Xcode, `brew install cocoapods fastlane` and `LANG=en_US.UTF-8`.
+
+Xcode 27 builds with the iOS 27 SDK, which requires the scene life cycle: without
+it the app stops at launch. `plugins/withSceneLifecycle.js` (the same file as in
+Shelfsmith and Orbit Arena) moves the generated project onto Expo's
+`ExpoAppSceneDelegate`, and fails the prebuild if Expo's AppDelegate template
+changes. Remove it once Expo's own template uses scenes.
 
 [`store/BUILD_CHECKS.md`](store/BUILD_CHECKS.md) is the pre-release checklist,
 and [`store/RELEASE_1.1.md`](store/RELEASE_1.1.md) lists what the running

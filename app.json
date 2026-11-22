@@ -162,7 +162,8 @@
           "recordAudioAndroid": false
         }
       ],
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      "./plugins/withSceneLifecycle"
     ],
     "experiments": {
       "tsconfigPaths": true
