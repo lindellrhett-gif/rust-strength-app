@@ -48,10 +48,23 @@ function googleSignIn(clientId) {
   return [['@react-native-google-signin/google-signin', { iosUrlScheme }]];
 }
 
+/**
+ * EAS keeps the build number on its servers (appVersionSource "remote") and
+ * passes it to the build as EAS_BUILD_IOS_BUILD_NUMBER. The app gets it from
+ * EAS, but @bacons/apple-targets only reads ios.buildNumber, so without this
+ * the widget extension is built as 1 and Xcode warns that it doesn't match the
+ * app. Outside EAS builds this leaves the config as it is.
+ */
+function withBuildNumber(ios) {
+  const buildNumber = process.env.EAS_BUILD_IOS_BUILD_NUMBER;
+  return buildNumber ? { ...ios, buildNumber } : ios;
+}
+
 module.exports = ({ config }) => {
   const isDev = process.env.APP_VARIANT === 'development';
   const base = {
     ...config,
+    ios: withBuildNumber(config.ios),
     plugins: [
       ...(config.plugins ?? []),
       ...googleSignIn(

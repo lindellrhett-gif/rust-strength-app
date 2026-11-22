@@ -64,6 +64,17 @@ if ! $cloud && [ "$step" != "submit" ]; then
   for tool in pod fastlane xcodebuild; do
     command -v "$tool" >/dev/null 2>&1 || problems+=("$tool is not installed (brew install cocoapods fastlane, and Xcode)")
   done
+  # Shelfsmith and Orbit Arena sign with a different distribution certificate
+  # that has the same name as this app's. Each local build puts its certificate
+  # in a temporary keychain, and Xcode's export step picks a certificate by
+  # name, so two local builds at once can sign with the other app's
+  # certificate and fail ("doesn't include signing certificate").
+  if pgrep -f eas-cli-local-build-plugin >/dev/null 2>&1; then
+    problems+=("Another local iOS build is running (Shelfsmith or Orbit Arena?). Wait for it to finish; two at once can pick the wrong certificate.")
+  fi
+  if security list-keychains -d user | grep -q "eas-build-"; then
+    problems+=("A keychain from an earlier EAS build is still in the keychain list. If no build is running, remove it: security list-keychains -d user -s ~/Library/Keychains/login.keychain-db")
+  fi
 fi
 latest_ipa="$(ls -t dist/*.ipa 2>/dev/null | head -1 || true)"
 if ! $cloud && [ "$step" = "submit" ] && [ -z "$latest_ipa" ]; then
