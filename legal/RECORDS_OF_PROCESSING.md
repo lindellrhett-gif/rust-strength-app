@@ -583,7 +583,7 @@ This conclusion has not been reviewed by a lawyer.
 | # | Action | Risk or reason |
 |---|---|---|
 | A1 | Appoint a UK representative (UK GDPR Art. 27), an EU representative (GDPR Art. 27) and an EU DSA legal representative (DSA Art. 13). Fill in `ukRepresentative` and `euRepresentative`, and update 1.2 | 1.2 |
-| A2 | Replace consumer Gmail as the code sender with a transactional email provider that offers a written DPA with SCCs and the UK Addendum. Delete the old code emails from Gmail's Sent folder. Update the provider table in `src/legal/privacy.ts` and its French translation (finding 3). **Done November 23, 2026 (Resend), except deleting the old code emails** | R11 |
+| A2 | Replace consumer Gmail as the code sender with a transactional email provider that offers a written DPA with SCCs and the UK Addendum. Delete the old code emails from Gmail's Sent folder. Update the provider table in `src/legal/privacy.ts` and its French translation (finding 3). **Done November 23, 2026 (Resend). The old code emails are in Gmail's Trash and the App Password is revoked** | R11 |
 | A3 | Decide where the support inbox lives. A consumer Gmail inbox holds requests, reports and appeals with no DPA. A business mailbox with a DPA would close that gap. **Decided November 23, 2026: Zoho Mail, support@bluestemsoftware.com. Get Zoho's DPA on file** | R11 |
 | A4 | Fill in `postalAddress` in `src/legal/config.ts` | 1.2 |
 | A5 | Add UK and EU breach steps to `legal/INCIDENT_RESPONSE.md`: 72 hours, Arts. 33 and 34, a breach log (finding 5) | R1 |

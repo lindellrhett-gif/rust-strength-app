@@ -330,13 +330,16 @@ translation has the same gap (RECORDS 2.7, finding 3).
 |---|---|---|
 | Who | Resend (Plus Five Five, Inc.) | Zoho Mail, support@bluestemsoftware.com, a business mailbox on the LLC's domain |
 | Since | Privacy Policy 1.6.1 | Privacy Policy 1.6.2. The old Gmail address stays in the policy because the app versions already out show it |
-| Written agreement | **Yes.** Resend's Data Processing Addendum (updated December 31, 2025) is part of its Terms for every account and plan, and is pre-signed when the account is made; the signed copy is in the Resend dashboard, Settings → Documents. It incorporates the EU SCCs (2021/914), the UK Addendum and Swiss terms, and Resend is under the EU-US Data Privacy Framework. **Save a dated copy outside the repo** | **Not yet on file.** Zoho gives its DPA on request: the account's administrator emails legal@zohocorp.com and names the data centre the account was made in. Zoho describes it as based on the model contractual clauses |
+| Written agreement | **Yes.** Resend's Data Processing Addendum (updated December 31, 2025) is part of its Terms for every account and plan, and is pre-signed when the account is made; the signed copy is in the Resend dashboard, Settings → Documents. It incorporates the EU SCCs (2021/914), the UK Addendum and Swiss terms, and Resend is under the EU-US Data Privacy Framework. A dated copy is saved outside the repo (November 23, 2026) | **Requested November 23, 2026, not yet on file.** Zoho gives its DPA on request: the account's administrator emails legal@zohocorp.com and names the data centre the account was made in (US: the account opens at mail.zoho.com). Zoho describes it as based on the model contractual clauses |
 | Where | United States (Resend's DPA 6.1) | The data centre of the Zoho account (**not checked**; zoho.com accounts are normally the US one) |
 
 **Conclusion after the update: adequate protection is established for the
-codes, and will be for the inbox once Zoho's DPA is on file.** Still to do:
-save Resend's signed DPA, get and save Zoho's, and in the old Gmail account
-delete the code emails from the Sent folder and revoke the App Password.
+codes, and will be for the inbox once Zoho's DPA is on file.** Done on November 23, 2026: Resend's
+signed DPA saved (outside the repo, Agreements folder, dated), Zoho's DPA
+requested from legal@zohocorp.com (US data centre), the Gmail App Password
+revoked, and the 31 code emails in Gmail's Sent folder moved to the Trash
+(Gmail empties it after 30 days). Still to do: sign and save Zoho's DPA when
+it arrives.
 
 **Conclusion (before the update): adequate protection is not established.** The reason is mainly
 the missing written agreement, not the data. Options:
