@@ -34,11 +34,6 @@ export function useTimeline() {
   return {
     timeline,
     isLoading: workouts.isLoading || activities.isLoading || restDays.isLoading,
-    isRefetching: workouts.isRefetching || activities.isRefetching || restDays.isRefetching,
-    refetch: () => {
-      void workouts.refetch();
-      void activities.refetch();
-      void restDays.refetch();
-    },
+    refetch: () => Promise.allSettled([workouts.refetch(), activities.refetch(), restDays.refetch()]),
   };
 }

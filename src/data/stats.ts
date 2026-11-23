@@ -119,10 +119,7 @@ export function useTrainedDates() {
     data,
     isLoading: workouts.isLoading || activities.isLoading,
     isRefetching: workouts.isRefetching || activities.isRefetching,
-    refetch: () => {
-      void workouts.refetch();
-      void activities.refetch();
-    },
+    refetch: () => Promise.allSettled([workouts.refetch(), activities.refetch()]),
   };
 }
 

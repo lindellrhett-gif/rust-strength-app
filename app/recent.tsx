@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingView } from '@/components';
 import { TimelineRow } from '@/components/progress/TimelineRow';
 import { useTimeline } from '@/data/timeline';
+import { usePullToRefresh } from '@/lib/pullRefresh';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -12,7 +13,8 @@ import { radius, spacing, text } from '@/theme/typography';
  * the Progress tab. Tap a workout or run to open it.
  */
 export default function RecentWorkouts() {
-  const { timeline, isLoading, isRefetching, refetch } = useTimeline();
+  const { timeline, isLoading, refetch } = useTimeline();
+  const pull = usePullToRefresh(refetch);
 
   if (isLoading && timeline.length === 0) return <LoadingView />;
 
@@ -28,7 +30,7 @@ export default function RecentWorkouts() {
         ListEmptyComponent={
           <Text style={[text.bodyMuted, styles.empty]}>Workouts, activities and rest days show up here.</Text>
         }
-        refreshControl={<RefreshControl tintColor={colors.textMuted} refreshing={isRefetching} onRefresh={refetch} />}
+        refreshControl={<RefreshControl tintColor={colors.textMuted} refreshing={pull.refreshing} onRefresh={pull.onRefresh} />}
       />
     </SafeAreaView>
   );

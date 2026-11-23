@@ -26,6 +26,7 @@ import {
 } from '@/domain/nutrition/reports';
 import { goalFor } from '@/domain/nutrition/totals';
 import { todayLocal } from '@/lib/dates';
+import { usePullToRefresh } from '@/lib/pullRefresh';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -81,6 +82,7 @@ function Reports() {
   const settings = useNutritionSettings();
   const weighIns = useWeighIns();
   const profile = useProfile();
+  const pull = usePullToRefresh(entries.refetch);
   const s = settings.data ?? nutritionDefaults();
   const unit = s.energyUnit;
   const weightUnit = profile.data?.unit ?? 'lb';
@@ -115,7 +117,7 @@ function Reports() {
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl tintColor={colors.textMuted} refreshing={entries.isRefetching} onRefresh={() => void entries.refetch()} />
+          <RefreshControl tintColor={colors.textMuted} refreshing={pull.refreshing} onRefresh={pull.onRefresh} />
         }
       >
         <Chips options={RANGES} selected={range} onSelect={setRange} accessibilityLabel="Report range" />

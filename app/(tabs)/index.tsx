@@ -15,6 +15,7 @@ import { consistency } from '@/domain/achievements';
 import { hasFeature } from '@/domain/entitlements';
 import { currentStreak, weekStart } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
+import { usePullToRefresh } from '@/lib/pullRefresh';
 import { useRunInProgress } from '@/lib/useActiveRun';
 import { colors } from '@/theme/colors';
 import { spacing, text } from '@/theme/typography';
@@ -36,7 +37,7 @@ export default function Today() {
   const streak = currentStreak(dates.data ?? [], todayStr, restDates);
   // The same 30-day figure friends see on a profile: rest days count.
   const consistent = consistency(dates.data ?? [], todayStr, 30, restDates);
-  const refreshing = dates.isRefetching || open.isRefetching || restDays.isRefetching;
+  const pull = usePullToRefresh(dates.refetch, restDays.refetch, open.refetch, planned.refetch);
 
   const todaysPlans = (planned.data ?? []).filter((p) => p.scheduled_for === todayStr);
 
@@ -52,16 +53,7 @@ export default function Today() {
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            tintColor={colors.textMuted}
-            refreshing={refreshing}
-            onRefresh={() => {
-              dates.refetch();
-              restDays.refetch();
-              open.refetch();
-              planned.refetch();
-            }}
-          />
+          <RefreshControl tintColor={colors.textMuted} refreshing={pull.refreshing} onRefresh={pull.onRefresh} />
         }
       >
         <TodayTiles consistency={consistent} streak={streak} />

@@ -28,6 +28,7 @@ import {
 } from '@/domain/leaderboard';
 import { currentStreak } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
+import { usePullToRefresh } from '@/lib/pullRefresh';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
@@ -46,6 +47,7 @@ export default function Leaderboard() {
   const [metric, setMetric] = useState<LeaderboardMetric>('streak');
   const [period, setPeriod] = useState<LeaderboardPeriod>('month');
   const board = useLeaderboard(period);
+  const pull = usePullToRefresh(board.refetch);
   const trainedDates = useTrainedDates();
   const restDays = useRestDays();
   const today = todayLocal();
@@ -74,8 +76,8 @@ export default function Leaderboard() {
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
-            refreshing={board.isFetching && !board.isLoading}
-            onRefresh={() => board.refetch()}
+            refreshing={pull.refreshing}
+            onRefresh={pull.onRefresh}
             tintColor={colors.primary}
           />
         }

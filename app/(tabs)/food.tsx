@@ -34,6 +34,7 @@ import { cleanMealName, itemsFromEntries } from '@/domain/nutrition/savedMeals';
 import { addDays } from '@/domain/stats';
 import { todayLocal } from '@/lib/dates';
 import { newId } from '@/lib/ids';
+import { usePullToRefresh } from '@/lib/pullRefresh';
 import { useToday } from '@/lib/useToday';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
@@ -90,6 +91,7 @@ function Diary() {
   const saveMeal = useSaveMeal();
   const profile = useProfile();
   const [editing, setEditing] = useState<DiaryEntry | null>(null);
+  const pull = usePullToRefresh(entries.refetch, goals.refetch, settings.refetch);
 
   const s = settings.data ?? nutritionDefaults();
   if (entries.isLoading && !entries.data) return <LoadingView />;
@@ -136,15 +138,7 @@ function Diary() {
         contentContainerStyle={styles.content}
         {...keyboardAware}
         refreshControl={
-          <RefreshControl
-            tintColor={colors.textMuted}
-            refreshing={entries.isRefetching}
-            onRefresh={() => {
-              void entries.refetch();
-              void goals.refetch();
-              void settings.refetch();
-            }}
-          />
+          <RefreshControl tintColor={colors.textMuted} refreshing={pull.refreshing} onRefresh={pull.onRefresh} />
         }
       >
         <View style={styles.dayNav}>
