@@ -6,7 +6,7 @@ import { LEGAL, representative } from '../config';
  * TERMS_FR_SOURCE_VERSION must equal LEGAL.version, and a test checks that.
  * Translation not yet reviewed by a French-speaking lawyer.
  */
-export const TERMS_FR_SOURCE_VERSION = '1.6.1';
+export const TERMS_FR_SOURCE_VERSION = '1.6.2';
 
 export const TERMS_OF_SERVICE_FR = `# Conditions d’utilisation
 

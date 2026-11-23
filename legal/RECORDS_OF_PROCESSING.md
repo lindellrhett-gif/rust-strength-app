@@ -23,9 +23,9 @@ below describes the code as first found. Since then:
   `0032_friendship_integrity.sql` stops a friendship being inserted already
   accepted, accepted by its requester, moved to other people, or requested across a
   block.
-- **Finding 3, partly done.** The Privacy Policy (English and French) now says Gmail
-  sends the sign-up and password codes and holds the support inbox. Replacing
-  consumer Gmail is still open.
+- **Finding 3, done November 23, 2026.** Resend sends the codes (policy 1.6.1)
+  and the support inbox is support@bluestemsoftware.com on Zoho Mail (1.6.2).
+  Zoho's DPA is requested, not yet on file (A3).
 - **Finding 5 and A5, done.** `legal/INCIDENT_RESPONSE.md` has the UK, EU, Canada and
   Quebec steps and an incident register.
 - **Finding 7 and A19, done.** The sharing question has two equal buttons, "Keep
@@ -65,7 +65,7 @@ We must show this record to the ICO or an EU supervisory authority if asked
 |---|---|
 | Controller | Bluestem Software LLC, a one-person US limited liability company |
 | Postal address | See `src/legal/config.ts` `postalAddress` (to be filled in) |
-| Email | ruststrengthsupport@gmail.com (`LEGAL.contactEmail`) |
+| Email | support@bluestemsoftware.com (`LEGAL.contactEmail`), since November 23, 2026; ruststrengthsupport@gmail.com before |
 | Privacy Officer | Published by title, "Privacy Officer", at the same email. In practice the owner |
 | UK representative (UK GDPR Art. 27) | Not yet appointed |
 | EU representative (GDPR Art. 27) | Not yet appointed |
@@ -94,7 +94,9 @@ These apply to every activity in 1.5. Each activity names the ones it uses.
 |---|---|---|---|---|
 | **Supabase** (contracting entity Supabase Pte. Ltd) | Processor: database, sign-in (Supabase Auth), Edge Functions, logs | AWS us-east-1, Virginia, USA | Everything the app stores | Supabase's Data Processing Addendum (version 1, August 1, 2026), part of its Terms. It incorporates the EU Standard Contractual Clauses (Commission Implementing Decision (EU) 2021/914) and the UK Addendum. Nothing to sign |
 | **Amazon Web Services** | Supabase's sub-processor (hosting) | us-east-1, USA | As Supabase | Through Supabase's DPA. Supabase's full sub-processor list was **not checked** |
-| **Google, consumer Gmail** (ruststrengthsupport@gmail.com) | Sends sign-up confirmation codes and password reset codes (Supabase SMTP settings). Also the support inbox: requests, reports, appeals | USA (**not checked**) | Email addresses and one-time codes. Every email people send us | **None. Consumer Gmail has no data processing agreement. Open gap** (see 2.9) |
+| **Resend** (Plus Five Five, Inc.) | Processor: sends sign-up confirmation codes and password reset codes (Supabase SMTP settings), from support@bluestemsoftware.com, since November 23, 2026 | USA | Email addresses and the code emails | Resend's Data Processing Addendum (updated December 31, 2025), part of its Terms for every plan and pre-signed; signed copy in Resend → Settings → Documents. EU SCCs (2021/914), UK Addendum, EU-US Data Privacy Framework |
+| **Zoho Mail** (Zoho Corporation) | Processor: the support inbox, support@bluestemsoftware.com: requests, reports, appeals, and replies to code emails | The account's data centre (**not checked**; normally US for zoho.com) | Every email people send us | Zoho's DPA, given on request from legal@zohocorp.com. **Requested, not yet on file** |
+| **Google, consumer Gmail** (ruststrengthsupport@gmail.com) | The old support address, still shown by app versions already out. Sent the codes until November 23, 2026 | USA (**not checked**) | Email people still send to the old address. Old code emails in the Sent folder until deleted | **None. Consumer Gmail has no data processing agreement.** Shrinking gap: only the old address |
 | **RevenueCat, Inc.** | Processor: Pro plans, purchase checks with Apple, Pro status, the manage-plan screen | USA | The random account id, purchase details, app and device details needed for purchases, App Store country and currency, answers given in its purchase-help screen | **Not checked:** whether RevenueCat's DPA is accepted and includes the SCCs and UK Addendum |
 | **Apple** | Its own controller: Sign in with Apple, App Store payments, Apple Maps tiles | Apple's | Sign-in: email (or private relay) and account id. Payments: everything about the purchase. Maps: map-area requests and IP address from the phone, no routes | Apple's own terms. Not our processor |
 | **Google, Sign in with Google** | Its own controller | Google's | Google confirms the account and sends email, account id, name and picture link. We drop the name and picture before storage (migration 0029) | Google's own terms. Not our processor |
@@ -581,8 +583,8 @@ This conclusion has not been reviewed by a lawyer.
 | # | Action | Risk or reason |
 |---|---|---|
 | A1 | Appoint a UK representative (UK GDPR Art. 27), an EU representative (GDPR Art. 27) and an EU DSA legal representative (DSA Art. 13). Fill in `ukRepresentative` and `euRepresentative`, and update 1.2 | 1.2 |
-| A2 | Replace consumer Gmail as the code sender with a transactional email provider that offers a written DPA with SCCs and the UK Addendum. Delete the old code emails from Gmail's Sent folder. Update the provider table in `src/legal/privacy.ts` and its French translation (finding 3) | R11 |
-| A3 | Decide where the support inbox lives. A consumer Gmail inbox holds requests, reports and appeals with no DPA. A business mailbox with a DPA would close that gap | R11 |
+| A2 | Replace consumer Gmail as the code sender with a transactional email provider that offers a written DPA with SCCs and the UK Addendum. Delete the old code emails from Gmail's Sent folder. Update the provider table in `src/legal/privacy.ts` and its French translation (finding 3). **Done November 23, 2026 (Resend), except deleting the old code emails** | R11 |
+| A3 | Decide where the support inbox lives. A consumer Gmail inbox holds requests, reports and appeals with no DPA. A business mailbox with a DPA would close that gap. **Decided November 23, 2026: Zoho Mail, support@bluestemsoftware.com. Get Zoho's DPA on file** | R11 |
 | A4 | Fill in `postalAddress` in `src/legal/config.ts` | 1.2 |
 | A5 | Add UK and EU breach steps to `legal/INCIDENT_RESPONSE.md`: 72 hours, Arts. 33 and 34, a breach log (finding 5) | R1 |
 | A6 | Check RevenueCat's DPA, accept it, and note the safeguard in 1.3. Confirm `REVENUECAT_SECRET_API_KEY` is set in production so deletion removes the RevenueCat customer | P7 |

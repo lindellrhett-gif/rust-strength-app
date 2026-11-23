@@ -30,7 +30,7 @@ Vous devez avoir au moins 13 ans, au moins 14 ans si vous vivez au Canada, ou au
 
 ## 3. Votre compte
 
-Vous êtes responsable de la sécurité de votre mot de passe, ou du compte Apple ou du compte Google avec lequel vous vous connectez, ainsi que des activités effectuées avec votre compte. Fournissez-nous des renseignements exacts et tenez-les à jour. Avisez-nous à ruststrengthsupport@gmail.com si vous croyez que quelqu’un a accédé à votre compte sans votre autorisation.
+Vous êtes responsable de la sécurité de votre mot de passe, ou du compte Apple ou du compte Google avec lequel vous vous connectez, ainsi que des activités effectuées avec votre compte. Fournissez-nous des renseignements exacts et tenez-les à jour. Avisez-nous à support@bluestemsoftware.com si vous croyez que quelqu’un a accédé à votre compte sans votre autorisation.
 
 Un seul compte par personne. Ne partagez pas, ne vendez pas et ne transférez pas votre compte.
 
@@ -61,19 +61,19 @@ Vous êtes responsable de votre contenu et vous confirmez avoir le droit de le p
 
 ## 6. Signalements et application des règles
 
-Si le nom d’utilisateur, le nom affiché ou le comportement d’une personne enfreint ces règles, signalez cette personne à partir de son profil dans l’Application, ou écrivez à ruststrengthsupport@gmail.com. Vous pouvez aussi bloquer immédiatement n’importe quel utilisateur, ce qui met fin à toute relation d’amitié entre vous et vous rend invisibles l’un pour l’autre.
+Si le nom d’utilisateur, le nom affiché ou le comportement d’une personne enfreint ces règles, signalez cette personne à partir de son profil dans l’Application, ou écrivez à support@bluestemsoftware.com. Vous pouvez aussi bloquer immédiatement n’importe quel utilisateur, ce qui met fin à toute relation d’amitié entre vous et vous rend invisibles l’un pour l’autre.
 
-**Toute personne peut signaler un contenu illégal**, avec ou sans compte. Écrivez à ruststrengthsupport@gmail.com en indiquant où il se trouve dans l’Application et pourquoi vous croyez qu’il est illégal.
+**Toute personne peut signaler un contenu illégal**, avec ou sans compte. Écrivez à support@bluestemsoftware.com en indiquant où il se trouve dans l’Application et pourquoi vous croyez qu’il est illégal.
 
 Nous examinons les signalements et pouvons retirer du contenu, restreindre des fonctionnalités, ou suspendre ou résilier les comptes qui enfreignent les présentes Conditions ou la loi. Nous visons à donner suite aux signalements de contenu abusif dans les 24 heures. Nous pouvons agir sans préavis lorsque la sécurité d’une personne est en danger. Une personne examine chaque signalement; nous n’utilisons pas d’outils automatisés pour modérer le contenu.
 
-**Lorsque nous agissons, nous vous expliquons pourquoi.** Si nous retirons quelque chose que vous avez écrit, ou si nous restreignons, suspendons ou fermons votre compte, nous vous indiquons ce que nous avons fait, la règle ou la loi sur laquelle nous nous sommes fondés et comment contester la décision, à moins que la loi ou la sécurité d’une personne ne nous en empêche. Si vous croyez que nous nous sommes trompés, écrivez à ruststrengthsupport@gmail.com et une personne réexaminera la décision. Vous pouvez aussi nous écrire pour vous plaindre de la façon dont nous traitons les signalements ou le contenu, ou dont nous nous acquittons de nos obligations en vertu de l’Online Safety Act du Royaume-Uni (loi britannique sur la sécurité en ligne), et nous vous répondrons.
+**Lorsque nous agissons, nous vous expliquons pourquoi.** Si nous retirons quelque chose que vous avez écrit, ou si nous restreignons, suspendons ou fermons votre compte, nous vous indiquons ce que nous avons fait, la règle ou la loi sur laquelle nous nous sommes fondés et comment contester la décision, à moins que la loi ou la sécurité d’une personne ne nous en empêche. Si vous croyez que nous nous sommes trompés, écrivez à support@bluestemsoftware.com et une personne réexaminera la décision. Vous pouvez aussi nous écrire pour vous plaindre de la façon dont nous traitons les signalements ou le contenu, ou dont nous nous acquittons de nos obligations en vertu de l’Online Safety Act du Royaume-Uni (loi britannique sur la sécurité en ligne), et nous vous répondrons.
 
-**Point de contact.** Pour les utilisateurs et les autorités, y compris en vertu du règlement sur les services numériques de l’Union européenne (Digital Services Act) : ruststrengthsupport@gmail.com, en anglais ou en français. Notre représentant légal dans l’Union européenne : sera nommé ici avant que Rust Strength soit offert dans l’Union européenne.
+**Point de contact.** Pour les utilisateurs et les autorités, y compris en vertu du règlement sur les services numériques de l’Union européenne (Digital Services Act) : support@bluestemsoftware.com, en anglais ou en français. Notre représentant légal dans l’Union européenne : sera nommé ici avant que Rust Strength soit offert dans l’Union européenne.
 
 ## 7. Droit d’auteur
 
-Si vous croyez qu’un contenu de l’Application porte atteinte à votre droit d’auteur, écrivez à ruststrengthsupport@gmail.com en fournissant une description de l’œuvre, l’endroit où elle apparaît, vos coordonnées, une déclaration selon laquelle vous croyez que l’utilisation n’est pas autorisée, et une déclaration, faite sous peine de parjure, selon laquelle votre avis est exact et vous êtes autorisé à agir. Nous retirerons le contenu contrefaisant et pouvons résilier le compte des personnes qui récidivent.
+Si vous croyez qu’un contenu de l’Application porte atteinte à votre droit d’auteur, écrivez à support@bluestemsoftware.com en fournissant une description de l’œuvre, l’endroit où elle apparaît, vos coordonnées, une déclaration selon laquelle vous croyez que l’utilisation n’est pas autorisée, et une déclaration, faite sous peine de parjure, selon laquelle votre avis est exact et vous êtes autorisé à agir. Nous retirerons le contenu contrefaisant et pouvons résilier le compte des personnes qui récidivent.
 
 ## 8. Notre contenu
 
@@ -128,7 +128,7 @@ Dans la mesure permise par la loi, vous acceptez d’indemniser Bluestem Softwar
 
 Les présentes Conditions sont régies par les lois de l’État du Dakota du Nord, sans égard aux règles de conflit de lois.
 
-Veuillez d’abord communiquer avec nous à ruststrengthsupport@gmail.com — la plupart des problèmes peuvent être réglés de façon informelle. Si nous ne parvenons pas à régler un différend dans un délai de 30 jours, il sera porté devant les tribunaux d’État ou fédéraux situés dans l’État du Dakota du Nord, et vous et nous acceptons la compétence de ces tribunaux.
+Veuillez d’abord communiquer avec nous à support@bluestemsoftware.com — la plupart des problèmes peuvent être réglés de façon informelle. Si nous ne parvenons pas à régler un différend dans un délai de 30 jours, il sera porté devant les tribunaux d’État ou fédéraux situés dans l’État du Dakota du Nord, et vous et nous acceptons la compétence de ces tribunaux.
 
 Rien dans les présentes n’empêche l’un ou l’autre d’entre nous d’intenter une action devant un tribunal des petites créances.
 
@@ -157,4 +157,4 @@ Si une disposition est inapplicable, les autres demeurent en vigueur. Le fait qu
 
 Bluestem Software LLC
 308 6th St W, Park River, ND 58270
-ruststrengthsupport@gmail.com
+support@bluestemsoftware.com

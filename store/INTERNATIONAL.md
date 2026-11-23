@@ -53,8 +53,9 @@ documents are written as if it does, which is safe either way.
 3. **Answer French emails in French.** Quebec's language law gives consumers
    the right to be served in French. A translation tool is fine.
 4. **Done November 23, 2026: Resend sends the codes**, from
-   support@bluestemsoftware.com (Privacy Policy 1.6.1). Put Resend's data
-   processing agreement on file. Original step: **Replace the Gmail sender** for sign-up and password codes with a
+   support@bluestemsoftware.com (Privacy Policy 1.6.1), and that Zoho Mail
+   address is the support inbox (1.6.2). Save Resend's signed DPA and get
+   Zoho's (legal/QUEBEC_PIA.md 1.5.2). Original step: **Replace the Gmail sender** for sign-up and password codes with a
    transactional email provider that offers a written data processing
    agreement (Postmark, Resend, Mailtrap and similar). Consumer Gmail has
    none. This also unblocks the UK and the EU.

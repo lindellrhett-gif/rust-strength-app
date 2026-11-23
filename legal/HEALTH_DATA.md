@@ -47,8 +47,8 @@ To contact them: Supabase at privacy@supabase.com, and Open Food Facts at contac
 - **See it.** Profile → Privacy & legal → Download my data gives you a copy of everything we hold about you, straight away. This policy lists everyone who receives health data. Ask us and we will confirm what we hold and who has received it.
 - **Delete it.** Delete single entries in the app, or delete your account under Profile → Privacy & legal → Delete account, which deletes all of it immediately. Turning off Share daily steps deletes the totals already uploaded. Copies in our provider's backups and logs are overwritten on the provider's own schedule.
 - **Stop it.** You can withdraw your consent at any time: stop using a feature and delete what it holds, turn off the feed, step sharing or run maps, remove friends, or delete your account. You can also ask us.
-- **Ask us.** Email ruststrengthsupport@gmail.com from your account's email address, so we can confirm the request is yours. We will answer within 45 days. If we need longer, up to 45 more days, we will tell you why within the first 45. Requests are free, up to twice a year.
-- **Appeal.** If we turn down a request, email ruststrengthsupport@gmail.com with "Appeal" in the subject. We will answer in writing within 45 days, with our reasons. If we still turn it down, you can complain to the Washington State Attorney General at https://www.atg.wa.gov/file-complaint
+- **Ask us.** Email support@bluestemsoftware.com from your account's email address, so we can confirm the request is yours. We will answer within 45 days. If we need longer, up to 45 more days, we will tell you why within the first 45. Requests are free, up to twice a year.
+- **Appeal.** If we turn down a request, email support@bluestemsoftware.com with "Appeal" in the subject. We will answer in writing within 45 days, with our reasons. If we still turn it down, you can complain to the Washington State Attorney General at https://www.atg.wa.gov/file-complaint
 
 We will not treat you differently for using any of these rights.
 
@@ -62,4 +62,4 @@ If we change this policy materially, we will update the date above and tell you 
 
 Bluestem Software LLC
 308 6th St W, Park River, ND 58270
-ruststrengthsupport@gmail.com
+support@bluestemsoftware.com

@@ -6,7 +6,7 @@ import { LEGAL, representative } from '../config';
  * PRIVACY_FR_SOURCE_VERSION must equal LEGAL.version, and a test checks that.
  * Translation not yet reviewed by a French-speaking lawyer.
  */
-export const PRIVACY_FR_SOURCE_VERSION = '1.6.1';
+export const PRIVACY_FR_SOURCE_VERSION = '1.6.2';
 
 export const PRIVACY_POLICY_FR = `# Politique de confidentialité
 
@@ -142,7 +142,8 @@ Nous faisons appel aux fournisseurs de services suivants :
 |---|---|---|
 | Supabase | Base de données, authentification et hébergement | Vos identifiants de connexion et toutes les données de l’application décrites ci-dessus |
 | Resend | Envoie les codes de confirmation de votre adresse courriel et de réinitialisation de votre mot de passe, à partir de support@bluestemsoftware.com | Votre adresse courriel et le contenu du courriel, y compris le code à usage unique, lorsque vous vous inscrivez ou demandez à réinitialiser votre mot de passe |
-| Google (Gmail) et Zoho Mail | Hébergent nos boîtes de soutien : Gmail pour ${LEGAL.contactEmail}, et Zoho Mail pour support@bluestemsoftware.com, qui reçoit toute réponse à un courriel de code | Tout courriel que vous nous envoyez |
+| Zoho Mail | Héberge notre boîte de soutien, ${LEGAL.contactEmail}, qui reçoit aussi toute réponse à un courriel de code | Tout courriel que vous nous envoyez |
+| Google (Gmail) | Reçoit les courriels envoyés à notre ancienne adresse, ruststrengthsupport@gmail.com, qu’affichent les anciennes versions de l’application | Tout courriel que vous envoyez à cette adresse |
 | Apple (« Se connecter avec Apple ») | Vous connecte, si vous choisissez cette option | Apple confirme votre compte Apple et nous transmet votre adresse courriel (ou votre adresse de relais privée) et un identifiant de compte. Lorsque vous supprimez votre compte, nous demandons à Apple de mettre fin à l’accès de l’application à votre compte Apple |
 | Google (« Se connecter avec Google ») | Vous connecte, si vous choisissez cette option | Google confirme votre compte Google et nous transmet votre adresse courriel et un identifiant de compte, ainsi que votre nom et le lien vers votre photo de profil, que nous supprimons |
 | Apple (Plans) | Affiche les cartes dans l’application | Les demandes de carte de la zone affichée à l’écran, qui, comme toute connexion, comprennent votre adresse IP. Pas votre compte, ni vos parcours, qui sont tracés sur votre téléphone |

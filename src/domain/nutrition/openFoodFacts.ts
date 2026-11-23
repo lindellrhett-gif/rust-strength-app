@@ -17,7 +17,7 @@ import type { Food, FoodBasis } from './foods';
 import { emptyNutrients, KJ_PER_KCAL, type Nutrients } from './nutrients';
 
 /** Identifies the app to Open Food Facts, as its API asks. */
-export const OFF_USER_AGENT = 'RustStrength/1.2 (ruststrengthsupport@gmail.com)';
+export const OFF_USER_AGENT = 'RustStrength/1.2 (support@bluestemsoftware.com)';
 
 /** Only what the diary uses, to keep each response small. */
 export const OFF_FIELDS = [

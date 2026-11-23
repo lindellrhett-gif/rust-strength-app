@@ -14,7 +14,7 @@ export const LEGAL = {
   entity: 'Bluestem Software LLC',
 
   /** Monitored inbox for privacy requests and support. */
-  contactEmail: 'ruststrengthsupport@gmail.com',
+  contactEmail: 'support@bluestemsoftware.com',
 
   /**
    * The LLC's postal address, printed in the Privacy Policy. New Zealand's
@@ -112,7 +112,9 @@ export const LEGAL = {
   // src/legal/fr must be updated with every change to this version.
   // 1.6.1: Resend sends the sign-up and password codes instead of Gmail, from
   // support@bluestemsoftware.com. A patch: the same job, a different provider.
-  version: '1.6.1',
+  // 1.6.2: the support address moves to support@bluestemsoftware.com, a Zoho
+  // Mail business mailbox, from consumer Gmail. A patch: a new contact address.
+  version: '1.6.2',
 
   /** Last substantive edit to the documents. */
   lastUpdated: 'November 23, 2026',

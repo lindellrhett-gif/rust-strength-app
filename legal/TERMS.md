@@ -30,7 +30,7 @@ You must be at least 13 years old, at least 14 if you live in Canada, or at leas
 
 ## 3. Your account
 
-You are responsible for keeping your password, or the Apple ID or Google account you sign in with, secure, and for activity under your account. Give us accurate information and keep it current. Tell us at ruststrengthsupport@gmail.com if you believe your account has been accessed without your permission.
+You are responsible for keeping your password, or the Apple ID or Google account you sign in with, secure, and for activity under your account. Give us accurate information and keep it current. Tell us at support@bluestemsoftware.com if you believe your account has been accessed without your permission.
 
 One account per person. Do not share, sell or transfer your account.
 
@@ -61,19 +61,19 @@ You are responsible for your content and confirm you have the right to post it.
 
 ## 6. Reporting and enforcement
 
-If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email ruststrengthsupport@gmail.com. You can also block any user immediately, which removes any friendship and hides you from each other.
+If someone's username, display name or behaviour breaks these rules, report them from their profile in the App, or email support@bluestemsoftware.com. You can also block any user immediately, which removes any friendship and hides you from each other.
 
-**Anyone can report illegal content**, with or without an account. Email ruststrengthsupport@gmail.com saying where it is in the App and why you believe it is illegal.
+**Anyone can report illegal content**, with or without an account. Email support@bluestemsoftware.com saying where it is in the App and why you believe it is illegal.
 
 We review reports and may remove content, restrict features, or suspend or terminate accounts that break these Terms or the law. We aim to act on reports of abusive content within 24 hours. We may act without notice where someone's safety is at risk. A person reviews every report; we do not use automated tools to moderate content.
 
-**When we act, we tell you why.** If we remove something you wrote, or restrict, suspend or end your account, we tell you what we did, what rule or law it was based on, and how to challenge it, unless the law or someone's safety prevents us. If you think we got it wrong, email ruststrengthsupport@gmail.com and a person will review the decision. You can also email us to complain about how we handle reports or content, or about how we meet our duties under the UK Online Safety Act, and we will reply.
+**When we act, we tell you why.** If we remove something you wrote, or restrict, suspend or end your account, we tell you what we did, what rule or law it was based on, and how to challenge it, unless the law or someone's safety prevents us. If you think we got it wrong, email support@bluestemsoftware.com and a person will review the decision. You can also email us to complain about how we handle reports or content, or about how we meet our duties under the UK Online Safety Act, and we will reply.
 
-**Contact point.** For users and authorities, including under the EU Digital Services Act: ruststrengthsupport@gmail.com, in English or French. Our legal representative in the European Union: to be named here before Rust Strength is offered in the European Union.
+**Contact point.** For users and authorities, including under the EU Digital Services Act: support@bluestemsoftware.com, in English or French. Our legal representative in the European Union: to be named here before Rust Strength is offered in the European Union.
 
 ## 7. Copyright
 
-If you believe content in the App infringes your copyright, email ruststrengthsupport@gmail.com with a description of the work, where it appears, your contact details, a statement that you believe the use is unauthorised, and a statement under penalty of perjury that your notice is accurate and you are authorised to act. We will remove infringing material and may terminate repeat infringers.
+If you believe content in the App infringes your copyright, email support@bluestemsoftware.com with a description of the work, where it appears, your contact details, a statement that you believe the use is unauthorised, and a statement under penalty of perjury that your notice is accurate and you are authorised to act. We will remove infringing material and may terminate repeat infringers.
 
 ## 8. Our content
 
@@ -128,7 +128,7 @@ To the extent the law allows, you agree to indemnify and hold harmless Bluestem 
 
 These Terms are governed by the laws of the State of North Dakota, without regard to conflict-of-law rules.
 
-Please contact us at ruststrengthsupport@gmail.com first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in North Dakota, and you and we consent to that jurisdiction.
+Please contact us at support@bluestemsoftware.com first — most issues can be resolved informally. If we cannot resolve a dispute within 30 days, it will be brought in the state or federal courts located in North Dakota, and you and we consent to that jurisdiction.
 
 Nothing here prevents either of us from bringing a claim in small-claims court.
 
@@ -157,4 +157,4 @@ If any provision is unenforceable, the rest stays in force. Our not enforcing a 
 
 Bluestem Software LLC
 308 6th St W, Park River, ND 58270
-ruststrengthsupport@gmail.com
+support@bluestemsoftware.com

@@ -132,7 +132,8 @@ We use these service providers:
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
 | Resend | Sends the codes to confirm your email and to reset your password, from support@bluestemsoftware.com | Your email address and the content of the email, including the one-time code, when you sign up or ask to reset your password |
-| Google (Gmail) and Zoho Mail | Hold our support inboxes: Gmail for ruststrengthsupport@gmail.com, and Zoho Mail for support@bluestemsoftware.com, which receives any reply to a code email | Any email you send us |
+| Zoho Mail | Holds our support inbox, support@bluestemsoftware.com, which also receives any reply to a code email | Any email you send us |
+| Google (Gmail) | Receives email sent to our earlier address, ruststrengthsupport@gmail.com, which older versions of the app show | Any email you send to that address |
 | Apple (Sign in with Apple) | Signs you in, if you choose it | Apple confirms your Apple ID and sends us your email address (or private relay address) and an account identifier. When you delete your account, we ask Apple to end the app's access to your Apple ID |
 | Google (Sign in with Google) | Signs you in, if you choose it | Google confirms your Google account and sends us your email address and an account identifier, along with your name and profile picture link, which we discard |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |
@@ -167,7 +168,7 @@ This permanently deletes your account, profile, workouts, sets, activities, runs
 
 You can also download everything we hold about you first: **Profile → Privacy & legal → Download my data**.
 
-If you cannot access the app, email ruststrengthsupport@gmail.com from your account's email address and we will action it.
+If you cannot access the app, email support@bluestemsoftware.com from your account's email address and we will action it.
 
 ## 9. Your privacy rights
 
@@ -175,11 +176,11 @@ Depending on where you live, you may have the right to know what we collect, acc
 
 **We do not sell or share personal information**, so there is nothing to opt out of.
 
-The in-app export and delete tools satisfy access and deletion immediately. For anything else, contact ruststrengthsupport@gmail.com. We will not treat you differently for asking.
+The in-app export and delete tools satisfy access and deletion immediately. For anything else, contact support@bluestemsoftware.com. We will not treat you differently for asking.
 
 ## 10. Children
 
-Rust Strength is not intended for children under 13, under 14 in Canada, or under 16 in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email ruststrengthsupport@gmail.com and we will delete it.
+Rust Strength is not intended for children under 13, under 14 in Canada, or under 16 in the European Union, Iceland, Liechtenstein and Norway. You must confirm you are old enough to create an account or, if you sign in with Apple or Google, before you can use the app. The app asks for the higher age when your phone's region is set to one of those countries. We do not knowingly collect information from children below these ages. If you believe one has created an account, email support@bluestemsoftware.com and we will delete it.
 
 ## 11. Security
 
@@ -203,7 +204,7 @@ We handle your information under the Privacy Act 2020.
 
 - **Who collects and holds it:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270. Supabase stores it on our behalf.
 - **What we collect, why, and who sees it:** Sections 1 to 5. Your email address is needed to create an account. Everything else is optional; leaving it out only means the feature that uses it does not work.
-- **Access and correction:** you can see and download your information at any time (**Profile → Privacy & legal → Download my data**) and change most of it in the app. To ask for anything else, or to have something corrected, email ruststrengthsupport@gmail.com. We will respond within 20 working days.
+- **Access and correction:** you can see and download your information at any time (**Profile → Privacy & legal → Download my data**) and change most of it in the app. To ask for anything else, or to have something corrected, email support@bluestemsoftware.com. We will respond within 20 working days.
 - **Complaints:** email us first. If you are not satisfied, you can complain to the Privacy Commissioner: https://www.privacy.org.nz
 - **Breaches:** if a privacy breach is likely to cause you serious harm, we will tell you and the Privacy Commissioner as soon as we can.
 
@@ -211,7 +212,7 @@ We handle your information under the Privacy Act 2020.
 
 We handle your information in line with the Australian Privacy Principles in the Privacy Act 1988.
 
-- **Who we are:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
+- **Who we are:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com.
 - **Health information** (Section 2) is sensitive information. We collect it only with your consent, which you give by entering it, and use it only for the features that need it. You can withdraw your consent by deleting that information or your account (Section 8).
 - **You do not have to give your real name.** Your account starts with a random handle, and the app never asks for your name.
 - **Overseas:** your information is stored and processed in the United States (see above).
@@ -223,7 +224,7 @@ We handle your information in line with the Australian Privacy Principles in the
 
 We handle your information under the Personal Information Protection and Electronic Documents Act (PIPEDA) and, if you live in Quebec, the Act respecting the protection of personal information in the private sector.
 
-- **Who is responsible:** our Privacy Officer, Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com. They are in charge of protecting your personal information and of answering your questions and requests.
+- **Who is responsible:** our Privacy Officer, Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com. They are in charge of protecting your personal information and of answering your questions and requests.
 - **Consent:** we use your information only for the purposes in Sections 2 and 3. You give explicit consent to our use of your health information before you can use the app (Section 2). You can withdraw consent at any time by deleting the information or your account; the features that use it then stop working.
 - **Private by default:** new accounts start with sharing with friends off, and nothing you log is shown to anyone until you choose to share it (Section 4).
 - **Outside Quebec and Canada:** your information is stored in the United States (see above). Before sending Quebec residents' information outside Quebec, we assessed the protection it receives there.
@@ -237,7 +238,7 @@ We handle your information under the Personal Information Protection and Electro
 
 We handle your information under the UK GDPR and the EU General Data Protection Regulation.
 
-- **Controller:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
+- **Controller:** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com.
 - **Our representative in the United Kingdom:** to be named here before Rust Strength is offered in the United Kingdom.
 - **Our representative in the European Union:** to be named here before Rust Strength is offered in the European Union.
 
@@ -263,6 +264,6 @@ You can contact a representative instead of us about anything to do with your in
 
 Bluestem Software LLC
 308 6th St W, Park River, ND 58270
-ruststrengthsupport@gmail.com
+support@bluestemsoftware.com
 
 Our Privacy Officer can be reached at the same address.

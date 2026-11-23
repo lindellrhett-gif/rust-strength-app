@@ -132,7 +132,8 @@ Nous faisons appel aux fournisseurs de services suivants :
 |---|---|---|
 | Supabase | Base de données, authentification et hébergement | Vos identifiants de connexion et toutes les données de l’application décrites ci-dessus |
 | Resend | Envoie les codes de confirmation de votre adresse courriel et de réinitialisation de votre mot de passe, à partir de support@bluestemsoftware.com | Votre adresse courriel et le contenu du courriel, y compris le code à usage unique, lorsque vous vous inscrivez ou demandez à réinitialiser votre mot de passe |
-| Google (Gmail) et Zoho Mail | Hébergent nos boîtes de soutien : Gmail pour ruststrengthsupport@gmail.com, et Zoho Mail pour support@bluestemsoftware.com, qui reçoit toute réponse à un courriel de code | Tout courriel que vous nous envoyez |
+| Zoho Mail | Héberge notre boîte de soutien, support@bluestemsoftware.com, qui reçoit aussi toute réponse à un courriel de code | Tout courriel que vous nous envoyez |
+| Google (Gmail) | Reçoit les courriels envoyés à notre ancienne adresse, ruststrengthsupport@gmail.com, qu’affichent les anciennes versions de l’application | Tout courriel que vous envoyez à cette adresse |
 | Apple (« Se connecter avec Apple ») | Vous connecte, si vous choisissez cette option | Apple confirme votre compte Apple et nous transmet votre adresse courriel (ou votre adresse de relais privée) et un identifiant de compte. Lorsque vous supprimez votre compte, nous demandons à Apple de mettre fin à l’accès de l’application à votre compte Apple |
 | Google (« Se connecter avec Google ») | Vous connecte, si vous choisissez cette option | Google confirme votre compte Google et nous transmet votre adresse courriel et un identifiant de compte, ainsi que votre nom et le lien vers votre photo de profil, que nous supprimons |
 | Apple (Plans) | Affiche les cartes dans l’application | Les demandes de carte de la zone affichée à l’écran, qui, comme toute connexion, comprennent votre adresse IP. Pas votre compte, ni vos parcours, qui sont tracés sur votre téléphone |
@@ -167,7 +168,7 @@ Cela supprime définitivement votre compte, votre profil, vos entraînements, vo
 
 Vous pouvez aussi télécharger d’abord tout ce que nous détenons à votre sujet : **Profile → Privacy & legal → Download my data**.
 
-Si vous ne pouvez pas accéder à l’application, écrivez à ruststrengthsupport@gmail.com à partir de l’adresse courriel de votre compte et nous traiterons votre demande.
+Si vous ne pouvez pas accéder à l’application, écrivez à support@bluestemsoftware.com à partir de l’adresse courriel de votre compte et nous traiterons votre demande.
 
 ## 9. Vos droits en matière de vie privée
 
@@ -175,11 +176,11 @@ Selon l’endroit où vous habitez, vous pouvez avoir le droit de savoir ce que 
 
 **Nous ne vendons ni ne partageons de renseignements personnels**, il n’y a donc aucune option de retrait à exercer.
 
-Les outils d’exportation et de suppression intégrés à l’application répondent immédiatement aux demandes d’accès et de suppression. Pour toute autre demande, communiquez avec nous à ruststrengthsupport@gmail.com. Nous ne vous traiterons pas différemment parce que vous avez fait une demande.
+Les outils d’exportation et de suppression intégrés à l’application répondent immédiatement aux demandes d’accès et de suppression. Pour toute autre demande, communiquez avec nous à support@bluestemsoftware.com. Nous ne vous traiterons pas différemment parce que vous avez fait une demande.
 
 ## 10. Enfants
 
-L’application Rust Strength n’est pas destinée aux enfants de moins de 13 ans, de moins de 14 ans au Canada, ou de moins de 16 ans dans l’Union européenne, en Islande, au Liechtenstein et en Norvège. Vous devez confirmer que vous avez l’âge requis pour créer un compte ou, si vous vous connectez avec Apple ou Google, avant de pouvoir utiliser l’application. L’application demande l’âge le plus élevé lorsque la région de votre téléphone est réglée sur l’un de ces pays. Nous ne recueillons pas sciemment de renseignements auprès d’enfants qui n’ont pas atteint ces âges. Si vous croyez qu’un tel enfant a créé un compte, écrivez à ruststrengthsupport@gmail.com et nous le supprimerons.
+L’application Rust Strength n’est pas destinée aux enfants de moins de 13 ans, de moins de 14 ans au Canada, ou de moins de 16 ans dans l’Union européenne, en Islande, au Liechtenstein et en Norvège. Vous devez confirmer que vous avez l’âge requis pour créer un compte ou, si vous vous connectez avec Apple ou Google, avant de pouvoir utiliser l’application. L’application demande l’âge le plus élevé lorsque la région de votre téléphone est réglée sur l’un de ces pays. Nous ne recueillons pas sciemment de renseignements auprès d’enfants qui n’ont pas atteint ces âges. Si vous croyez qu’un tel enfant a créé un compte, écrivez à support@bluestemsoftware.com et nous le supprimerons.
 
 ## 11. Sécurité
 
@@ -203,7 +204,7 @@ Nous traitons vos renseignements conformément à la Privacy Act 2020 (loi néo-
 
 - **Qui les recueille et les détient :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270. Supabase les stocke pour notre compte.
 - **Ce que nous recueillons, pourquoi, et qui y a accès :** sections 1 à 5. Votre adresse courriel est nécessaire pour créer un compte. Tout le reste est facultatif; ne pas le fournir signifie seulement que la fonctionnalité qui l’utilise ne fonctionne pas.
-- **Accès et correction :** vous pouvez consulter et télécharger vos renseignements à tout moment (**Profile → Privacy & legal → Download my data**) et en modifier la plupart dans l’application. Pour toute autre demande, ou pour faire corriger quelque chose, écrivez à ruststrengthsupport@gmail.com. Nous répondrons dans un délai de 20 jours ouvrables.
+- **Accès et correction :** vous pouvez consulter et télécharger vos renseignements à tout moment (**Profile → Privacy & legal → Download my data**) et en modifier la plupart dans l’application. Pour toute autre demande, ou pour faire corriger quelque chose, écrivez à support@bluestemsoftware.com. Nous répondrons dans un délai de 20 jours ouvrables.
 - **Plaintes :** écrivez-nous d’abord. Si la réponse ne vous satisfait pas, vous pouvez porter plainte auprès du Privacy Commissioner (commissaire néo-zélandais à la protection de la vie privée) : https://www.privacy.org.nz
 - **Atteintes :** si une atteinte à la vie privée est susceptible de vous causer un préjudice grave, nous vous en informerons, de même que le Privacy Commissioner, dès que possible.
 
@@ -211,7 +212,7 @@ Nous traitons vos renseignements conformément à la Privacy Act 2020 (loi néo-
 
 Nous traitons vos renseignements conformément aux Australian Privacy Principles (principes australiens de protection de la vie privée) de la Privacy Act 1988 (loi australienne de 1988 sur la protection de la vie privée).
 
-- **Qui nous sommes :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
+- **Qui nous sommes :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com.
 - **Les renseignements sur la santé** (section 2) sont des renseignements sensibles. Nous ne les recueillons qu’avec votre consentement, que vous donnez en les saisissant, et nous ne les utilisons que pour les fonctionnalités qui en ont besoin. Vous pouvez retirer votre consentement en supprimant ces renseignements ou votre compte (section 8).
 - **Vous n’avez pas à donner votre vrai nom.** Votre compte commence avec un pseudonyme aléatoire, et l’application ne demande jamais votre nom.
 - **À l’étranger :** vos renseignements sont stockés et traités aux États-Unis (voir ci-dessus).
@@ -223,7 +224,7 @@ Nous traitons vos renseignements conformément aux Australian Privacy Principles
 
 Nous traitons vos renseignements conformément à la Loi sur la protection des renseignements personnels et les documents électroniques (LPRPDE) et, si vous habitez au Québec, à la Loi sur la protection des renseignements personnels dans le secteur privé.
 
-- **Personne responsable :** notre responsable de la protection des renseignements personnels (Privacy Officer), Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com. Cette personne veille à la protection de vos renseignements personnels et répond à vos questions et à vos demandes.
+- **Personne responsable :** notre responsable de la protection des renseignements personnels (Privacy Officer), Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com. Cette personne veille à la protection de vos renseignements personnels et répond à vos questions et à vos demandes.
 - **Consentement :** nous utilisons vos renseignements uniquement aux fins décrites aux sections 2 et 3. Vous donnez un consentement exprès à notre utilisation de vos renseignements sur la santé avant de pouvoir utiliser l’application (section 2). Vous pouvez retirer votre consentement à tout moment en supprimant les renseignements ou votre compte; les fonctionnalités qui les utilisent cessent alors de fonctionner.
 - **Confidentialité par défaut :** les nouveaux comptes commencent avec le partage avec les amis désactivé, et rien de ce que vous consignez n’est montré à qui que ce soit tant que vous ne choisissez pas de le partager (section 4).
 - **Hors du Québec et du Canada :** vos renseignements sont stockés aux États-Unis (voir ci-dessus). Avant de communiquer à l’extérieur du Québec les renseignements des résidents du Québec, nous avons évalué la protection dont ils y bénéficient.
@@ -237,7 +238,7 @@ Nous traitons vos renseignements conformément à la Loi sur la protection des r
 
 Nous traitons vos renseignements conformément au RGPD du Royaume-Uni (UK GDPR) et au Règlement général sur la protection des données (RGPD) de l’Union européenne.
 
-- **Responsable du traitement :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, ruststrengthsupport@gmail.com.
+- **Responsable du traitement :** Bluestem Software LLC, 308 6th St W, Park River, ND 58270, support@bluestemsoftware.com.
 - **Notre représentant au Royaume-Uni :** sera nommé ici avant que Rust Strength soit offert au Royaume-Uni.
 - **Notre représentant dans l’Union européenne :** sera nommé ici avant que Rust Strength soit offert dans l’Union européenne.
 
@@ -263,6 +264,6 @@ Vous pouvez communiquer avec un représentant plutôt qu’avec nous pour toute 
 
 Bluestem Software LLC
 308 6th St W, Park River, ND 58270
-ruststrengthsupport@gmail.com
+support@bluestemsoftware.com
 
 Vous pouvez joindre notre responsable de la protection des renseignements personnels (Privacy Officer) à la même adresse.

@@ -1,6 +1,7 @@
 # Answering privacy requests
 
-What to do when someone emails ruststrengthsupport@gmail.com to see, correct,
+What to do when someone emails support@bluestemsoftware.com (or the old
+address, ruststrengthsupport@gmail.com) to see, correct,
 delete or stop their data. The deadlines differ by country (section 7). To
 keep one process, **answer every request within 20 working days**, New
 Zealand's limit and the shortest of them; that meets every other deadline the

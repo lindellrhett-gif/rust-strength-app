@@ -31,14 +31,16 @@ below describes the code as first found. Since then:
   before Start, and "profiling".
 - **L8, done.** "Keep private" and "Share" are equal buttons.
 - **D4, done.** The share card's "Show the route" now starts off.
-- **The Gmail mismatch in the Privacy Policy is fixed;** the provider itself is still
-  consumer Gmail.
+- **Gmail is replaced (November 23, 2026).** Resend sends the codes (policy
+  1.6.1) and the support inbox is support@bluestemsoftware.com on Zoho Mail
+  (policy 1.6.2). Left: Zoho's DPA on file, and clearing the old Gmail account
+  (1.5.2).
 - **D1, decided November 7, 2026: option A.** The minimum age is 14 when the
   phone's region is Canada (`src/domain/age.ts`, `LEGAL.minimumAgeCanada`). The
   Terms (section 2) and the Privacy Policy (sections 10 and 13) say so in both
   languages.
 - **Still open:**
-  - replacing Gmail;
+  - Zoho's DPA, and clearing the old Gmail account (1.5.2);
   - Open Food Facts;
   - the French review;
   - the governance summary;
@@ -322,12 +324,19 @@ password reset emails" only. Section 1 and the code say it also sends sign-up
 confirmation codes. The table does not mention the support inbox. The French
 translation has the same gap (RECORDS 2.7, finding 3).
 
-**Update, November 23, 2026: the codes now go through Resend.** Supabase Auth
-sends them through Resend's SMTP server from support@bluestemsoftware.com
-(Privacy Policy 1.6.1, both languages). Replies to a code email reach the
-Zoho Mail mailbox for that address. What is left of this point is the support
-inbox, which is still consumer Gmail, and putting Resend's and Zoho's data
-processing agreements on file.
+**Update, November 23, 2026: option 1 is done, apart from Zoho's agreement.**
+
+| | Codes | Support inbox |
+|---|---|---|
+| Who | Resend (Plus Five Five, Inc.) | Zoho Mail, support@bluestemsoftware.com, a business mailbox on the LLC's domain |
+| Since | Privacy Policy 1.6.1 | Privacy Policy 1.6.2. The old Gmail address stays in the policy because the app versions already out show it |
+| Written agreement | **Yes.** Resend's Data Processing Addendum (updated December 31, 2025) is part of its Terms for every account and plan, and is pre-signed when the account is made; the signed copy is in the Resend dashboard, Settings → Documents. It incorporates the EU SCCs (2021/914), the UK Addendum and Swiss terms, and Resend is under the EU-US Data Privacy Framework. **Save a dated copy outside the repo** | **Not yet on file.** Zoho gives its DPA on request: the account's administrator emails legal@zohocorp.com and names the data centre the account was made in. Zoho describes it as based on the model contractual clauses |
+| Where | United States (Resend's DPA 6.1) | The data centre of the Zoho account (**not checked**; zoho.com accounts are normally the US one) |
+
+**Conclusion after the update: adequate protection is established for the
+codes, and will be for the inbox once Zoho's DPA is on file.** Still to do:
+save Resend's signed DPA, get and save Zoho's, and in the old Gmail account
+delete the code emails from the Sent folder and revoke the App Password.
 
 **Conclusion (before the update): adequate protection is not established.** The reason is mainly
 the missing written agreement, not the data. Options:
@@ -471,7 +480,9 @@ the contract.
 | Recipient | Adequate protection? | Written agreement | Residual risk |
 |---|---|---|---|
 | Supabase | Yes, in our assessment, on conditions T2 to T4 | Yes (DPA). Fit with s 17's wording uncertain | Low to Medium |
-| Gmail | **Not established** | **No** | Medium |
+| Resend (codes) | Yes, in our assessment | Yes (DPA with SCCs) | Low |
+| Zoho Mail (inbox) | Likely, once its DPA is on file | **Requested from Zoho, not yet on file** | Low once done |
+| Gmail (old address only) | **Not established** | **No** | Low, falling as people update |
 | RevenueCat | Likely, once T5 is done | **Not on file** | Low once done |
 | Apple | Acceptable | Developer agreement only | Low |
 | Google Sign-In | Acceptable | Developer terms only | Low |
@@ -481,12 +492,12 @@ the contract.
 
 | # | Action | When |
 |---|---|---|
-| T1 | Replace consumer Gmail for codes and the support inbox (1.5.2), or accept and record the risk in Part 3 | Before Canada goes on sale |
+| T1 | Replace consumer Gmail for codes and the support inbox (1.5.2), or accept and record the risk in Part 3. **Done November 23, 2026,** except Zoho's DPA | Before Canada goes on sale |
 | T2 | Save a dated PDF of Supabase's DPA and Terms outside the repo. Check that the DPA covers all personal data in the project, not only EU and UK data | Before Canada |
 | T3 | Read Supabase's sub-processor list and note where staff and support can access data | Before Canada |
 | T4 | Fix R2: stop friends and pending requesters reading whole profile rows (RECORDS A8) | With 1.2 |
 | T5 | Accept RevenueCat's DPA, save a dated copy, and note it here. Confirm `REVENUECAT_SECRET_API_KEY` is set in production (RECORDS A6) | Before Canada |
-| T6 | Correct Privacy Policy section 5's Gmail row in English and French: sign-up codes too, and the support inbox (or the new providers after T1) | With T1 |
+| T6 | Correct Privacy Policy section 5's Gmail row in English and French: sign-up codes too, and the support inbox (or the new providers after T1). **Done in 1.6.1 and 1.6.2** | With T1 |
 | T7 | Decide Open Food Facts: accept and record, or proxy (1.5.6) | Before Canada |
 | T8 | Recheck government access at the next review: Section 702's status after April 2026, and whether Canada is a qualifying state under EO 14086 | Next review |
 | T9 | Sign Part 3, so the Privacy Policy's "we assessed" sentence is true | Before Canada |
@@ -1180,7 +1191,7 @@ or decide the items in 3.1 and 3.2.
 | Name | ______________________ |
 | Role | Owner, Bluestem Software LLC; person in charge of the protection of personal information |
 | D1 (Quebec under 14) decided | Option A, minimum age 14 across Canada, November 7, 2026 |
-| D2 (Gmail) decided | ______________________ (option and date; if accepted, the reason) |
+| D2 (Gmail) decided | Replace, November 23, 2026: Resend for codes, Zoho Mail for the support inbox |
 | D3 (Open Food Facts) decided | ______________________ |
 | Signature | ______________________ |
 | Date | ______________________ |

@@ -87,7 +87,8 @@ Free. No purchases, no subscription, no advertising, no analytics.
 | **Apple** | Distribution | Whatever App Store Connect collects from purchasers. No data flows from the app to Apple. |
 | **GitHub Pages** | Hosts the legal site | Visitor IPs in its own logs. No app data. |
 | **Resend** | Sends Supabase's sign-up and password reset emails, from `support@bluestemsoftware.com` (since November 23, 2026, policy 1.6.1; Gmail SMTP before) | A user's email address and the email with its code. Never contacted by the app itself. |
-| **Google (Gmail), Zoho Mail** | Support inboxes: `ruststrengthsupport@gmail.com` (Gmail) and `support@bluestemsoftware.com` (Zoho, gets replies to code emails) | Whatever people email us. |
+| **Zoho Mail** | The support inbox, `support@bluestemsoftware.com`, since November 23, 2026 (policy 1.6.2). Also gets replies to code emails | Whatever people email us. |
+| **Google (Gmail)** | The old support address, `ruststrengthsupport@gmail.com`, which app versions already out still show | Whatever people still email there. |
 
 **Verified: no analytics, crash reporting, advertising or attribution SDK is
 present.** The dependency tree and the source were searched for every common one. The

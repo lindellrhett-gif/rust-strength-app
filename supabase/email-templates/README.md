@@ -54,18 +54,20 @@ but the code was already used".
 - **Nothing sent, 429 or "email rate limit exceeded":** Authentication →
   **Rate limits** → "Emails sent per hour". The default is low, and sign-ups
   plus resends share it.
-- **Nothing sent, SMTP error:** the sender address in **SMTP Settings** has to
-  be exactly the Gmail account the App Password belongs to, or Gmail refuses
-  the message.
+- **Nothing sent, SMTP error:** check **SMTP Settings**: host `smtp.resend.com`,
+  port 465, username `resend`, the password a Resend API key with Sending
+  access, and a sender on `bluestemsoftware.com`, the domain verified in
+  Resend. Resend's **Emails** log shows whether it was delivered or bounced.
 - **Sent, but codes are rejected:** **Email OTP expiration** in the email
   provider settings. Codes people read in the evening need longer than an hour.
-- **Sent, but nobody sees it:** spam. A personal Gmail account sending to
-  strangers lands there regularly; a transactional provider on your own domain
-  is the fix.
+- **Sent, but nobody sees it:** spam. Check that the domain's DKIM, SPF and
+  DMARC records still pass in Resend's **Domains** page.
 
 ## Delivery
 
-Until a custom SMTP provider is connected (**Authentication → Emails → SMTP
-Settings**), Supabase only sends to members of your Supabase team, at most two
-emails an hour. Fine for testing with your own address; real users will receive
-nothing. See `legal/LEGAL_AUDIT.md` section 4.
+Since November 23, 2026, Supabase sends through **Resend** (Authentication →
+Emails → SMTP Settings), from `support@bluestemsoftware.com`, sender name
+"Rust Strength". Gmail SMTP was used before. Resend's free plan allows 100
+emails a day and 3,000 a month, shared with Shelfsmith on the same account;
+upgrade before that gets tight. Without custom SMTP, Supabase only sends to
+members of your Supabase team, at most two emails an hour.
