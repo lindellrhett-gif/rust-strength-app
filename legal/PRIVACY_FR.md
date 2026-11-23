@@ -1,6 +1,6 @@
 # Politique de confidentialité
 
-**Dernière mise à jour : 21 novembre 2026**
+**Dernière mise à jour : 23 novembre 2026**
 
 L’application Rust Strength est exploitée par Bluestem Software LLC (« nous »). Cette politique explique ce que nous recueillons, pourquoi, et ce que vous pouvez faire à ce sujet.
 
@@ -131,7 +131,8 @@ Nous faisons appel aux fournisseurs de services suivants :
 | Fournisseur | Ce qu’il fait | Ce qu’il reçoit |
 |---|---|---|
 | Supabase | Base de données, authentification et hébergement | Vos identifiants de connexion et toutes les données de l’application décrites ci-dessus |
-| Google (Gmail) | Envoie les codes de confirmation de votre adresse courriel et de réinitialisation de votre mot de passe, et héberge notre boîte de soutien | Votre adresse courriel et le code à usage unique, lorsque vous vous inscrivez ou demandez à réinitialiser votre mot de passe; et tout courriel que vous nous envoyez |
+| Resend | Envoie les codes de confirmation de votre adresse courriel et de réinitialisation de votre mot de passe, à partir de support@bluestemsoftware.com | Votre adresse courriel et le contenu du courriel, y compris le code à usage unique, lorsque vous vous inscrivez ou demandez à réinitialiser votre mot de passe |
+| Google (Gmail) et Zoho Mail | Hébergent nos boîtes de soutien : Gmail pour ruststrengthsupport@gmail.com, et Zoho Mail pour support@bluestemsoftware.com, qui reçoit toute réponse à un courriel de code | Tout courriel que vous nous envoyez |
 | Apple (« Se connecter avec Apple ») | Vous connecte, si vous choisissez cette option | Apple confirme votre compte Apple et nous transmet votre adresse courriel (ou votre adresse de relais privée) et un identifiant de compte. Lorsque vous supprimez votre compte, nous demandons à Apple de mettre fin à l’accès de l’application à votre compte Apple |
 | Google (« Se connecter avec Google ») | Vous connecte, si vous choisissez cette option | Google confirme votre compte Google et nous transmet votre adresse courriel et un identifiant de compte, ainsi que votre nom et le lien vers votre photo de profil, que nous supprimons |
 | Apple (Plans) | Affiche les cartes dans l’application | Les demandes de carte de la zone affichée à l’écran, qui, comme toute connexion, comprennent votre adresse IP. Pas votre compte, ni vos parcours, qui sont tracés sur votre téléphone |

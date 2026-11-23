@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: November 21, 2026**
+**Last updated: November 23, 2026**
 
 Rust Strength is operated by Bluestem Software LLC ("we", "us"). This policy explains what we collect, why, and what you can do about it.
 
@@ -131,7 +131,8 @@ We use these service providers:
 | Provider | What it does | What it receives |
 |---|---|---|
 | Supabase | Database, authentication and hosting | Your account credentials and all app data described above |
-| Google (Gmail) | Sends the codes to confirm your email and to reset your password, and holds our support inbox | Your email address and the one-time code, when you sign up or ask to reset your password; and any email you send us |
+| Resend | Sends the codes to confirm your email and to reset your password, from support@bluestemsoftware.com | Your email address and the content of the email, including the one-time code, when you sign up or ask to reset your password |
+| Google (Gmail) and Zoho Mail | Hold our support inboxes: Gmail for ruststrengthsupport@gmail.com, and Zoho Mail for support@bluestemsoftware.com, which receives any reply to a code email | Any email you send us |
 | Apple (Sign in with Apple) | Signs you in, if you choose it | Apple confirms your Apple ID and sends us your email address (or private relay address) and an account identifier. When you delete your account, we ask Apple to end the app's access to your Apple ID |
 | Google (Sign in with Google) | Signs you in, if you choose it | Google confirms your Google account and sends us your email address and an account identifier, along with your name and profile picture link, which we discard |
 | Apple (Maps) | Shows the maps in the app | Requests for the map of the area on screen, which like any connection include your IP address. Not your account, and not your routes, which are drawn on your phone |

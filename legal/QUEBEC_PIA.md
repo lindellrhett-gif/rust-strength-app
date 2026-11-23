@@ -72,7 +72,8 @@ file at least once a year, together with `legal/RECORDS_OF_PROCESSING.md`.
 | Recipient | Where | Sensitivity | Written agreement | Conclusion |
 |---|---|---|---|---|
 | Supabase (with AWS) | USA (AWS us-east-1) | High | Yes: Supabase's DPA | Adequate, with conditions (1.5.1) |
-| Google, consumer Gmail | USA (not checked) | Low (codes) to Moderate (inbox) | **No** | **Not established.** Replace, or accept and record the risk (1.5.2) |
+| Google, consumer Gmail | USA (not checked) | Moderate (inbox) | **No** | Codes moved to Resend on November 23, 2026. The inbox: **not established.** Replace, or accept and record the risk (1.5.2) |
+| Resend | USA (us-east-1) | Low (codes) | Resend's DPA: **check it is accepted** | Likely adequate once its DPA is on file (1.5.2) |
 | RevenueCat | USA | Low to Moderate | **Not on file** | Likely adequate once its DPA is on file (1.5.3) |
 | Apple | USA | Low to Moderate | Apple's developer agreement only | Acceptable (1.5.4) |
 | Google, Sign in with Google | USA | Low | Google's developer terms only | Acceptable (1.5.5) |
@@ -321,7 +322,14 @@ password reset emails" only. Section 1 and the code say it also sends sign-up
 confirmation codes. The table does not mention the support inbox. The French
 translation has the same gap (RECORDS 2.7, finding 3).
 
-**Conclusion: adequate protection is not established.** The reason is mainly
+**Update, November 23, 2026: the codes now go through Resend.** Supabase Auth
+sends them through Resend's SMTP server from support@bluestemsoftware.com
+(Privacy Policy 1.6.1, both languages). Replies to a code email reach the
+Zoho Mail mailbox for that address. What is left of this point is the support
+inbox, which is still consumer Gmail, and putting Resend's and Zoho's data
+processing agreements on file.
+
+**Conclusion (before the update): adequate protection is not established.** The reason is mainly
 the missing written agreement, not the data. Options:
 1. **Replace it before Canada goes on sale. Recommended.**
    - **Codes:** send them through a transactional email provider that offers

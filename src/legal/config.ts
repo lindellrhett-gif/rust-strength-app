@@ -110,12 +110,14 @@ export const LEGAL = {
   // Canada, the UK and the EU, explicit consent for health information, the
   // EU minimum age and sharing off by default. The French translations in
   // src/legal/fr must be updated with every change to this version.
-  version: '1.6.0',
+  // 1.6.1: Resend sends the sign-up and password codes instead of Gmail, from
+  // support@bluestemsoftware.com. A patch: the same job, a different provider.
+  version: '1.6.1',
 
   /** Last substantive edit to the documents. */
-  lastUpdated: 'November 21, 2026',
+  lastUpdated: 'November 23, 2026',
   /** The same date, as the French translations write it. A test keeps the two in step. */
-  lastUpdatedFr: '21 novembre 2026',
+  lastUpdatedFr: '23 novembre 2026',
 
   /** Where the app is offered. Drives which privacy laws the documents address. */
   region: 'United States, New Zealand, Australia, Canada, the United Kingdom and the European Economic Area',

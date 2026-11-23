@@ -1,6 +1,6 @@
 # Conditions d’utilisation
 
-**Dernière mise à jour : 21 novembre 2026**
+**Dernière mise à jour : 23 novembre 2026**
 
 Les présentes Conditions constituent une entente entre vous et Bluestem Software LLC (« nous ») qui régit votre utilisation de Rust Strength (l’« Application »). En créant un compte, vous les acceptez.
 
