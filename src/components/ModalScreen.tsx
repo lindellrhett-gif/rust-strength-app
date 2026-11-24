@@ -8,6 +8,8 @@ interface ModalScreenProps {
   onRequestClose: () => void;
   animationType?: 'none' | 'slide' | 'fade';
   onShow?: () => void;
+  /** iOS only: after the modal has finished closing. */
+  onDismiss?: () => void;
   style?: StyleProp<ViewStyle>;
   children: React.ReactNode;
 }
@@ -32,6 +34,7 @@ export function ModalScreen({
   onRequestClose,
   animationType = 'slide',
   onShow,
+  onDismiss,
   style,
   children,
 }: ModalScreenProps) {
@@ -43,6 +46,7 @@ export function ModalScreen({
       animationType={animationType}
       onRequestClose={onRequestClose}
       onShow={onShow}
+      onDismiss={onDismiss}
       statusBarTranslucent
     >
       <View

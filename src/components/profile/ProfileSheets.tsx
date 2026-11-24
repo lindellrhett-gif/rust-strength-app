@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button } from '../Button';
@@ -9,7 +9,7 @@ import { RestAlertToggle } from '../RestAlertToggle';
 import { SettingRow } from '../SettingRow';
 import { SettingsSheet } from '../SettingsSheet';
 import { useUpdateProfile } from '@/data/profile';
-import { useProStatus } from '@/data/subscription';
+import { useCustomerCenter, useProStatus } from '@/data/subscription';
 import { EQUIPMENT_OPTIONS } from '@/domain/generator';
 import { parseInlineNumber } from '@/domain/inlineEdit';
 import { REST_PRESETS, clampRest, restLabel } from '@/domain/restTimer';
@@ -192,7 +192,31 @@ export function RestTimerRow({ profile }: { profile: Profile }) {
 /** Rust Strength Pro: the row and the sheet holding its status and plans. */
 export function ProRow() {
   const status = useProStatus();
+  const customerCenter = useCustomerCenter();
   const [open, setOpen] = useState(false);
+  const afterClose = useRef<(() => void) | null>(null);
+
+  const runAfterClose = () => {
+    const next = afterClose.current;
+    afterClose.current = null;
+    next?.();
+  };
+
+  // The Customer Center can't open over this sheet (see ProCard), so the sheet
+  // closes first, the Customer Center opens once it has gone, and the sheet
+  // comes back with the refreshed status when the Customer Center closes.
+  const openCustomerCenter = () => {
+    afterClose.current = () =>
+      customerCenter.mutate(undefined, {
+        onError: (e) =>
+          Alert.alert('Couldn’t open subscriptions', e instanceof Error ? e.message : 'Please try again.'),
+        onSettled: () => setOpen(true),
+      });
+    setOpen(false);
+    // onDismiss is the signal; this covers a close that never reports one.
+    setTimeout(runAfterClose, 1500);
+  };
+
   return (
     <>
       <SettingRow
@@ -200,8 +224,13 @@ export function ProRow() {
         value={status.data?.active ? 'Active' : 'See plans'}
         onPress={() => setOpen(true)}
       />
-      <SettingsSheet visible={open} title="Rust Strength Pro" onClose={() => setOpen(false)}>
-        <ProCard />
+      <SettingsSheet
+        visible={open}
+        title="Rust Strength Pro"
+        onClose={() => setOpen(false)}
+        onDismiss={runAfterClose}
+      >
+        <ProCard onOpenCustomerCenter={openCustomerCenter} />
       </SettingsSheet>
     </>
   );

@@ -12,8 +12,13 @@ import { spacing, text } from '@/theme/typography';
  * Rust Strength Pro on the Profile tab: the status, RevenueCat's paywall for
  * anyone without Pro, its Customer Center for subscribers, and Restore. Only
  * shown while subscriptions are on.
+ *
+ * Inside a sheet, pass onOpenCustomerCenter: RevenueCat presents the Customer
+ * Center from the window's root view controller, and iOS refuses while a
+ * sheet is already presented there, so the button would spin forever. The
+ * sheet's owner closes the sheet first and opens it after.
  */
-export function ProCard() {
+export function ProCard({ onOpenCustomerCenter }: { onOpenCustomerCenter?: () => void } = {}) {
   const status = useProStatus();
   const paywall = useShowPaywall();
   const customerCenter = useCustomerCenter();
@@ -30,7 +35,10 @@ export function ProCard() {
         <Button
           label={pro.lifetime ? 'Purchase help' : 'Manage subscription'}
           variant="secondary"
-          onPress={() => customerCenter.mutate(undefined, { onError: fail('Couldn’t open subscriptions') })}
+          onPress={
+            onOpenCustomerCenter ??
+            (() => customerCenter.mutate(undefined, { onError: fail('Couldn’t open subscriptions') }))
+          }
           loading={customerCenter.isPending}
         />
       ) : (

@@ -11,17 +11,20 @@ export function SettingsSheet({
   visible,
   title,
   onClose,
+  onDismiss,
   closeLabel = 'Done',
   children,
 }: {
   visible: boolean;
   title: string;
   onClose: () => void;
+  /** iOS only: after the sheet has finished closing. */
+  onDismiss?: () => void;
   closeLabel?: string;
   children: ReactNode;
 }) {
   return (
-    <ModalScreen visible={visible} onRequestClose={onClose}>
+    <ModalScreen visible={visible} onRequestClose={onClose} onDismiss={onDismiss}>
       <View style={styles.head}>
         <Text style={[text.title, styles.title]} numberOfLines={2}>
           {title}
