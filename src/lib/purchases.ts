@@ -18,7 +18,7 @@
  * manage their plan in RevenueCat's Customer Center. Both SDKs load on first
  * use, so an older build without them reports that it needs updating.
  */
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import type { CustomerInfo } from 'react-native-purchases';
 
 import {
@@ -30,6 +30,7 @@ import {
   type PaywallOutcome,
   type ProStatus,
 } from '@/domain/subscription';
+import { LEGAL } from '@/legal/config';
 
 import { env } from './env';
 
@@ -124,18 +125,34 @@ export async function showPaywall(): Promise<PaywallOutcome> {
   return paywallOutcome(String(result));
 }
 
+/** Where openCustomerCenter ended up, so a caller knows whether to wait for it. */
+export type CustomerCenterOutcome = 'customerCenter' | 'manageSubscriptions' | 'emailSupport';
+
+/** The email Lifetime owners get when RevenueCat's screen can't open. */
+export const PURCHASE_HELP_MAILTO = `mailto:${LEGAL.contactEmail}?subject=${encodeURIComponent(
+  `${LEGAL.appName} Pro purchase help`,
+)}`;
+
 /**
  * RevenueCat's Customer Center: change or cancel the plan, restore, ask for
- * a refund, contact support. It needs a RevenueCat plan that includes it;
- * without one, this falls back to Apple's own subscription settings.
+ * a refund, contact support. Resolves when it closes. If it can't open, a
+ * subscriber gets Apple's subscription settings instead; a Lifetime purchase
+ * isn't a subscription and isn't listed there, so its owner gets an email to
+ * support. Those two resolve as soon as they are shown.
  */
-export async function openCustomerCenter(): Promise<void> {
+export async function openCustomerCenter({ lifetime = false }: { lifetime?: boolean } = {}): Promise<CustomerCenterOutcome> {
   try {
     const { default: RevenueCatUI } = await loadUi();
     await RevenueCatUI.presentCustomerCenter();
+    return 'customerCenter';
   } catch {
+    if (lifetime) {
+      await Linking.openURL(PURCHASE_HELP_MAILTO);
+      return 'emailSupport';
+    }
     const { default: Purchases } = await load();
     await Purchases.showManageSubscriptions();
+    return 'manageSubscriptions';
   }
 }
 

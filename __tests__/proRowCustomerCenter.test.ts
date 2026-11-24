@@ -10,9 +10,10 @@ import { createElement } from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 
 const mockMutate = jest.fn();
+const mockAlert = jest.fn();
 
 jest.mock('react-native', () => ({
-  Alert: { alert: jest.fn() },
+  Alert: { alert: (...args: unknown[]) => mockAlert(...args) },
   Pressable: 'Pressable',
   StyleSheet: { create: <T>(s: T) => s },
   Switch: 'Switch',
@@ -38,7 +39,7 @@ jest.mock('@/theme/colors', () => ({ colors: {} }));
 jest.mock('@/theme/typography', () => ({ radius: {}, spacing: {}, text: {} }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- after the mocks above
-const { ProRow } = require('@/components/profile/ProfileSheets') as typeof import('@/components/profile/ProfileSheets');
+const { ProRow, BACKUP_MS } = require('@/components/profile/ProfileSheets') as typeof import('@/components/profile/ProfileSheets');
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -59,8 +60,12 @@ function openSheetAndAskForHelp(tree: ReactTestRenderer) {
   act(() => card(tree).props.onOpenCustomerCenter());
 }
 
+type MutateOptions = { onSuccess: (outcome: string) => void; onError: (e: unknown) => void };
+const lastOptions = () => mockMutate.mock.calls.at(-1)![1] as MutateOptions;
+
 beforeEach(() => {
   mockMutate.mockReset();
+  mockAlert.mockReset();
   jest.useFakeTimers();
 });
 afterEach(() => {
@@ -76,9 +81,10 @@ test('closes the sheet before opening the Customer Center, and only then opens i
 
   act(() => sheet(tree).props.onDismiss());
   expect(mockMutate).toHaveBeenCalledTimes(1);
+  expect(mockMutate.mock.calls[0][0]).toEqual({ lifetime: true });
 
-  // The fallback timer must not open it a second time.
-  act(() => jest.advanceTimersByTime(2000));
+  // The backup timer must not open it a second time.
+  act(() => jest.advanceTimersByTime(BACKUP_MS * 2));
   expect(mockMutate).toHaveBeenCalledTimes(1);
 });
 
@@ -87,16 +93,48 @@ test('brings the sheet back when the Customer Center closes', () => {
   openSheetAndAskForHelp(tree);
   act(() => sheet(tree).props.onDismiss());
 
-  const options = mockMutate.mock.calls[0][1] as { onSettled: () => void };
-  act(() => options.onSettled());
+  act(() => lastOptions().onSuccess('customerCenter'));
   expect(sheet(tree).props.visible).toBe(true);
+});
+
+test('stays closed while Apple’s settings or the support email are showing', () => {
+  for (const outcome of ['manageSubscriptions', 'emailSupport']) {
+    const tree = render();
+    openSheetAndAskForHelp(tree);
+    act(() => sheet(tree).props.onDismiss());
+    act(() => lastOptions().onSuccess(outcome));
+    expect(sheet(tree).props.visible).toBe(false);
+    act(() => tree.unmount());
+  }
+});
+
+test('after an error, brings the sheet back only once the alert is dismissed', () => {
+  const tree = render();
+  openSheetAndAskForHelp(tree);
+  act(() => sheet(tree).props.onDismiss());
+  act(() => lastOptions().onError(new Error('No connection')));
+
+  expect(sheet(tree).props.visible).toBe(false);
+  const [title, message, buttons] = mockAlert.mock.calls[0] as [string, string, { onPress: () => void }[]];
+  expect(title).toBe('Couldn’t open subscriptions');
+  expect(message).toBe('No connection');
+  act(() => buttons[0].onPress());
+  expect(sheet(tree).props.visible).toBe(true);
+});
+
+test('drops a pending Customer Center when Profile goes away', () => {
+  const tree = render();
+  openSheetAndAskForHelp(tree);
+  act(() => tree.unmount());
+  act(() => jest.advanceTimersByTime(BACKUP_MS * 2));
+  expect(mockMutate).not.toHaveBeenCalled();
 });
 
 test('still opens the Customer Center if the sheet never reports closing', () => {
   const tree = render();
   openSheetAndAskForHelp(tree);
 
-  act(() => jest.advanceTimersByTime(1499));
+  act(() => jest.advanceTimersByTime(BACKUP_MS - 1));
   expect(mockMutate).not.toHaveBeenCalled();
   act(() => jest.advanceTimersByTime(1));
   expect(mockMutate).toHaveBeenCalledTimes(1);

@@ -37,7 +37,8 @@ export function ProCard({ onOpenCustomerCenter }: { onOpenCustomerCenter?: () =>
           variant="secondary"
           onPress={
             onOpenCustomerCenter ??
-            (() => customerCenter.mutate(undefined, { onError: fail('Couldn’t open subscriptions') }))
+            (() =>
+              customerCenter.mutate({ lifetime: pro.lifetime }, { onError: fail('Couldn’t open subscriptions') }))
           }
           loading={customerCenter.isPending}
         />

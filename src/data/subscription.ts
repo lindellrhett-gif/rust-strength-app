@@ -88,7 +88,7 @@ export function useShowPaywall() {
 export function useCustomerCenter() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: () => openCustomerCenter(),
+    mutationFn: (options?: { lifetime?: boolean }) => openCustomerCenter(options),
     onSettled: () => client.invalidateQueries({ queryKey: qk.proStatus }),
   });
 }

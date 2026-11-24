@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button } from '../Button';
@@ -189,32 +189,64 @@ export function RestTimerRow({ profile }: { profile: Profile }) {
   );
 }
 
+/**
+ * How long to wait for the Pro sheet to report that it has closed before
+ * opening the Customer Center anyway. The sheet takes about 0.3 s to slide
+ * away; opening while it is still there would be refused, so this is long.
+ */
+export const BACKUP_MS = 3000;
+
 /** Rust Strength Pro: the row and the sheet holding its status and plans. */
 export function ProRow() {
   const status = useProStatus();
   const customerCenter = useCustomerCenter();
   const [open, setOpen] = useState(false);
   const afterClose = useRef<(() => void) | null>(null);
+  const backup = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const runAfterClose = () => {
+    if (backup.current) clearTimeout(backup.current);
+    backup.current = null;
     const next = afterClose.current;
     afterClose.current = null;
     next?.();
   };
 
+  // Leaving Profile (signing out, say) drops a Customer Center still waiting
+  // for the sheet to close.
+  useEffect(
+    () => () => {
+      if (backup.current) clearTimeout(backup.current);
+      afterClose.current = null;
+    },
+    [],
+  );
+
   // The Customer Center can't open over this sheet (see ProCard), so the sheet
-  // closes first, the Customer Center opens once it has gone, and the sheet
-  // comes back with the refreshed status when the Customer Center closes.
+  // closes first and the Customer Center opens once it has gone. When the
+  // Customer Center closes, the sheet comes back with the refreshed status.
+  // Apple's subscription settings and the support email, the fallbacks, return
+  // at once and stay on screen, so the sheet only comes back after the
+  // Customer Center itself, and after an error once its alert is dismissed.
   const openCustomerCenter = () => {
     afterClose.current = () =>
-      customerCenter.mutate(undefined, {
-        onError: (e) =>
-          Alert.alert('Couldn’t open subscriptions', e instanceof Error ? e.message : 'Please try again.'),
-        onSettled: () => setOpen(true),
-      });
+      customerCenter.mutate(
+        { lifetime: status.data?.lifetime },
+        {
+          onSuccess: (outcome) => {
+            if (outcome === 'customerCenter') setOpen(true);
+          },
+          onError: (e) =>
+            Alert.alert('Couldn’t open subscriptions', e instanceof Error ? e.message : 'Please try again.', [
+              { text: 'OK', onPress: () => setOpen(true) },
+            ]),
+        },
+      );
     setOpen(false);
-    // onDismiss is the signal; this covers a close that never reports one.
-    setTimeout(runAfterClose, 1500);
+    // onDismiss is the signal. This only covers a close that never reports
+    // one, and waits long enough that the sheet has certainly gone.
+    if (backup.current) clearTimeout(backup.current);
+    backup.current = setTimeout(runAfterClose, BACKUP_MS);
   };
 
   return (
