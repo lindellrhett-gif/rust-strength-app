@@ -2,11 +2,15 @@
 // everything you log is yours alone, entries keep their own numbers, search
 // works on word starts, weigh-ins update the profile, and "Download my data"
 // and deleting an account cover all of it.
-import { asAnon, asUser, check, createUser, done, errorOf, freshDb } from './harness.mjs';
+import { asAnon, asUser, check, createUser, done, errorOf, freshDb, givePro } from './harness.mjs';
 
 const db = await freshDb();
 const alice = await createUser(db, 'alice@example.com');
 const bob = await createUser(db, 'bob@example.com');
+// The food diary needs Pro on the server from migration 0039.
+await givePro(db, alice);
+await givePro(db, bob);
+
 
 /** Insert a row from an object, returning the inserted row. */
 const insert = async (table, row) => {

@@ -91,6 +91,19 @@ export async function createUser(db, email) {
   return rows[0].id;
 }
 
+/**
+ * Gives an account Rust Strength Pro, as the RevenueCat webhook would. From
+ * migration 0039 the server needs it to save anything to the food diary.
+ */
+export async function givePro(db, userId) {
+  await db.query(
+    `insert into subscriptions (user_id, pro_active, product_id, period_type, expires_at)
+     values ($1, true, 'com.ruststrength.app.pro.lifetime', 'LIFETIME', null)
+     on conflict (user_id) do update set pro_active = true, expires_at = null`,
+    [userId],
+  );
+}
+
 /** Run fn with the connection acting as a signed-in user, RLS enforced. */
 export async function asUser(db, userId, fn) {
   await db.exec(`set role authenticated`);

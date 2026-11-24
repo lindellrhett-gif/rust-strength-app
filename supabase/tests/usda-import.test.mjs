@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { asAnon, asUser, check, createUser, done, errorOf, freshDb } from './harness.mjs';
+import { asAnon, asUser, check, createUser, done, errorOf, freshDb, givePro } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const { mapDataset } = require('../../scripts/usda.js');
@@ -18,6 +18,9 @@ const rows = ['sr_legacy', 'survey', 'foundation'].flatMap(
 
 const db = await freshDb();
 const alice = await createUser(db, 'alice@example.com');
+// The food diary needs Pro on the server from migration 0039.
+await givePro(db, alice);
+
 
 const asService = async (fn) => {
   await db.exec(`set role service_role`);

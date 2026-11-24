@@ -54,7 +54,14 @@ export function CreateExerciseModal({ visible, initialName = '', busy, onSubmit,
       >
         <SafeAreaView style={styles.sheet}>
           <Text style={text.heading}>New exercise</Text>
-          <Field label="Name" value={name} onChangeText={changeName} autoFocus placeholder="e.g. Incline Machine Press" />
+          <Field
+            label="Name"
+            value={name}
+            onChangeText={changeName}
+            autoFocus
+            placeholder="e.g. Incline Machine Press"
+            maxLength={80}
+          />
 
           <Text style={text.label}>TYPE</Text>
           <View style={styles.groups}>

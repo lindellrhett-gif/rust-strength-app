@@ -1,11 +1,15 @@
 // Saved meals and recipes (migration 0027): saved with their items in one
 // call, saving again replaces the items, and nobody can save over someone
 // else's meal or recipe, or turn another food into a recipe.
-import { asAnon, asUser, check, createUser, done, errorOf, freshDb } from './harness.mjs';
+import { asAnon, asUser, check, createUser, done, errorOf, freshDb, givePro } from './harness.mjs';
 
 const db = await freshDb();
 const alice = await createUser(db, 'alice@example.com');
 const bob = await createUser(db, 'bob@example.com');
+// The food diary needs Pro on the server from migration 0039.
+await givePro(db, alice);
+await givePro(db, bob);
+
 
 const { rows: [oats] } = await db.query(
   `insert into foods (source, source_ref, name, kcal, carbs_g, protein_g) values ('usda', '173904', 'Oats', 379, 67.7, 13.2) returning id`,
