@@ -7,6 +7,7 @@ import { Button, Card } from '@/components';
 import { Avatar } from '@/components/Avatar';
 import { Field } from '@/components/Field';
 import { HelpButton } from '@/components/HelpButton';
+import { InviteFriendsButton } from '@/components/InviteFriendsButton';
 import { keyboardAware } from '@/components/keyboard';
 import {
   useFriendships,
@@ -73,7 +74,10 @@ export default function FindFriends() {
             ) : search.isError || search.fetchStatus === 'paused' ? (
               <Text style={text.bodyMuted}>Could not search. Check your connection and try again.</Text>
             ) : (search.data ?? []).length === 0 ? (
-              <Text style={text.bodyMuted}>No users found.</Text>
+              <View style={styles.invite}>
+                <Text style={text.bodyMuted}>No users found. If they’re not on Rust Strength yet, send them the app.</Text>
+                <InviteFriendsButton />
+              </View>
             ) : (
               (search.data ?? []).map((u) => (
                 <View key={u.user_id} style={styles.row}>
@@ -132,6 +136,17 @@ export default function FindFriends() {
                 </View>
               </View>
             ))}
+          </Card>
+        ) : null}
+
+        {query.trim().length < 3 ? (
+          <Card title="Invite friends">
+            <View style={styles.invite}>
+              <Text style={text.bodyMuted}>
+                Training is better with people you know. Send them a link to Rust Strength and your username.
+              </Text>
+              <InviteFriendsButton />
+            </View>
           </Card>
         ) : null}
 
@@ -202,6 +217,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, gap: spacing.lg },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  invite: { gap: spacing.md },
   row: {
     flexDirection: 'row',
     alignItems: 'center',

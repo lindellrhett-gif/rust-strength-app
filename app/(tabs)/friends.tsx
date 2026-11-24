@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components';
 import { FeedCard } from '@/components/FeedCard';
 import { FriendsRow } from '@/components/FriendsRow';
+import { InviteFriendsButton, useInviteFriends } from '@/components/InviteFriendsButton';
 import { SharePrompt } from '@/components/SharePrompt';
 import { useFriendFeed, useReact } from '@/data/feed';
 import { useFriendships } from '@/data/friends';
@@ -27,14 +28,18 @@ import { useAuth } from '@/providers/AuthProvider';
 import { colors } from '@/theme/colors';
 import { radius, spacing, text } from '@/theme/typography';
 
-/** The leaderboard and finding friends, as icons in the tab's own header. */
+/** Inviting, the leaderboard and finding friends, as icons in the tab's own header. */
 function HeaderIcons() {
   const router = useRouter();
+  const invite = useInviteFriends();
   const friendships = useFriendships();
   const requests = (friendships.data ?? []).filter((e) => e.status === 'pending' && !e.outgoing).length;
 
   return (
     <View style={styles.icons}>
+      <Pressable onPress={invite} hitSlop={10} accessibilityRole="button" accessibilityLabel="Invite friends">
+        <Ionicons name="share-outline" size={23} color={colors.text} />
+      </Pressable>
       <Pressable
         onPress={() => router.push('/leaderboard')}
         hitSlop={10}
@@ -171,11 +176,14 @@ export default function FriendsScreen() {
               <Text style={[text.bodyMuted, styles.emptyText]}>
                 Sessions you and your friends finish show up here.
               </Text>
-              <Button
-                label="Find friends"
-                variant="secondary"
-                onPress={() => router.push('/find-friends')}
-              />
+              <View style={styles.emptyActions}>
+                <Button
+                  label="Find friends"
+                  variant="secondary"
+                  onPress={() => router.push('/find-friends')}
+                />
+                <InviteFriendsButton />
+              </View>
             </View>
           )
         }
@@ -207,4 +215,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   emptyText: { textAlign: 'center' },
+  emptyActions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.sm },
 });
