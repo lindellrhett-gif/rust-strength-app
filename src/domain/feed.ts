@@ -101,9 +101,9 @@ export interface FeedPost {
   /** What the post is called: the preset name, the activity, or a fallback. */
   title: string;
   poster: PostPoster;
-  /** Up to four exercise names, for the line under the post. */
+  /** Up to four exercise names, for the chips on the post's graphic. */
   exercises: string[];
-  /** How many more exercises that line leaves out. */
+  /** How many more exercises the chips leave out. */
   moreExercises: number;
   recordCount: number;
   badgeIds: string[];

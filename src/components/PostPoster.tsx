@@ -40,6 +40,10 @@ const FIRE = REACTIONS.find((r) => r.id === 'fire')!;
  *
  * Double-tapping it reacts, when `onDoubleTap` is given. VoiceOver users have
  * the reaction buttons under it, since a double tap there means something else.
+ *
+ * A lifting session's exercises sit as chips down the right-hand side, with
+ * the numbers kept to the left half. The chips are a dark wash over whatever
+ * is behind them, so they also read over a photo when posts get one.
  */
 export function PostPoster({ post, onDoubleTap }: { post: FeedPost; onDoubleTap?: () => void }) {
   const { tone, eyebrow, title, hero, details } = post.poster;
@@ -69,7 +73,19 @@ export function PostPoster({ post, onDoubleTap }: { post: FeedPost; onDoubleTap?
     Animated.timing(burst, { toValue: 1, duration: 650, useNativeDriver: true }).start();
   };
 
-  const label = [eyebrow, title, hero, ...details, route ? 'with the outline of the route' : null]
+  // A run's route takes the width; only sessions without one carry chips.
+  const chips = route ? [] : post.exercises;
+  const more = route ? 0 : post.moreExercises;
+  const half = chips.length > 0 ? styles.leftHalf : null;
+
+  const label = [
+    eyebrow,
+    title,
+    hero,
+    ...details,
+    chips.length > 0 ? `${chips.join(', ')}${more > 0 ? ` and ${more} more` : ''}` : null,
+    route ? 'with the outline of the route' : null,
+  ]
     .filter(Boolean)
     .join(', ');
 
@@ -94,13 +110,30 @@ export function PostPoster({ post, onDoubleTap }: { post: FeedPost; onDoubleTap?
             />
           </Svg>
         </View>
+      ) : chips.length > 0 ? (
+        <View style={styles.chips} pointerEvents="none">
+          {chips.map((name, i) => (
+            <View key={`${i}-${name}`} style={[styles.chip, { borderColor: `${ink}59` }]}>
+              <Text style={styles.chipText} numberOfLines={1} maxFontSizeMultiplier={POSTER_TEXT_SCALE}>
+                {name}
+              </Text>
+            </View>
+          ))}
+          {more > 0 ? (
+            <View style={[styles.chip, { borderColor: `${ink}59` }]}>
+              <Text style={[styles.chipText, { color: ink }]} numberOfLines={1} maxFontSizeMultiplier={POSTER_TEXT_SCALE}>
+                +{more} more
+              </Text>
+            </View>
+          ) : null}
+        </View>
       ) : (
         <View style={styles.watermark} pointerEvents="none">
           <GlyphIcon glyph={glyph} color={`${ink}40`} size={72} />
         </View>
       )}
 
-      <View style={styles.top}>
+      <View style={[styles.top, half]}>
         {eyebrow ? (
           <>
             {tone === 'record' ? <Ionicons name="trophy" size={16} color={ink} /> : null}
@@ -111,7 +144,7 @@ export function PostPoster({ post, onDoubleTap }: { post: FeedPost; onDoubleTap?
         ) : null}
       </View>
 
-      <View style={styles.bottom}>
+      <View style={[styles.bottom, half]}>
         <Text style={styles.title} numberOfLines={1} maxFontSizeMultiplier={POSTER_TEXT_SCALE}>
           {title}
         </Text>
@@ -164,6 +197,27 @@ const styles = StyleSheet.create({
   },
   route: { position: 'absolute', top: 0, left: 0, right: 0 },
   watermark: { position: 'absolute', top: spacing.lg, right: spacing.lg },
+  // The chips take the right of the poster, the words and numbers the left.
+  leftHalf: { maxWidth: '52%' },
+  chips: {
+    position: 'absolute',
+    top: spacing.lg,
+    right: spacing.lg,
+    bottom: spacing.lg,
+    maxWidth: '46%',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  chip: {
+    maxWidth: '100%',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: 'rgba(11, 13, 16, 0.55)',
+  },
+  chipText: { color: colors.posterTitle, fontSize: 12, fontWeight: '600' },
   top: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minHeight: 20 },
   eyebrow: { fontSize: 15, fontWeight: '800', flexShrink: 1 },
   bottom: { gap: 2 },

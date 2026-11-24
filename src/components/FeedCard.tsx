@@ -23,8 +23,8 @@ interface FeedCardProps {
 }
 
 /**
- * One post in the friend feed: who, a big graphic of the session, reactions,
- * and what they trained.
+ * One post in the friend feed: who, a big graphic of the session with what
+ * they trained on it, and reactions.
  *
  * A post is a summary. It never shows individual sets: that is a deliberate
  * limit enforced in `rpc_friend_feed`, not a detail left out for space.
@@ -99,13 +99,6 @@ export const FeedCard = memo(function FeedCard({
         })}
       </View>
 
-      {post.exercises.length > 0 ? (
-        <Text style={styles.caption} numberOfLines={2}>
-          <Text style={styles.captionName}>{who} </Text>
-          {post.exercises.join(', ')}
-          {post.moreExercises > 0 ? ` +${post.moreExercises} more` : ''}
-        </Text>
-      ) : null}
     </View>
   );
 });
@@ -133,6 +126,4 @@ const styles = StyleSheet.create({
   reactionPressed: { opacity: 0.6 },
   reactionCount: { color: colors.textMuted, fontSize: 14, fontWeight: '700' },
 
-  caption: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
-  captionName: { color: colors.text, fontWeight: '700' },
 });
